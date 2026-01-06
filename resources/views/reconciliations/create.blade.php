@@ -1,0 +1,185 @@
+@extends('layouts.app')
+
+@section('title', 'Upload Rekonsiliasi - SISUDAH')
+
+@section('content')
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div class="bg-green-600 px-6 py-4">
+            <h2 class="text-xl font-bold text-white flex items-center">
+                <svg class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                Upload Data Rekonsiliasi Triwulan
+            </h2>
+        </div>
+        
+        <div class="p-8">
+            <p class="mb-6 text-gray-600">
+                Silakan unggah file Excel hasil rekonsiliasi. Pastikan file memiliki format yang sesuai sebelum diunggah.
+            </p>
+
+            @if ($errors->any())
+                <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+                    <p class="font-bold">Terjadi Kesalahan</p>
+                    <ul class="list-disc pl-5 mt-1 text-sm">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <form action="{{ route('reconciliations.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                @csrf
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Tahun Periode</label>
+                        <input type="number" name="year" value="{{ old('year', date('Y')) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 py-2 px-3 border" placeholder="Contoh: 2024">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Triwulan</label>
+                        <select name="quarter" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 py-2 px-3 border bg-white">
+                            <option value="1" {{ old('quarter') == 1 ? 'selected' : '' }}>Triwulan I (Jan - Mar)</option>
+                            <option value="2" {{ old('quarter') == 2 ? 'selected' : '' }}>Triwulan II (Apr - Jun)</option>
+                            <option value="3" {{ old('quarter') == 3 ? 'selected' : '' }}>Triwulan III (Jul - Sep)</option>
+                            <option value="4" {{ old('quarter') == 4 ? 'selected' : '' }}>Triwulan IV (Okt - Des)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">File Excel (.xlsx, .xls, .csv)</label>
+                    
+                    <div id="drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:bg-gray-50 transition relative">
+                        
+                        <!-- Empty State -->
+                        <div id="empty-state" class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600 justify-center">
+                                <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-green-600 hover:text-green-500 focus-within:outline-none">
+                                    <span>Upload file</span>
+                                    <input id="file-upload" name="file" type="file" class="sr-only" accept=".xlsx,.xls,.csv">
+                                </label>
+                                <p class="pl-1">atau drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">Excel hingga 10MB</p>
+                            <p class="text-xs text-orange-500 font-semibold mt-2">Wajib kolom: Wilayah, Jenis Sumber Daya Hutan</p>
+                        </div>
+
+                        <!-- Selected State -->
+                        <div id="file-info" class="hidden text-center w-full">
+                            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-3">
+                                <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <h3 class="text-sm font-medium text-gray-900" id="selected-filename">filename.xlsx</h3>
+                            <p class="text-xs text-gray-500 mt-1" id="selected-filesize">0 KB</p>
+                            <button type="button" id="remove-file" class="mt-3 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                Ganti File
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    const dropZone = document.getElementById('drop-zone');
+                    const fileInput = document.getElementById('file-upload');
+                    const emptyState = document.getElementById('empty-state');
+                    const fileInfo = document.getElementById('file-info');
+                    const filenameDisplay = document.getElementById('selected-filename');
+                    const filesizeDisplay = document.getElementById('selected-filesize');
+                    const removeBtn = document.getElementById('remove-file');
+
+                    function updateUI(file) {
+                        if (file) {
+                            emptyState.classList.add('hidden');
+                            fileInfo.classList.remove('hidden');
+                            filenameDisplay.textContent = file.name;
+                            filesizeDisplay.textContent = (file.size / 1024).toFixed(2) + ' KB';
+                            dropZone.classList.add('border-green-500', 'bg-green-50');
+                            dropZone.classList.remove('border-gray-300');
+                        } else {
+                            resetUI();
+                        }
+                    }
+
+                    function resetUI() {
+                        fileInput.value = '';
+                        emptyState.classList.remove('hidden');
+                        fileInfo.classList.add('hidden');
+                        dropZone.classList.remove('border-green-500', 'bg-green-50');
+                        dropZone.classList.add('border-gray-300');
+                    }
+
+                    fileInput.addEventListener('change', function(e) {
+                        if (this.files.length > 0) {
+                            updateUI(this.files[0]);
+                        }
+                    });
+
+                    removeBtn.addEventListener('click', function(e) {
+                        e.preventDefault(); // Prevent bubbling causing file dialog to open
+                        e.stopPropagation();
+                        resetUI();
+                    });
+
+                    // Drag and Drop Events
+                    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                        dropZone.addEventListener(eventName, preventDefaults, false);
+                    });
+
+                    function preventDefaults(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+
+                    ['dragenter', 'dragover'].forEach(eventName => {
+                        dropZone.addEventListener(eventName, highlight, false);
+                    });
+
+                    ['dragleave', 'drop'].forEach(eventName => {
+                        dropZone.addEventListener(eventName, unhighlight, false);
+                    });
+
+                    function highlight(e) {
+                        dropZone.classList.add('border-green-500', 'bg-green-50');
+                    }
+
+                    function unhighlight(e) {
+                        if (fileInput.files.length === 0) {
+                            dropZone.classList.remove('border-green-500', 'bg-green-50');
+                        }
+                    }
+
+                    dropZone.addEventListener('drop', handleDrop, false);
+
+                    function handleDrop(e) {
+                        const dt = e.dataTransfer;
+                        const files = dt.files;
+                        if (files.length > 0) {
+                            fileInput.files = files;
+                            updateUI(files[0]);
+                        }
+                    }
+                </script>
+
+
+                <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100">
+                    <a href="{{ route('reconciliations.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        Batal
+                    </a>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        Upload Data
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
