@@ -19,7 +19,7 @@
                 </div>
                 <div class="flex items-center space-x-4">
                      <a href="{{ url('/') }}" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition">Beranda</a>
-                    <a href="{{ route('reconciliations.index') }}" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('reconciliations.*') ? 'text-green-600 font-semibold' : '' }}">Data Rekonsiliasi</a>
+                    <a href="{{ route('reconciliations.index') }}" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('reconciliations.*') ? 'text-gray-600 font-semibold' : '' }}">Data Rekonsiliasi</a>
                 </div>
             </div>
         </div>

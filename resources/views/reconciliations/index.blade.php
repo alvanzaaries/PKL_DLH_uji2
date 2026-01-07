@@ -68,7 +68,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->created_at->format('d M Y, H:i') }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                            <a href="#" class="text-green-600 hover:text-green-900">Detail</a>
+                            <a href="{{ route('reconciliations.show', $item->id) }}" class="text-green-600 hover:text-green-900">Detail</a>
                             <form action="{{ route('reconciliations.destroy', $item->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini? Semua detail data akan ikut terhapus.')">
                                 @csrf
                                 @method('DELETE')

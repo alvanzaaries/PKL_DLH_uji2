@@ -8,19 +8,64 @@ use App\Models\ReconciliationFact;
 use App\Models\MappingAlias;
 use Illuminate\Http\Request;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class ReconciliationController extends Controller
 {
     public function index()
     {
-        $data = Reconciliation::latest()->get();
-        return view('reconciliations.index', compact('data'));
+        $reconciliations = Reconciliation::latest()->get();
+        return view('reconciliations.index', compact('reconciliations'));
     }
 
     public function create()
     {
         return view('reconciliations.create');
+    }
+
+    public function show(Reconciliation $reconciliation)
+    {
+        // Grouping Total Kuantitas PER SATUAN
+        $totalPerSatuan = ReconciliationDetail::where('reconciliation_id', $reconciliation->id)
+            ->select('satuan', DB::raw('SUM(volume) as total_volume'))
+            ->groupBy('satuan')
+            ->orderByDesc('total_volume')
+            ->get();
+
+        // Group by Jenis HH
+        $statsJenis = ReconciliationDetail::where('reconciliation_id', $reconciliation->id)
+            ->select('jenis_sdh as label', 'satuan', DB::raw('SUM(volume) as total_volume'), DB::raw('SUM(lhp_nilai) as total_nilai'), DB::raw('COUNT(*) as count'))
+            ->groupBy('jenis_sdh', 'satuan')
+            ->orderByDesc('total_volume')
+            ->get();
+
+        // Group by Wilayah
+        $statsWilayah = ReconciliationDetail::where('reconciliation_id', $reconciliation->id)
+            ->select('wilayah as label', DB::raw('SUM(volume) as total_volume'), DB::raw('SUM(lhp_nilai) as total_nilai'), DB::raw('COUNT(*) as count'))
+            ->groupBy('wilayah')
+            ->orderByDesc('total_volume')
+            ->get();
+
+        // Group by Bank
+        $statsBank = ReconciliationDetail::where('reconciliation_id', $reconciliation->id)
+            ->whereNotNull('setor_bank')
+            ->where('setor_bank', '!=', '')
+            ->select('setor_bank as label', DB::raw('SUM(setor_nilai) as total_nilai'), DB::raw('COUNT(*) as count'))
+            ->groupBy('setor_bank')
+            ->orderByDesc('total_nilai')
+            ->get();
+
+        $details = $reconciliation->details()->orderBy('id')->paginate(50);
+
+        return view('reconciliations.show', compact('reconciliation', 'totalPerSatuan', 'statsJenis', 'statsWilayah', 'statsBank', 'details'));
+    }
+
+    public function destroy(Reconciliation $reconciliation)
+    {
+        $reconciliation->delete();
+        return back()->with('success', 'Data dihapus');
     }
 
     public function store(Request $request)
@@ -35,21 +80,11 @@ class ReconciliationController extends Controller
 
         try {
             $file = $request->file('file');
-            $sheet = IOFactory::load($file->getPathname())->getActiveSheet();
-            $rows = $sheet->toArray();
-
-            if (count($rows) < 5) {
-                throw new \Exception('File tidak memiliki data yang cukup');
-            }
-
-            [$headerIndex, $colWilayah, $colJenis] = $this->detectHeader($rows);
-
-            if ($headerIndex === null) {
-                throw new \Exception('Header tidak terdeteksi');
-            }
-
-            $headers = $this->cleanHeaders($rows[$headerIndex]);
-            $dataRows = array_slice($rows, $headerIndex + 1);
+            $spreadsheet = IOFactory::load($file->getPathname());
+            $sheet = $spreadsheet->getActiveSheet();
+            
+            // Ambil semua data (format kolom A, B, C...)
+            $rows = $sheet->toArray(null, true, true, true);
 
             $recon = Reconciliation::create([
                 'year' => $request->year,
@@ -57,25 +92,110 @@ class ReconciliationController extends Controller
                 'original_filename' => $file->getClientOriginalName(),
             ]);
 
-            foreach ($dataRows as $row) {
-                if ($this->isEmptyRow($row)) continue;
+            $activeWilayah = null;
+            $activeBulan = null;
+            $count = 0;
 
-                $mapped = $this->mapRowToHeaders($headers, $row);
+            foreach ($rows as $rowIndex => $row) {
+                // 1. Cek Baris Kosong Total
+                if (trim($row['A'].$row['B'].$row['F']) === '') {
+                    continue; 
+                }
 
+                $colA = trim($row['A'] ?? ''); // No
+                $colB = trim($row['B'] ?? ''); // Uraian
+                
+                // MAPPING PASTI (HARDCODED) SESUAI REQUEST ANDA
+                // F=Jenis, G=Vol, H=Satuan, I=Nilai LHP
+                $colJenis = trim($row['F'] ?? ''); 
+                $colVol   = trim($row['G'] ?? '');
+                $colSat   = trim($row['H'] ?? ''); 
+                $colNilai = trim($row['I'] ?? '');
+                
+                // Gabungkan teks A dan B untuk deteksi Konteks
+                $rowText = strtoupper($colA . ' ' . $colB);
+
+                // A. DETEKSI WILAYAH
+                if (preg_match('/(KABUPATEN|KOTA)\s+[A-Z\s]+/', $rowText, $m)) {
+                    $activeWilayah = trim($m[0]);
+                    continue;
+                }
+
+                // B. DETEKSI BULAN
+                if ($bulan = $this->detectBulan($colB)) {
+                    $activeBulan = $bulan;
+                }
+
+                // C. FILTER BARIS NON-DATA (SAMPAH)
+                if ($colJenis === '' || preg_match('/(JENIS|URAIAN|NO|VOLUME|HH|REKAP|KETERANGAN)/i', $colJenis)) {
+                    continue;
+                }
+                // Skip Baris Jumlah/Total di kolom B
+                if (preg_match('/(JUMLAH|TOTAL|REKAP)/i', $colB)) {
+                    continue;
+                }
+                // Skip baris nomor kolom (1, 2, 3...)
+                if (is_numeric(str_replace(['.',','], '', $colJenis)) && (float)$colJenis < 50) {
+                    continue;
+                }
+
+                // D. PROSES DATA
+                $volume = $this->parseVolume($colVol);
+                $rupiah = $this->parseRupiah($colNilai);
+                
+                // LOGIC PENTING: Simpan jika Volume > 0 ATAU Rupiah > 0
+                // (Menangani kasus Jasling/Wisata yang volumenya 0 tapi ada uangnya)
+                if ($volume <= 0 && $rupiah <= 0) {
+                    continue;
+                }
+
+                // E. SIMPAN
                 $detail = ReconciliationDetail::create([
                     'reconciliation_id' => $recon->id,
-                    'wilayah' => $row[$colWilayah] ?? null,
-                    'jenis_sdh' => $row[$colJenis] ?? null,
-                    'raw_data' => json_encode($mapped),
+                    'wilayah'           => $activeWilayah ?? 'UNKNOWN',
+                    'no_urut'           => $colA,
+                    'jenis_sdh'         => $colJenis,
+                    'volume'            => $volume,
+                    'satuan'            => $colSat ?: '-', // Ambil dari kolom H, default '-'
+                    
+                    'lhp_no'            => trim($row['D'] ?? ''), // Kolom D
+                    'lhp_tanggal'       => $this->parseDate($row['E'] ?? ''), // Kolom E
+                    'lhp_nilai'         => $rupiah, // Kolom I (Parsed)
+                    
+                    'billing_no'        => trim($row['J'] ?? ''), // Geser ke J
+                    'billing_tanggal'   => $this->parseDate($row['K'] ?? ''), // Geser ke K
+                    'billing_nilai'     => $this->parseRupiah($row['L'] ?? ''), // Geser ke L
+                    
+                    'setor_tanggal'     => $this->parseDate($row['M'] ?? ''), // Geser ke M
+                    'setor_bank'        => trim($row['N'] ?? ''), // Geser ke N
+                    'setor_ntpn'        => trim($row['O'] ?? ''), // Geser ke O
+                    'setor_ntb'         => trim($row['P'] ?? ''), // Geser ke P
+                    'setor_nilai'       => $this->parseRupiah($row['Q'] ?? ''), // Geser ke Q
+                    
+                    'raw_data'          => json_encode($row),
                 ]);
 
-                $this->normalizeDetail($detail);
+                // Simpan Fact (Opsional)
+                ReconciliationFact::create([
+                    'reconciliation_detail_id' => $detail->id,
+                    'wilayah_id'   => $this->mapAlias('wilayah', $activeWilayah),
+                    'komoditas_id' => $this->mapAlias('komoditas', $colJenis),
+                    'volume'       => $volume,
+                    'bulan'        => $activeBulan,
+                ]);
+
+                $count++;
+            }
+
+            if ($count === 0) {
+                throw new \Exception('Tidak ada data valid terbaca. Pastikan format kolom: [F:Jenis] [G:Volume] [H:Satuan].');
             }
 
             DB::commit();
 
-            return redirect()->route('reconciliations.index')
-                ->with('success', 'Upload berhasil. Data siap untuk validasi.');
+            return redirect()
+                ->route('reconciliations.show', $recon->id)
+                ->with('success', "Berhasil memproses {$count} baris data.");
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -83,93 +203,61 @@ class ReconciliationController extends Controller
         }
     }
 
-    public function destroy(Reconciliation $reconciliation)
+    // --- HELPER FUNCTIONS ---
+
+    private function detectBulan(string $text): ?string
     {
-        $reconciliation->delete();
-        return back()->with('success', 'Data dihapus');
-    }
-
-    private function detectHeader(array $rows)
-    {
-        $wilayahKeys = ['wilayah', 'provinsi', 'kabupaten', 'kota', 'daerah'];
-        $jenisKeys = ['jenis', 'komoditas', 'sdh', 'hhk', 'hhbk'];
-
-        for ($i = 0; $i < min(20, count($rows)); $i++) {
-            $row = array_map(fn($v) => strtolower(trim((string)$v)), $rows[$i]);
-
-            $w = $this->findIndex($row, $wilayahKeys);
-            $j = $this->findIndex($row, $jenisKeys);
-
-            if ($w !== null && $j !== null) {
-                return [$i, $w, $j];
-            }
-        }
-
-        return [null, null, null];
-    }
-
-    private function findIndex(array $row, array $keys)
-    {
-        foreach ($row as $i => $cell) {
-            foreach ($keys as $key) {
-                if (str_contains($cell, $key)) {
-                    return $i;
-                }
+        $text = strtoupper($text);
+        foreach ([
+            'JANUARI','FEBRUARI','MARET','APRIL','MEI','JUNI',
+            'JULI','AGUSTUS','SEPTEMBER','OKTOBER','NOVEMBER','DESEMBER'
+        ] as $b) {
+            if (str_contains($text, $b)) {
+                return ucfirst(strtolower($b));
             }
         }
         return null;
     }
 
-    private function cleanHeaders(array $headers)
+    private function parseVolume($val): float
     {
-        $result = [];
-        foreach ($headers as $i => $h) {
-            $result[$i] = $h ? trim($h) : "kolom_$i";
+        if ($val === '') return 0;
+        if (strpos($val, ',') !== false && strpos($val, '.') !== false) {
+             $clean = str_replace('.', '', $val);
+             $clean = str_replace(',', '.', $clean);
+        } elseif (strpos($val, ',') !== false) {
+             $clean = str_replace(',', '.', $val);
+        } else {
+             $clean = $val;
         }
-        return $result;
+        return (float) preg_replace('/[^0-9\.-]/', '', $clean);
     }
 
-    private function isEmptyRow(array $row)
+    private function parseRupiah($val): float
     {
-        return count(array_filter($row, fn($v) => trim((string)$v) !== '')) === 0;
+        if ($val === '') return 0;
+        $clean = preg_replace('/[^0-9,]/', '', $val);
+        return (float) str_replace(',', '', $clean);
     }
 
-    private function mapRowToHeaders(array $headers, array $row)
+    private function parseDate($val): ?string
     {
-        $result = [];
-        foreach ($headers as $i => $h) {
-            $result[$h] = $row[$i] ?? null;
-        }
-        return $result;
-    }
-
-    private function normalizeDetail(ReconciliationDetail $detail)
-    {
-        $wilayahId = $this->mapAlias('wilayah', $detail->wilayah);
-        $komoditasId = $this->mapAlias('komoditas', $detail->jenis_sdh);
-
-        $raw = json_decode($detail->raw_data, true);
-
-        $volume = null;
-        foreach ($raw as $k => $v) {
-            if (str_contains(strtolower($k), 'volume')) {
-                $volume = (float) str_replace(',', '.', $v);
+        if (empty($val) || $val == '-' || $val == '0') return null;
+        try {
+            if (is_numeric($val)) {
+                return Date::excelToDateTimeObject($val)->format('Y-m-d');
             }
+            return Carbon::parse($val)->format('Y-m-d');
+        } catch (\Exception $e) {
+            return null;
         }
-
-        ReconciliationFact::create([
-            'reconciliation_detail_id' => $detail->id,
-            'wilayah_id' => $wilayahId,
-            'komoditas_id' => $komoditasId,
-            'volume' => $volume,
-        ]);
     }
 
-    private function mapAlias(string $type, ?string $value)
+    private function mapAlias(string $type, ?string $value): ?int
     {
         if (!$value) return null;
-
-        $value = strtolower($value);
+        $value = strtolower(trim($value));
+        $value = preg_replace('/[^a-z0-9\s]/', '', $value);
 
         $alias = MappingAlias::where('type', $type)
             ->whereRaw('? LIKE CONCAT("%", alias, "%")', [$value])

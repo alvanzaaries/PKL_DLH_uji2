@@ -12,4 +12,9 @@ class Reconciliation extends Model
     {
         return $this->hasMany(ReconciliationDetail::class);
     }
+
+    public function facts()
+    {
+        return $this->hasManyThrough(ReconciliationFact::class, ReconciliationDetail::class);
+    }
 }
