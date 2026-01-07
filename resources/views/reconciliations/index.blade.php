@@ -1,11 +1,12 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Riwayat Rekonsiliasi - SISUDAH')
+@section('header', 'Riwayat Rekonsiliasi')
 
 @section('content')
 <div class="sm:flex sm:items-center sm:justify-between mb-6">
     <div>
-        <h1 class="text-3xl font-bold text-gray-900">Riwayat Rekonsiliasi</h1>
+        {{-- Title moved to header section --}}
         <p class="mt-2 text-sm text-gray-700">Daftar semua proses rekonsiliasi yang telah diunggah ke dalam sistem.</p>
     </div>
     <div class="mt-4 sm:mt-0">

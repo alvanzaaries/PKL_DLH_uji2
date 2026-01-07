@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'SISUDAH - Sistem Rekonsiliasi LHK')</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="{{ asset('img/Logo Provinsi Jawa Tengah.png') }}">   
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
     
@@ -19,6 +20,7 @@
                 </div>
                 <div class="flex items-center space-x-4">
                      <a href="{{ url('/') }}" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition">Beranda</a>
+                    <a href="{{ route('dashboard.index') }}" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('dashboard.*') ? 'text-gray-600 font-semibold' : '' }}">Dashboard Statistik</a>
                     <a href="{{ route('reconciliations.index') }}" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('reconciliations.*') ? 'text-gray-600 font-semibold' : '' }}">Data Rekonsiliasi</a>
                 </div>
             </div>

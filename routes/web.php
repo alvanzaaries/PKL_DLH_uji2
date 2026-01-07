@@ -8,3 +8,6 @@ Route::get('/', function () {
 });
 
 Route::resource('reconciliations', ReconciliationController::class);
+
+Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard.index');
+

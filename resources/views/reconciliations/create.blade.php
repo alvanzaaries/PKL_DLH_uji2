@@ -1,6 +1,7 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
-@section('title', 'Upload Rekonsiliasi - SISUDAH')
+@section('title', 'Upload Rekonsiliasi Baru - SISUDAH')
+@section('header', 'Upload Rekonsiliasi Baru')
 
 @section('content')
 <div class="max-w-3xl mx-auto">

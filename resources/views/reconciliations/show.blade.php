@@ -1,13 +1,13 @@
-@extends('layouts.app')
+@extends('layouts.admin')
 
 @section('title', 'Detail Rekonsiliasi - ' . $reconciliation->original_filename)
+@section('header')
+    Detail Rekonsiliasi <span class="text-sm font-normal text-gray-500 ml-2">{{ $reconciliation->original_filename }}</span>
+@endsection
 
 @section('content')
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h2 class="font-semibold text-xl text-gray-800">
-                Detail Rekonsiliasi : {{ $reconciliation->original_filename }}
-            </h2>
             <div class="text-sm text-gray-500 mt-1">
                 Tahun {{ $reconciliation->year }} - Triwulan {{ $reconciliation->quarter }}
             </div>
