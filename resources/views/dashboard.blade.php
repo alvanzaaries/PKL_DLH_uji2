@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #0f172a; /* Navy Dark */
+            --primary: rgb(9, 58, 28); /* Navy Dark */
             --accent: #15803d;  /* Forest Green */
             --bg-body: #f8fafc;
             --text-main: #334155;
@@ -212,7 +212,7 @@
 
         .slide-placeholder {
             height: 350px;
-            background: #cbd5e1;
+            background: #d6ebdd;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -247,7 +247,6 @@
     <nav>
         <div class="container nav-content">
             <div class="logo-area">
-                <span style="font-size: 24px;">🌲</span>
                 <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
             </div>
             <ul class="nav-links">
@@ -275,17 +274,17 @@
                 <span class="stat-number">{{ number_format($statistics['primer_pbphh']) }}</span>
                 <div class="stat-desc">Izin PBPHH Aktif • Klik untuk lihat data</div>
             </a>
-            <a href="#" class="stat-card">
+            <a href="{{ route('industri-sekunder.index') }}" class="stat-card">
                 <div class="stat-label">Industri Sekunder</div>
                 <span class="stat-number">{{ number_format($statistics['sekunder_pbui']) }}</span>
                 <div class="stat-desc">Izin PBUI Aktif</div>
             </a>
-            <a href="#" class="stat-card">
+            <a href="{{ route('tptkb.index') }}" class="stat-card">
                 <div class="stat-label">Pengolahan TPT-KB</div>
                 <span class="stat-number">{{ number_format($statistics['tpt_kb']) }}</span>
                 <div class="stat-desc">Terdaftar di Database</div>
             </a>
-            <a href="#" class="stat-card">
+            <a href="{{ route('perajin.index') }}" class="stat-card">
                 <div class="stat-label">Industri Perajin</div>
                 <span class="stat-number">{{ number_format($statistics['perajin']) }}</span>
                 <div class="stat-desc">Usaha Mikro & Kecil</div>

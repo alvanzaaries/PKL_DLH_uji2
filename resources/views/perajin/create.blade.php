@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Industri Primer</title>
+    <title>Tambah Perajin - SIIPPHH</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -36,7 +36,6 @@
             padding: 20px;
         }
 
-        /* Navigation */
         nav {
             background: var(--white);
             border-bottom: 1px solid var(--border);
@@ -175,21 +174,6 @@
             min-height: 100px;
         }
 
-        .form-file {
-            width: 100%;
-            padding: 12px;
-            border: 2px dashed var(--border);
-            border-radius: 8px;
-            background: #f8fafc;
-            cursor: pointer;
-            transition: border-color 0.2s, background 0.2s;
-        }
-
-        .form-file:hover {
-            border-color: var(--accent);
-            background: #f0fdf4;
-        }
-
         .file-info {
             font-size: 12px;
             color: #64748b;
@@ -277,10 +261,10 @@
         <div class="nav-content">
             <div class="logo-area">
                 <span style="font-size: 24px;"></span>
-                <span class="logo-text">Industri Primer (PBPHH)</span>
+                <span class="logo-text">Perajin / End User</span>
             </div>
-            <a href="{{ route('industri-primer.index') }}" class="back-link">
-                 Kembali
+            <a href="{{ route('perajin.index') }}" class="back-link">
+                ← Kembali 
             </a>
         </div>
     </nav>
@@ -288,8 +272,8 @@
     <div class="container">
         <!-- Page Header -->
         <div class="page-header">
-            <h1 class="page-title">Tambah Industri Primer (PBPHH)</h1>
-            <p class="page-subtitle">Formulir pendaftaran industri primer pengelolaan hasil hutan</p>
+            <h1 class="page-title">Tambah Perajin</h1>
+            <p class="page-subtitle">Formulir pendaftaran Perajin / End User</p>
         </div>
 
         <!-- Success Alert -->
@@ -310,19 +294,19 @@
 
         <!-- Form Card -->
         <div class="form-card">
-            <form action="{{ route('industri-primer.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('perajin.store') }}" method="POST">
                 @csrf
 
-                <!-- Nama Industri -->
+                <!-- Nama Perusahaan -->
                 <div class="form-group">
                     <label class="form-label">
-                        Nama Industri <span class="required">*</span>
+                        Nama Perusahaan <span class="required">*</span>
                     </label>
                     <input 
                         type="text" 
                         name="nama" 
                         class="form-input" 
-                        placeholder="Contoh: PT. Kayu Lestari Indonesia"
+                        placeholder="Contoh: UD. Mebel Jati Sejahtera"
                         value="{{ old('nama') }}"
                         required
                     >
@@ -339,7 +323,7 @@
                     <textarea 
                         name="alamat" 
                         class="form-textarea" 
-                        placeholder="Masukkan alamat lengkap industri"
+                        placeholder="Masukkan alamat lengkap perusahaan"
                         required
                     >{{ old('alamat') }}</textarea>
                     @error('alamat')
@@ -347,25 +331,8 @@
                     @enderror
                 </div>
 
-                <!-- Row: Penanggung Jawab & Kabupaten -->
+                <!-- Row: Kabupaten & Penanggung Jawab -->
                 <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">
-                            Penanggung Jawab/Direktur <span class="required">*</span>
-                        </label>
-                        <input 
-                            type="text" 
-                            name="penanggungjawab" 
-                            class="form-input" 
-                            placeholder="Nama lengkap direktur"
-                            value="{{ old('penanggungjawab') }}"
-                            required
-                        >
-                        @error('penanggungjawab')
-                            <div class="error-message">{{ $message }}</div>
-                        @enderror
-                    </div>
-
                     <div class="form-group">
                         <label class="form-label">
                             Kabupaten/Kota <span class="required">*</span>
@@ -383,9 +350,26 @@
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Penanggung Jawab/Direktur <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="penanggungjawab" 
+                            class="form-input" 
+                            placeholder="Nama lengkap direktur"
+                            value="{{ old('penanggungjawab') }}"
+                            required
+                        >
+                        @error('penanggungjawab')
+                            <div class="error-message">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
-                <!-- Row: Kontak & Pemberi Izin -->
+                <!-- Row: Kontak & Nomor Izin -->
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">
@@ -406,97 +390,20 @@
 
                     <div class="form-group">
                         <label class="form-label">
-                            Pemberi Izin <span class="required">*</span>
+                            Nomor Izin <span class="required">*</span>
                         </label>
                         <input 
                             type="text" 
-                            name="pemberi_izin" 
+                            name="nomor_izin" 
                             class="form-input" 
-                            placeholder="Instansi pemberi izin"
-                            value="{{ old('pemberi_izin') }}"
+                            placeholder="Masukkan nomor izin"
+                            value="{{ old('nomor_izin') }}"
                             required
                         >
-                        @error('pemberi_izin')
+                        @error('nomor_izin')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
-                </div>
-
-                <!-- Row: Jenis Produksi & Kapasitas Izin -->
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">
-                            Jenis Produksi <span class="required">*</span>
-                        </label>
-                        <input 
-                            type="text" 
-                            name="jenis_produksi" 
-                            class="form-input" 
-                            placeholder="Contoh: Kayu Olahan, Kayu Bulat"
-                            value="{{ old('jenis_produksi') }}"
-                            required
-                        >
-                        @error('jenis_produksi')
-                            <div class="error-message">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">
-                            Kapasitas Izin <span class="required">*</span>
-                        </label>
-                        <select 
-                            name="kapasitas_izin" 
-                            class="form-select" 
-                            required
-                        >
-                            <option value="">-- Pilih Kapasitas Izin --</option>
-                            <option value="0-1999" {{ old('kapasitas_izin') == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
-                            <option value="2000-5999" {{ old('kapasitas_izin') == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
-                            <option value=">= 6000" {{ old('kapasitas_izin') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
-                        </select>
-                        @error('kapasitas_izin')
-                            <div class="error-message">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-
-                <!-- Nomor Izin/NIB/SS -->
-                <div class="form-group">
-                    <label class="form-label">
-                        Nomor Izin/NIB/SS <span class="required">*</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        name="nomor_izin" 
-                        class="form-input" 
-                        placeholder="Masukkan nomor izin/NIB/SS"
-                        value="{{ old('nomor_izin') }}"
-                        required
-                    >
-                    @error('nomor_izin')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
-                </div>
-
-
-                <!-- Upload Dokumen Izin -->
-                <div class="form-group">
-                    <label class="form-label">
-                        Upload Dokumen Izin (PDF)
-                    </label>
-                    <input 
-                        type="file" 
-                        name="dokumen_izin" 
-                        class="form-file"
-                        accept=".pdf"
-                    >
-                    <div class="file-info">
-                        Format: PDF | Maksimal: 5 MB
-                    </div>
-                    @error('dokumen_izin')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
                 </div>
 
                 <!-- Form Actions -->
@@ -543,16 +450,6 @@
                     loadingInfo.textContent = 'Gagal memuat data wilayah';
                     loadingInfo.style.color = 'var(--error)';
                 });
-        });
-
-        // Preview nama file yang dipilih
-        document.querySelector('.form-file').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name;
-            if (fileName) {
-                const fileInfo = this.nextElementSibling;
-                fileInfo.innerHTML = `<strong>File dipilih:</strong> ${fileName}<br>Format: PDF | Maksimal: 5 MB`;
-                fileInfo.style.color = 'var(--accent)';
-            }
         });
 
         // Auto-hide success alert after 5 seconds

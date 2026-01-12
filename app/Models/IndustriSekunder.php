@@ -5,28 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Model untuk Industri Primer (PBPHH)
+ * Model untuk Industri Sekunder (PBUI)
  * Child table dengan FK ke industries
  */
-class IndustriPrimer extends Model
+class IndustriSekunder extends Model
 {
-    protected $table = 'industri_primer';
+    protected $table = 'industri_sekunder';
     
     /**
-     * Fillable attributes spesifik untuk Industri Primer
+     * Fillable attributes spesifik untuk Industri Sekunder
      */
     protected $fillable = [
         'industri_id',
         'pemberi_izin',
         'jenis_produksi',
         'kapasitas_izin',
-        'pelaporan',
-        'dokumen_izin'
     ];
 
     /**
      * Relationship ke tabel industries (parent)
-     * Many-to-One: Many industri_primer records belong to one industry
      */
     public function industri()
     {
@@ -39,21 +36,5 @@ class IndustriPrimer extends Model
     public function scopeByKapasitas($query, $kapasitas)
     {
         return $query->where('kapasitas_izin', $kapasitas);
-    }
-
-    /**
-     * Check if pelaporan is active
-     */
-    public function isAktif(): bool
-    {
-        return $this->pelaporan === 'Aktif';
-    }
-
-    /**
-     * Get full data dengan join ke parent
-     */
-    public function getFullData()
-    {
-        return $this->with('industri')->first();
     }
 }

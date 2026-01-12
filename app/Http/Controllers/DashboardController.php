@@ -3,17 +3,21 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\IndustriPrimer;
+use App\Models\IndustriSekunder;
+use App\Models\TptKb;
+use App\Models\Perajin;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Data statistik untuk dashboard
+        // Hitung data real dari database dengan TPT structure
         $statistics = [
-            'primer_pbphh' => 856, // Jumlah industri Primer/PBPHH
-            'sekunder_pbui' => 1247, // Jumlah industri Sekunder/PBUI
-            'tpt_kb' => 645, // Jumlah industri TPT-KB
-            'perajin' => 390, // Jumlah Perajin/Endprimer
+            'primer_pbphh' => IndustriPrimer::count(),
+            'sekunder_pbui' => IndustriSekunder::count(),
+            'tpt_kb' => TptKb::count(),
+            'perajin' => Perajin::count(),
         ];
 
         // Total keseluruhan industri

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Industri Primer</title>
+    <title>Tambah TPT-KB - SIIPPHH</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -36,7 +36,6 @@
             padding: 20px;
         }
 
-        /* Navigation */
         nav {
             background: var(--white);
             border-bottom: 1px solid var(--border);
@@ -175,21 +174,6 @@
             min-height: 100px;
         }
 
-        .form-file {
-            width: 100%;
-            padding: 12px;
-            border: 2px dashed var(--border);
-            border-radius: 8px;
-            background: #f8fafc;
-            cursor: pointer;
-            transition: border-color 0.2s, background 0.2s;
-        }
-
-        .form-file:hover {
-            border-color: var(--accent);
-            background: #f0fdf4;
-        }
-
         .file-info {
             font-size: 12px;
             color: #64748b;
@@ -277,10 +261,10 @@
         <div class="nav-content">
             <div class="logo-area">
                 <span style="font-size: 24px;"></span>
-                <span class="logo-text">Industri Primer (PBPHH)</span>
+                <span class="logo-text">TPT-KB (Tempat Penampungan Tebangan Kayu Bulat)</span>
             </div>
-            <a href="{{ route('industri-primer.index') }}" class="back-link">
-                 Kembali
+            <a href="{{ route('tptkb.index') }}" class="back-link">
+                ← Kembali 
             </a>
         </div>
     </nav>
@@ -288,8 +272,8 @@
     <div class="container">
         <!-- Page Header -->
         <div class="page-header">
-            <h1 class="page-title">Tambah Industri Primer (PBPHH)</h1>
-            <p class="page-subtitle">Formulir pendaftaran industri primer pengelolaan hasil hutan</p>
+            <h1 class="page-title">Tambah TPT-KB</h1>
+            <p class="page-subtitle">Formulir pendaftaran Tempat Penampungan Tebangan Kayu Bulat</p>
         </div>
 
         <!-- Success Alert -->
@@ -310,19 +294,19 @@
 
         <!-- Form Card -->
         <div class="form-card">
-            <form action="{{ route('industri-primer.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('tptkb.store') }}" method="POST">
                 @csrf
 
-                <!-- Nama Industri -->
+                <!-- Nama Perusahaan -->
                 <div class="form-group">
                     <label class="form-label">
-                        Nama Industri <span class="required">*</span>
+                        Nama Perusahaan <span class="required">*</span>
                     </label>
                     <input 
                         type="text" 
                         name="nama" 
                         class="form-input" 
-                        placeholder="Contoh: PT. Kayu Lestari Indonesia"
+                        placeholder="Contoh: PT. Kayu Jaya Makmur"
                         value="{{ old('nama') }}"
                         required
                     >
@@ -339,7 +323,7 @@
                     <textarea 
                         name="alamat" 
                         class="form-textarea" 
-                        placeholder="Masukkan alamat lengkap industri"
+                        placeholder="Masukkan alamat lengkap perusahaan"
                         required
                     >{{ old('alamat') }}</textarea>
                     @error('alamat')
@@ -347,25 +331,8 @@
                     @enderror
                 </div>
 
-                <!-- Row: Penanggung Jawab & Kabupaten -->
+                <!-- Row: Kabupaten & Penanggung Jawab -->
                 <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">
-                            Penanggung Jawab/Direktur <span class="required">*</span>
-                        </label>
-                        <input 
-                            type="text" 
-                            name="penanggungjawab" 
-                            class="form-input" 
-                            placeholder="Nama lengkap direktur"
-                            value="{{ old('penanggungjawab') }}"
-                            required
-                        >
-                        @error('penanggungjawab')
-                            <div class="error-message">{{ $message }}</div>
-                        @enderror
-                    </div>
-
                     <div class="form-group">
                         <label class="form-label">
                             Kabupaten/Kota <span class="required">*</span>
@@ -383,9 +350,26 @@
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            Penanggung Jawab/Direktur <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="penanggungjawab" 
+                            class="form-input" 
+                            placeholder="Nama lengkap direktur"
+                            value="{{ old('penanggungjawab') }}"
+                            required
+                        >
+                        @error('penanggungjawab')
+                            <div class="error-message">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
-                <!-- Row: Kontak & Pemberi Izin -->
+                <!-- Row: Kontak & Nomor Izin -->
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">
@@ -406,13 +390,33 @@
 
                     <div class="form-group">
                         <label class="form-label">
+                            Nomor Izin <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            name="nomor_izin" 
+                            class="form-input" 
+                            placeholder="Masukkan nomor izin"
+                            value="{{ old('nomor_izin') }}"
+                            required
+                        >
+                        @error('nomor_izin')
+                            <div class="error-message">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Row: Pemberi Izin & Sumber Bahan Baku -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
                             Pemberi Izin <span class="required">*</span>
                         </label>
                         <input 
                             type="text" 
                             name="pemberi_izin" 
                             class="form-input" 
-                            placeholder="Instansi pemberi izin"
+                            placeholder="Contoh: Dinas LHK Jateng"
                             value="{{ old('pemberi_izin') }}"
                             required
                         >
@@ -420,27 +424,29 @@
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
-                </div>
 
-                <!-- Row: Jenis Produksi & Kapasitas Izin -->
-                <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">
-                            Jenis Produksi <span class="required">*</span>
+                            Sumber Bahan Baku <span class="required">*</span>
                         </label>
-                        <input 
-                            type="text" 
-                            name="jenis_produksi" 
-                            class="form-input" 
-                            placeholder="Contoh: Kayu Olahan, Kayu Bulat"
-                            value="{{ old('jenis_produksi') }}"
+                        <select 
+                            name="sumber_bahan_baku" 
+                            class="form-select" 
                             required
                         >
-                        @error('jenis_produksi')
+                            <option value="">-- Pilih Sumber Bahan Baku --</option>
+                            <option value="Hutan Alam" {{ old('sumber_bahan_baku') == 'Hutan Alam' ? 'selected' : '' }}>Hutan Alam</option>
+                            <option value="Perhutani" {{ old('sumber_bahan_baku') == 'Perhutani' ? 'selected' : '' }}>Hutan Tanaman</option>
+                            <option value="Hutan Rakyat" {{ old('sumber_bahan_baku') == 'Hutan Rakyat' ? 'selected' : '' }}>Hutan Rakyat</option>
+                        </select>
+                        @error('sumber_bahan_baku')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
+                </div>
 
+                <!-- Row: Kapasitas Izin & Masa Berlaku -->
+                <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">
                             Kapasitas Izin <span class="required">*</span>
@@ -459,44 +465,22 @@
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
-                </div>
 
-                <!-- Nomor Izin/NIB/SS -->
-                <div class="form-group">
-                    <label class="form-label">
-                        Nomor Izin/NIB/SS <span class="required">*</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        name="nomor_izin" 
-                        class="form-input" 
-                        placeholder="Masukkan nomor izin/NIB/SS"
-                        value="{{ old('nomor_izin') }}"
-                        required
-                    >
-                    @error('nomor_izin')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
-                </div>
-
-
-                <!-- Upload Dokumen Izin -->
-                <div class="form-group">
-                    <label class="form-label">
-                        Upload Dokumen Izin (PDF)
-                    </label>
-                    <input 
-                        type="file" 
-                        name="dokumen_izin" 
-                        class="form-file"
-                        accept=".pdf"
-                    >
-                    <div class="file-info">
-                        Format: PDF | Maksimal: 5 MB
+                    <div class="form-group">
+                        <label class="form-label">
+                            Masa Berlaku Izin <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            name="masa_berlaku" 
+                            class="form-input" 
+                            value="{{ old('masa_berlaku') }}"
+                            required
+                        >
+                        @error('masa_berlaku')
+                            <div class="error-message">{{ $message }}</div>
+                        @enderror
                     </div>
-                    @error('dokumen_izin')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
                 </div>
 
                 <!-- Form Actions -->
@@ -543,16 +527,6 @@
                     loadingInfo.textContent = 'Gagal memuat data wilayah';
                     loadingInfo.style.color = 'var(--error)';
                 });
-        });
-
-        // Preview nama file yang dipilih
-        document.querySelector('.form-file').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name;
-            if (fileName) {
-                const fileInfo = this.nextElementSibling;
-                fileInfo.innerHTML = `<strong>File dipilih:</strong> ${fileName}<br>Format: PDF | Maksimal: 5 MB`;
-                fileInfo.style.color = 'var(--accent)';
-            }
         });
 
         // Auto-hide success alert after 5 seconds

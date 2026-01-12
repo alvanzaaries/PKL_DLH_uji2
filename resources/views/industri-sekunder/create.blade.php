@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Industri Primer</title>
+    <title>Tambah Industri Sekunder - SIIPPHH</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -175,21 +175,6 @@
             min-height: 100px;
         }
 
-        .form-file {
-            width: 100%;
-            padding: 12px;
-            border: 2px dashed var(--border);
-            border-radius: 8px;
-            background: #f8fafc;
-            cursor: pointer;
-            transition: border-color 0.2s, background 0.2s;
-        }
-
-        .form-file:hover {
-            border-color: var(--accent);
-            background: #f0fdf4;
-        }
-
         .file-info {
             font-size: 12px;
             color: #64748b;
@@ -277,10 +262,10 @@
         <div class="nav-content">
             <div class="logo-area">
                 <span style="font-size: 24px;"></span>
-                <span class="logo-text">Industri Primer (PBPHH)</span>
+                <span class="logo-text">Industri Sekunder (PBUI)</span>
             </div>
-            <a href="{{ route('industri-primer.index') }}" class="back-link">
-                 Kembali
+            <a href="{{ route('industri-sekunder.index') }}" class="back-link">
+                ← Kembali 
             </a>
         </div>
     </nav>
@@ -288,8 +273,8 @@
     <div class="container">
         <!-- Page Header -->
         <div class="page-header">
-            <h1 class="page-title">Tambah Industri Primer (PBPHH)</h1>
-            <p class="page-subtitle">Formulir pendaftaran industri primer pengelolaan hasil hutan</p>
+            <h1 class="page-title">Tambah Industri Sekunder (PBUI)</h1>
+            <p class="page-subtitle">Formulir pendaftaran industri sekunder pengolahan hasil hutan</p>
         </div>
 
         <!-- Success Alert -->
@@ -310,7 +295,7 @@
 
         <!-- Form Card -->
         <div class="form-card">
-            <form action="{{ route('industri-primer.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('industri-sekunder.store') }}" method="POST">
                 @csrf
 
                 <!-- Nama Industri -->
@@ -322,7 +307,7 @@
                         type="text" 
                         name="nama" 
                         class="form-input" 
-                        placeholder="Contoh: PT. Kayu Lestari Indonesia"
+                        placeholder="Contoh: PT. Mebel Jaya Indonesia"
                         value="{{ old('nama') }}"
                         required
                     >
@@ -432,7 +417,7 @@
                             type="text" 
                             name="jenis_produksi" 
                             class="form-input" 
-                            placeholder="Contoh: Kayu Olahan, Kayu Bulat"
+                            placeholder="Contoh: Furniture, Moulding, Plywood"
                             value="{{ old('jenis_produksi') }}"
                             required
                         >
@@ -475,26 +460,6 @@
                         required
                     >
                     @error('nomor_izin')
-                        <div class="error-message">{{ $message }}</div>
-                    @enderror
-                </div>
-
-
-                <!-- Upload Dokumen Izin -->
-                <div class="form-group">
-                    <label class="form-label">
-                        Upload Dokumen Izin (PDF)
-                    </label>
-                    <input 
-                        type="file" 
-                        name="dokumen_izin" 
-                        class="form-file"
-                        accept=".pdf"
-                    >
-                    <div class="file-info">
-                        Format: PDF | Maksimal: 5 MB
-                    </div>
-                    @error('dokumen_izin')
                         <div class="error-message">{{ $message }}</div>
                     @enderror
                 </div>
@@ -543,16 +508,6 @@
                     loadingInfo.textContent = 'Gagal memuat data wilayah';
                     loadingInfo.style.color = 'var(--error)';
                 });
-        });
-
-        // Preview nama file yang dipilih
-        document.querySelector('.form-file').addEventListener('change', function(e) {
-            const fileName = e.target.files[0]?.name;
-            if (fileName) {
-                const fileInfo = this.nextElementSibling;
-                fileInfo.innerHTML = `<strong>File dipilih:</strong> ${fileName}<br>Format: PDF | Maksimal: 5 MB`;
-                fileInfo.style.color = 'var(--accent)';
-            }
         });
 
         // Auto-hide success alert after 5 seconds

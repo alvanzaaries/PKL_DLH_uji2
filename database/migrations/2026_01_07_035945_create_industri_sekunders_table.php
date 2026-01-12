@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('industri_primer', function (Blueprint $table) {
+        Schema::create('industri_sekunder', function (Blueprint $table) {
             $table->id();
             $table->foreignId('industri_id')->constrained('industries')->onDelete('cascade');
             $table->string('pemberi_izin');
-            $table->string('jenis_produksi');
-            $table->string('kapasitas_izin');
-            $table->enum('pelaporan', ['Aktif', 'Tidak Aktif', 'Pending'])->default('Pending');
-            $table->string('dokumen_izin')->nullable();
+            $table->string('jenis_produksi'); // jenis produksi/komoditas
+            $table->enum('kapasitas_izin', ['<= 2000', '2001 - 6000', '>= 6001']);
             $table->timestamps();
         });
     }
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('industri_primer');
+        Schema::dropIfExists('industri_sekunder');
     }
 };
