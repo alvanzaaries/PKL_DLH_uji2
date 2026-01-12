@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TptkbController;
+use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PerajinController;
+use App\Http\Controllers\IndustriController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IndustriPrimerController;
 use App\Http\Controllers\IndustriSekunderController;
@@ -61,4 +65,32 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/perajin/{id}', [PerajinController::class, 'update'])->name('perajin.update');
     Route::delete('/perajin/{id}', [PerajinController::class, 'destroy'])->name('perajin.destroy');
 });
+
+
+
+
+// Routes Laporan
+
+Route::get('/laporan', [IndustriController::class, 'index'])->name('data.industri');
+
+Route::get('/laporan/upload', function () {
+    return view('laporan/uploadLaporan', [
+        'industris' => \App\Models\Industri::orderBy('nama')->get(),
+        'jenisLaporans' => \App\Models\Laporan::getJenisLaporan()
+    ]);
+})->name('laporan.upload');
+
+// Route untuk preview dan simpan laporan
+Route::post('/laporan/upload/preview', [LaporanController::class, 'preview'])->name('laporan.preview');
+Route::post('/laporan/upload/store', [LaporanController::class, 'store'])->name('laporan.store');
+
+// Route untuk melihat laporan per industri
+Route::get('/laporan/{industri}/upload', [LaporanController::class, 'showByIndustri'])->name('industri.laporan');
+
+// Route untuk rekap laporan
+Route::get('/laporan/rekap', [LaporanController::class, 'rekapLaporan'])->name('laporan.rekap');
+
+// Route untuk detail data laporan (tabel lengkap per jenis)
+Route::get('/laporan/detail', [LaporanController::class, 'detailLaporan'])->name('laporan.detail');
+
 
