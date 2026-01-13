@@ -404,8 +404,16 @@ class LaporanController extends Controller
             'penjualan_kayu_olahan' => 'Laporan Penjualan Kayu Olahan',
         ];
 
+        // Build filters from request (so export respects applied detail filters)
+        $filters = [];
+        if ($request->filled('jenis_kayu')) $filters['jenis_kayu'] = $request->jenis_kayu;
+        if ($request->filled('asal_kayu')) $filters['asal_kayu'] = $request->asal_kayu;
+        if ($request->filled('jenis_olahan')) $filters['jenis_olahan'] = $request->jenis_olahan;
+        if ($request->filled('tujuan_kirim')) $filters['tujuan_kirim'] = $request->tujuan_kirim;
+        if ($request->filled('ekspor_impor')) $filters['ekspor_impor'] = $request->ekspor_impor;
+
         // Get data
-        $detailData = $this->dataService->getDetailLaporan($bulan, $tahun, $jenis, []);
+        $detailData = $this->dataService->getDetailLaporan($bulan, $tahun, $jenis, $filters);
         $items = $detailData['items'];
 
         // Create spreadsheet
@@ -689,8 +697,23 @@ class LaporanController extends Controller
             $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
         }
 
-        // Generate filename
-        $filename = 'Rekap_' . str_replace(' ', '_', $jenisOptions[$jenis] ?? 'Laporan') . '_' . $namaBulan[$bulan] . '_' . $tahun . '.xlsx';
+        // Generate filename (include applied filters if any)
+        $base = 'Rekap_' . str_replace(' ', '_', $jenisOptions[$jenis] ?? 'Laporan') . '_' . $namaBulan[$bulan] . '_' . $tahun;
+        $filterSuffix = '';
+        if (!empty($filters)) {
+            $parts = [];
+            foreach ($filters as $k => $v) {
+                if ($v === null || $v === '') continue;
+                // sanitize value for filename
+                $safe = preg_replace('/[^A-Za-z0-9\-_.]/', '_', str_replace(' ', '_', (string)$v));
+                $parts[] = $k . '-' . $safe;
+            }
+            if (!empty($parts)) {
+                $filterSuffix = '_' . implode('_', $parts);
+            }
+        }
+
+        $filename = $base . $filterSuffix . '.xlsx';
 
         // Output
         $writer = new Xlsx($spreadsheet);

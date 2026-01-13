@@ -401,7 +401,7 @@
             <div class="filter-group">
                 <label class="filter-label" for="jenis_laporan">Kategori Laporan</label>
                 <select name="jenis_laporan" id="jenis_laporan" class="filter-input">
-                    <option value="">-- Semua Kategori --</option>
+                    <option value="">Semua Kategori</option>
                     @if(isset($jenisLaporans))
                         @foreach($jenisLaporans as $jenis)
                             <option value="{{ $jenis }}" {{ request('jenis_laporan') == $jenis ? 'selected' : '' }}>
