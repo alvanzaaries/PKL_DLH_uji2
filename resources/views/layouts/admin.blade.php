@@ -31,8 +31,8 @@
                     </a>
 
                     <!-- Placeholder Links -->
-                    <a href="#" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
-                        <i class="fas fa-users mr-3 text-lg text-gray-400 group-hover:text-green-500"></i>
+                    <a href="{{ route('admin.users.index') }}" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md {{ request()->routeIs('admin.users.*') ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white' }}">
+                        <i class="fas fa-users mr-3 text-lg {{ request()->routeIs('admin.users.*') ? 'text-green-500' : 'text-gray-400 group-hover:text-green-500' }}"></i>
                          Manajemen User
                     </a>
                     <a href="#" class="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-300 hover:bg-gray-700 hover:text-white">
@@ -59,7 +59,12 @@
                 <div class="flex items-center justify-between h-16 px-6">
                     <h1 class="text-2xl font-semibold text-gray-800">@yield('header', 'Dashboard')</h1>
                     <div class="flex items-center space-x-4">
-                        <a href="{{ url('/') }}" class="text-sm text-gray-600 hover:text-green-600">Lihat Situs Depan</a>
+                        <a href="{{ url('/') }}" class="text-sm text-gray-600 hover:text-green-600">Beranda</a>
+
+                        <form method="POST" action="{{ route('logout') }}" class="inline-flex">
+                            @csrf
+                            <button type="submit" class="text-sm text-gray-600 hover:text-green-600">Logout</button>
+                        </form>
                     </div>
                 </div>
             </header>

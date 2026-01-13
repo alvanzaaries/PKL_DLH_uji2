@@ -8,6 +8,7 @@
     <div>
         {{-- Title moved to header section --}}
         <p class="mt-2 text-sm text-gray-700">Daftar semua proses rekonsiliasi yang telah diunggah ke dalam sistem.</p>
+        
     </div>
     <div class="mt-4 sm:mt-0">
         <a href="{{ route('reconciliations.create') }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
@@ -44,6 +45,7 @@
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Triwulan</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diunggah Oleh</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Upload</th>
                     <th scope="col" class="relative px-6 py-3">
                         <span class="sr-only">Aksi</span>
@@ -55,8 +57,18 @@
                     <tr class="hover:bg-gray-50 transition">
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item->year }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                Triwulan {{ $item->quarter }}
+                            @php
+                                $q = (int) $item->quarter;
+                                $badge = match($q) {
+                                    1 => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800', 'label' => 'TW1'],
+                                    2 => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'label' => 'TW2'],
+                                    3 => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'label' => 'TW3'],
+                                    4 => ['bg' => 'bg-purple-100', 'text' => 'text-purple-800', 'label' => 'TW4'],
+                                    default => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'label' => 'TW?'],
+                                };
+                            @endphp
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badge['bg'] }} {{ $badge['text'] }}">
+                                {{ $badge['label'] }} — Triwulan {{ $item->quarter }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -66,6 +78,20 @@
                                 </svg>
                                 {{ $item->original_filename }}
                             </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            @php($uploader = $item->uploader)
+                            @if($uploader)
+                                @php($isAdmin = ($uploader->role ?? 'user') === 'admin')
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium text-gray-900">{{ $uploader->name }}</span>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $isAdmin ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
+                                        {{ $isAdmin ? 'Admin' : 'User' }}
+                                    </span>
+                                </div>
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->created_at->format('d M Y, H:i') }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
@@ -79,7 +105,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-10 text-center text-sm text-gray-500">
+                        <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
                             <div class="flex flex-col items-center justify-center">
                                 <svg class="h-10 w-10 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

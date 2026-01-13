@@ -3,10 +3,22 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Reconciliation extends Model
 {
-    protected $fillable = ['year', 'quarter', 'original_filename'];
+    protected $fillable = [
+        'year',
+        'quarter',
+        'kph',
+        'original_filename',
+        'user_id',
+    ];
+
+    public function uploader(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     public function details()
     {

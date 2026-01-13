@@ -16,24 +16,80 @@
                     @endforeach
                 </select>
             </div>
+
             <div class="flex-1 w-full md:w-auto">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Kuartal / Triwulan</label>
-                <select name="quarter" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border">
-                    <option value="">Semua Triwulan</option>
-                    @foreach($availableQuarters as $q)
-                        <option value="{{ $q }}" {{ request('quarter') == $q ? 'selected' : '' }}>Triwulan {{ $q }}</option>
+                <label class="block text-sm font-medium text-gray-700 mb-1">KPH</label>
+                <select name="kph" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border">
+                    <option value="">Semua KPH</option>
+                    @foreach(($availableKph ?? []) as $kph)
+                        <option value="{{ $kph }}" {{ request('kph') == $kph ? 'selected' : '' }}>{{ $kph }}</option>
                     @endforeach
                 </select>
+            </div>
+
+            <div class="flex-1 w-full md:w-auto">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Filter Waktu (Triwulan)</label>
+                
+                <select id="combined_quarter_select" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border">
+                    <option value="">Semua Waktu</option>
+                    
+                    {{-- Grup 1: Triwulan Spesifik --}}
+                    <optgroup label="Triwulan Spesifik (Hanya TW itu)">
+                        @foreach($availableQuarters as $q)
+                            <option value="q-{{ $q }}" {{ request('quarter') == $q ? 'selected' : '' }}>
+                                Triwulan {{ $q }}
+                            </option>
+                        @endforeach
+                    </optgroup>
+
+                    {{-- Grup 2: Sampai Dengan --}}
+                    <optgroup label="Akumulasi (Sampai Dengan)">
+                        @foreach($availableQuarters as $q)
+                            <option value="s-{{ $q }}" {{ request('sampai_quarter') == $q ? 'selected' : '' }}>
+                                Sampai Dengan TW {{ $q }}
+                            </option>
+                        @endforeach
+                    </optgroup>
+                </select>
+
+                <input type="hidden" name="quarter" id="input_quarter" value="{{ request('quarter') }}">
+                <input type="hidden" name="sampai_quarter" id="input_sampai_quarter" value="{{ request('sampai_quarter') }}">
             </div>
             <div class="flex-none">
                 <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
                     <i class="fas fa-filter mr-2"></i> Filter Data
                 </button>
-                @if(request('year') || request('quarter'))
+                @if(request('year') || request('kph') || request('quarter') || request('sampai_quarter'))
                     <a href="{{ route('dashboard.index') }}" class="ml-2 text-gray-600 hover:text-gray-900 border px-3 py-2 rounded-md">Reset</a>
                 @endif
             </div>
         </form>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const comboSelect = document.getElementById('combined_quarter_select');
+                const inputQuarter = document.getElementById('input_quarter');
+                const inputSampai = document.getElementById('input_sampai_quarter');
+
+                comboSelect.addEventListener('change', function () {
+                    const val = this.value; 
+
+                    inputQuarter.value = '';
+                    inputSampai.value = '';
+
+                    if (val) {
+                        const parts = val.split('-'); 
+                        const type = parts[0];
+                        const number = parts[1]; 
+
+                        if (type === 'q') {
+                            inputQuarter.value = number;
+                        } else if (type === 's') {
+                            inputSampai.value = number;
+                        }
+                    }
+                });
+            });
+        </script>
     </div>
 
     {{-- Infographic Grid --}}

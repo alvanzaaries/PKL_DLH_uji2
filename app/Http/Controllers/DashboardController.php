@@ -14,6 +14,8 @@ class DashboardController extends Controller
         // 1. Filter Parameters
         $year = $request->input('year');
         $quarter = $request->input('quarter');
+        $sampaiQuarter = $request->input('sampai_quarter');
+        $kph = trim((string) $request->input('kph', ''));
 
         // 2. Base Queries
         $reconQuery = Reconciliation::query();
@@ -25,9 +27,19 @@ class DashboardController extends Controller
             $reconQuery->where('year', $year);
             $detailQuery->where('reconciliations.year', $year);
         }
+
+        if ($kph !== '') {
+            $reconQuery->where('kph', $kph);
+            $detailQuery->where('reconciliations.kph', $kph);
+        }
+
         if ($quarter) {
             $reconQuery->where('quarter', $quarter);
             $detailQuery->where('reconciliations.quarter', $quarter);
+        } elseif ($sampaiQuarter) {
+            // "Sampai dengan quarter" means: TW 1 + TW 2 + ... + selected TW (for that year)
+            $reconQuery->whereBetween('quarter', [1, $sampaiQuarter]);
+            $detailQuery->whereBetween('reconciliations.quarter', [1, $sampaiQuarter]);
         }
 
         // 4. Aggregations (Infographics)
@@ -60,6 +72,12 @@ class DashboardController extends Controller
         // 5. Filter Data Options (Dropdowns)
         $availableYears = Reconciliation::select('year')->distinct()->orderByDesc('year')->pluck('year');
         $availableQuarters = Reconciliation::select('quarter')->distinct()->orderBy('quarter')->pluck('quarter');
+        $availableKph = Reconciliation::select('kph')
+            ->whereNotNull('kph')
+            ->where('kph', '!=', '')
+            ->distinct()
+            ->orderBy('kph')
+            ->pluck('kph');
 
         return view('admin.dashboard', compact(
             'totalFiles', 
@@ -67,7 +85,8 @@ class DashboardController extends Controller
             'topWilayah', 
             'statsJenis', 
             'availableYears', 
-            'availableQuarters'
+            'availableQuarters',
+            'availableKph'
         ));
     }
 }

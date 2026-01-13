@@ -19,9 +19,26 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                     <a href="{{ url('/') }}" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition">Beranda</a>
-                    <a href="{{ route('dashboard.index') }}" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('dashboard.*') ? 'text-gray-600 font-semibold' : '' }}">Dashboard Statistik</a>
-                    <a href="{{ route('reconciliations.index') }}" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('reconciliations.*') ? 'text-gray-600 font-semibold' : '' }}">Data Rekonsiliasi</a>
+                    @if (auth()->check() && ((auth()->user()->role ?? 'user') === 'user'))
+                        <a href="{{ url('/') }}" class="px-3 py-2 rounded-md text-sm font-medium transition text-gray-700 hover:text-green-700 hover:bg-green-50">Beranda</a>
+                        <a href="{{ route('user.upload') }}" class="px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('user.upload') ? 'bg-green-600 text-white' : 'text-gray-700 hover:text-green-700 hover:bg-green-50' }}">Upload</a>
+                        <a href="{{ route('user.history') }}" class="px-3 py-2 rounded-md text-sm font-medium transition {{ request()->routeIs('user.history') ? 'bg-green-600 text-white' : 'text-gray-700 hover:text-green-700 hover:bg-green-50' }}">Riwayat</a>
+
+                        <form method="POST" action="{{ route('logout') }}" class="inline-flex">
+                            @csrf
+                            <button type="submit" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition">Logout</button>
+                        </form>
+                    @elseif (auth()->check() && ((auth()->user()->role ?? 'user') === 'admin'))
+                        <a href="{{ route('dashboard.index') }}" class="px-3 py-2 rounded-md text-sm font-medium transition text-gray-700 hover:text-green-700 hover:bg-green-50">Dashboard</a>
+                        <a href="{{ url('/') }}" class="px-3 py-2 rounded-md text-sm font-medium transition text-gray-700 hover:text-green-700 hover:bg-green-50">Beranda</a>
+                        <form method="POST" action="{{ route('logout') }}" class="inline-flex">
+                            @csrf
+                            <button type="submit" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition">Logout</button>
+                        </form>
+                    @else
+                        <a href="{{ url('/') }}" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition">Beranda</a>
+                        <a href="{{ route('login') }}" class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition">Login</a>
+                    @endif
                 </div>
             </div>
         </div>

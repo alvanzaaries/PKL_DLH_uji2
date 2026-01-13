@@ -1,11 +1,10 @@
-@extends('layouts.admin')
+@extends('layouts.app')
 
-@section('title', 'Upload Rekonsiliasi Baru - SISUDAH')
-@section('header', 'Upload Rekonsiliasi Baru')
+@section('title', 'Upload Rekonsiliasi - SISUDAH')
 
 @section('content')
-<div class="max-w-3xl mx-auto">
-    <div class="bg-white shadow-lg rounded-lg overflow-hidden">
+<div class="w-full max-w-3xl mx-auto">
+    <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
         <div class="bg-green-600 px-6 py-4">
             <h2 class="text-xl font-bold text-white flex items-center">
                 <svg class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -14,11 +13,18 @@
                 Upload Data Rekonsiliasi Triwulan
             </h2>
         </div>
-        
+
         <div class="p-8">
             <p class="mb-6 text-gray-600">
                 Silakan unggah file Excel hasil rekonsiliasi. Pastikan file memiliki format yang sesuai sebelum diunggah.
             </p>
+
+            @if (session('success'))
+                <div class="bg-green-50 border-l-4 border-green-600 text-green-800 p-4 mb-6" role="alert">
+                    <p class="font-bold">Berhasil</p>
+                    <p class="text-sm mt-1">{{ session('success') }}</p>
+                </div>
+            @endif
 
             @if ($errors->any())
                 <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
@@ -33,16 +39,16 @@
 
             <form id="uploadForm" action="{{ route('reconciliations.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Tahun Periode</label>
-                        <input type="number" name="year" value="{{ old('year', date('Y')) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 py-2 px-3 border" placeholder="Contoh: 2024">
+                        <input type="number" name="year" value="{{ old('year', date('Y')) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 py-2 px-3 border" placeholder="Contoh: 2024" required>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Triwulan</label>
-                        <select name="quarter" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 py-2 px-3 border bg-white">
+                        <select name="quarter" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 py-2 px-3 border bg-white" required>
                             <option value="1" {{ old('quarter') == 1 ? 'selected' : '' }}>Triwulan I (Jan - Mar)</option>
                             <option value="2" {{ old('quarter') == 2 ? 'selected' : '' }}>Triwulan II (Apr - Jun)</option>
                             <option value="3" {{ old('quarter') == 3 ? 'selected' : '' }}>Triwulan III (Jul - Sep)</option>
@@ -63,7 +69,7 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">File Excel (.xlsx, .xls, .csv)</label>
-                    
+
                     <div id="drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:bg-gray-50 transition relative cursor-pointer">
                         <div id="empty-state" class="space-y-1 text-center">
                             <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
@@ -122,24 +128,20 @@
                         dropZone.classList.add('border-gray-300');
                     }
 
-                    fileInput.addEventListener('change', function(e) {
+                    fileInput.addEventListener('change', function() {
                         if (this.files.length > 0) {
                             updateUI(this.files[0]);
                         }
                     });
 
                     removeBtn.addEventListener('click', function(e) {
-                        e.preventDefault(); // Prevent bubbling causing file dialog to open
+                        e.preventDefault();
                         e.stopPropagation();
                         resetUI();
                     });
 
-                    // Make the whole drop zone clickable (trigger file picker)
-                    dropZone.addEventListener('click', function(e) {
-                        // If clicking the remove button, ignore
-                        if (e.target && (e.target.id === 'remove-file' || (e.target.closest && e.target.closest('#remove-file')))) {
-                            return;
-                        }
+                    // Whole box clickable
+                    dropZone.addEventListener('click', function() {
                         fileInput.click();
                     });
 
@@ -161,11 +163,11 @@
                         dropZone.addEventListener(eventName, unhighlight, false);
                     });
 
-                    function highlight(e) {
+                    function highlight() {
                         dropZone.classList.add('border-green-500', 'bg-green-50');
                     }
 
-                    function unhighlight(e) {
+                    function unhighlight() {
                         if (fileInput.files.length === 0) {
                             dropZone.classList.remove('border-green-500', 'bg-green-50');
                         }
@@ -183,11 +185,7 @@
                     }
                 </script>
 
-
                 <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100">
-                    <a href="{{ route('reconciliations.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                        Batal
-                    </a>
                     <button id="uploadBtn" type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                         <svg id="uploadSpinner" class="hidden animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

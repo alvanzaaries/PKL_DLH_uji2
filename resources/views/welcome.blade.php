@@ -16,14 +16,35 @@
                     </p>
                     <div class="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
                         <div class="rounded-md shadow">
-                            <a href="{{ route('reconciliations.create') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg">
-                                Mulai Upload Data
-                            </a>
+                            @if (auth()->check())
+                                @php
+                                    $role = (auth()->user()->role ?? 'user');
+                                    $dashboardUrl = $role === 'admin' ? route('dashboard.index') : route('user.upload');
+                                @endphp
+                                <a href="{{ $dashboardUrl }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg">
+                                    Ke Dashboard
+                                </a>
+                            @else
+                                <a href="{{ route('login') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg">
+                                    Login
+                                </a>
+                            @endif
                         </div>
                         <div class="mt-3 sm:mt-0 sm:ml-3">
-                            <a href="{{ route('reconciliations.index') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 md:py-4 md:text-lg">
-                                Lihat Riwayat
-                            </a>
+                            @if (auth()->check())
+                                <a href="{{ route('logout') }}"
+                                   onclick="event.preventDefault(); document.getElementById('welcome-logout-form').submit();"
+                                   class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 md:py-4 md:text-lg">
+                                    Logout
+                                </a>
+                                <form id="welcome-logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
+                                    @csrf
+                                </form>
+                            @else
+                                <a href="{{ route('login') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 md:py-4 md:text-lg">
+                                    Masuk ke Dashboard
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
