@@ -1,6 +1,8 @@
 @extends('laporan/layouts.dashboard')
 
-@section('page-title', 'Detail Laporan Perusahaan')
+@section('title', 'Laporan Perusahaan')
+
+@section('page-title', 'Laporan Perusahaan')
 
 @section('content')
 

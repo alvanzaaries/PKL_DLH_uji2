@@ -1,6 +1,6 @@
 @extends('laporan.layouts.dashboard')
-
-@section('page-title', 'Preview Laporan')
+@section('title', 'Pratinjau Laporan')
+@section('page-title', 'Pratinjau Laporan')
 
 @section('content')
 
@@ -120,10 +120,10 @@
         <input type="hidden" name="jenis_laporan" value="{{ $metadata['jenis_laporan'] }}">
         <input type="hidden" name="confirmed_preview" value="1">
 
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
-            <a href="{{ route('laporan.upload') }}" 
+        <div class="flex justify-end gap-3 pt-4 border-gray-100">
+            <a href="{{ route('industri.laporan', $metadata['industri_id']) }}" 
                 class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-4 focus:outline-none focus:ring-gray-200 transition-all">
-                <i class="fas fa-arrow-left mr-2"></i> Kembali Ubah Data
+                <i class="fas fa-arrow-left mr-2"></i> Kembali ke Upload
             </a>
             
             @if(empty($data['errors']))

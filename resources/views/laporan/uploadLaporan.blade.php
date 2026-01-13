@@ -1,379 +1,215 @@
 @extends('laporan/layouts.dashboard')
 
-@section('page-title', 'Upload Laporan')
+@section('title', 'Input Laporan')
+
+@section('page-title', 'Input Laporan Baru')
 
 @section('content')
 
-<style>
-    .upload-card {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        overflow: hidden;
-    }
+    <style>
+        .btn-primary {
+            background-color: #1A4030;
+            color: white;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .btn-primary:hover { background-color: #2E5444; }
+        
+        .btn-secondary {
+            background-color: #F3F4F6;
+            color: #1F2937;
+            border: 1px solid #E5E7EB;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .btn-secondary:hover { background-color: #E5E7EB; }
 
-    .card-header {
-        padding: 1.5rem;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-    }
+        .form-input {
+            border-radius: 4px;
+            border-color: #D1D5DB;
+        }
+        .form-input:focus {
+            border-color: #1A4030;
+            --tw-ring-color: rgba(26, 64, 48, 0.2);
+            --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+            box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+        }
 
-    .form-section {
-        padding: 2rem;
-    }
+        .dropzone-active {
+            border-color: #1A4030 !important;
+            background-color: #F1FDF4 !important;
+        }
+    </style>
 
-    .preview-section {
-        background: #f8fafc;
-        border-top: 2px solid #e2e8f0;
-        padding: 2rem;
-        display: none;
-    }
+    <div class="max-w-7xl mx-auto">
 
-    .preview-section.active {
-        display: block;
-    }
-
-    .excel-drop-zone {
-        border: 2px dashed #cbd5e1;
-        border-radius: 8px;
-        padding: 3rem 2rem;
-        text-align: center;
-        transition: all 0.3s;
-        cursor: pointer;
-    }
-
-    .excel-drop-zone:hover,
-    .excel-drop-zone.dragover {
-        border-color: #10b981;
-        background: #ecfdf5;
-    }
-
-    .preview-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.875rem;
-        margin-top: 1rem;
-    }
-
-    .preview-table th {
-        background: #f1f5f9;
-        padding: 0.75rem;
-        text-align: left;
-        font-weight: 600;
-        border-bottom: 2px solid #cbd5e1;
-    }
-
-    .preview-table td {
-        padding: 0.75rem;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .preview-table tbody tr:hover {
-        background: #f8fafc;
-    }
-
-    .btn {
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 600;
-        transition: all 0.3s;
-        cursor: pointer;
-    }
-
-    .btn-primary {
-        background: #10b981;
-        color: white;
-        border: none;
-    }
-
-    .btn-primary:hover {
-        background: #059669;
-    }
-
-    .btn-secondary {
-        background: #64748b;
-        color: white;
-        border: none;
-    }
-
-    .btn-secondary:hover {
-        background: #475569;
-    }
-
-    .alert {
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-    }
-
-    .alert-info {
-        background: #dbeafe;
-        color: #1e40af;
-        border-left: 4px solid #3b82f6;
-    }
-
-    .alert-warning {
-        background: #fef3c7;
-        color: #92400e;
-        border-left: 4px solid #f59e0b;
-    }
-</style>
-
-<div class="upload-card">
-    <div class="card-header">
-        <h2 class="text-2xl font-bold flex items-center gap-3">
-            <i class="fas fa-file-excel"></i>
-            Upload Laporan Industri
-        </h2>
-        <p class="text-emerald-100 text-sm mt-2">
-            Upload file Excel untuk mengirimkan data laporan berkala
-        </p>
-    </div>
-
-    <form id="uploadForm" action="{{ route('laporan.store') }}" method="POST" enctype="multipart/form-data">
-        @csrf
-
-        <div class="form-section">
-            <!-- Step 1: Form Metadata -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        Perusahaan/Industri <span class="text-red-500">*</span>
-                    </label>
-                    <select name="industri_id" id="industri_id" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" required>
-                        <option value="">-- Pilih Perusahaan --</option>
-                        @foreach ($industris as $industri)
-                            <option value="{{ $industri->id }}">{{ $industri->nama_perusahaan }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
+        @if (session('success'))
+            <div class="bg-[#F1FDF4] border-l-4 border-[#1A4030] p-4 mb-6 shadow-sm flex items-start">
+                <i class="fas fa-check-circle text-[#1A4030] mt-1 mr-3"></i>
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        Periode Laporan <span class="text-red-500">*</span>
-                    </label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <select name="bulan" id="bulan" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" required>
-                            <option value="">-- Bulan --</option>
-                            @php
-                                $bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-                            @endphp
-                            @foreach($bulanIndo as $index => $namaBulan)
-                                <option value="{{ $index + 1 }}">{{ $namaBulan }}</option>
+                    <h3 class="font-bold text-sm text-[#1A4030]">Berhasil</h3>
+                    <p class="text-sm text-green-800">{{ session('success') }}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="ml-auto text-green-700 hover:text-green-900">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="bg-red-50 border-l-4 border-red-700 p-4 mb-6 shadow-sm flex items-start">
+                <i class="fas fa-exclamation-circle text-red-700 mt-1 mr-3"></i>
+                <div>
+                    <h3 class="font-bold text-sm text-red-800">Kesalahan</h3>
+                    <p class="text-sm text-red-700">{{ session('error') }}</p>
+                </div>
+            </div>
+        @endif
+
+        <div class="bg-white border border-gray-200 shadow-sm rounded-md p-6 mb-6">
+            <div class="flex items-center gap-3 mb-2">
+                <a href="{{ route('data.industri') }}" class="text-gray-400 hover:text-[#1A4030] transition-colors" title="Kembali">
+                    <i class="fas fa-arrow-left text-lg"></i>
+                </a>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900 font-sans tracking-tight">Upload Laporan Baru</h2>
+                    <p class="text-sm text-gray-500">Formulir upload laporan dengan pilihan perusahaan</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 shadow-sm rounded-md mb-8">
+            <div class="px-6 py-4 border-bottom border-gray-200 bg-gray-50 rounded-t-md">
+                <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-file-upload text-[#1A4030]"></i>
+                    Formulir Upload Laporan
+                </h3>
+            </div>
+
+            <form id="uploadForm" action="{{ route('laporan.preview') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+
+                <div class="p-6">
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Pilih Perusahaan</label>
+                        <select name="industri_id" id="industri_id" required class="w-full form-input px-3 py-2 border text-sm">
+                            <option value="">-- Pilih Perusahaan --</option>
+                            @foreach ($industries as $industri)
+                                <option value="{{ $industri->id }}" {{ old('industri_id') == $industri->id ? 'selected' : '' }}>
+                                    {{ $industri->nama }} - {{ $industri->kabupaten }}
+                                </option>
                             @endforeach
                         </select>
-                        <select name="tahun" id="tahun" class="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" required>
-                            <option value="">-- Tahun --</option>
-                            @for($tahun = date('Y') + 1; $tahun >= 2020; $tahun--)
-                                <option value="{{ $tahun }}" {{ $tahun == date('Y') ? 'selected' : '' }}>{{ $tahun }}</option>
-                            @endfor
-                        </select>
+                        @error('industri_id')
+                            <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Bulan</label>
+                            <select name="bulan" id="bulan" required class="w-full form-input px-3 py-2 border text-sm">
+                                @foreach (range(1, 12) as $m)
+                                    <option value="{{ $m }}" {{ (old('bulan') ?? date('n')) == $m ? 'selected' : '' }}>
+                                        {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Tahun</label>
+                            <select name="tahun" id="tahun" required class="w-full form-input px-3 py-2 border text-sm">
+                                @for ($y = date('Y'); $y >= 2020; $y--)
+                                    <option value="{{ $y }}" {{ (old('tahun') ?? date('Y')) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                @endfor
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Jenis Dokumen</label>
+                            <select name="jenis_laporan" id="jenis_laporan" required class="w-full form-input px-3 py-2 border text-sm">
+                                <option value="">-- Pilih Jenis --</option>
+                                @foreach (\App\Models\Laporan::JENIS_LAPORAN as $jenis)
+                                    <option value="{{ $jenis }}" {{ old('jenis_laporan') == $jenis ? 'selected' : '' }}>
+                                        {{ $jenis }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold text-gray-700 uppercase mb-2">File Excel (.xlsx/.xls)</label>
+                        <div class="border-2 border-dashed border-gray-300 rounded-md p-8 text-center transition-all cursor-pointer hover:bg-gray-50" id="dropZone">
+                            <i class="fas fa-file-excel text-3xl text-gray-400 mb-3"></i>
+                            <p class="text-sm font-medium text-gray-700 mb-1">Klik untuk memilih file atau tarik file ke sini</p>
+                            <p class="text-xs text-gray-500">Maksimal ukuran file 5MB</p>
+                            <input type="file" name="file_excel" id="excelFile" accept=".xlsx,.xls" class="hidden" required>
+                            <p id="fileName" class="mt-3 text-[#1A4030] font-bold text-sm"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-3 p-3 bg-gray-50 border border-gray-200 rounded-sm mb-6">
+                        <i class="fas fa-info-circle text-gray-500 mt-0.5 text-sm"></i>
+                        <div class="text-xs text-gray-600">
+                            <strong>Catatan Sistem:</strong> Pastikan format header Excel sesuai dengan template standar Dinas. Laporan yang sudah diupload tidak dapat diedit secara parsial, harus diupload ulang sepenuhnya.
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3 pt-2 border-t border-gray-100">
+                        <button type="submit" class="btn-primary px-5 py-2.5 text-sm font-semibold flex items-center gap-2">
+                            <i class="fas fa-search"></i>
+                            Preview & Validasi
+                        </button>
+                        <button type="reset" class="btn-secondary px-5 py-2.5 text-sm font-semibold">
+                            Reset Form
+                        </button>
                     </div>
                 </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        Jenis Laporan <span class="text-red-500">*</span>
-                    </label>
-                    <select name="jenis_laporan" id="jenis_laporan" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500" required>
-                        <option value="">-- Pilih Jenis --</option>
-                        @foreach ($jenisLaporans as $jenis)
-                            <option value="{{ $jenis }}">{{ $jenis }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <!-- Step 2: Upload Excel -->
-            <div class="mt-6">
-                <label class="block text-sm font-semibold text-gray-700 mb-2">
-                    File Excel <span class="text-red-500">*</span>
-                </label>
-
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    <strong>Template Excel:</strong> Silakan download template Excel sesuai jenis laporan yang dipilih.
-                    <a href="#" class="underline font-semibold ml-2" id="downloadTemplate">Download Template</a>
-                </div>
-
-                <div class="excel-drop-zone" id="dropZone">
-                    <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-3"></i>
-                    <p class="text-lg font-semibold text-gray-700 mb-2">Klik atau Drop File Excel Di Sini</p>
-                    <p class="text-sm text-gray-500">Format: .xlsx atau .xls (Maks. 5MB)</p>
-                    <input type="file" name="excel_file" id="excelFile" accept=".xlsx,.xls" class="hidden" required>
-                    <p id="fileName" class="mt-3 text-emerald-600 font-semibold"></p>
-                </div>
-            </div>
-
-            <div class="flex justify-end gap-3 mt-6">
-                <button type="button" onclick="window.history.back()" class="btn btn-secondary">
-                    <i class="fas fa-times mr-2"></i> Batal
-                </button>
-                <button type="button" id="btnPreview" class="btn btn-primary">
-                    <i class="fas fa-eye mr-2"></i> Preview Data
-                </button>
-            </div>
+            </form>
         </div>
 
-        <!-- Step 3: Preview Section -->
-        <div class="preview-section" id="previewSection">
-            <h3 class="text-lg font-bold text-gray-800 mb-4">
-                <i class="fas fa-table mr-2"></i> Preview Data Excel
-            </h3>
+    </div>
 
-            <div id="previewTableContainer" class="overflow-x-auto bg-white rounded-lg p-4">
-                <!-- Table will be inserted here by JavaScript -->
-            </div>
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const excelFile = document.getElementById('excelFile');
+        const fileName = document.getElementById('fileName');
 
-            <div class="flex justify-end gap-3 mt-6">
-                <button type="button" id="btnCancelPreview" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left mr-2"></i> Kembali
-                </button>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save mr-2"></i> Simpan ke Database
-                </button>
-            </div>
-        </div>
-    </form>
-</div>
+        dropZone.addEventListener('click', () => excelFile.click());
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script>
-let excelData = [];
-const dropZone = document.getElementById('dropZone');
-const excelFile = document.getElementById('excelFile');
-const fileName = document.getElementById('fileName');
-const btnPreview = document.getElementById('btnPreview');
-const btnCancelPreview = document.getElementById('btnCancelPreview');
-const previewSection = document.getElementById('previewSection');
-const previewTableContainer = document.getElementById('previewTableContainer');
-const formSection = document.querySelector('.form-section');
-const jenisLaporanSelect = document.getElementById('jenis_laporan');
-
-// Click to upload
-dropZone.addEventListener('click', () => excelFile.click());
-
-// Drag & Drop
-dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
-});
-
-dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('dragover');
-});
-
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-        excelFile.files = files;
-        handleFileSelect(files[0]);
-    }
-});
-
-// File input change
-excelFile.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) {
-        handleFileSelect(e.target.files[0]);
-    }
-});
-
-function handleFileSelect(file) {
-    fileName.textContent = `📄 ${file.name}`;
-}
-
-// Preview button
-btnPreview.addEventListener('click', async () => {
-    const file = excelFile.files[0];
-    const jenisLaporan = jenisLaporanSelect.value;
-
-    if (!file) {
-        alert('Silakan pilih file Excel terlebih dahulu!');
-        return;
-    }
-
-    if (!jenisLaporan) {
-        alert('Silakan pilih jenis laporan terlebih dahulu!');
-        return;
-    }
-
-    try {
-        const data = await readExcelFile(file);
-        excelData = data;
-        displayPreview(data, jenisLaporan);
-        formSection.style.display = 'none';
-        previewSection.classList.add('active');
-    } catch (error) {
-        alert('Gagal membaca file Excel: ' + error.message);
-    }
-});
-
-// Cancel preview
-btnCancelPreview.addEventListener('click', () => {
-    previewSection.classList.remove('active');
-    formSection.style.display = 'block';
-});
-
-// Read Excel file
-function readExcelFile(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-                resolve(jsonData);
-            } catch (error) {
-                reject(error);
-            }
-        };
-        reader.onerror = () => reject(new Error('Gagal membaca file'));
-        reader.readAsArrayBuffer(file);
-    });
-}
-
-// Display preview table
-function displayPreview(data, jenisLaporan) {
-    if (data.length === 0) {
-        previewTableContainer.innerHTML = '<p class="text-center text-gray-500">Tidak ada data dalam file Excel</p>';
-        return;
-    }
-
-    let headers = Object.keys(data[0]);
-    let tableHTML = '<table class="preview-table"><thead><tr>';
-    
-    headers.forEach(header => {
-        tableHTML += `<th>${header}</th>`;
-    });
-    tableHTML += '</tr></thead><tbody>';
-
-    data.forEach(row => {
-        tableHTML += '<tr>';
-        headers.forEach(header => {
-            tableHTML += `<td>${row[header] || ''}</td>`;
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dropzone-active');
+            });
         });
-        tableHTML += '</tr>';
-    });
 
-    tableHTML += '</tbody></table>';
-    tableHTML += `<p class="mt-4 text-sm text-gray-600">Total: <strong>${data.length}</strong> baris data</p>`;
-    
-    previewTableContainer.innerHTML = tableHTML;
-}
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dropzone-active');
+            });
+        });
 
-// Submit form with Excel data
-document.getElementById('uploadForm').addEventListener('submit', function(e) {
-    // Add excel data as hidden input
-    const hiddenInput = document.createElement('input');
-    hiddenInput.type = 'hidden';
-    hiddenInput.name = 'excel_data';
-    hiddenInput.value = JSON.stringify(excelData);
-    this.appendChild(hiddenInput);
-});
-</script>
+        dropZone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                excelFile.files = files;
+                updateFileName(files[0]);
+            }
+        });
+
+        excelFile.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                updateFileName(e.target.files[0]);
+            }
+        });
+
+        function updateFileName(file) {
+            fileName.innerHTML = `<i class="fas fa-check mr-1"></i> ${file.name}`;
+        }
+    </script>
 
 @endsection

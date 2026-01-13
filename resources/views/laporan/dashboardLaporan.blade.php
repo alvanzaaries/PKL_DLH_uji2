@@ -1,6 +1,8 @@
 @extends('laporan/layouts.dashboard')
 
-@section('page-title', 'DATA MONITORING INDUSTRI')
+@section('title', 'Monitoring Pelaporan')
+
+@section('page-title', 'Monitoring Pelaporan Industri')
 
 @section('content')
 
@@ -284,8 +286,8 @@
 <div class="content-card">
     <div class="card-header">
         <div class="card-title">
-            <h2>REKAPITULASI PELAPORAN</h2>
-            <p>Tahun Anggaran {{ request('tahun', date('Y')) }}</p>
+            <h2>MONITORING PELAPORAN</h2>
+            <p>Tahun {{ request('tahun', date('Y')) }}</p>
         </div>
         {{-- <a href="#" class="btn btn-export">
             <i class="fas fa-file-excel"></i>
@@ -298,25 +300,35 @@
         $totalPerusahaan = isset($companies) ? count($companies) : 0;
         $perusahaanLapor = 0;
         $totalLaporanMasuk = 0;
+        $bulanSekarang = date('n'); // 1-12 (Januari = 1, Desember = 12)
         
         if(isset($companies)) {
             foreach($companies as $company) {
-                $adaLaporan = false;
+                // Cek status laporan di bulan sekarang (index array dimulai dari 0, bulan dari 1)
+                $statusBulanIni = $company->laporan[$bulanSekarang - 1] ?? null;
+                
+                // Jika sudah lapor di bulan ini (status 'ok')
+                if($statusBulanIni == 'ok') {
+                    $perusahaanLapor++;
+                }
+                
+                // Hitung total laporan masuk (untuk statistik tambahan jika diperlukan)
                 foreach($company->laporan as $status) {
                     if($status == 'ok') {
                         $totalLaporanMasuk++;
-                        $adaLaporan = true;
                     }
-                }
-                if($adaLaporan) {
-                    $perusahaanLapor++;
                 }
             }
         }
         
         $persentase = $totalPerusahaan > 0 ? round(($perusahaanLapor / $totalPerusahaan) * 100, 1) : 0;
-        $bulanSekarang = date('n');
         $totalLaporanDiharapkan = $totalPerusahaan * $bulanSekarang;
+        
+        $namaBulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
     @endphp
 
     <div class="stats-container">
@@ -329,7 +341,7 @@
         <div class="stat-card">
             <div class="stat-label">Sudah Melapor</div>
             <div class="stat-value">{{ $perusahaanLapor }}</div>
-            <div class="stat-subtitle">Minimal 1 laporan di tahun ini</div>
+            <div class="stat-subtitle">Laporan bulan {{ $namaBulan[$bulanSekarang] ?? $bulanSekarang }}</div>
             <div class="progress-bar-container">
                 <div class="progress-bar" style="width: {{ $persentase }}%"></div>
             </div>
@@ -339,7 +351,7 @@
         <div class="stat-card">
             <div class="stat-label">Belum Melapor</div>
             <div class="stat-value" style="color: #DC2626;">{{ $totalPerusahaan - $perusahaanLapor }}</div>
-            <div class="stat-subtitle">Perlu tindak lanjut</div>
+            <div class="stat-subtitle">Belum lapor bulan {{ $namaBulan[$bulanSekarang] ?? $bulanSekarang }}</div>
         </div>
 {{-- 
         <div class="stat-card">
@@ -347,33 +359,6 @@
             <div class="stat-value" style="color: #059669;">{{ $totalLaporanMasuk }}</div>
             <div class="stat-subtitle">Dari {{ $totalLaporanDiharapkan }} yang diharapkan (s.d bulan ini)</div>
         </div> --}}
-    </div>
-
-    @php
-        $jenisKartu = [
-            'penerimaan_kayu_bulat' => 'Laporan Penerimaan Kayu Bulat',
-            'penerimaan_kayu_olahan' => 'Laporan Penerimaan Kayu Olahan',
-            'mutasi_kayu_bulat' => 'Laporan Mutasi Kayu Bulat (LMKB)',
-            'mutasi_kayu_olahan' => 'Laporan Mutasi Kayu Olahan (LMKO)',
-            'penjualan_kayu_olahan' => 'Laporan Penjualan Kayu Olahan',
-        ];
-
-        $bulanLink = date('n');
-        $tahunLink = request('tahun', date('Y'));
-
-        $countLabel = function (string $label) use ($laporanCountsByJenis) {
-            return $laporanCountsByJenis[$label] ?? 0;
-        };
-    @endphp
-
-    <div class="stats-container" style="border-top: 1px solid #E5E7EB;">
-        @foreach($jenisKartu as $key => $label)
-            <a class="stat-card stat-card-link" href="{{ route('laporan.detail', ['bulan' => $bulanLink, 'tahun' => $tahunLink, 'jenis' => $key]) }}">
-                <div class="stat-label">Pilih Jenis Laporan</div>
-                <div class="stat-value" style="font-size: 1.25rem;">{{ $label }}</div>
-                <div class="stat-subtitle">{{ number_format($countLabel($label)) }} dokumen di tahun {{ $tahunLink }} • Klik untuk lihat tabel</div>
-            </a>
-        @endforeach
     </div>
 
     <div class="filter-ribbon">

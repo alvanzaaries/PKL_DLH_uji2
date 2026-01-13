@@ -2,7 +2,7 @@
 
 @section('title', 'Detail Laporan')
 
-@section('page-title', 'Detail Data Laporan')
+@section('page-title', 'Detail Laporan')
 
 @section('content')
 @php
@@ -236,6 +236,7 @@
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Perusahaan</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Jenis Kayu</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700">Persediaan Awal (m³)</th>
+                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Penambahan (m³)</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700">Penggunaan (m³)</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700">Persediaan Akhir (m³)</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Keterangan</th>
@@ -248,6 +249,7 @@
                                     <td class="px-4 py-3 font-medium text-gray-800">{{ $item->laporan->industri->nama ?? '-' }}</td>
                                     <td class="px-4 py-3">{{ $item->jenis_kayu }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($item->persediaan_awal_volume, 2) }}</td>
+                                    <td class="px-4 py-3 text-right">{{ number_format($item->penambahan_volume, 2) }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($item->penggunaan_pengurangan_volume, 2) }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($item->persediaan_akhir_volume, 2) }}</td>
                                     <td class="px-4 py-3">{{ $item->keterangan }}</td>
@@ -257,6 +259,7 @@
                                 <tr class="bg-gray-100 font-bold">
                                     <td colspan="3" class="px-4 py-3 text-right">TOTAL:</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
+                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
                                     <td class="px-4 py-3"></td>
@@ -272,6 +275,7 @@
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Perusahaan</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Jenis Olahan</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700">Persediaan Awal (m³)</th>
+                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Penambahan (m³)</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700">Penggunaan (m³)</th>
                                 <th class="px-4 py-3 text-right font-semibold text-gray-700">Persediaan Akhir (m³)</th>
                                 <th class="px-4 py-3 text-left font-semibold text-gray-700">Keterangan</th>
@@ -284,6 +288,7 @@
                                     <td class="px-4 py-3 font-medium text-gray-800">{{ $item->laporan->industri->nama ?? '-' }}</td>
                                     <td class="px-4 py-3">{{ $item->jenis_olahan }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($item->persediaan_awal_volume, 2) }}</td>
+                                    <td class="px-4 py-3 text-right">{{ number_format($item->penambahan_volume, 2) }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($item->penggunaan_pengurangan_volume, 2) }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($item->persediaan_akhir_volume, 2) }}</td>
                                     <td class="px-4 py-3">{{ $item->keterangan }}</td>
@@ -293,6 +298,7 @@
                                 <tr class="bg-gray-100 font-bold">
                                     <td colspan="3" class="px-4 py-3 text-right">TOTAL:</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
+                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
                                     <td class="px-4 py-3 text-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
                                     <td class="px-4 py-3"></td>

@@ -73,12 +73,8 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/laporan', [IndustriController::class, 'index'])->name('data.industri');
 
-Route::get('/laporan/upload', function () {
-    return view('laporan/uploadLaporan', [
-        'industris' => \App\Models\Industri::orderBy('nama')->get(),
-        'jenisLaporans' => \App\Models\Laporan::getJenisLaporan()
-    ]);
-})->name('laporan.upload');
+// Route untuk upload laporan umum (dengan pilihan perusahaan)
+Route::get('/laporan/upload', [LaporanController::class, 'showUploadForm'])->name('laporan.upload.form');
 
 // Route untuk preview dan simpan laporan
 Route::post('/laporan/upload/preview', [LaporanController::class, 'preview'])->name('laporan.preview');
@@ -89,6 +85,9 @@ Route::get('/laporan/{industri}/upload', [LaporanController::class, 'showByIndus
 
 // Route untuk rekap laporan
 Route::get('/laporan/rekap', [LaporanController::class, 'rekapLaporan'])->name('laporan.rekap');
+
+// Route untuk ekspor rekap laporan ke Excel
+Route::get('/laporan/rekap/export', [LaporanController::class, 'exportRekapLaporan'])->name('laporan.rekap.export');
 
 // Route untuk detail data laporan (tabel lengkap per jenis)
 Route::get('/laporan/detail', [LaporanController::class, 'detailLaporan'])->name('laporan.detail');

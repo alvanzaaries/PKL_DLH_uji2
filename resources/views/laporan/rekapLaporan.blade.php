@@ -2,364 +2,646 @@
 
 @section('title', 'Rekap Laporan')
 
-@section('page-title', 'Rekap Laporan Bulanan')
+@section('page-title', 'Rekapitulasi Laporan')
 
 @section('content')
+
+<style>
+    /* LOCAL SCOPED STYLES FOR REKAP LAPORAN */
+    
+    /* Container: Sharp & Flat */
+    .content-card {
+        background: white;
+        border: 1px solid #E5E7EB;
+        border-radius: 4px;
+        box-shadow: none;
+    }
+
+    /* Header: Official & Structured */
+    .card-header {
+        padding: 1.5rem;
+        background-color: white;
+        border-bottom: 2px solid #F3F4F6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .card-title h2 {
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 1.125rem;
+        color: #111827;
+        margin: 0;
+        letter-spacing: -0.025em;
+    }
+
+    .card-title p {
+        font-size: 0.8rem;
+        color: #6B7280;
+        margin-top: 4px;
+    }
+
+    /* Control Ribbon (Filters) */
+    .filter-ribbon {
+        background-color: #F9FAFB;
+        border-bottom: 1px solid #E5E7EB;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: flex-end;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .filter-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+        color: #4B5563;
+    }
+
+    .filter-input {
+        height: 38px;
+        padding: 0 0.75rem;
+        border: 1px solid #D1D5DB;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        color: #111827;
+        background-color: white;
+        min-width: 180px;
+        transition: border-color 0.15s;
+    }
+
+    .filter-input:focus {
+        outline: none;
+        border-color: #0F2F24;
+        box-shadow: 0 0 0 1px #0F2F24;
+    }
+
+    /* Buttons: Solid & Authoritative */
+    .btn {
+        height: 38px;
+        padding: 0 1.25rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+        text-decoration: none;
+    }
+
+    .btn-primary {
+        background-color: #0F2F24;
+        color: white;
+    }
+    .btn-primary:hover { background-color: #183F32; }
+
+    .btn-secondary {
+        background-color: white;
+        border-color: #D1D5DB;
+        color: #374151;
+    }
+    .btn-secondary:hover { background-color: #F3F4F6; border-color: #9CA3AF; }
+
+    .btn-export {
+        background-color: #FFFBEB;
+        border-color: #D4AF37;
+        color: #92400E;
+    }
+    .btn-export:hover { background-color: #FEF3C7; }
+
+    /* Table: The Ledger Style */
+    .table-container {
+        overflow-x: auto;
+        width: 100%;
+    }
+
+    .ledger-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+
+    .ledger-table thead {
+        background-color: #F3F4F6;
+        border-bottom: 2px solid #E5E7EB;
+    }
+
+    .ledger-table th {
+        text-align: left;
+        padding: 0.875rem 1rem;
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        color: #6B7280;
+        white-space: nowrap;
+    }
+
+    .ledger-table th.col-center { text-align: center; }
+    .ledger-table th.col-right { text-align: right; }
+
+    .ledger-table td {
+        padding: 0.875rem 1rem;
+        border-bottom: 1px solid #E5E7EB;
+        color: #374151;
+        vertical-align: middle;
+    }
+
+    .ledger-table td.col-center { text-align: center; }
+    .ledger-table td.col-right { text-align: right; }
+
+    .ledger-table tbody tr:hover {
+        background-color: #F9FAFB;
+    }
+
+    .ledger-table tbody tr:last-child td { border-bottom: none; }
+
+    /* Total Row */
+    .ledger-table tbody tr.total-row {
+        background-color: #F3F4F6;
+        font-weight: 700;
+        border-top: 2px solid #0F2F24;
+    }
+
+    .ledger-table tbody tr.total-row:hover {
+        background-color: #F3F4F6;
+    }
+
+    /* Data Typography */
+    .company-name {
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .meta-info {
+        font-size: 0.75rem;
+        color: #6B7280;
+    }
+
+    /* Empty State */
+    .empty-state {
+        padding: 4rem 1rem;
+        text-align: center;
+        background-color: #F9FAFB;
+        color: #6B7280;
+    }
+
+    /* Stats Summary */
+    .stats-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        padding: 1.5rem;
+        background: #F9FAFB;
+        border-bottom: 1px solid #E5E7EB;
+    }
+
+    .stat-card {
+        background: white;
+        border: 1px solid #E5E7EB;
+        border-radius: 4px;
+        padding: 1rem;
+    }
+
+    .stat-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 700;
+        color: #6B7280;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-subtitle {
+        font-size: 0.75rem;
+        color: #6B7280;
+    }
+
+    /* Print Styles */
+    @media print {
+        .filter-ribbon, .btn, .card-header .btn {
+            display: none !important;
+        }
+        body {
+            background: white !important;
+        }
+        .content-card {
+            border: none;
+            box-shadow: none;
+        }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .filter-ribbon { 
+            flex-direction: column; 
+            align-items: stretch; 
+            gap: 1rem; 
+        }
+        .filter-input { 
+            width: 100%; 
+            min-width: 100%;
+        }
+        .filter-actions { 
+            display: flex; 
+            gap: 0.5rem; 
+        }
+        .btn { 
+            flex: 1; 
+            justify-content: center; 
+        }
+        .card-header { 
+            flex-direction: column; 
+            align-items: flex-start; 
+            gap: 1rem; 
+        }
+    }
+</style>
+
 @php
     $namaBulan = [
         1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
         5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
         9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
     ];
-
-    $jenis = request('jenis', 'semua');
-    $tampilan = request('tampilan', $jenis === 'semua' ? 'ringkas' : 'detail');
-    $showDetail = $tampilan === 'detail';
-
-    $jenisOptions = [
-        'semua' => 'Semua Jenis Laporan',
+    
+    $bulan = request('bulan', date('n'));
+    $tahun = request('tahun', date('Y'));
+    $jenis = request('jenis', 'penerimaan_kayu_bulat');
+    
+    $jenisLaporanLabels = [
         'penerimaan_kayu_bulat' => 'Penerimaan Kayu Bulat',
         'penerimaan_kayu_olahan' => 'Penerimaan Kayu Olahan',
-        'mutasi_kayu_bulat' => 'Mutasi Kayu Bulat (LMKB)',
-        'mutasi_kayu_olahan' => 'Mutasi Kayu Olahan (LMKO)',
-        'penjualan_kayu_olahan' => 'Penjualan Kayu Olahan',
+        'mutasi_kayu_bulat' => 'Mutasi Kayu Bulat',
+        'mutasi_kayu_olahan' => 'Mutasi Kayu Olahan',
+        'penjualan_kayu_olahan' => 'Penjualan Kayu Olahan'
     ];
+    
+    $jenisLabel = $jenisLaporanLabels[$jenis] ?? 'Laporan';
+    $periodeLabel = ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun;
 @endphp
 
-<div class="container mx-auto px-6 py-8">
-    <!-- Header -->
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-800 mb-2">
-            Rekap Laporan Bulanan
-        </h1>
-        <p class="text-gray-600">Rekapitulasi laporan industri kayu per bulan</p>
+<div class="content-card">
+    <div class="card-header">
+        <div class="card-title">
+            <h2>REKAP DATA LAPORAN</h2>
+            <p>{{ $jenisLabel }} - Periode: {{ $periodeLabel }}</p>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <a href="{{ route('data.industri') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a>
+            <a href="{{ route('laporan.rekap.export', ['bulan' => $bulan, 'tahun' => $tahun, 'jenis' => $jenis]) }}" class="btn btn-export">
+                <i class="fas fa-file-excel"></i> Ekspor Excel
+            </a>
+            <button type="button" onclick="window.print()" class="btn btn-export">
+                <i class="fas fa-print"></i> Cetak
+            </button>
+        </div>
     </div>
 
-    <!-- Filter Bulan dan Tahun -->
-    <div class="bg-white rounded-lg shadow p-4 mb-6 no-print">
-        <form method="GET" action="{{ route('laporan.rekap') }}" class="flex flex-wrap items-end gap-4">
-            <div>
-                <label for="bulan" class="block text-sm font-medium text-gray-700 mb-1">Bulan</label>
-                <select name="bulan" id="bulan" class="w-40 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+    <!-- Filter Ribbon -->
+    <div class="filter-ribbon">
+        <form method="GET" action="{{ route('laporan.rekap') }}" style="display: contents;">
+            
+            <div class="filter-group">
+                <label class="filter-label" for="bulan">Bulan</label>
+                <select name="bulan" id="bulan" class="filter-input" style="min-width: 150px;">
                     @foreach($namaBulan as $key => $nama)
-                        <option value="{{ $key }}" {{ $bulan == $key ? 'selected' : '' }}>{{ $nama }}</option>
+                        <option value="{{ $key }}" {{ $bulan == $key ? 'selected' : '' }}>
+                            {{ $nama }}
+                        </option>
                     @endforeach
                 </select>
             </div>
-            
-            <div>
-                <label for="tahun" class="block text-sm font-medium text-gray-700 mb-1">Tahun</label>
-                <select name="tahun" id="tahun" class="w-32 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    @for($y = date('Y'); $y >= 2020; $y--)
-                        <option value="{{ $y }}" {{ $tahun == $y ? 'selected' : '' }}>{{ $y }}</option>
+
+            <div class="filter-group">
+                <label class="filter-label" for="tahun">Tahun</label>
+                <select name="tahun" id="tahun" class="filter-input" style="min-width: 120px;">
+                    @php
+                        $currentYear = date('Y');
+                        $startYear = 2026;
+                    @endphp
+                    @for($year = $currentYear; $year >= $startYear; $year--)
+                        <option value="{{ $year }}" {{ $tahun == $year ? 'selected' : '' }}>
+                            {{ $year }}
+                        </option>
                     @endfor
                 </select>
             </div>
 
-            <div>
-                <label for="jenis" class="block text-sm font-medium text-gray-700 mb-1">Jenis Laporan</label>
-                <select name="jenis" id="jenis" class="w-64 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    @foreach($jenisOptions as $key => $label)
-                        <option value="{{ $key }}" {{ $jenis === $key ? 'selected' : '' }}>{{ $label }}</option>
+            <div class="filter-group">
+                <label class="filter-label" for="jenis">Jenis Laporan</label>
+                <select name="jenis" id="jenis" class="filter-input" style="min-width: 220px;">
+                    @foreach($jenisLaporanLabels as $key => $label)
+                        <option value="{{ $key }}" {{ $jenis == $key ? 'selected' : '' }}>
+                            {{ $label }}
+                        </option>
                     @endforeach
                 </select>
             </div>
 
-            <div>
-                <label for="tampilan" class="block text-sm font-medium text-gray-700 mb-1">Tampilan</label>
-                <select name="tampilan" id="tampilan" class="w-40 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="ringkas" {{ $tampilan === 'ringkas' ? 'selected' : '' }}>Ringkas</option>
-                    <option value="detail" {{ $tampilan === 'detail' ? 'selected' : '' }}>Detail</option>
-                </select>
-            </div>
-            
-            <div>
-                <button type="submit" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded shadow-sm transition">
-                    Tampilkan
-                </button>
-            </div>
-
-            <div>
-                <button type="button" onclick="window.print()" class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded shadow-sm transition">
-                    Cetak
+            <div class="filter-actions" style="margin-left: auto; display: flex; gap: 8px;">
+                <a href="{{ route('laporan.rekap') }}" class="btn btn-secondary">
+                    <i class="fas fa-undo-alt"></i> Reset
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Terapkan Filter
                 </button>
             </div>
         </form>
     </div>
 
-    <!-- Info Periode -->
-    <div class="bg-blue-600 rounded-lg shadow p-4 mb-6 text-white">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-xl font-bold">
-                    Periode: {{ $namaBulan[$bulan] }} {{ $tahun }}
-                </h2>
-                <p class="text-sm text-blue-100 mt-1">Total: {{ $insights['total_laporan'] }} laporan dari {{ $insights['total_industri_aktif'] }} industri</p>
+    <!-- Statistics Summary -->
+    @if(isset($items) && $items->count() > 0)
+    <div class="stats-summary">
+        <div class="stat-card">
+            <div class="stat-label">Total Data</div>
+            <div class="stat-value">{{ $items->count() }}</div>
+            <div class="stat-subtitle">Entri laporan</div>
+        </div>
+
+        @switch($jenis)
+            @case('penerimaan_kayu_bulat')
+            @case('mutasi_kayu_bulat')
+                <div class="stat-card">
+                    <div class="stat-label">Total Volume</div>
+                    <div class="stat-value" style="color: #059669;">{{ number_format($items->sum('volume'), 2) }}</div>
+                    <div class="stat-subtitle">Meter kubik (m³)</div>
+                </div>
+                @if($jenis == 'penerimaan_kayu_bulat')
+                <div class="stat-card">
+                    <div class="stat-label">Total Batang</div>
+                    <div class="stat-value" style="color: #D97706;">{{ number_format($items->sum('jumlah_batang')) }}</div>
+                    <div class="stat-subtitle">Batang kayu</div>
+                </div>
+                @endif
+                @break
+
+            @case('penerimaan_kayu_olahan')
+            @case('penjualan_kayu_olahan')
+            @case('mutasi_kayu_olahan')
+                <div class="stat-card">
+                    <div class="stat-label">Total Volume</div>
+                    <div class="stat-value" style="color: #059669;">{{ number_format($items->sum('volume'), 2) }}</div>
+                    <div class="stat-subtitle">Meter kubik (m³)</div>
+                </div>
+                @if($jenis != 'mutasi_kayu_olahan')
+                <div class="stat-card">
+                    <div class="stat-label">Total Keping</div>
+                    <div class="stat-value" style="color: #D97706;">{{ number_format($items->sum('jumlah_keping')) }}</div>
+                    <div class="stat-subtitle">Keping kayu olahan</div>
+                </div>
+                @endif
+                @break
+        @endswitch
+
+        <div class="stat-card">
+            <div class="stat-label">Jumlah Perusahaan</div>
+            <div class="stat-value" style="color: #2563EB;">{{ $items->groupBy('laporan.industri_id')->count() }}</div>
+            <div class="stat-subtitle">Yang melapor</div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Data Table -->
+    <div class="table-container">
+        @if(isset($items) && $items->count() > 0)
+        <table class="ledger-table">
+            @switch($jenis)
+                @case('penerimaan_kayu_bulat')
+                    <thead>
+                        <tr>
+                            <th class="col-center" style="width: 60px;">No</th>
+                            <th style="min-width: 200px;">Perusahaan</th>
+                            <th style="width: 150px;">Nomor Dokumen</th>
+                            <th style="width: 120px;">Tanggal</th>
+                            <th style="width: 150px;">Asal Kayu</th>
+                            <th style="width: 150px;">Jenis Kayu</th>
+                            <th class="col-right" style="width: 120px;">Jumlah Batang</th>
+                            <th class="col-right" style="width: 120px;">Volume (m³)</th>
+                            <th style="min-width: 150px;">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($items as $index => $item)
+                            <tr>
+                                <td class="col-center" style="color: #9CA3AF;">{{ $index + 1 }}</td>
+                                <td>
+                                    <div class="company-name">{{ $item->laporan->industri->nama ?? '-' }}</div>
+                                    <div class="meta-info">{{ $item->laporan->industri->nomor_izin ?? '' }}</div>
+                                </td>
+                                <td>{{ $item->nomor_dokumen }}</td>
+                                <td>{{ date('d/m/Y', strtotime($item->tanggal)) }}</td>
+                                <td>{{ $item->asal_kayu }}</td>
+                                <td>{{ $item->jenis_kayu }}</td>
+                                <td class="col-right">{{ number_format($item->jumlah_batang) }}</td>
+                                <td class="col-right">{{ number_format($item->volume, 2) }}</td>
+                                <td class="meta-info">{{ $item->keterangan ?? '-' }}</td>
+                            </tr>
+                        @endforeach
+                        <tr class="total-row">
+                            <td colspan="6" class="col-right" style="padding-right: 2rem;">TOTAL:</td>
+                            <td class="col-right">{{ number_format($items->sum('jumlah_batang')) }}</td>
+                            <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                    @break
+
+                @case('penerimaan_kayu_olahan')
+                    <thead>
+                        <tr>
+                            <th class="col-center" style="width: 60px;">No</th>
+                            <th style="min-width: 200px;">Perusahaan</th>
+                            <th style="width: 150px;">Nomor Dokumen</th>
+                            <th style="width: 120px;">Tanggal</th>
+                            <th style="width: 150px;">Asal Kayu</th>
+                            <th style="width: 150px;">Jenis Olahan</th>
+                            <th class="col-right" style="width: 120px;">Jumlah Keping</th>
+                            <th class="col-right" style="width: 120px;">Volume (m³)</th>
+                            <th style="min-width: 150px;">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($items as $index => $item)
+                            <tr>
+                                <td class="col-center" style="color: #9CA3AF;">{{ $index + 1 }}</td>
+                                <td>
+                                    <div class="company-name">{{ $item->laporan->industri->nama ?? '-' }}</div>
+                                    <div class="meta-info">{{ $item->laporan->industri->nomor_izin ?? '' }}</div>
+                                </td>
+                                <td>{{ $item->nomor_dokumen }}</td>
+                                <td>{{ date('d/m/Y', strtotime($item->tanggal)) }}</td>
+                                <td>{{ $item->asal_kayu }}</td>
+                                <td>{{ $item->jenis_olahan }}</td>
+                                <td class="col-right">{{ number_format($item->jumlah_keping) }}</td>
+                                <td class="col-right">{{ number_format($item->volume, 2) }}</td>
+                                <td class="meta-info">{{ $item->keterangan ?? '-' }}</td>
+                            </tr>
+                        @endforeach
+                        <tr class="total-row">
+                            <td colspan="6" class="col-right" style="padding-right: 2rem;">TOTAL:</td>
+                            <td class="col-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
+                            <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                    @break
+
+                @case('mutasi_kayu_bulat')
+                    <thead>
+                        <tr>
+                            <th class="col-center" style="width: 60px;">No</th>
+                            <th style="min-width: 200px;">Perusahaan</th>
+                            <th style="width: 150px;">Jenis Kayu</th>
+                            <th class="col-right" style="width: 150px;">Persediaan Awal (m³)</th>
+                            <th class="col-right" style="width: 150px;">Penambahan (m³)</th>
+                            <th class="col-right" style="width: 150px;">Penggunaan (m³)</th>
+                            <th class="col-right" style="width: 150px;">Persediaan Akhir (m³)</th>
+                            <th style="min-width: 150px;">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($items as $index => $item)
+                            <tr>
+                                <td class="col-center" style="color: #9CA3AF;">{{ $index + 1 }}</td>
+                                <td>
+                                    <div class="company-name">{{ $item->laporan->industri->nama ?? '-' }}</div>
+                                    <div class="meta-info">{{ $item->laporan->industri->nomor_izin ?? '' }}</div>
+                                </td>
+                                <td>{{ $item->jenis_kayu }}</td>
+                                <td class="col-right">{{ number_format($item->persediaan_awal_volume, 2) }}</td>
+                                <td class="col-right">{{ number_format($item->penambahan_volume, 2) }}</td>
+                                <td class="col-right">{{ number_format($item->penggunaan_pengurangan_volume, 2) }}</td>
+                                <td class="col-right">{{ number_format($item->persediaan_akhir_volume, 2) }}</td>
+                                <td class="meta-info">{{ $item->keterangan ?? '-' }}</td>
+                            </tr>
+                        @endforeach
+                        <tr class="total-row">
+                            <td colspan="3" class="col-right" style="padding-right: 2rem;">TOTAL:</td>
+                            <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
+                            <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
+                            <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
+                            <td class="col-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                    @break
+
+                @case('mutasi_kayu_olahan')
+                    <thead>
+                        <tr>
+                            <th class="col-center" style="width: 60px;">No</th>
+                            <th style="min-width: 200px;">Perusahaan</th>
+                            <th style="width: 150px;">Jenis Olahan</th>
+                            <th class="col-right" style="width: 150px;">Persediaan Awal (m³)</th>
+                            <th class="col-right" style="width: 150px;">Penambahan (m³)</th>
+                            <th class="col-right" style="width: 150px;">Penggunaan (m³)</th>
+                            <th class="col-right" style="width: 150px;">Persediaan Akhir (m³)</th>
+                            <th style="min-width: 150px;">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($items as $index => $item)
+                            <tr>
+                                <td class="col-center" style="color: #9CA3AF;">{{ $index + 1 }}</td>
+                                <td>
+                                    <div class="company-name">{{ $item->laporan->industri->nama ?? '-' }}</div>
+                                    <div class="meta-info">{{ $item->laporan->industri->nomor_izin ?? '' }}</div>
+                                </td>
+                                <td>{{ $item->jenis_olahan }}</td>
+                                <td class="col-right">{{ number_format($item->persediaan_awal_volume, 2) }}</td>
+                                <td class="col-right">{{ number_format($item->penambahan_volume, 2) }}</td>
+                                <td class="col-right">{{ number_format($item->penggunaan_pengurangan_volume, 2) }}</td>
+                                <td class="col-right">{{ number_format($item->persediaan_akhir_volume, 2) }}</td>
+                                <td class="meta-info">{{ $item->keterangan ?? '-' }}</td>
+                            </tr>
+                        @endforeach
+                        <tr class="total-row">
+                            <td colspan="3" class="col-right" style="padding-right: 2rem;">TOTAL:</td>
+                            <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
+                            <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
+                            <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
+                            <td class="col-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                    @break
+
+                @case('penjualan_kayu_olahan')
+                    <thead>
+                        <tr>
+                            <th class="col-center" style="width: 60px;">No</th>
+                            <th style="min-width: 200px;">Perusahaan</th>
+                            <th style="width: 150px;">Nomor Dokumen</th>
+                            <th style="width: 120px;">Tanggal</th>
+                            <th style="width: 150px;">Tujuan Kirim</th>
+                            <th style="width: 150px;">Jenis Olahan</th>
+                            <th class="col-right" style="width: 120px;">Jumlah Keping</th>
+                            <th class="col-right" style="width: 120px;">Volume (m³)</th>
+                            <th style="min-width: 150px;">Keterangan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($items as $index => $item)
+                            <tr>
+                                <td class="col-center" style="color: #9CA3AF;">{{ $index + 1 }}</td>
+                                <td>
+                                    <div class="company-name">{{ $item->laporan->industri->nama ?? '-' }}</div>
+                                    <div class="meta-info">{{ $item->laporan->industri->nomor_izin ?? '' }}</div>
+                                </td>
+                                <td>{{ $item->nomor_dokumen }}</td>
+                                <td>{{ date('d/m/Y', strtotime($item->tanggal)) }}</td>
+                                <td>{{ $item->tujuan_kirim }}</td>
+                                <td>{{ $item->jenis_olahan }}</td>
+                                <td class="col-right">{{ number_format($item->jumlah_keping) }}</td>
+                                <td class="col-right">{{ number_format($item->volume, 2) }}</td>
+                                <td class="meta-info">{{ $item->keterangan ?? '-' }}</td>
+                            </tr>
+                        @endforeach
+                        <tr class="total-row">
+                            <td colspan="6" class="col-right" style="padding-right: 2rem;">TOTAL:</td>
+                            <td class="col-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
+                            <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                    @break
+            @endswitch
+        </table>
+        @else
+        <div class="empty-state">
+            <div style="margin-bottom: 1rem; color: #D1D5DB;">
+                <i class="far fa-folder-open fa-3x"></i>
             </div>
+            <h3 style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">Data Tidak Ditemukan</h3>
+            <p style="font-size: 0.875rem;">Tidak ada data laporan untuk periode dan jenis yang dipilih.</p>
+            <p style="font-size: 0.875rem; margin-top: 0.5rem;">Silakan pilih filter lain atau hubungi administrator.</p>
         </div>
-    </div>
-
-    <!-- Tabel Rekap per Jenis Laporan -->
-
-    @if($jenis === 'semua' || $jenis === 'penerimaan_kayu_bulat')
-    <!-- Penerimaan Kayu Bulat -->
-    <div class="bg-white rounded-lg shadow mb-6 overflow-hidden">
-        <div class="bg-emerald-600 px-4 py-3">
-            <h3 class="text-base font-bold text-white">{{ $jenis === 'semua' ? '1. ' : '' }}Laporan Penerimaan Kayu Bulat</h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-100 border-b">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Indikator</th>
-                        <th class="px-4 py-3 text-right font-semibold text-gray-700">Jumlah</th>
-                        <th class="px-4 py-3 text-right font-semibold text-gray-700">Satuan</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    <tr>
-                        <td class="px-4 py-3 text-gray-800">Total Dokumen Penerimaan</td>
-                        <td class="px-4 py-3 text-right font-semibold">{{ number_format($rekap['penerimaan_kayu_bulat']['total_dokumen']) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">Dokumen</td>
-                    </tr>
-                    <tr class="bg-gray-50">
-                        <td class="px-4 py-3 text-gray-800">Total Jumlah Batang</td>
-                        <td class="px-4 py-3 text-right font-semibold">{{ number_format($rekap['penerimaan_kayu_bulat']['total_batang']) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">Batang</td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3 text-gray-800 font-semibold">Total Volume</td>
-                        <td class="px-4 py-3 text-right font-bold text-emerald-700">{{ number_format($rekap['penerimaan_kayu_bulat']['total_volume'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">m³</td>
-                    </tr>
-                    @if($rekap['penerimaan_kayu_bulat']['jenis_kayu_terbanyak'])
-                    <tr class="bg-yellow-50">
-                        <td class="px-4 py-3 text-gray-800">Jenis Kayu Terbanyak</td>
-                        <td class="px-4 py-3 text-right font-semibold" colspan="2">{{ $rekap['penerimaan_kayu_bulat']['jenis_kayu_terbanyak'] }}</td>
-                    </tr>
-                    @endif
-                </tbody>
-            </table>
-        </div>
-        <div class="px-4 py-3 bg-gray-50 border-t">
-            <a href="{{ route('laporan.detail', ['bulan' => $bulan, 'tahun' => $tahun, 'jenis' => 'penerimaan_kayu_bulat']) }}" class="text-sm text-emerald-700 hover:text-emerald-800 font-medium">
-                Lihat Detail Data (Tabel)
-            </a>
-        </div>
-    </div>
-    @endif
-
-    @if($jenis === 'semua' || $jenis === 'penerimaan_kayu_olahan')
-    <!-- Penerimaan Kayu Olahan -->
-    <div class="bg-white rounded-lg shadow mb-6 overflow-hidden">
-        <div class="bg-teal-600 px-4 py-3">
-            <h3 class="text-base font-bold text-white">{{ $jenis === 'semua' ? '2. ' : '' }}Laporan Penerimaan Kayu Olahan</h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-100 border-b">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Indikator</th>
-                        <th class="px-4 py-3 text-right font-semibold text-gray-700">Jumlah</th>
-                        <th class="px-4 py-3 text-right font-semibold text-gray-700">Satuan</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    <tr>
-                        <td class="px-4 py-3 text-gray-800">Total Dokumen Penerimaan</td>
-                        <td class="px-4 py-3 text-right font-semibold">{{ number_format($rekap['penerimaan_kayu_olahan']['total_dokumen']) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">Dokumen</td>
-                    </tr>
-                    <tr class="bg-gray-50">
-                        <td class="px-4 py-3 text-gray-800">Total Jumlah Keping</td>
-                        <td class="px-4 py-3 text-right font-semibold">{{ number_format($rekap['penerimaan_kayu_olahan']['total_keping']) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">Keping</td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3 text-gray-800 font-semibold">Total Volume</td>
-                        <td class="px-4 py-3 text-right font-bold text-teal-700">{{ number_format($rekap['penerimaan_kayu_olahan']['total_volume'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">m³</td>
-                    </tr>
-                    @if($rekap['penerimaan_kayu_olahan']['jenis_olahan_terbanyak'])
-                    <tr class="bg-yellow-50">
-                        <td class="px-4 py-3 text-gray-800">Jenis Olahan Terbanyak</td>
-                        <td class="px-4 py-3 text-right font-semibold" colspan="2">{{ $rekap['penerimaan_kayu_olahan']['jenis_olahan_terbanyak'] }}</td>
-                    </tr>
-                    @endif
-                </tbody>
-            </table>
-        </div>
-        <div class="px-4 py-3 bg-gray-50 border-t">
-            <a href="{{ route('laporan.detail', ['bulan' => $bulan, 'tahun' => $tahun, 'jenis' => 'penerimaan_kayu_olahan']) }}" class="text-sm text-teal-700 hover:text-teal-800 font-medium">
-                Lihat Detail Data (Tabel)
-            </a>
-        </div>
-    </div>
-    @endif
-
-    @if($jenis === 'semua' || $jenis === 'mutasi_kayu_bulat')
-    <!-- Mutasi Kayu Bulat (LMKB) -->
-    <div class="bg-white rounded-lg shadow mb-6 overflow-hidden">
-        <div class="bg-amber-600 px-4 py-3">
-            <h3 class="text-base font-bold text-white">{{ $jenis === 'semua' ? '3. ' : '' }}Laporan Mutasi Kayu Bulat (LMKB)</h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-100 border-b">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Indikator</th>
-                        <th class="px-4 py-3 text-right font-semibold text-gray-700">Volume</th>
-                        <th class="px-4 py-3 text-right font-semibold text-gray-700">Satuan</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    <tr>
-                        <td class="px-4 py-3 text-gray-800">Persediaan Awal</td>
-                        <td class="px-4 py-3 text-right font-semibold text-blue-700">{{ number_format($rekap['mutasi_kayu_bulat']['total_persediaan_awal'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">m³</td>
-                    </tr>
-                    <tr class="bg-gray-50">
-                        <td class="px-4 py-3 text-gray-800">Penggunaan/Pengurangan</td>
-                        <td class="px-4 py-3 text-right font-semibold text-red-700">{{ number_format($rekap['mutasi_kayu_bulat']['total_penggunaan'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">m³</td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3 text-gray-800 font-semibold">Persediaan Akhir</td>
-                        <td class="px-4 py-3 text-right font-bold text-green-700">{{ number_format($rekap['mutasi_kayu_bulat']['total_persediaan_akhir'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">m³</td>
-                    </tr>
-                    @if($rekap['mutasi_kayu_bulat']['jenis_kayu_terbanyak'])
-                    <tr class="bg-yellow-50">
-                        <td class="px-4 py-3 text-gray-800">Jenis Kayu Terbanyak</td>
-                        <td class="px-4 py-3 text-right font-semibold" colspan="2">{{ $rekap['mutasi_kayu_bulat']['jenis_kayu_terbanyak'] }}</td>
-                    </tr>
-                    @endif
-                </tbody>
-            </table>
-        </div>
-        <div class="px-4 py-3 bg-gray-50 border-t">
-            <a href="{{ route('laporan.detail', ['bulan' => $bulan, 'tahun' => $tahun, 'jenis' => 'mutasi_kayu_bulat']) }}" class="text-sm text-amber-700 hover:text-amber-800 font-medium">
-                Lihat Detail Data (Tabel)
-            </a>
-        </div>
-    </div>
-    @endif
-
-    @if($jenis === 'semua' || $jenis === 'mutasi_kayu_olahan')
-    <!-- Mutasi Kayu Olahan (LMKO) -->
-    <div class="bg-white rounded-lg shadow mb-6 overflow-hidden">
-        <div class="bg-orange-600 px-4 py-3">
-            <h3 class="text-base font-bold text-white">{{ $jenis === 'semua' ? '4. ' : '' }}Laporan Mutasi Kayu Olahan (LMKO)</h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-100 border-b">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Indikator</th>
-                        <th class="px-4 py-3 text-right font-semibold text-gray-700">Volume</th>
-                        <th class="px-4 py-3 text-right font-semibold text-gray-700">Satuan</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    <tr>
-                        <td class="px-4 py-3 text-gray-800">Persediaan Awal</td>
-                        <td class="px-4 py-3 text-right font-semibold text-blue-700">{{ number_format($rekap['mutasi_kayu_olahan']['total_persediaan_awal'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">m³</td>
-                    </tr>
-                    <tr class="bg-gray-50">
-                        <td class="px-4 py-3 text-gray-800">Penggunaan/Pengurangan</td>
-                        <td class="px-4 py-3 text-right font-semibold text-red-700">{{ number_format($rekap['mutasi_kayu_olahan']['total_penggunaan'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">m³</td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3 text-gray-800 font-semibold">Persediaan Akhir</td>
-                        <td class="px-4 py-3 text-right font-bold text-green-700">{{ number_format($rekap['mutasi_kayu_olahan']['total_persediaan_akhir'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">m³</td>
-                    </tr>
-                    @if($rekap['mutasi_kayu_olahan']['jenis_olahan_terbanyak'])
-                    <tr class="bg-yellow-50">
-                        <td class="px-4 py-3 text-gray-800">Jenis Olahan Terbanyak</td>
-                        <td class="px-4 py-3 text-right font-semibold" colspan="2">{{ $rekap['mutasi_kayu_olahan']['jenis_olahan_terbanyak'] }}</td>
-                    </tr>
-                    @endif
-                </tbody>
-            </table>
-        </div>
-        <div class="px-4 py-3 bg-gray-50 border-t">
-            <a href="{{ route('laporan.detail', ['bulan' => $bulan, 'tahun' => $tahun, 'jenis' => 'mutasi_kayu_olahan']) }}" class="text-sm text-orange-700 hover:text-orange-800 font-medium">
-                Lihat Detail Data (Tabel)
-            </a>
-        </div>
-    </div>
-    @endif
-
-    @if($jenis === 'semua' || $jenis === 'penjualan_kayu_olahan')
-    <!-- Penjualan Kayu Olahan -->
-    <div class="bg-white rounded-lg shadow mb-6 overflow-hidden">
-        <div class="bg-rose-600 px-4 py-3">
-            <h3 class="text-base font-bold text-white">{{ $jenis === 'semua' ? '5. ' : '' }}Laporan Penjualan Kayu Olahan</h3>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-100 border-b">
-                    <tr>
-                        <th class="px-4 py-3 text-left font-semibold text-gray-700">Indikator</th>
-                        <th class="px-4 py-3 text-right font-semibold text-gray-700">Jumlah</th>
-                        <th class="px-4 py-3 text-right font-semibold text-gray-700">Satuan</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y">
-                    <tr>
-                        <td class="px-4 py-3 text-gray-800">Total Dokumen Penjualan</td>
-                        <td class="px-4 py-3 text-right font-semibold">{{ number_format($rekap['penjualan_kayu_olahan']['total_dokumen']) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">Dokumen</td>
-                    </tr>
-                    <tr class="bg-gray-50">
-                        <td class="px-4 py-3 text-gray-800">Total Jumlah Keping</td>
-                        <td class="px-4 py-3 text-right font-semibold">{{ number_format($rekap['penjualan_kayu_olahan']['total_keping']) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">Keping</td>
-                    </tr>
-                    <tr>
-                        <td class="px-4 py-3 text-gray-800 font-semibold">Total Volume</td>
-                        <td class="px-4 py-3 text-right font-bold text-rose-700">{{ number_format($rekap['penjualan_kayu_olahan']['total_volume'], 2) }}</td>
-                        <td class="px-4 py-3 text-right text-gray-600">m³</td>
-                    </tr>
-                    @if($rekap['penjualan_kayu_olahan']['tujuan_terbanyak'])
-                    <tr class="bg-yellow-50">
-                        <td class="px-4 py-3 text-gray-800">Tujuan Kirim Terbanyak</td>
-                        <td class="px-4 py-3 text-right font-semibold" colspan="2">{{ $rekap['penjualan_kayu_olahan']['tujuan_terbanyak'] }}</td>
-                    </tr>
-                    @endif
-                </tbody>
-            </table>
-        </div>
-        <div class="px-4 py-3 bg-gray-50 border-t">
-            <a href="{{ route('laporan.detail', ['bulan' => $bulan, 'tahun' => $tahun, 'jenis' => 'penjualan_kayu_olahan']) }}" class="text-sm text-rose-700 hover:text-rose-800 font-medium">
-                Lihat Detail Data (Tabel)
-            </a>
-        </div>
-    </div>
-    @endif
-
-    <!-- Footer Info -->
-    <div class="mt-6 text-center text-sm text-gray-500 border-t pt-4">
-        <p>Data diambil pada: {{ now()->format('d M Y, H:i') }} WIB</p>
+        @endif
     </div>
 </div>
-
-<style>
-    @media print {
-        .app-sidebar, .no-print {
-            display: none !important;
-        }
-        body {
-            background: white !important;
-        }
-        .container {
-            max-width: 100% !important;
-            padding: 20px
-        }
-    }
-</style>
 
 @endsection

@@ -23,8 +23,8 @@
          */
         :root {
             /* Primary Palette (DLHK Jateng Inspired Green) */
-            --color-primary: #1B5E20;        /* Deep Forest Green - Sidebar Bg */
-            --color-primary-hover: #2E7D32;  /* Slightly Lighter Green - Hover state */
+            --color-primary: #1A4030;        /* Deep Forest Green - Sidebar Bg */
+            --color-primary-hover: #2E5444;  /* Slightly Lighter Green - Hover state */
             --color-white: #FFFFFF;
 
             /* Backgrounds & Neutrals */
@@ -259,31 +259,19 @@
         <nav class="sidebar-menu">
             <div class="menu-label">Pelaporan & Data</div>
             
-            <a href="{{ route('data.industri') }}" class="nav-link {{ request()->routeIs('data.industri') || request()->routeIs('industri.laporan') ? 'active' : '' }}">
+            <a href="{{ route('data.industri') }}" class="nav-link {{ request()->routeIs('data.industri') || request()->routeIs('industri.laporan') || request()->routeIs('laporan.preview') ? 'active' : '' }}">
                 <i class="fas fa-city nav-icon"></i>
                 Monitoring Laporan
             </a>
 
-            <a href="{{ route('laporan.upload') ?? '#' }}" class="nav-link {{ request()->routeIs('laporan.upload') || request()->routeIs('laporan.preview') ? 'active' : '' }}">
-                <i class="fas fa-file-import nav-icon"></i>
+            <a href="{{ route('laporan.upload.form') }}" class="nav-link {{ request()->routeIs('laporan.upload.form') ? 'active' : '' }}">
+                <i class="fas fa-file-upload nav-icon"></i>
                 Input Laporan
             </a>
 
-            <a href="{{ route('laporan.rekap') }}" class="nav-link {{ request()->routeIs('laporan.rekap') ? 'active' : '' }}">
+            <a href="{{ route('laporan.rekap') }}" class="nav-link {{ request()->routeIs('laporan.rekap') || request()->routeIs('laporan.detail') ? 'active' : '' }}">
                 <i class="fas fa-chart-bar nav-icon"></i>
                 Rekapitulasi
-            </a>
-
-            <div class="menu-label">Administrasi</div>
-
-            <a href="#" class="nav-link">
-                <i class="fas fa-sliders-h nav-icon"></i>
-                Konfigurasi Sistem
-            </a>
-            
-            <a href="#" class="nav-link">
-                <i class="fas fa-user-shield nav-icon"></i>
-                Hak Akses Pengguna
             </a>
         </nav>
 

@@ -15,6 +15,7 @@ class laporan_mutasi_kayu_bulat extends Model
         'laporan_id',
         'jenis_kayu',
         'persediaan_awal_volume',
+        'penambahan_volume',
         'penggunaan_pengurangan_volume',
         'persediaan_akhir_volume',
         'keterangan'
@@ -22,6 +23,7 @@ class laporan_mutasi_kayu_bulat extends Model
 
     protected $casts = [
         'persediaan_awal_volume' => 'float',
+        'penambahan_volume' => 'float',
         'penggunaan_pengurangan_volume' => 'float',
         'persediaan_akhir_volume' => 'float',
     ];
