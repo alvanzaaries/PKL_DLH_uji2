@@ -44,7 +44,7 @@
                     <div>
                         <label for="jenis_kayu" class="block text-sm font-medium text-gray-700 mb-1">Jenis Kayu</label>
                         <select name="jenis_kayu" id="jenis_kayu" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">-- Semua --</option>
+                            <option value="">Semua</option>
                             @foreach($filterOptions['jenis_kayu'] ?? [] as $item)
                                 <option value="{{ $item }}" {{ request('jenis_kayu') == $item ? 'selected' : '' }}>{{ $item }}</option>
                             @endforeach
@@ -53,7 +53,7 @@
                     <div>
                         <label for="asal_kayu" class="block text-sm font-medium text-gray-700 mb-1">Asal Kayu</label>
                         <select name="asal_kayu" id="asal_kayu" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">-- Semua --</option>
+                            <option value="">Semua</option>
                             @foreach($filterOptions['asal_kayu'] ?? [] as $item)
                                 <option value="{{ $item }}" {{ request('asal_kayu') == $item ? 'selected' : '' }}>{{ $item }}</option>
                             @endforeach
@@ -65,7 +65,7 @@
                     <div>
                         <label for="jenis_olahan" class="block text-sm font-medium text-gray-700 mb-1">Jenis Olahan</label>
                         <select name="jenis_olahan" id="jenis_olahan" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">-- Semua --</option>
+                            <option value="">Semua</option>
                             @foreach($filterOptions['jenis_olahan'] ?? [] as $item)
                                 <option value="{{ $item }}" {{ request('jenis_olahan') == $item ? 'selected' : '' }}>{{ $item }}</option>
                             @endforeach
@@ -74,7 +74,7 @@
                     <div>
                         <label for="asal_kayu" class="block text-sm font-medium text-gray-700 mb-1">Asal Kayu</label>
                         <select name="asal_kayu" id="asal_kayu" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">-- Semua --</option>
+                            <option value="">Semua</option>
                             @foreach($filterOptions['asal_kayu'] ?? [] as $item)
                                 <option value="{{ $item }}" {{ request('asal_kayu') == $item ? 'selected' : '' }}>{{ $item }}</option>
                             @endforeach
@@ -86,7 +86,7 @@
                     <div>
                         <label for="jenis_kayu" class="block text-sm font-medium text-gray-700 mb-1">Jenis Kayu</label>
                         <select name="jenis_kayu" id="jenis_kayu" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">-- Semua --</option>
+                            <option value="">Semua</option>
                             @foreach($filterOptions['jenis_kayu'] ?? [] as $item)
                                 <option value="{{ $item }}" {{ request('jenis_kayu') == $item ? 'selected' : '' }}>{{ $item }}</option>
                             @endforeach
@@ -98,7 +98,7 @@
                     <div>
                         <label for="jenis_olahan" class="block text-sm font-medium text-gray-700 mb-1">Jenis Olahan</label>
                         <select name="jenis_olahan" id="jenis_olahan" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">-- Semua --</option>
+                            <option value="">Semua</option>
                             @foreach($filterOptions['jenis_olahan'] ?? [] as $item)
                                 <option value="{{ $item }}" {{ request('jenis_olahan') == $item ? 'selected' : '' }}>{{ $item }}</option>
                             @endforeach
@@ -110,7 +110,7 @@
                     <div>
                         <label for="tujuan_kirim" class="block text-sm font-medium text-gray-700 mb-1">Tujuan Kirim</label>
                         <select name="tujuan_kirim" id="tujuan_kirim" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">-- Semua --</option>
+                            <option value="">Semua</option>
                             @foreach($filterOptions['tujuan_kirim'] ?? [] as $item)
                                 <option value="{{ $item }}" {{ request('tujuan_kirim') == $item ? 'selected' : '' }}>{{ $item }}</option>
                             @endforeach
@@ -119,18 +119,18 @@
                     <div>
                         <label for="jenis_olahan" class="block text-sm font-medium text-gray-700 mb-1">Jenis Olahan</label>
                         <select name="jenis_olahan" id="jenis_olahan" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">-- Semua --</option>
+                            <option value="">Semua</option>
                             @foreach($filterOptions['jenis_olahan'] ?? [] as $item)
                                 <option value="{{ $item }}" {{ request('jenis_olahan') == $item ? 'selected' : '' }}>{{ $item }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div>
-                        <label for="ekspor_impor" class="block text-sm font-medium text-gray-700 mb-1">Ekspor/Impor</label>
+                        <label for="ekspor_impor" class="block text-sm font-medium text-gray-700 mb-1">Ekspor/Lokal</label>
                         <select name="ekspor_impor" id="ekspor_impor" class="w-40 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                             <option value="">-- Semua --</option>
                             <option value="ekspor" {{ request('ekspor_impor') == 'ekspor' ? 'selected' : '' }}>Ekspor</option>
-                            <option value="impor" {{ request('ekspor_impor') == 'impor' ? 'selected' : '' }}>Impor</option>
+                            <option value="lokal" {{ request('ekspor_impor') == 'lokal' ? 'selected' : '' }}>Lokal</option>
                         </select>
                     </div>
                     @break

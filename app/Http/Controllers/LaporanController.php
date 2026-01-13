@@ -71,7 +71,8 @@ class LaporanController extends Controller
                     'bulan' => $request->bulan,
                     'tahun' => $request->tahun,
                     'jenis_laporan' => $jenisLaporan,
-                ]
+                ],
+                'redirect_after_save' => url()->previous() // Simpan URL sebelumnya
             ]);
 
             // Return view preview dengan data
@@ -171,6 +172,15 @@ class LaporanController extends Controller
             $previewData = session('preview_data');
             $filePath = session('preview_file_path');
 
+            // Cek apakah ada edited data dari form (data yang sudah diedit user)
+            $dataRows = $previewData['rows'];
+            if ($request->has('edited_data') && !empty($request->edited_data)) {
+                $editedData = json_decode($request->edited_data, true);
+                if (is_array($editedData) && count($editedData) > 0) {
+                    $dataRows = $editedData;
+                }
+            }
+
             // Buat tanggal dari bulan dan tahun
             $tanggal = $request->tahun . '-' . str_pad($request->bulan, 2, '0', STR_PAD_LEFT) . '-01';
 
@@ -182,8 +192,8 @@ class LaporanController extends Controller
                 'path_laporan' => '',
             ]);
 
-            // Simpan detail berdasarkan jenis laporan menggunakan service
-            $this->dataService->saveDetailData($laporan, $request->jenis_laporan, $previewData['rows']);
+            // Simpan detail berdasarkan jenis laporan menggunakan service (gunakan edited data jika ada)
+            $this->dataService->saveDetailData($laporan, $request->jenis_laporan, $dataRows);
 
             DB::commit();
 
@@ -192,16 +202,31 @@ class LaporanController extends Controller
                 Storage::delete($filePath);
             }
 
-            // Clear session data
-            session()->forget(['preview_data', 'preview_file_path', 'preview_metadata']);
+            // Ambil URL redirect dari session
+            $redirectUrl = session('redirect_after_save');
 
-            return redirect()->route('industri.laporan', ['industri' => $request->industri_id])
-                ->with('success', 'Laporan berhasil disimpan!');
+            // Clear session data
+            session()->forget(['preview_data', 'preview_file_path', 'preview_metadata', 'redirect_after_save']);
+
+            // Redirect ke halaman sebelumnya atau default ke industri laporan
+            if ($redirectUrl) {
+                return redirect($redirectUrl)->with('success', 'Laporan berhasil disimpan!');
+            } else {
+                return redirect()->route('industri.laporan', ['industri' => $request->industri_id])
+                    ->with('success', 'Laporan berhasil disimpan!');
+            }
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('industri.laporan', ['industri' => $request->industri_id])
-                ->with('error', 'Gagal menyimpan laporan: ' . $e->getMessage());
+            
+            // Gunakan redirect URL dari session atau fallback ke industri.laporan
+            $redirectUrl = session('redirect_after_save');
+            if ($redirectUrl) {
+                return redirect($redirectUrl)->with('error', 'Gagal menyimpan laporan: ' . $e->getMessage());
+            } else {
+                return redirect()->route('industri.laporan', ['industri' => $request->industri_id])
+                    ->with('error', 'Gagal menyimpan laporan: ' . $e->getMessage());
+            }
         }
     }
 
@@ -292,8 +317,16 @@ class LaporanController extends Controller
             $jenis = 'penerimaan_kayu_bulat';
         }
 
-        // Get detail data menggunakan service (sama seperti detailLaporan tapi tanpa filter tambahan)
-        $detailData = $this->dataService->getDetailLaporan($bulan, $tahun, $jenis, []);
+        // Build filters array (allow filtering on the rekap page)
+        $filters = [];
+        if ($request->filled('jenis_kayu')) $filters['jenis_kayu'] = $request->jenis_kayu;
+        if ($request->filled('asal_kayu')) $filters['asal_kayu'] = $request->asal_kayu;
+        if ($request->filled('jenis_olahan')) $filters['jenis_olahan'] = $request->jenis_olahan;
+        if ($request->filled('tujuan_kirim')) $filters['tujuan_kirim'] = $request->tujuan_kirim;
+        if ($request->filled('ekspor_impor')) $filters['ekspor_impor'] = $request->ekspor_impor;
+
+        // Get detail data menggunakan service dengan filter tambahan jika ada
+        $detailData = $this->dataService->getDetailLaporan($bulan, $tahun, $jenis, $filters);
 
         return view('laporan.rekapLaporan', [
             'bulan' => $bulan,
@@ -301,6 +334,7 @@ class LaporanController extends Controller
             'jenis' => $jenis,
             'jenisLabel' => $jenisOptions[$jenis],
             'items' => $detailData['items'],
+            'filterOptions' => $detailData['filterOptions'],
         ]);
     }
 

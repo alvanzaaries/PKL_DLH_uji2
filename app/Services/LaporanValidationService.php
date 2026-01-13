@@ -140,7 +140,7 @@ class LaporanValidationService
      */
     private function validateLaporanMutasiKayuBulat($sheet)
     {
-        $expectedHeaders = ['Jenis Kayu', 'Persediaan Awal', 'Penggunaan/Pengurangan', 'Persediaan Akhir', 'Keterangan'];
+        $expectedHeaders = ['Jenis Kayu', 'Persediaan Awal', 'Penambahan', 'Penggunaan/Pengurangan', 'Persediaan Akhir', 'Keterangan'];
         
         $headerRow = $sheet[6] ?? [];
         $headers = array_slice($headerRow, 1);
@@ -148,8 +148,8 @@ class LaporanValidationService
         $errors = [];
         $validRows = [];
         
-        if (count($headers) < 5) {
-            throw new \Exception('Format file tidak sesuai. Header harus memiliki 5 kolom: Jenis Kayu, Persediaan Awal, Penggunaan/Pengurangan, Persediaan Akhir, Keterangan');
+        if (count($headers) < 6) {
+            throw new \Exception('Format file tidak sesuai. Header harus memiliki 6 kolom: Jenis Kayu, Persediaan Awal, Penambahan, Penggunaan/Pengurangan, Persediaan Akhir, Keterangan');
         }
         
         foreach ($dataRows as $index => $fullRow) {
@@ -172,21 +172,27 @@ class LaporanValidationService
             }
             
             if (empty($row[2]) && $row[2] !== 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh kosong";
+                $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh kosong";
             } elseif (!is_numeric($row[2]) || $row[2] < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka positif";
+                $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka positif";
             }
             
             if (empty($row[3]) && $row[3] !== 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh kosong";
+                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh kosong";
             } elseif (!is_numeric($row[3]) || $row[3] < 0) {
+                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka positif";
+            }
+            
+            if (empty($row[4]) && $row[4] !== 0) {
+                $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh kosong";
+            } elseif (!is_numeric($row[4]) || $row[4] < 0) {
                 $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka positif";
             }
             
-            // Validasi logika: Persediaan Akhir = Persediaan Awal - Penggunaan
-            if (is_numeric($row[1]) && is_numeric($row[2]) && is_numeric($row[3])) {
-                $expectedAkhir = $row[1] - $row[2];
-                if (abs($expectedAkhir - $row[3]) > 0.01) {
+            // Validasi logika: Persediaan Akhir = Persediaan Awal + Penambahan - Penggunaan
+            if (is_numeric($row[1]) && is_numeric($row[2]) && is_numeric($row[3]) && is_numeric($row[4])) {
+                $expectedAkhir = $row[1] + $row[2] - $row[3];
+                if (abs($expectedAkhir - $row[4]) > 0.01) {
                     $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
                 }
             }
@@ -212,7 +218,7 @@ class LaporanValidationService
      */
     private function validateLaporanPenerimaanKayuOlahan($sheet)
     {
-        $expectedHeaders = ['Nomor Dokumen', 'Tanggal', 'Asal Kayu', 'Jenis Produk', 'Volume', 'Keterangan'];
+        $expectedHeaders = ['Nomor Dokumen', 'Tanggal', 'Asal Kayu', 'Jenis Produk', 'Jumlah Keping', 'Volume', 'Keterangan'];
         
         $headerRow = $sheet[6] ?? [];
         $headers = array_slice($headerRow, 1);
@@ -220,8 +226,8 @@ class LaporanValidationService
         $errors = [];
         $validRows = [];
         
-        if (count($headers) < 6) {
-            throw new \Exception('Format file tidak sesuai. Header harus memiliki 6 kolom: Nomor Dokumen, Tanggal, Asal Kayu, Jenis Produk, Volume, Keterangan');
+        if (count($headers) < 7) {
+            throw new \Exception('Format file tidak sesuai. Header harus memiliki 7 kolom: Nomor Dokumen, Tanggal, Asal Kayu, Jenis Produk, Jumlah Keping, Volume, Keterangan');
         }
         
         foreach ($dataRows as $index => $fullRow) {
@@ -252,8 +258,14 @@ class LaporanValidationService
             }
             
             if (empty($row[4]) && $row[4] !== 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
+                $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh kosong";
             } elseif (!is_numeric($row[4]) || $row[4] < 0) {
+                $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka positif";
+            }
+            
+            if (empty($row[5]) && $row[5] !== 0) {
+                $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
+            } elseif (!is_numeric($row[5]) || $row[5] < 0) {
                 $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka positif";
             }
             
@@ -278,7 +290,7 @@ class LaporanValidationService
      */
     private function validateLaporanMutasiKayuOlahan($sheet)
     {
-        $expectedHeaders = ['Jenis Produk', 'Persediaan Awal', 'Penggunaan/Pengurangan', 'Persediaan Akhir', 'Keterangan'];
+        $expectedHeaders = ['Jenis Produk', 'Persediaan Awal', 'Penambahan', 'Penggunaan/Pengurangan', 'Persediaan Akhir', 'Keterangan'];
         
         $headerRow = $sheet[6] ?? [];
         $headers = array_slice($headerRow, 1);
@@ -286,8 +298,8 @@ class LaporanValidationService
         $errors = [];
         $validRows = [];
         
-        if (count($headers) < 5) {
-            throw new \Exception('Format file tidak sesuai. Header harus memiliki 5 kolom');
+        if (count($headers) < 6) {
+            throw new \Exception('Format file tidak sesuai. Header harus memiliki 6 kolom: Jenis Produk, Persediaan Awal, Penambahan, Penggunaan/Pengurangan, Persediaan Akhir, Keterangan');
         }
         
         foreach ($dataRows as $index => $fullRow) {
@@ -310,22 +322,28 @@ class LaporanValidationService
             }
             
             if (empty($row[2]) && $row[2] !== 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh kosong";
+                $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh kosong";
             } elseif (!is_numeric($row[2]) || $row[2] < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus angka positif";
+                $rowErrors[] = "Baris {$rowNumber}: Penambahan harus angka positif";
             }
             
             if (empty($row[3]) && $row[3] !== 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh kosong";
+                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh kosong";
             } elseif (!is_numeric($row[3]) || $row[3] < 0) {
+                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus angka positif";
+            }
+            
+            if (empty($row[4]) && $row[4] !== 0) {
+                $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh kosong";
+            } elseif (!is_numeric($row[4]) || $row[4] < 0) {
                 $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus angka positif";
             }
             
-            // Validasi logika
-            if (is_numeric($row[1]) && is_numeric($row[2]) && is_numeric($row[3])) {
-                $expectedAkhir = $row[1] - $row[2];
-                if (abs($expectedAkhir - $row[3]) > 0.01) {
-                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai";
+            // Validasi logika: Persediaan Akhir = Persediaan Awal + Penambahan - Penggunaan
+            if (is_numeric($row[1]) && is_numeric($row[2]) && is_numeric($row[3]) && is_numeric($row[4])) {
+                $expectedAkhir = $row[1] + $row[2] - $row[3];
+                if (abs($expectedAkhir - $row[4]) > 0.01) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
                 }
             }
             
@@ -350,7 +368,7 @@ class LaporanValidationService
      */
     private function validateLaporanPenjualanKayuOlahan($sheet)
     {
-        $expectedHeaders = ['Nomor Dokumen', 'Tanggal', 'Pembeli', 'Jenis Produk', 'Volume', 'Keterangan'];
+        $expectedHeaders = ['Nomor Dokumen', 'Tanggal', 'Tujuan Kirim', 'Jenis Produk', 'Jumlah Keping', 'Volume', 'Keterangan'];
         
         $headerRow = $sheet[6] ?? [];
         $headers = array_slice($headerRow, 1);
@@ -358,8 +376,8 @@ class LaporanValidationService
         $errors = [];
         $validRows = [];
         
-        if (count($headers) < 6) {
-            throw new \Exception('Format file tidak sesuai. Header harus memiliki 6 kolom');
+        if (count($headers) < 7) {
+            throw new \Exception('Format file tidak sesuai. Header harus memiliki 7 kolom: Nomor Dokumen, Tanggal, Tujuan Kirim, Jenis Produk, Jumlah Keping, Volume, Keterangan');
         }
         
         foreach ($dataRows as $index => $fullRow) {
@@ -382,7 +400,7 @@ class LaporanValidationService
             }
             
             if (empty($row[2])) {
-                $rowErrors[] = "Baris {$rowNumber}: Pembeli tidak boleh kosong";
+                $rowErrors[] = "Baris {$rowNumber}: Tujuan Kirim tidak boleh kosong";
             }
             
             if (empty($row[3])) {
@@ -390,8 +408,14 @@ class LaporanValidationService
             }
             
             if (empty($row[4]) && $row[4] !== 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
+                $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh kosong";
             } elseif (!is_numeric($row[4]) || $row[4] < 0) {
+                $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus angka positif";
+            }
+            
+            if (empty($row[5]) && $row[5] !== 0) {
+                $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
+            } elseif (!is_numeric($row[5]) || $row[5] < 0) {
                 $rowErrors[] = "Baris {$rowNumber}: Volume harus angka positif";
             }
             

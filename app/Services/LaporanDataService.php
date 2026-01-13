@@ -26,7 +26,7 @@ class LaporanDataService
                     laporan_penerimaan_kayu_bulat::create([
                         'laporan_id' => $laporan->id,
                         'nomor_dokumen' => $row[0] ?? '',
-                        'tanggal' => $row[1] ?? now(),
+                        'tanggal' => $this->parseDate($row[1]) ?? now(),
                         'asal_kayu' => $row[2] ?? '',
                         'jenis_kayu' => $row[3] ?? '',
                         'jumlah_batang' => $row[4] ?? 0,
@@ -57,7 +57,7 @@ class LaporanDataService
                     laporan_penerimaan_kayu_olahan::create([
                         'laporan_id' => $laporan->id,
                         'nomor_dokumen' => $row[0] ?? '',
-                        'tanggal' => $row[1] ?? now(),
+                        'tanggal' => $this->parseDate($row[1]) ?? now(),
                         'asal_kayu' => $row[2] ?? '',
                         'jenis_olahan' => $row[3] ?? '',
                         'jumlah_keping' => $row[4] ?? 0,
@@ -88,7 +88,7 @@ class LaporanDataService
                     laporan_penjualan_kayu_olahan::create([
                         'laporan_id' => $laporan->id,
                         'nomor_dokumen' => $row[0] ?? '',
-                        'tanggal' => $row[1] ?? now(),
+                        'tanggal' => $this->parseDate($row[1]) ?? now(),
                         'tujuan_kirim' => $row[2] ?? '',
                         'jenis_olahan' => $row[3] ?? '',
                         'jumlah_keping' => $row[4] ?? 0,
@@ -400,7 +400,16 @@ class LaporanDataService
                     $query->where('jenis_olahan', $filters['jenis_olahan']);
                 }
                 if (isset($filters['ekspor_impor'])) {
-                    $query->where('keterangan', 'LIKE', '%' . $filters['ekspor_impor'] . '%');
+                    // Case-insensitive matching: use LOWER(keterangan)
+                    if ($filters['ekspor_impor'] === 'ekspor') {
+                        $query->whereRaw('LOWER(keterangan) LIKE ?', ['%ekspor%']);
+                    } elseif ($filters['ekspor_impor'] === 'lokal') {
+                        // lokal => keterangan does NOT contain 'ekspor' (case-insensitive) or is null
+                        $query->whereRaw("(keterangan IS NULL OR LOWER(keterangan) NOT LIKE ?)", ['%ekspor%']);
+                    } else {
+                        $val = strtolower($filters['ekspor_impor']);
+                        $query->whereRaw('LOWER(keterangan) LIKE ?', ['%' . $val . '%']);
+                    }
                 }
                 
                 $items = $query->orderBy('tanggal')->get();
@@ -416,5 +425,34 @@ class LaporanDataService
             'items' => $items,
             'filterOptions' => $filterOptions
         ];
+    }
+
+    /**
+     * Parse tanggal dari berbagai format Excel ke format Y-m-d
+     */
+    private function parseDate($value): ?string
+    {
+        if (empty($value)) return null;
+        
+        // Jika sudah dalam format tanggal Excel (numeric)
+        if (is_numeric($value)) {
+            try {
+                $date = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value);
+                return $date->format('Y-m-d');
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+        
+        // Coba parse string tanggal
+        $formats = ['Y-m-d', 'd/m/Y', 'd-m-Y', 'Y/m/d'];
+        foreach ($formats as $format) {
+            $date = \DateTime::createFromFormat($format, $value);
+            if ($date !== false) {
+                return $date->format('Y-m-d');
+            }
+        }
+        
+        return null;
     }
 }

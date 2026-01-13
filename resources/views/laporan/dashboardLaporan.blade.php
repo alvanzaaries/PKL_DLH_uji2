@@ -372,7 +372,7 @@
             <div class="filter-group">
                 <label class="filter-label" for="kabupaten">Wilayah Administrasi</label>
                 <select name="kabupaten" id="kabupaten" class="filter-input">
-                    <option value="">-- Seluruh Wilayah --</option>
+                    <option value=""> Seluruh Wilayah</option>
                     @if(isset($kabupatens))
                         @foreach($kabupatens as $kab)
                             <option value="{{ $kab }}" {{ request('kabupaten') == $kab ? 'selected' : '' }}>

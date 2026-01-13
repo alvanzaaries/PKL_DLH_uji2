@@ -43,19 +43,6 @@
 
     <div class="max-w-7xl mx-auto">
 
-        @if (session('success'))
-            <div class="bg-[#F1FDF4] border-l-4 border-[#1A4030] p-4 mb-6 shadow-sm flex items-start">
-                <i class="fas fa-check-circle text-[#1A4030] mt-1 mr-3"></i>
-                <div>
-                    <h3 class="font-bold text-sm text-[#1A4030]">Berhasil</h3>
-                    <p class="text-sm text-green-800">{{ session('success') }}</p>
-                </div>
-                <button onclick="this.parentElement.remove()" class="ml-auto text-green-700 hover:text-green-900">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        @endif
-
         @if (session('error'))
             <div class="bg-red-50 border-l-4 border-red-700 p-4 mb-6 shadow-sm flex items-start">
                 <i class="fas fa-exclamation-circle text-red-700 mt-1 mr-3"></i>
@@ -120,8 +107,12 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Tahun</label>
                             <select name="tahun" id="tahun" required class="w-full form-input px-3 py-2 border text-sm">
-                                @for ($y = date('Y'); $y >= 2020; $y--)
-                                    <option value="{{ $y }}" {{ (old('tahun') ?? date('Y')) == $y ? 'selected' : '' }}>{{ $y }}</option>
+                                @php
+                                    $currentYear = date('Y');
+                                    $startYear = 2020;
+                                @endphp
+                                @for ($y = $currentYear; $y >= $startYear; $y--)
+                                    <option value="{{ $y }}" {{ (old('tahun') ?? $currentYear) == $y ? 'selected' : '' }}>{{ $y }}</option>
                                 @endfor
                             </select>
                         </div>

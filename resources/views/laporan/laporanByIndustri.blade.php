@@ -63,19 +63,6 @@
 
     <div class="max-w-7xl mx-auto">
 
-        @if (session('success'))
-            <div class="bg-[#F1FDF4] border-l-4 border-[#1B5E20] p-4 mb-6 shadow-sm flex items-start">
-                <i class="fas fa-check-circle text-[#1B5E20] mt-1 mr-3"></i>
-                <div>
-                    <h3 class="font-bold text-sm text-[#1B5E20]">Berhasil</h3>
-                    <p class="text-sm text-green-800">{{ session('success') }}</p>
-                </div>
-                <button onclick="this.parentElement.remove()" class="ml-auto text-green-700 hover:text-green-900">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        @endif
-
         @if (session('error'))
             <div class="bg-red-50 border-l-4 border-red-700 p-4 mb-6 shadow-sm flex items-start">
                 <i class="fas fa-exclamation-circle text-red-700 mt-1 mr-3"></i>
@@ -266,6 +253,7 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">No</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Nama Perusahaan</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Jenis Dokumen</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Periode</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tgl Upload</th>
@@ -277,6 +265,9 @@
                                 <tr class="hover:bg-gray-50 transition-colors">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ ($laporans->currentPage() - 1) * $laporans->perPage() + $loop->iteration }}
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+                                        {{ $laporan->industri->nama ?? '-' }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900 font-medium">
                                         {{ $laporan->jenis_laporan }}
