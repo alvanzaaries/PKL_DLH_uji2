@@ -97,7 +97,7 @@ class IndustriSekunderController extends Controller
             return 'Lainnya';
         })->map->count();
 
-        return view('industri-sekunder.index', compact(
+        return view('Industri.industri-sekunder.index', compact(
             'industriSekunder', 
             'kabupatenList',
             'yearStats',
@@ -111,7 +111,7 @@ class IndustriSekunderController extends Controller
      */
     public function create()
     {
-        return view('industri-sekunder.create');
+        return view('Industri.industri-sekunder.create');
     }
 
     /**
@@ -163,7 +163,7 @@ class IndustriSekunderController extends Controller
     {
         $industriSekunder = IndustriSekunder::with('industri')->findOrFail($id);
         
-        return view('industri-sekunder.edit', compact('industriSekunder'));
+        return view('Industri.industri-sekunder.edit', compact('industriSekunder'));
     }
 
     /**

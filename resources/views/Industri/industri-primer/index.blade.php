@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data TPT-KB</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Data Industri Primer (PBPHH)</title>
+    <link rel="icon" href="{{ asset('logo jateng.webp') }}" type="image/webp">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
@@ -176,6 +176,9 @@
             color: var(--accent);
             font-weight: 500;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
             transition: opacity 0.2s;
         }
 
@@ -205,6 +208,7 @@
             font-size: 14px;
         }
 
+        /* Header Section */
         .page-header {
             background: var(--white);
             padding: 30px;
@@ -253,6 +257,7 @@
             box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
         }
 
+        /* Filter Section */
         .filter-card {
             background: var(--white);
             padding: 25px;
@@ -266,6 +271,11 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
         }
 
         .filter-group label {
@@ -282,7 +292,8 @@
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 14px;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            transition: border-color 0.2s;
         }
 
         .filter-input:focus {
@@ -320,12 +331,14 @@
             cursor: pointer;
             font-size: 14px;
             text-decoration: none;
+            display: inline-block;
         }
 
         .btn-reset:hover {
             background: #e2e8f0;
         }
 
+        /* Table */
         .table-card {
             background: var(--white);
             border-radius: 12px;
@@ -354,6 +367,8 @@
 
         .table-container {
             overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
         }
 
         table {
@@ -396,24 +411,6 @@
             transform: scale(1.001);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: all 0.2s ease;
-        }
-
-        .badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .badge-success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .badge-danger {
-            background: #f8d7da;
-            color: #721c24;
         }
 
         .action-buttons {
@@ -460,6 +457,53 @@
             background: #dc2626;
         }
 
+        .btn-document {
+            background: #dc2626;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-document:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-document i {
+            font-size: 14px;
+        }
+
+        /* Select2 Custom Styling */
+        .select2-container--default .select2-selection--single {
+            height: 42px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 12px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 28px;
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--accent);
+        }
+
         /* Statistics Section */
         .statistics-section {
             display: grid;
@@ -489,11 +533,35 @@
             margin: 0 auto;
         }
 
+        /* Pagination */
         .pagination {
             margin-top: 30px;
             display: flex;
             justify-content: center;
             gap: 8px;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .pagination a:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .pagination .active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
         }
 
         .empty-state {
@@ -502,23 +570,12 @@
             color: #999;
         }
 
-        .alert {
-            padding: 14px 18px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
         }
 
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-
-        /* Modal */
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -592,6 +649,7 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
+            margin-bottom: 25px;
         }
 
         .detail-item {
@@ -618,6 +676,28 @@
             grid-column: 1 / -1;
         }
 
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
         @media (max-width: 1024px) {
             .filter-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -641,11 +721,17 @@
                 grid-template-columns: 1fr;
             }
 
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
             .filter-actions {
                 flex-direction: column;
             }
 
-            .btn-filter, .btn-reset {
+            .btn-search, .btn-reset {
                 width: 100%;
                 justify-content: center;
             }
@@ -671,7 +757,7 @@
 <body>
     <!-- Sidebar Navigation -->
     <div class="sidebar">
-        <div class="sidebar-header">
+         <div class="sidebar-header">
             <div class="sidebar-logo">
                 <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah">
             </div>
@@ -681,7 +767,7 @@
             </div>
         </div>
         <div class="sidebar-menu">
-            <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ url('/') }}" class="menu-item {{ request()->is('/') ? 'active' : '' }}">
                 <i class="fas fa-th-large menu-icon"></i>
                 <span class="menu-text">Beranda</span>
             </a>
@@ -736,7 +822,6 @@
         <nav>
             <div class="nav-content">
                 <div class="logo-area">
-                    <span style="font-size: 24px;"></span>
                     <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px;">
@@ -756,8 +841,15 @@
             <!-- Alert Messages -->
             @if(session('success'))
             <div class="alert alert-success" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
-                <span style="font-size: 20px;">✓</span>
+                <span style="font-size: 20px;">?</span>
                 <span>{{ session('success') }}</span>
+            </div>
+            @endif
+
+            @if(session('error'))
+            <div class="alert alert-error" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
+                <span style="font-size: 20px;">?</span>
+                <span>{{ session('error') }}</span>
             </div>
             @endif
         </nav>
@@ -781,24 +873,27 @@
         </script>
 
         <div class="container">
+
+        <!-- Page Header -->
         <div class="page-header">
             <div>
-                <h1 class="page-title">Data TPT-KB</h1>
-                <p class="page-subtitle">Daftar Tempat Penampungan Tebangan Kayu Bulat</p>
+                <h1 class="page-title">Data Industri Sekunder (PBUI)</h1>
+                <p class="page-subtitle">Daftar perusahaan industri sekunder pengolahan hasil hutan</p>
             </div>
             @auth
-            <a href="{{ route('tptkb.create') }}" class="btn btn-primary">
+            <a href="{{ route('industri-primer.create') }}" class="btn btn-primary">
                 <span>+</span> Tambah Data Baru
             </a>
             @endauth
         </div>
 
+        <!-- Filter Section -->
         <div class="filter-card">
-            <form method="GET" action="{{ route('tptkb.index') }}">
+            <form method="GET" action="{{ route('industri-primer.index') }}">
                 <div class="filter-grid">
                     <div class="filter-group">
                         <label>Nama Perusahaan</label>
-                        <input type="text" name="nama" class="filter-input" placeholder="Cari nama..." value="{{ request('nama') }}">
+                        <input type="text" name="nama" class="filter-input" placeholder="Cari nama perusahaan..." value="{{ request('nama') }}">
                     </div>
                     <div class="filter-group">
                         <label>Kabupaten/Kota</label>
@@ -835,7 +930,7 @@
                 </div>
                 <div class="filter-actions">
                     <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
-                    <a href="{{ route('tptkb.index') }}" class="btn-reset">↻ Reset Filter</a>
+                    <a href="{{ route('industri-primer.index') }}" class="btn-reset">↻ Reset Filter</a>
                 </div>
             </form>
         </div>
@@ -862,16 +957,17 @@
             </div>
         </div>
 
+        <!-- Table Card -->
         <div class="table-card">
             <div class="table-header">
                 <h2 class="table-title">Daftar Perusahaan</h2>
                 <div class="result-count">
-                    Total: <strong>{{ $tptkb->total() }}</strong> perusahaan
+                    Total: <strong>{{ $industriPrimer->total() }}</strong> perusahaan
                 </div>
             </div>
 
             <div class="table-container">
-                @if($tptkb->count() > 0)
+                @if($industriPrimer->count() > 0)
                 <table>
                     <thead>
                         <tr>
@@ -879,36 +975,28 @@
                             <th>Nama Perusahaan</th>
                             <th>Kabupaten/Kota</th>
                             <th>Penanggung Jawab</th>
-                            <th>Sumber Bahan Baku</th>
+                            <th>Jenis Produksi</th>
                             <th>Kapasitas Izin</th>
-                            <th>Masa Berlaku</th>
-                            <th>Status</th>
+                            <th>Nomor Izin</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($tptkb as $index => $item)
+                        @foreach($industriPrimer as $index => $item)
                         <tr>
-                            <td>{{ $tptkb->firstItem() + $index }}</td>
+                            <td>{{ $industriPrimer->firstItem() + $index }}</td>
                             <td><strong>{{ $item->industri->nama }}</strong></td>
                             <td>{{ $item->industri->kabupaten }}</td>
                             <td>{{ $item->industri->penanggungjawab }}</td>
-                            <td>{{ $item->sumber_bahan_baku }}</td>
+                            <td>{{ $item->jenis_produksi }}</td>
                             <td>{{ $item->kapasitas_izin }}</td>
-                            <td>{{ $item->masa_berlaku ? $item->masa_berlaku->format('d/m/Y') : '-' }}</td>
-                            <td>
-                                @if($item->isMasaBerlakuAktif())
-                                    <span class="badge badge-success">✓ Aktif</span>
-                                @else
-                                    <span class="badge badge-danger">✗ Kadaluarsa</span>
-                                @endif
-                            </td>
+                            <td>{{ $item->industri->nomor_izin }}</td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn-action btn-view" onclick='showDetail(@json($item), {{ $item->isMasaBerlakuAktif() ? 'true' : 'false' }})'>Lihat</button>
+                                    <button class="btn-action btn-view" onclick='showDetail(@json($item))'>Lihat</button>
                                     @auth
-                                    <a href="{{ route('tptkb.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
-                                    <form action="{{ route('tptkb.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                    <a href="{{ route('industri-primer.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
+                                    <form action="{{ route('industri-primer.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('{{ $item->industri->nama }}')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-action btn-delete">Hapus</button>
@@ -922,16 +1010,16 @@
                 </table>
                 @else
                 <div class="empty-state">
-                    <div style="font-size: 48px;">📂</div>
-                    <div style="font-size: 18px; margin: 10px 0;">Tidak ada data ditemukan</div>
+                    <div class="empty-state-icon">??</div>
+                    <div class="empty-state-text">Tidak ada data ditemukan</div>
                     <p style="font-size: 14px;">Silakan ubah filter atau tambah data baru</p>
                 </div>
                 @endif
             </div>
 
-            @if($tptkb->hasPages())
+            @if($industriPrimer->hasPages())
             <div class="pagination">
-                {{ $tptkb->appends(request()->query())->links() }}
+                {{ $industriPrimer->appends(request()->query())->links() }}
             </div>
             @endif
         </div>
@@ -939,11 +1027,11 @@
     </div>
     <!-- End Main Wrapper -->
 
-    <!-- Modal Detail -->
+    <!-- Modal Detail Perusahaan -->
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">📋 Detail TPT-KB</h2>
+                <h2 class="modal-title">?? Detail Perusahaan</h2>
                 <span class="close-btn" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body">
@@ -977,20 +1065,16 @@
                         <div class="detail-value" id="modal-pemberi-izin">-</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-label">Sumber Bahan Baku</div>
-                        <div class="detail-value" id="modal-sumber-bahan-baku">-</div>
+                        <div class="detail-label">Jenis Produksi</div>
+                        <div class="detail-value" id="modal-jenis-produksi">-</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">Kapasitas Izin</div>
                         <div class="detail-value" id="modal-kapasitas">-</div>
                     </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Masa Berlaku</div>
-                        <div class="detail-value" id="modal-masa-berlaku">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Status Izin</div>
-                        <div class="detail-value" id="modal-status">-</div>
+                    <div class="detail-item detail-item-full">
+                        <div class="detail-label">Dokumen Izin</div>
+                        <div class="detail-value" id="modal-dokumen">-</div>
                     </div>
                 </div>
             </div>
@@ -998,7 +1082,8 @@
     </div>
 
     <script>
-        function showDetail(item, isAktif) {
+        function showDetail(item) {
+            // Populate modal dengan data
             document.getElementById('modal-nama').textContent = item.industri.nama;
             document.getElementById('modal-nomor-izin').textContent = item.industri.nomor_izin;
             document.getElementById('modal-alamat').textContent = item.industri.alamat;
@@ -1006,25 +1091,26 @@
             document.getElementById('modal-penanggungjawab').textContent = item.industri.penanggungjawab;
             document.getElementById('modal-kontak').textContent = item.industri.kontak;
             document.getElementById('modal-pemberi-izin').textContent = item.pemberi_izin;
-            document.getElementById('modal-sumber-bahan-baku').textContent = item.sumber_bahan_baku;
+            document.getElementById('modal-jenis-produksi').textContent = item.jenis_produksi;
             document.getElementById('modal-kapasitas').textContent = item.kapasitas_izin;
-            
-            // Format masa berlaku
-            if(item.masa_berlaku) {
-                const date = new Date(item.masa_berlaku);
-                document.getElementById('modal-masa-berlaku').textContent = date.toLocaleDateString('id-ID');
+
+            // Handle dokumen izin
+            const dokumenElement = document.getElementById('modal-dokumen');
+            if (item.dokumen_izin) {
+                dokumenElement.innerHTML = `
+                    <a href="/storage/${item.dokumen_izin}" 
+                       target="_blank" 
+                       style="color: #15803d; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500;">
+                        <i class="fas fa-file-pdf" style="color: #dc2626;"></i>
+                        <span>Download Dokumen Izin</span>
+                        <i class="fas fa-external-link-alt" style="font-size: 12px;"></i>
+                    </a>
+                `;
             } else {
-                document.getElementById('modal-masa-berlaku').textContent = '-';
-            }
-            
-            // Status badge - now uses the passed isAktif parameter
-            const statusEl = document.getElementById('modal-status');
-            if(isAktif) {
-                statusEl.innerHTML = '<span class="badge badge-success">✓ Aktif</span>';
-            } else {
-                statusEl.innerHTML = '<span class="badge badge-danger">✗ Kadaluarsa</span>';
+                dokumenElement.innerHTML = '<span style="color: #94a3b8;">Tidak ada dokumen</span>';
             }
 
+            // Tampilkan modal
             document.getElementById('detailModal').style.display = 'block';
         }
 
@@ -1032,6 +1118,7 @@
             document.getElementById('detailModal').style.display = 'none';
         }
 
+        // Close modal ketika click di luar modal
         window.onclick = function(event) {
             const modal = document.getElementById('detailModal');
             if (event.target == modal) {
@@ -1039,21 +1126,17 @@
             }
         }
 
+        // Close modal dengan ESC key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeModal();
             }
         });
 
-        // Auto-hide success alerts
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert-success');
-            alerts.forEach(alert => {
-                alert.style.transition = 'opacity 0.5s';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500);
-            });
-        }, 5000);
+        // Konfirmasi delete
+        function confirmDelete(namaPerusahaan) {
+            return confirm(`Apakah Anda yakin ingin menghapus perusahaan "${namaPerusahaan}"?\n\nData yang dihapus tidak dapat dikembalikan!`);
+        }
     </script>
 
     <!-- Select2 JS -->
@@ -1171,3 +1254,4 @@
     </script>
 </body>
 </html>
+

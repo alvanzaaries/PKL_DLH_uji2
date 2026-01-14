@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Industri Sekunder (IPHHK)</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <title>Data TPT-KB</title>
+    <link rel="icon" href="{{ asset('logo jateng.webp') }}" type="image/webp">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
@@ -47,30 +47,49 @@
         }
 
         .sidebar-header {
-            padding: 20px 20px 30px;
-            text-align: center;
+            padding: 15px 12px 20px;
+            background: transparent;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .sidebar-logo {
-            width: 50px;
-            height: 50px;
-            background: white;
-            border-radius: 12px;
-            margin: 0 auto 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: #5B4A9B;
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
         }
 
-        .sidebar-title {
-            color: white;
-            font-size: 16px;
+        .sidebar-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .sidebar-text {
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .sidebar-text-top {
+            font-size: 9px;
             font-weight: 600;
+            color: #fbbf24;
+            text-transform: uppercase;
+            margin: 0 0 2px 0;
+            letter-spacing: 0.3px;
+        }
+
+        .sidebar-text-bottom {
+            font-size: 10px;
+            font-weight: 700;
+            color: #86efac;
+            text-transform: uppercase;
             margin: 0;
+            letter-spacing: 0.2px;
+            line-height: 1.2;
         }
 
         .sidebar-menu {
@@ -157,9 +176,6 @@
             color: var(--accent);
             font-weight: 500;
             font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
             transition: opacity 0.2s;
         }
 
@@ -189,7 +205,6 @@
             font-size: 14px;
         }
 
-        /* Header Section */
         .page-header {
             background: var(--white);
             padding: 30px;
@@ -238,7 +253,6 @@
             box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
         }
 
-        /* Filter Section */
         .filter-card {
             background: var(--white);
             padding: 25px;
@@ -252,11 +266,6 @@
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             margin-bottom: 20px;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
         }
 
         .filter-group label {
@@ -273,8 +282,7 @@
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 14px;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            transition: border-color 0.2s;
+            font-family: 'Inter', sans-serif;
         }
 
         .filter-input:focus {
@@ -312,14 +320,12 @@
             cursor: pointer;
             font-size: 14px;
             text-decoration: none;
-            display: inline-block;
         }
 
         .btn-reset:hover {
             background: #e2e8f0;
         }
 
-        /* Table */
         .table-card {
             background: var(--white);
             border-radius: 12px;
@@ -348,8 +354,6 @@
 
         .table-container {
             overflow-x: auto;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
         }
 
         table {
@@ -392,6 +396,24 @@
             transform: scale(1.001);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             transition: all 0.2s ease;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-danger {
+            background: #f8d7da;
+            color: #721c24;
         }
 
         .action-buttons {
@@ -438,35 +460,6 @@
             background: #dc2626;
         }
 
-        /* Select2 Custom Styling */
-        .select2-container--default .select2-selection--single {
-            height: 42px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 6px 12px;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 28px;
-            color: var(--text-main);
-            font-size: 14px;
-        }
-
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 40px;
-        }
-
-        .select2-container--default .select2-search--dropdown .select2-search__field {
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 8px;
-            font-size: 14px;
-        }
-
-        .select2-container--default .select2-results__option--highlighted[aria-selected] {
-            background-color: var(--accent);
-        }
-
         /* Statistics Section */
         .statistics-section {
             display: grid;
@@ -496,35 +489,11 @@
             margin: 0 auto;
         }
 
-        /* Pagination */
         .pagination {
             margin-top: 30px;
             display: flex;
             justify-content: center;
             gap: 8px;
-        }
-
-        .pagination a,
-        .pagination span {
-            padding: 8px 14px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            text-decoration: none;
-            color: var(--text-main);
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .pagination a:hover {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-
-        .pagination .active {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
         }
 
         .empty-state {
@@ -533,12 +502,23 @@
             color: #999;
         }
 
-        .empty-state h3 {
-            font-size: 24px;
-            margin-bottom: 10px;
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* Modal Styles */
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -612,7 +592,6 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-            margin-bottom: 25px;
         }
 
         .detail-item {
@@ -639,28 +618,6 @@
             grid-column: 1 / -1;
         }
 
-        .alert {
-            padding: 14px 18px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-
         @media (max-width: 1024px) {
             .filter-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -684,17 +641,11 @@
                 grid-template-columns: 1fr;
             }
 
-            .header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
-
             .filter-actions {
                 flex-direction: column;
             }
 
-            .btn-search, .btn-reset {
+            .btn-filter, .btn-reset {
                 width: 100%;
                 justify-content: center;
             }
@@ -721,11 +672,16 @@
     <!-- Sidebar Navigation -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-logo">AL</div>
-            <h2 class="sidebar-title">DLHK<span style="font-weight: 400;">al</span></h2>
+            <div class="sidebar-logo">
+                <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah">
+            </div>
+            <div class="sidebar-text">
+                <p class="sidebar-text-top">Pemerintah Provinsi Jawa Tengah</p>
+                <p class="sidebar-text-bottom">Dinas Lingkungan Hidup<br>dan Kehutanan</p>
+            </div>
         </div>
         <div class="sidebar-menu">
-            <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ url('/') }}" class="menu-item {{ request()->is('/') ? 'active' : '' }}">
                 <i class="fas fa-th-large menu-icon"></i>
                 <span class="menu-text">Beranda</span>
             </a>
@@ -804,13 +760,6 @@
                 <span>{{ session('success') }}</span>
             </div>
             @endif
-
-            @if(session('error'))
-            <div class="alert alert-error" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
-                <span style="font-size: 20px;">⚠</span>
-                <span>{{ session('error') }}</span>
-            </div>
-            @endif
         </nav>
 
         <script>
@@ -832,27 +781,24 @@
         </script>
 
         <div class="container">
-
-        <!-- Page Header -->
         <div class="page-header">
             <div>
-                <h1 class="page-title">Data Industri Sekunder (PBUI)</h1>
-                <p class="page-subtitle">Daftar perusahaan industri sekunder pengolahan hasil hutan</p>
+                <h1 class="page-title">Data TPT-KB</h1>
+                <p class="page-subtitle">Daftar Tempat Penampungan Tebangan Kayu Bulat</p>
             </div>
             @auth
-            <a href="{{ route('industri-sekunder.create') }}" class="btn btn-primary">
+            <a href="{{ route('tptkb.create') }}" class="btn btn-primary">
                 <span>+</span> Tambah Data Baru
             </a>
             @endauth
         </div>
 
-        <!-- Filter Section -->
         <div class="filter-card">
-            <form method="GET" action="{{ route('industri-sekunder.index') }}">
+            <form method="GET" action="{{ route('tptkb.index') }}">
                 <div class="filter-grid">
                     <div class="filter-group">
                         <label>Nama Perusahaan</label>
-                        <input type="text" name="nama" class="filter-input" placeholder="Cari nama perusahaan..." value="{{ request('nama') }}">
+                        <input type="text" name="nama" class="filter-input" placeholder="Cari nama..." value="{{ request('nama') }}">
                     </div>
                     <div class="filter-group">
                         <label>Kabupaten/Kota</label>
@@ -889,7 +835,7 @@
                 </div>
                 <div class="filter-actions">
                     <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
-                    <a href="{{ route('industri-sekunder.index') }}" class="btn-reset">↻ Reset Filter</a>
+                    <a href="{{ route('tptkb.index') }}" class="btn-reset">↻ Reset Filter</a>
                 </div>
             </form>
         </div>
@@ -916,17 +862,16 @@
             </div>
         </div>
 
-        <!-- Table Card -->
         <div class="table-card">
             <div class="table-header">
                 <h2 class="table-title">Daftar Perusahaan</h2>
                 <div class="result-count">
-                    Total: <strong>{{ $industriSekunder->total() }}</strong> perusahaan
+                    Total: <strong>{{ $tptkb->total() }}</strong> perusahaan
                 </div>
             </div>
 
             <div class="table-container">
-                @if($industriSekunder->count() > 0)
+                @if($tptkb->count() > 0)
                 <table>
                     <thead>
                         <tr>
@@ -934,28 +879,36 @@
                             <th>Nama Perusahaan</th>
                             <th>Kabupaten/Kota</th>
                             <th>Penanggung Jawab</th>
-                            <th>Jenis Produksi</th>
+                            <th>Sumber Bahan Baku</th>
                             <th>Kapasitas Izin</th>
-                            <th>Nomor Izin</th>
+                            <th>Masa Berlaku</th>
+                            <th>Status</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($industriSekunder as $index => $item)
+                        @foreach($tptkb as $index => $item)
                         <tr>
-                            <td>{{ $industriSekunder->firstItem() + $index }}</td>
+                            <td>{{ $tptkb->firstItem() + $index }}</td>
                             <td><strong>{{ $item->industri->nama }}</strong></td>
                             <td>{{ $item->industri->kabupaten }}</td>
                             <td>{{ $item->industri->penanggungjawab }}</td>
-                            <td>{{ $item->jenis_produksi }}</td>
+                            <td>{{ $item->sumber_bahan_baku }}</td>
                             <td>{{ $item->kapasitas_izin }}</td>
-                            <td>{{ $item->industri->nomor_izin }}</td>
+                            <td>{{ $item->masa_berlaku ? $item->masa_berlaku->format('d/m/Y') : '-' }}</td>
+                            <td>
+                                @if($item->isMasaBerlakuAktif())
+                                    <span class="badge badge-success">✓ Aktif</span>
+                                @else
+                                    <span class="badge badge-danger">✗ Kadaluarsa</span>
+                                @endif
+                            </td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn-action btn-view" onclick='showDetail(@json($item))'>Lihat</button>
+                                    <button class="btn-action btn-view" onclick='showDetail(@json($item), {{ $item->isMasaBerlakuAktif() ? 'true' : 'false' }})'>Lihat</button>
                                     @auth
-                                    <a href="{{ route('industri-sekunder.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
-                                    <form action="{{ route('industri-sekunder.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('{{ $item->industri->nama }}')">
+                                    <a href="{{ route('tptkb.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
+                                    <form action="{{ route('tptkb.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-action btn-delete">Hapus</button>
@@ -969,16 +922,16 @@
                 </table>
                 @else
                 <div class="empty-state">
-                    <div class="empty-state-icon">📂</div>
-                    <div class="empty-state-text">Tidak ada data ditemukan</div>
+                    <div style="font-size: 48px;">📂</div>
+                    <div style="font-size: 18px; margin: 10px 0;">Tidak ada data ditemukan</div>
                     <p style="font-size: 14px;">Silakan ubah filter atau tambah data baru</p>
                 </div>
                 @endif
             </div>
 
-            @if($industriSekunder->hasPages())
+            @if($tptkb->hasPages())
             <div class="pagination">
-                {{ $industriSekunder->appends(request()->query())->links() }}
+                {{ $tptkb->appends(request()->query())->links() }}
             </div>
             @endif
         </div>
@@ -986,11 +939,11 @@
     </div>
     <!-- End Main Wrapper -->
 
-    <!-- Modal Detail Perusahaan -->
+    <!-- Modal Detail -->
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">📋 Detail Perusahaan</h2>
+                <h2 class="modal-title">📋 Detail TPT-KB</h2>
                 <span class="close-btn" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body">
@@ -1024,12 +977,20 @@
                         <div class="detail-value" id="modal-pemberi-izin">-</div>
                     </div>
                     <div class="detail-item">
-                        <div class="detail-label">Jenis Produksi</div>
-                        <div class="detail-value" id="modal-jenis-produksi">-</div>
+                        <div class="detail-label">Sumber Bahan Baku</div>
+                        <div class="detail-value" id="modal-sumber-bahan-baku">-</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">Kapasitas Izin</div>
                         <div class="detail-value" id="modal-kapasitas">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Masa Berlaku</div>
+                        <div class="detail-value" id="modal-masa-berlaku">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Status Izin</div>
+                        <div class="detail-value" id="modal-status">-</div>
                     </div>
                 </div>
             </div>
@@ -1037,8 +998,7 @@
     </div>
 
     <script>
-        function showDetail(item) {
-            // Populate modal dengan data
+        function showDetail(item, isAktif) {
             document.getElementById('modal-nama').textContent = item.industri.nama;
             document.getElementById('modal-nomor-izin').textContent = item.industri.nomor_izin;
             document.getElementById('modal-alamat').textContent = item.industri.alamat;
@@ -1046,10 +1006,25 @@
             document.getElementById('modal-penanggungjawab').textContent = item.industri.penanggungjawab;
             document.getElementById('modal-kontak').textContent = item.industri.kontak;
             document.getElementById('modal-pemberi-izin').textContent = item.pemberi_izin;
-            document.getElementById('modal-jenis-produksi').textContent = item.jenis_produksi;
+            document.getElementById('modal-sumber-bahan-baku').textContent = item.sumber_bahan_baku;
             document.getElementById('modal-kapasitas').textContent = item.kapasitas_izin;
+            
+            // Format masa berlaku
+            if(item.masa_berlaku) {
+                const date = new Date(item.masa_berlaku);
+                document.getElementById('modal-masa-berlaku').textContent = date.toLocaleDateString('id-ID');
+            } else {
+                document.getElementById('modal-masa-berlaku').textContent = '-';
+            }
+            
+            // Status badge - now uses the passed isAktif parameter
+            const statusEl = document.getElementById('modal-status');
+            if(isAktif) {
+                statusEl.innerHTML = '<span class="badge badge-success">✓ Aktif</span>';
+            } else {
+                statusEl.innerHTML = '<span class="badge badge-danger">✗ Kadaluarsa</span>';
+            }
 
-            // Tampilkan modal
             document.getElementById('detailModal').style.display = 'block';
         }
 
@@ -1057,7 +1032,6 @@
             document.getElementById('detailModal').style.display = 'none';
         }
 
-        // Close modal ketika click di luar modal
         window.onclick = function(event) {
             const modal = document.getElementById('detailModal');
             if (event.target == modal) {
@@ -1065,17 +1039,21 @@
             }
         }
 
-        // Close modal dengan ESC key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeModal();
             }
         });
 
-        // Konfirmasi delete
-        function confirmDelete(namaPerusahaan) {
-            return confirm(`Apakah Anda yakin ingin menghapus perusahaan "${namaPerusahaan}"?\n\nData yang dihapus tidak dapat dikembalikan!`);
-        }
+        // Auto-hide success alerts
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-success');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
     </script>
 
     <!-- Select2 JS -->
@@ -1089,53 +1067,15 @@
                 width: '100%'
             });
 
-            // Generate Statistics Charts
-            @php
-                // Statistik Tahun (dari created_at)
-                $tahunStats = $industriSekunder->groupBy(function($item) {
-                    return \Carbon\Carbon::parse($item->created_at)->format('Y');
-                })->map(function($group) {
-                    return $group->count();
-                })->sortKeys();
-
-                // Statistik Kabupaten
-                $kabupatenStats = $industriSekunder->groupBy('industri.kabupaten')->map(function($group) {
-                    return $group->count();
-                })->sortByDesc(function($count) {
-                    return $count;
-                });
-
-                // Statistik Kapasitas
-                $range1 = $industriSekunder->filter(function($item) {
-                    $kapasitas = (float) preg_replace('/[^0-9.]/', '', $item->kapasitas_izin);
-                    return $kapasitas < 2000;
-                })->count();
-                
-                $range2 = $industriSekunder->filter(function($item) {
-                    $kapasitas = (float) preg_replace('/[^0-9.]/', '', $item->kapasitas_izin);
-                    return $kapasitas >= 2000 && $kapasitas < 6000;
-                })->count();
-                
-                $range3 = $industriSekunder->filter(function($item) {
-                    $kapasitas = (float) preg_replace('/[^0-9.]/', '', $item->kapasitas_izin);
-                    return $kapasitas >= 6000;
-                })->count();
-                
-                $kapasitasStats = collect([
-                    '0-1999 m³' => $range1,
-                    '2000-5999 m³' => $range2,
-                    '≥6000 m³' => $range3
-                ]);
-            @endphp
-
+            // Generate Statistics Charts - Menggunakan data dari Controller
             // Chart Tahun
             const ctxTahun = document.getElementById('chartTahun').getContext('2d');
             new Chart(ctxTahun, {
                 type: 'doughnut',
                 data: {
-                    labels: {!! json_encode($tahunStats->keys()) !!},
+                    labels: {!! json_encode($yearStats->keys()) !!},
                     datasets: [{
-                        data: {!! json_encode($tahunStats->values()) !!},
+                        data: {!! json_encode($yearStats->values()) !!},
                         backgroundColor: [
                             '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6', '#a855f7',
                             '#9333ea', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'
@@ -1167,9 +1107,9 @@
             new Chart(ctxKabupaten, {
                 type: 'doughnut',
                 data: {
-                    labels: {!! json_encode($kabupatenStats->keys()) !!},
+                    labels: {!! json_encode($locationStats->keys()) !!},
                     datasets: [{
-                        data: {!! json_encode($kabupatenStats->values()) !!},
+                        data: {!! json_encode($locationStats->values()) !!},
                         backgroundColor: [
                             '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a',
                             '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe', '#eff6ff',
@@ -1202,9 +1142,9 @@
             new Chart(ctxKapasitas, {
                 type: 'doughnut',
                 data: {
-                    labels: {!! json_encode($kapasitasStats->keys()) !!},
+                    labels: {!! json_encode($capacityStats->keys()) !!},
                     datasets: [{
-                        data: {!! json_encode($kapasitasStats->values()) !!},
+                        data: {!! json_encode($capacityStats->values()) !!},
                         backgroundColor: ['#f59e0b', '#d97706', '#b45309']
                     }]
                 },

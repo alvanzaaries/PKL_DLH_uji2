@@ -172,7 +172,7 @@
 
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 font-semibold py-3 px-6 rounded-xl transition-all duration-200 border border-green-200 dark:border-green-800"
-                            href="#">
+                            href="#" target="_blank">
                             <span>Akses Aplikasi</span>
                             <span
                                 class="material-icons ml-2 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
@@ -201,11 +201,11 @@
                         class="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-widest mb-4 border-b border-green-100 dark:border-green-800 pb-2">
                         Sistem Informasi Database Industri Kehutanan</h3>
                     <p class="text-gray-600 dark:text-gray-300 mb-6 text-sm leading-relaxed">Layanan digital untuk
-                        menambahkan, memantau Database keaktifan Industri Kehutanan di Jawa Tengah secara real-time.</p>
+                        menambahkan, memantau database keaktifan industri kehutanan di Jawa Tengah secara real-time.</p>
 
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 font-semibold py-3 px-6 rounded-xl transition-all duration-200 border border-green-200 dark:border-green-800"
-                            href="{{ route('dashboard') }}">
+                            href="{{ route('dashboard') }}" target="_blank">
                             <span>Akses Aplikasi</span>
                             <span
                                 class="material-icons ml-2 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
@@ -238,7 +238,7 @@
 
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 font-semibold py-3 px-6 rounded-xl transition-all duration-200 border border-amber-200 dark:border-amber-800"
-                            href={{ route('data.industri') }}>
+                            href={{ route('data.industri') }} target="_blank">
                             <span>Akses Aplikasi</span>
                             <span
                                 class="material-icons ml-2 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>

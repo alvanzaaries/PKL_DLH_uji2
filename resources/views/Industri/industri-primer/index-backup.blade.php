@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Industri Primer (PBPHH)</title>
+    <title>Data Industri Sekunder (IPHHK)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -47,49 +47,30 @@
         }
 
         .sidebar-header {
-            padding: 15px 12px 20px;
-            background: transparent;
+            padding: 20px 20px 30px;
+            text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
         .sidebar-logo {
-            width: 48px;
-            height: 48px;
-            flex-shrink: 0;
-        }
-
-        .sidebar-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
-        }
-
-        .sidebar-text {
-            flex: 1;
-            line-height: 1.3;
-        }
-
-        .sidebar-text-top {
-            font-size: 9px;
-            font-weight: 600;
-            color: #fbbf24;
-            text-transform: uppercase;
-            margin: 0 0 2px 0;
-            letter-spacing: 0.3px;
-        }
-
-        .sidebar-text-bottom {
-            font-size: 10px;
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 12px;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
             font-weight: 700;
-            color: #86efac;
-            text-transform: uppercase;
+            color: #5B4A9B;
+        }
+
+        .sidebar-title {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
             margin: 0;
-            letter-spacing: 0.2px;
-            line-height: 1.2;
         }
 
         .sidebar-menu {
@@ -457,24 +438,6 @@
             background: #dc2626;
         }
 
-        .btn-document {
-            background: #dc2626;
-            color: white;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .btn-document:hover {
-            background: #b91c1c;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
-        }
-
-        .btn-document i {
-            font-size: 14px;
-        }
-
         /* Select2 Custom Styling */
         .select2-container--default .select2-selection--single {
             height: 42px;
@@ -757,17 +720,12 @@
 <body>
     <!-- Sidebar Navigation -->
     <div class="sidebar">
-         <div class="sidebar-header">
-            <div class="sidebar-logo">
-                <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah">
-            </div>
-            <div class="sidebar-text">
-                <p class="sidebar-text-top">Pemerintah Provinsi Jawa Tengah</p>
-                <p class="sidebar-text-bottom">Dinas Lingkungan Hidup<br>dan Kehutanan</p>
-            </div>
+        <div class="sidebar-header">
+            <div class="sidebar-logo">AL</div>
+            <h2 class="sidebar-title">DLHK<span style="font-weight: 400;">al</span></h2>
         </div>
         <div class="sidebar-menu">
-            <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ url('/') }}" class="menu-item {{ request()->is('/') ? 'active' : '' }}">
                 <i class="fas fa-th-large menu-icon"></i>
                 <span class="menu-text">Beranda</span>
             </a>
@@ -822,6 +780,7 @@
         <nav>
             <div class="nav-content">
                 <div class="logo-area">
+                    <span style="font-size: 24px;"></span>
                     <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px;">
@@ -841,14 +800,14 @@
             <!-- Alert Messages -->
             @if(session('success'))
             <div class="alert alert-success" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
-                <span style="font-size: 20px;">?</span>
+                <span style="font-size: 20px;">✓</span>
                 <span>{{ session('success') }}</span>
             </div>
             @endif
 
             @if(session('error'))
             <div class="alert alert-error" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
-                <span style="font-size: 20px;">?</span>
+                <span style="font-size: 20px;">⚠</span>
                 <span>{{ session('error') }}</span>
             </div>
             @endif
@@ -881,7 +840,7 @@
                 <p class="page-subtitle">Daftar perusahaan industri sekunder pengolahan hasil hutan</p>
             </div>
             @auth
-            <a href="{{ route('industri-primer.create') }}" class="btn btn-primary">
+            <a href="{{ route('industri-sekunder.create') }}" class="btn btn-primary">
                 <span>+</span> Tambah Data Baru
             </a>
             @endauth
@@ -889,7 +848,7 @@
 
         <!-- Filter Section -->
         <div class="filter-card">
-            <form method="GET" action="{{ route('industri-primer.index') }}">
+            <form method="GET" action="{{ route('industri-sekunder.index') }}">
                 <div class="filter-grid">
                     <div class="filter-group">
                         <label>Nama Perusahaan</label>
@@ -930,7 +889,7 @@
                 </div>
                 <div class="filter-actions">
                     <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
-                    <a href="{{ route('industri-primer.index') }}" class="btn-reset">↻ Reset Filter</a>
+                    <a href="{{ route('industri-sekunder.index') }}" class="btn-reset">↻ Reset Filter</a>
                 </div>
             </form>
         </div>
@@ -962,12 +921,12 @@
             <div class="table-header">
                 <h2 class="table-title">Daftar Perusahaan</h2>
                 <div class="result-count">
-                    Total: <strong>{{ $industriPrimer->total() }}</strong> perusahaan
+                    Total: <strong>{{ $industriSekunder->total() }}</strong> perusahaan
                 </div>
             </div>
 
             <div class="table-container">
-                @if($industriPrimer->count() > 0)
+                @if($industriSekunder->count() > 0)
                 <table>
                     <thead>
                         <tr>
@@ -982,9 +941,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($industriPrimer as $index => $item)
+                        @foreach($industriSekunder as $index => $item)
                         <tr>
-                            <td>{{ $industriPrimer->firstItem() + $index }}</td>
+                            <td>{{ $industriSekunder->firstItem() + $index }}</td>
                             <td><strong>{{ $item->industri->nama }}</strong></td>
                             <td>{{ $item->industri->kabupaten }}</td>
                             <td>{{ $item->industri->penanggungjawab }}</td>
@@ -995,8 +954,8 @@
                                 <div class="action-buttons">
                                     <button class="btn-action btn-view" onclick='showDetail(@json($item))'>Lihat</button>
                                     @auth
-                                    <a href="{{ route('industri-primer.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
-                                    <form action="{{ route('industri-primer.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('{{ $item->industri->nama }}')">
+                                    <a href="{{ route('industri-sekunder.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
+                                    <form action="{{ route('industri-sekunder.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('{{ $item->industri->nama }}')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-action btn-delete">Hapus</button>
@@ -1010,16 +969,16 @@
                 </table>
                 @else
                 <div class="empty-state">
-                    <div class="empty-state-icon">??</div>
+                    <div class="empty-state-icon">📂</div>
                     <div class="empty-state-text">Tidak ada data ditemukan</div>
                     <p style="font-size: 14px;">Silakan ubah filter atau tambah data baru</p>
                 </div>
                 @endif
             </div>
 
-            @if($industriPrimer->hasPages())
+            @if($industriSekunder->hasPages())
             <div class="pagination">
-                {{ $industriPrimer->appends(request()->query())->links() }}
+                {{ $industriSekunder->appends(request()->query())->links() }}
             </div>
             @endif
         </div>
@@ -1031,7 +990,7 @@
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">?? Detail Perusahaan</h2>
+                <h2 class="modal-title">📋 Detail Perusahaan</h2>
                 <span class="close-btn" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body">
@@ -1072,10 +1031,6 @@
                         <div class="detail-label">Kapasitas Izin</div>
                         <div class="detail-value" id="modal-kapasitas">-</div>
                     </div>
-                    <div class="detail-item detail-item-full">
-                        <div class="detail-label">Dokumen Izin</div>
-                        <div class="detail-value" id="modal-dokumen">-</div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1093,22 +1048,6 @@
             document.getElementById('modal-pemberi-izin').textContent = item.pemberi_izin;
             document.getElementById('modal-jenis-produksi').textContent = item.jenis_produksi;
             document.getElementById('modal-kapasitas').textContent = item.kapasitas_izin;
-
-            // Handle dokumen izin
-            const dokumenElement = document.getElementById('modal-dokumen');
-            if (item.dokumen_izin) {
-                dokumenElement.innerHTML = `
-                    <a href="/storage/${item.dokumen_izin}" 
-                       target="_blank" 
-                       style="color: #15803d; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500;">
-                        <i class="fas fa-file-pdf" style="color: #dc2626;"></i>
-                        <span>Download Dokumen Izin</span>
-                        <i class="fas fa-external-link-alt" style="font-size: 12px;"></i>
-                    </a>
-                `;
-            } else {
-                dokumenElement.innerHTML = '<span style="color: #94a3b8;">Tidak ada dokumen</span>';
-            }
 
             // Tampilkan modal
             document.getElementById('detailModal').style.display = 'block';
@@ -1150,15 +1089,53 @@
                 width: '100%'
             });
 
-            // Generate Statistics Charts - Menggunakan data dari Controller
+            // Generate Statistics Charts
+            @php
+                // Statistik Tahun (dari created_at)
+                $tahunStats = $industriSekunder->groupBy(function($item) {
+                    return \Carbon\Carbon::parse($item->created_at)->format('Y');
+                })->map(function($group) {
+                    return $group->count();
+                })->sortKeys();
+
+                // Statistik Kabupaten
+                $kabupatenStats = $industriSekunder->groupBy('industri.kabupaten')->map(function($group) {
+                    return $group->count();
+                })->sortByDesc(function($count) {
+                    return $count;
+                });
+
+                // Statistik Kapasitas
+                $range1 = $industriSekunder->filter(function($item) {
+                    $kapasitas = (float) preg_replace('/[^0-9.]/', '', $item->kapasitas_izin);
+                    return $kapasitas < 2000;
+                })->count();
+                
+                $range2 = $industriSekunder->filter(function($item) {
+                    $kapasitas = (float) preg_replace('/[^0-9.]/', '', $item->kapasitas_izin);
+                    return $kapasitas >= 2000 && $kapasitas < 6000;
+                })->count();
+                
+                $range3 = $industriSekunder->filter(function($item) {
+                    $kapasitas = (float) preg_replace('/[^0-9.]/', '', $item->kapasitas_izin);
+                    return $kapasitas >= 6000;
+                })->count();
+                
+                $kapasitasStats = collect([
+                    '0-1999 m³' => $range1,
+                    '2000-5999 m³' => $range2,
+                    '≥6000 m³' => $range3
+                ]);
+            @endphp
+
             // Chart Tahun
             const ctxTahun = document.getElementById('chartTahun').getContext('2d');
             new Chart(ctxTahun, {
                 type: 'doughnut',
                 data: {
-                    labels: {!! json_encode($yearStats->keys()) !!},
+                    labels: {!! json_encode($tahunStats->keys()) !!},
                     datasets: [{
-                        data: {!! json_encode($yearStats->values()) !!},
+                        data: {!! json_encode($tahunStats->values()) !!},
                         backgroundColor: [
                             '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6', '#a855f7',
                             '#9333ea', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'
@@ -1190,9 +1167,9 @@
             new Chart(ctxKabupaten, {
                 type: 'doughnut',
                 data: {
-                    labels: {!! json_encode($locationStats->keys()) !!},
+                    labels: {!! json_encode($kabupatenStats->keys()) !!},
                     datasets: [{
-                        data: {!! json_encode($locationStats->values()) !!},
+                        data: {!! json_encode($kabupatenStats->values()) !!},
                         backgroundColor: [
                             '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a',
                             '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe', '#eff6ff',
@@ -1225,9 +1202,9 @@
             new Chart(ctxKapasitas, {
                 type: 'doughnut',
                 data: {
-                    labels: {!! json_encode($capacityStats->keys()) !!},
+                    labels: {!! json_encode($kapasitasStats->keys()) !!},
                     datasets: [{
-                        data: {!! json_encode($capacityStats->values()) !!},
+                        data: {!! json_encode($kapasitasStats->values()) !!},
                         backgroundColor: ['#f59e0b', '#d97706', '#b45309']
                     }]
                 },
@@ -1254,4 +1231,3 @@
     </script>
 </body>
 </html>
-

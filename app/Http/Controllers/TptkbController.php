@@ -73,12 +73,12 @@ class TptkbController extends Controller
             return 'Lainnya';
         })->map->count();
 
-        return view('tptkb.index', compact('tptkb', 'kabupatenList', 'yearStats', 'locationStats', 'capacityStats'));
+        return view('Industri.tptkb.index', compact('tptkb', 'kabupatenList', 'yearStats', 'locationStats', 'capacityStats'));
     }
 
     public function create()
     {
-        return view('tptkb.create');
+        return view('Industri.tptkb.create');
     }
 
     public function store(Request $request)
@@ -121,7 +121,7 @@ class TptkbController extends Controller
     public function edit($id)
     {
         $tptkb = Tptkb::with('industri')->findOrFail($id);
-        return view('tptkb.edit', compact('tptkb'));
+        return view('Industri.tptkb.edit', compact('tptkb'));
     }
 
     public function update(Request $request, $id)

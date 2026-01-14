@@ -45,7 +45,7 @@ class PerajinController extends Controller
             ->sort()
             ->values();
 
-        return view('perajin.index', compact('perajin', 'kabupatenList'));
+        return view('Industri.perajin.index', compact('perajin', 'kabupatenList'));
     }
 
     /**
@@ -53,7 +53,7 @@ class PerajinController extends Controller
      */
     public function create()
     {
-        return view('perajin.create');
+        return view('Industri.perajin.create');
     }
 
     /**
@@ -96,7 +96,7 @@ class PerajinController extends Controller
     public function show(Perajin $perajin)
     {
         $perajin->load('industri');
-        return view('perajin.show', compact('perajin'));
+        return view('Industri.perajin.show', compact('perajin'));
     }
 
     /**
@@ -105,7 +105,7 @@ class PerajinController extends Controller
     public function edit($id)
     {
         $perajin = Perajin::with('industri')->findOrFail($id);
-        return view('perajin.edit', compact('perajin'));
+        return view('Industri.perajin.edit', compact('perajin'));
     }
 
     /**
