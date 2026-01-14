@@ -25,7 +25,7 @@ use App\Http\Controllers\IndustriSekunderController;
 // Landing Page
 Route::get('/', function () {
     return view('welcome');
-})->name('home');
+})->name('welcome');
 
 // Dashboard Publik (Visualisasi Industri - untuk SIDI-HUT)
 Route::get('/public/dashboard', [DashboardController::class, 'publicIndex'])->name('public.dashboard');
@@ -94,7 +94,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 // ===================================================================
 // MODUL PELAPORAN & CRUD DATA INDUSTRI (SIMPEL-HUT / SIDI-HUT Auth)
 // ===================================================================
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     
     // Industri Primer - CRUD
     Route::prefix('industri-primer')->name('industri-primer.')->group(function() {
