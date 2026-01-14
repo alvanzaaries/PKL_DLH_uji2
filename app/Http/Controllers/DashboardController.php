@@ -108,7 +108,7 @@ class DashboardController extends Controller
             ->orderBy('wilayah')
             ->pluck('wilayah');
 
-        return view('admin.dashboard', compact(
+        return view('PNBP.admin.dashboard', compact(
             'totalFiles', 
             'financials', 
             'topWilayah', 
@@ -137,6 +137,6 @@ class DashboardController extends Controller
         // Total keseluruhan industri
         $statistics['total_industri'] = array_sum($statistics);
 
-        return view('public.dashboard', compact('statistics'));
+        return view('industri.dashboard', compact('statistics'));
     }
 }

@@ -172,7 +172,7 @@
 
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 font-semibold py-3 px-6 rounded-xl transition-all duration-200 border border-green-200 dark:border-green-800"
-                            href="{{ route('dashboard.index') }}" target="_blank">
+                            href="{{ route('pnbp.landing') }}" target="_blank">
                             <span>Akses Aplikasi</span>
                             <span
                                 class="material-icons ml-2 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
@@ -205,7 +205,7 @@
 
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 font-semibold py-3 px-6 rounded-xl transition-all duration-200 border border-green-200 dark:border-green-800"
-                            href="{{ route('public.dashboard') }}" target="_blank">
+                            href="{{ route('industri.dashboard') }}" target="_blank">
                             <span>Akses Aplikasi</span>
                             <span
                                 class="material-icons ml-2 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>

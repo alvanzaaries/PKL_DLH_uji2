@@ -18,12 +18,12 @@ class UserManagementController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        return view('admin.users_management.index', compact('users'));
+        return view('PNBP.admin.users_management.index', compact('users'));
     }
 
     public function create(Request $request)
     {
-        return view('admin.users_management.create');
+        return view('PNBP.admin.users_management.create');
     }
 
     public function store(Request $request)
@@ -49,7 +49,7 @@ class UserManagementController extends Controller
 
     public function edit(Request $request, User $user)
     {
-        return view('admin.users_management.edit', compact('user'));
+        return view('PNBP.admin.users_management.edit', compact('user'));
     }
 
     public function update(Request $request, User $user)

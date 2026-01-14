@@ -37,12 +37,12 @@ class PerajinController extends Controller
 
         $perajin = $query->latest()->paginate(10);
 
-        return view('perajin.index', compact('perajin'));
+        return view('industri.perajin.index', compact('perajin'));
     }
 
     public function create()
     {
-        return view('perajin.create');
+        return view('industri.perajin.create');
     }
 
     public function store(Request $request)
@@ -82,14 +82,14 @@ class PerajinController extends Controller
             'masa_berlaku' => $validated['masa_berlaku'],
         ]);
 
-        return redirect()->route('perajin.index')
+        return redirect()->route('industri.perajin.index')
             ->with('success', 'Data perajin berhasil ditambahkan');
     }
 
     public function edit(Perajin $perajin)
     {
         $perajin->load('industri');
-        return view('perajin.edit', compact('perajin'));
+        return view('industri.perajin.edit', compact('perajin'));
     }
 
     public function update(Request $request, Perajin $perajin)
@@ -127,14 +127,14 @@ class PerajinController extends Controller
             'masa_berlaku' => $validated['masa_berlaku'],
         ]);
 
-        return redirect()->route('perajin.index')
+        return redirect()->route('industri.perajin.index')
             ->with('success', 'Data perajin berhasil diperbarui');
     }
 
     public function destroy(Perajin $perajin)
     {
         $perajin->industri->delete(); // Cascade delete
-        return redirect()->route('perajin.index')
+        return redirect()->route('industri.perajin.index')
             ->with('success', 'Data perajin berhasil dihapus');
     }
 }

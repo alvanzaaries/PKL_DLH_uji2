@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('PNBP.layouts.admin')
 
 @section('title', 'Raw Excel - ' . $reconciliation->original_filename)
 @section('header')

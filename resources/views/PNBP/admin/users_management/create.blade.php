@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('PNBP.layouts.admin')
 
 @section('title', 'Tambah User - SISUDAH')
 @section('header', 'Tambah User')

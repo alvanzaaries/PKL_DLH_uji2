@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('PNBP.layouts.app')
 
 @section('title', 'Upload Rekonsiliasi - SISUDAH')
 

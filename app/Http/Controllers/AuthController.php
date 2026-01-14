@@ -52,6 +52,12 @@ class AuthController extends Controller
             $intendedUrl = session('url.intended');
             if ($intendedUrl) {
                 session()->forget('url.intended');
+                // If user came from PNBP area, send to PNBP dashboard (named route)
+                $path = parse_url($intendedUrl, PHP_URL_PATH) ?: '';
+                if (str_starts_with($path, '/pnbp')) {
+                    return redirect()->route('dashboard.index')->with('success', 'Login berhasil!');
+                }
+
                 return redirect($intendedUrl)->with('success', 'Login berhasil!');
             }
 

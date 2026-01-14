@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('PNBP.layouts.admin')
 
 @section('title', 'Upload Rekonsiliasi Baru - SISUDAH')
 @section('header', 'Upload Rekonsiliasi Baru')
