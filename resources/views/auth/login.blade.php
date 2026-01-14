@@ -39,15 +39,10 @@
         .logo {
             width: 60px;
             height: 60px;
-            background: #15803d;
             border-radius: 12px;
             margin: 0 auto 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: 700;
-            color: white;
+            object-fit: contain;
+        }
         }
 
         .login-title {
@@ -156,7 +151,7 @@
 <body>
     <div class="login-container">
         <div class="logo-section">
-            <div class="logo">AL</div>
+            <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah" class="logo">
             <h1 class="login-title">Login Admin</h1>
             <p class="login-subtitle">Dinas Lingkungan Hidup dan Kehutanan</p>
         </div>

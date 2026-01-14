@@ -254,7 +254,7 @@
         <nav>
             <div class="nav-content">
                 <div class="logo-area">
-                    <span style="font-size: 24px;">🌲</span>
+                    <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah" style="width: 30px; height: 30px; object-fit: contain; margin-right: 8px;">
                     <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px;">

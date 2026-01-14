@@ -86,14 +86,9 @@
         .logo-placeholder {
             width: 36px;
             height: 36px;
-            background-color: var(--color-white);
-            border-radius: 4px; /* Minimal rounded corners */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-            color: var(--color-primary);
-            font-size: 0.8rem;
         }
 
         .brand-text {
@@ -248,7 +243,7 @@
     <aside class="app-sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo-placeholder">
-                LOGO
+                <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah" style="width: 40px; height: 40px; object-fit: contain;">
             </div>
             <div class="brand-text">
                 Sistem Informasi
@@ -276,15 +271,32 @@
         </nav>
 
         <div class="sidebar-footer">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-sm bg-white/10 flex items-center justify-center text-white font-bold text-xs">
-                    AD
+            @guest
+                <a href="{{ route('login') }}" class="flex items-center gap-3 text-white hover:text-white/80 transition">
+                    <div class="w-8 h-8 rounded-sm bg-white/20 flex items-center justify-center">
+                        <i class="fas fa-sign-in-alt text-sm"></i>
+                    </div>
+                    <span class="text-sm font-semibold">Login</span>
+                </a>
+            @else
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-sm bg-white/10 flex items-center justify-center text-white font-bold text-xs">
+                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                        </div>
+                        <div class="text-white">
+                            <p class="text-sm font-semibold leading-tight">{{ Auth::user()->name }}</p>
+                            <p class="text-xs opacity-70 leading-tight">Admin DLHK</p>
+                        </div>
+                    </div>
+                    <form action="{{ route('logout') }}" method="POST" class="ml-2">
+                        @csrf
+                        <button type="submit" class="text-white/70 hover:text-white transition text-sm">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </form>
                 </div>
-                <div class="text-white">
-                    <p class="text-sm font-semibold leading-tight">Admin Dinas</p>
-                    <p class="text-xs opacity-70 leading-tight">DLHK Prov.</p>
-                </div>
-            </div>
+            @endguest
         </div>
     </aside>
 
