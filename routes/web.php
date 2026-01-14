@@ -89,7 +89,7 @@ Route::get('/laporan/rekap', [LaporanController::class, 'rekapLaporan'])->name('
 // Route untuk ekspor rekap laporan ke Excel
 Route::get('/laporan/rekap/export', [LaporanController::class, 'exportRekapLaporan'])->name('laporan.rekap.export');
 
-// Route untuk detail data laporan (tabel lengkap per jenis)
-Route::get('/laporan/detail', [LaporanController::class, 'detailLaporan'])->name('laporan.detail');
+// Route untuk detail data laporan (tabel lengkap per jenis) per laporan id dan industri
+Route::get('/laporan/{industri}/detail/{id}', [LaporanController::class, 'detailLaporan'])->name('laporan.detail');
 
 

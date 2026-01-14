@@ -339,13 +339,22 @@ class LaporanController extends Controller
     }
 
     /**
-     * Menampilkan halaman detail data laporan (tabel lengkap) berdasarkan jenis, bulan, dan tahun
+     * Menampilkan halaman detail data laporan berdasarkan master laporan id dan industri
+     * Route: /laporan/{industri}/detail/{id}
      */
-    public function detailLaporan(Request $request)
+    public function detailLaporan(Request $request, $industri, $id)
     {
-        $bulan = (int) $request->input('bulan', now()->month);
-        $tahun = (int) $request->input('tahun', now()->year);
-        $jenis = (string) $request->input('jenis', '');
+        // Temukan master laporan
+        $laporan = Laporan::findOrFail($id);
+
+        // Pastikan laporan ini milik industri yang diberikan di URL
+        if ((int) $laporan->industri_id !== (int) $industri) {
+            abort(404);
+        }
+
+        // Derive periode dari master laporan
+        $bulan = (int) \Carbon\Carbon::parse($laporan->tanggal)->month;
+        $tahun = (int) \Carbon\Carbon::parse($laporan->tanggal)->year;
 
         $jenisOptions = [
             'penerimaan_kayu_bulat' => 'Laporan Penerimaan Kayu Bulat',
@@ -355,12 +364,14 @@ class LaporanController extends Controller
             'penjualan_kayu_olahan' => 'Laporan Penjualan Kayu Olahan',
         ];
 
-        if (!array_key_exists($jenis, $jenisOptions)) {
+        // Cari slug jenis berdasarkan label yang tersimpan di master laporan
+        $jenis = array_search($laporan->jenis_laporan, $jenisOptions);
+        if ($jenis === false) {
             return redirect()->route('laporan.rekap', ['bulan' => $bulan, 'tahun' => $tahun])
                 ->with('error', 'Jenis laporan tidak valid.');
         }
 
-        // Build filters array
+        // Build filters array dari query (jika ada)
         $filters = [];
         if ($request->filled('jenis_kayu')) $filters['jenis_kayu'] = $request->jenis_kayu;
         if ($request->filled('asal_kayu')) $filters['asal_kayu'] = $request->asal_kayu;
@@ -368,10 +379,15 @@ class LaporanController extends Controller
         if ($request->filled('tujuan_kirim')) $filters['tujuan_kirim'] = $request->tujuan_kirim;
         if ($request->filled('ekspor_impor')) $filters['ekspor_impor'] = $request->ekspor_impor;
 
-        // Get detail data menggunakan service
+        // Pastikan service hanya mengembalikan data untuk industri laporan ini
+        $filters['industri_id'] = $laporan->industri_id;
+
+        // Ambil data detail via service
         $detailData = $this->dataService->getDetailLaporan($bulan, $tahun, $jenis, $filters);
 
         return view('laporan.detailLaporan', [
+            'laporan_id' => $id,
+            'industri_id' => $laporan->industri_id,
             'bulan' => $bulan,
             'tahun' => $tahun,
             'jenis' => $jenis,

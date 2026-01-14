@@ -5,368 +5,553 @@
 @section('page-title', 'Detail Laporan')
 
 @section('content')
-@php
-    $namaBulan = [
-        1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-        5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-        9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-    ];
 
-    $periodeLabel = ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun;
-@endphp
+    {{-- STYLING DARI REKAP LAPORAN (DIADAPTASI) --}}
+    <style>
+        /* Container: Flat / Tanpa Card Style */
+        .page-container {
+            background: transparent;
+            padding: 0;
+        }
 
-<div class="container mx-auto px-6 py-8">
-    <div class="mb-6 flex items-start justify-between gap-4 flex-wrap">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-1">{{ $jenisLabel }}</h1>
-            <p class="text-gray-600">Periode: {{ $periodeLabel }} • Total data: {{ $items->count() }}</p>
-        </div>
+        /* Header: Clean & Structured */
+        .page-header {
+            padding: 0 0 1.5rem 0;
+            border-bottom: 2px solid #E5E7EB;
+            margin-bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
 
-        <div class="flex gap-2">
-            <a href="{{ route('laporan.rekap', ['bulan' => $bulan, 'tahun' => $tahun, 'jenis' => $jenis]) }}" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded shadow-sm transition">
-                Kembali ke Rekap
-            </a>
-            <button type="button" onclick="window.print()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded shadow-sm transition">
-                Cetak
-            </button>
-        </div>
-    </div>
+        .page-title h2 {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: #111827;
+            margin: 0;
+            letter-spacing: -0.025em;
+        }
 
-    <!-- Filter Form -->
-    <div class="bg-white rounded-lg shadow p-4 mb-6 no-print">
-        <form method="GET" action="{{ route('laporan.detail') }}" class="flex flex-wrap items-end gap-4">
-            <input type="hidden" name="bulan" value="{{ $bulan }}">
-            <input type="hidden" name="tahun" value="{{ $tahun }}">
-            <input type="hidden" name="jenis" value="{{ $jenis }}">
+        .page-title p {
+            font-size: 0.875rem;
+            color: #6B7280;
+            margin-top: 4px;
+        }
 
-            @switch($jenis)
-                @case('penerimaan_kayu_bulat')
-                    <div>
-                        <label for="jenis_kayu" class="block text-sm font-medium text-gray-700 mb-1">Jenis Kayu</label>
-                        <select name="jenis_kayu" id="jenis_kayu" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Semua</option>
-                            @foreach($filterOptions['jenis_kayu'] ?? [] as $item)
-                                <option value="{{ $item }}" {{ request('jenis_kayu') == $item ? 'selected' : '' }}>{{ $item }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="asal_kayu" class="block text-sm font-medium text-gray-700 mb-1">Asal Kayu</label>
-                        <select name="asal_kayu" id="asal_kayu" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Semua</option>
-                            @foreach($filterOptions['asal_kayu'] ?? [] as $item)
-                                <option value="{{ $item }}" {{ request('asal_kayu') == $item ? 'selected' : '' }}>{{ $item }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @break
+        /* Filter Ribbon */
+        .filter-ribbon {
+            background-color: #F9FAFB;
+            border-bottom: 1px solid #E5E7EB;
+            padding: 1rem 0; /* Padding vertikal saja karena layout flat */
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
 
-                @case('penerimaan_kayu_olahan')
-                    <div>
-                        <label for="jenis_olahan" class="block text-sm font-medium text-gray-700 mb-1">Jenis Olahan</label>
-                        <select name="jenis_olahan" id="jenis_olahan" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Semua</option>
-                            @foreach($filterOptions['jenis_olahan'] ?? [] as $item)
-                                <option value="{{ $item }}" {{ request('jenis_olahan') == $item ? 'selected' : '' }}>{{ $item }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="asal_kayu" class="block text-sm font-medium text-gray-700 mb-1">Asal Kayu</label>
-                        <select name="asal_kayu" id="asal_kayu" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Semua</option>
-                            @foreach($filterOptions['asal_kayu'] ?? [] as $item)
-                                <option value="{{ $item }}" {{ request('asal_kayu') == $item ? 'selected' : '' }}>{{ $item }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @break
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
-                @case('mutasi_kayu_bulat')
-                    <div>
-                        <label for="jenis_kayu" class="block text-sm font-medium text-gray-700 mb-1">Jenis Kayu</label>
-                        <select name="jenis_kayu" id="jenis_kayu" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Semua</option>
-                            @foreach($filterOptions['jenis_kayu'] ?? [] as $item)
-                                <option value="{{ $item }}" {{ request('jenis_kayu') == $item ? 'selected' : '' }}>{{ $item }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @break
+        .filter-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+            color: #4B5563;
+        }
 
-                @case('mutasi_kayu_olahan')
-                    <div>
-                        <label for="jenis_olahan" class="block text-sm font-medium text-gray-700 mb-1">Jenis Olahan</label>
-                        <select name="jenis_olahan" id="jenis_olahan" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Semua</option>
-                            @foreach($filterOptions['jenis_olahan'] ?? [] as $item)
-                                <option value="{{ $item }}" {{ request('jenis_olahan') == $item ? 'selected' : '' }}>{{ $item }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    @break
+        .filter-input {
+            height: 38px;
+            padding: 0 0.75rem;
+            border: 1px solid #D1D5DB;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            color: #111827;
+            background-color: white;
+            min-width: 180px;
+            transition: border-color 0.15s;
+        }
 
-                @case('penjualan_kayu_olahan')
-                    <div>
-                        <label for="tujuan_kirim" class="block text-sm font-medium text-gray-700 mb-1">Tujuan Kirim</label>
-                        <select name="tujuan_kirim" id="tujuan_kirim" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Semua</option>
-                            @foreach($filterOptions['tujuan_kirim'] ?? [] as $item)
-                                <option value="{{ $item }}" {{ request('tujuan_kirim') == $item ? 'selected' : '' }}>{{ $item }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="jenis_olahan" class="block text-sm font-medium text-gray-700 mb-1">Jenis Olahan</label>
-                        <select name="jenis_olahan" id="jenis_olahan" class="w-48 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">Semua</option>
-                            @foreach($filterOptions['jenis_olahan'] ?? [] as $item)
-                                <option value="{{ $item }}" {{ request('jenis_olahan') == $item ? 'selected' : '' }}>{{ $item }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label for="ekspor_impor" class="block text-sm font-medium text-gray-700 mb-1">Ekspor/Lokal</label>
-                        <select name="ekspor_impor" id="ekspor_impor" class="w-40 px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                            <option value="">-- Semua --</option>
-                            <option value="ekspor" {{ request('ekspor_impor') == 'ekspor' ? 'selected' : '' }}>Ekspor</option>
-                            <option value="lokal" {{ request('ekspor_impor') == 'lokal' ? 'selected' : '' }}>Lokal</option>
-                        </select>
-                    </div>
-                    @break
-            @endswitch
+        .filter-input:focus {
+            outline: none;
+            border-color: #0F2F24;
+            box-shadow: 0 0 0 1px #0F2F24;
+        }
 
-            <div class="ml-auto flex gap-2">
-                <a href="{{ route('laporan.detail', ['bulan' => $bulan, 'tahun' => $tahun, 'jenis' => $jenis]) }}" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white font-medium rounded shadow-sm transition">
-                    Reset
-                </a>
-                <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded shadow-sm transition">
-                    Terapkan Filter
-                </button>
+        /* Buttons */
+        .btn {
+            height: 38px;
+            padding: 0 1.25rem;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: #0F2F24;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #183F32;
+        }
+
+        .btn-secondary {
+            background-color: white;
+            border-color: #D1D5DB;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background-color: #F3F4F6;
+            border-color: #9CA3AF;
+        }
+
+        .btn-print {
+            background-color: #ECFDF5;
+            border-color: #059669;
+            color: #047857;
+        }
+
+        .btn-print:hover {
+            background-color: #D1FAE5;
+        }
+
+        /* Table Style */
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+            background: white; /* Tabel tetap butuh background agar terbaca */
+            border: 1px solid #E5E7EB;
+            border-radius: 4px;
+        }
+
+        .ledger-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .ledger-table thead {
+            background-color: #F3F4F6;
+            border-bottom: 2px solid #E5E7EB;
+        }
+
+        .ledger-table th {
+            text-align: left;
+            padding: 0.875rem 1rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            color: #6B7280;
+            white-space: nowrap;
+        }
+
+        .ledger-table td {
+            padding: 0.875rem 1rem;
+            border-bottom: 1px solid #E5E7EB;
+            color: #374151;
+            vertical-align: middle;
+        }
+
+        .ledger-table tbody tr:hover {
+            background-color: #F9FAFB;
+        }
+
+        .ledger-table tbody tr.total-row {
+            background-color: #F3F4F6;
+            font-weight: 700;
+            border-top: 2px solid #0F2F24;
+        }
+
+        /* Helpers */
+        .col-center { text-align: center; }
+        .col-right { text-align: right; }
+        
+        .empty-state {
+            padding: 4rem 1rem;
+            text-align: center;
+            background-color: #F9FAFB;
+            color: #6B7280;
+            border: 1px solid #E5E7EB;
+            border-radius: 4px;
+        }
+
+        /* Print Logic */
+        @media print {
+            .no-print, .btn, .filter-ribbon { display: none !important; }
+            .page-container { background: white; }
+            .table-container { border: none; }
+        }
+    </style>
+
+    @php
+        $namaBulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+        $periodeLabel = ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun;
+        
+        // Judul header yang lebih rapi
+        $judulHeader = ucwords(str_replace('_', ' ', $jenis));
+        // Cari nama perusahaan bila ada industri_id atau dari item pertama
+        $companyName = null;
+        if(isset($industri_id)) {
+            $ind = \App\Models\Industri::find($industri_id);
+            $companyName = $ind ? $ind->nama : null;
+        }
+        if(!$companyName && isset($items) && $items->count()) {
+            $companyName = $items->first()->laporan->industri->nama ?? null;
+        }
+    @endphp
+
+    <div class="page-container px-6 py-8">
+        
+        <div class="page-header">
+            <div class="page-title">
+                <h2>DETAIL LAPORAN</h2>
+                <p>
+                    @if($companyName)
+                        <strong>{{ $companyName }}</strong> •
+                    @endif
+                    {{ $judulHeader }} • Periode: {{ $periodeLabel }} • Total data: {{ $items->count() }}
+                </p>
             </div>
-        </form>
-    </div>
 
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <div style="display: flex; gap: 8px;">
+                @php $industriId = $industri_id ?? null; @endphp
+                @if($industriId)
+                    <a href="{{ route('industri.laporan', ['industri' => $industriId]) }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali ke Perusahaan
+                    </a>
+                @else
+                    <a href="{{ route('laporan.rekap', ['bulan' => $bulan, 'tahun' => $tahun, 'jenis' => $jenis]) }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Kembali ke Rekap
+                    </a>
+                @endif
+                
+                {{-- <button type="button" onclick="window.print()" class="btn btn-print">
+                    <i class="fas fa-print"></i> Cetak
+                </button> --}}
+            </div>
+        </div>
+
+        <div class="filter-ribbon no-print">
+            <form method="GET" action="{{ route('laporan.detail', ['industri' => $industri_id ?? request('industri'), 'id' => $laporan_id ?? request('id')]) }}" style="display: contents;">
+                <input type="hidden" name="bulan" value="{{ $bulan }}">
+                <input type="hidden" name="tahun" value="{{ $tahun }}">
+                <input type="hidden" name="jenis" value="{{ $jenis }}">
+                @if(isset($industri_id))
+                    <input type="hidden" name="industri_id" value="{{ $industri_id }}">
+                @endif
+
+                {{-- Filter Logic based on Switch --}}
                 @switch($jenis)
                     @case('penerimaan_kayu_bulat')
-                        <thead class="bg-gray-100 border-b">
-                            <tr>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">No</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Perusahaan</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Nomor Dokumen</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Tanggal</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Asal Kayu</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Jenis Kayu</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Jumlah Batang</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Volume (m³)</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Keterangan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            @foreach($items as $index => $item)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3">{{ $index + 1 }}</td>
-                                    <td class="px-4 py-3 font-medium text-gray-800">{{ $item->laporan->industri->nama ?? '-' }}</td>
-                                    <td class="px-4 py-3">{{ $item->nomor_dokumen }}</td>
-                                    <td class="px-4 py-3">{{ date('d/m/Y', strtotime($item->tanggal)) }}</td>
-                                    <td class="px-4 py-3">{{ $item->asal_kayu }}</td>
-                                    <td class="px-4 py-3">{{ $item->jenis_kayu }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->jumlah_batang) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->volume, 2) }}</td>
-                                    <td class="px-4 py-3">{{ $item->keterangan }}</td>
-                                </tr>
-                            @endforeach
-                            @if($items->count() > 0)
-                                <tr class="bg-gray-100 font-bold">
-                                    <td colspan="6" class="px-4 py-3 text-right">TOTAL:</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('jumlah_batang')) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('volume'), 2) }}</td>
-                                    <td class="px-4 py-3"></td>
-                                </tr>
-                            @endif
-                        </tbody>
+                    @case('mutasi_kayu_bulat')
+                        <div class="filter-group">
+                            <label class="filter-label" for="jenis_kayu">Jenis Kayu</label>
+                            <select name="jenis_kayu" id="jenis_kayu" class="filter-input">
+                                <option value="">Semua</option>
+                                @foreach($filterOptions['jenis_kayu'] ?? [] as $item)
+                                    <option value="{{ $item }}" {{ request('jenis_kayu') == $item ? 'selected' : '' }}>{{ $item }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @if($jenis == 'penerimaan_kayu_bulat')
+                            <div class="filter-group">
+                                <label class="filter-label" for="asal_kayu">Asal Kayu</label>
+                                <select name="asal_kayu" id="asal_kayu" class="filter-input">
+                                    <option value="">Semua</option>
+                                    @foreach($filterOptions['asal_kayu'] ?? [] as $item)
+                                        <option value="{{ $item }}" {{ request('asal_kayu') == $item ? 'selected' : '' }}>{{ $item }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
                         @break
 
                     @case('penerimaan_kayu_olahan')
-                        <thead class="bg-gray-100 border-b">
-                            <tr>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">No</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Perusahaan</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Nomor Dokumen</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Tanggal</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Asal Kayu</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Jenis Olahan</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Jumlah Keping</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Volume (m³)</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Keterangan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            @foreach($items as $index => $item)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3">{{ $index + 1 }}</td>
-                                    <td class="px-4 py-3 font-medium text-gray-800">{{ $item->laporan->industri->nama ?? '-' }}</td>
-                                    <td class="px-4 py-3">{{ $item->nomor_dokumen }}</td>
-                                    <td class="px-4 py-3">{{ date('d/m/Y', strtotime($item->tanggal)) }}</td>
-                                    <td class="px-4 py-3">{{ $item->asal_kayu }}</td>
-                                    <td class="px-4 py-3">{{ $item->jenis_olahan }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->jumlah_keping) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->volume, 2) }}</td>
-                                    <td class="px-4 py-3">{{ $item->keterangan }}</td>
-                                </tr>
-                            @endforeach
-                            @if($items->count() > 0)
-                                <tr class="bg-gray-100 font-bold">
-                                    <td colspan="6" class="px-4 py-3 text-right">TOTAL:</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('volume'), 2) }}</td>
-                                    <td class="px-4 py-3"></td>
-                                </tr>
-                            @endif
-                        </tbody>
-                        @break
-
-                    @case('mutasi_kayu_bulat')
-                        <thead class="bg-gray-100 border-b">
-                            <tr>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">No</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Perusahaan</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Jenis Kayu</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Persediaan Awal (m³)</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Penambahan (m³)</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Penggunaan (m³)</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Persediaan Akhir (m³)</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Keterangan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            @foreach($items as $index => $item)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3">{{ $index + 1 }}</td>
-                                    <td class="px-4 py-3 font-medium text-gray-800">{{ $item->laporan->industri->nama ?? '-' }}</td>
-                                    <td class="px-4 py-3">{{ $item->jenis_kayu }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->persediaan_awal_volume, 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->penambahan_volume, 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->penggunaan_pengurangan_volume, 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->persediaan_akhir_volume, 2) }}</td>
-                                    <td class="px-4 py-3">{{ $item->keterangan }}</td>
-                                </tr>
-                            @endforeach
-                            @if($items->count() > 0)
-                                <tr class="bg-gray-100 font-bold">
-                                    <td colspan="3" class="px-4 py-3 text-right">TOTAL:</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
-                                    <td class="px-4 py-3"></td>
-                                </tr>
-                            @endif
-                        </tbody>
-                        @break
-
                     @case('mutasi_kayu_olahan')
-                        <thead class="bg-gray-100 border-b">
-                            <tr>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">No</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Perusahaan</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Jenis Olahan</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Persediaan Awal (m³)</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Penambahan (m³)</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Penggunaan (m³)</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Persediaan Akhir (m³)</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Keterangan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            @foreach($items as $index => $item)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3">{{ $index + 1 }}</td>
-                                    <td class="px-4 py-3 font-medium text-gray-800">{{ $item->laporan->industri->nama ?? '-' }}</td>
-                                    <td class="px-4 py-3">{{ $item->jenis_olahan }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->persediaan_awal_volume, 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->penambahan_volume, 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->penggunaan_pengurangan_volume, 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->persediaan_akhir_volume, 2) }}</td>
-                                    <td class="px-4 py-3">{{ $item->keterangan }}</td>
-                                </tr>
-                            @endforeach
-                            @if($items->count() > 0)
-                                <tr class="bg-gray-100 font-bold">
-                                    <td colspan="3" class="px-4 py-3 text-right">TOTAL:</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
-                                    <td class="px-4 py-3"></td>
-                                </tr>
-                            @endif
-                        </tbody>
+                        <div class="filter-group">
+                            <label class="filter-label" for="jenis_olahan">Jenis Olahan</label>
+                            <select name="jenis_olahan" id="jenis_olahan" class="filter-input">
+                                <option value="">Semua</option>
+                                @foreach($filterOptions['jenis_olahan'] ?? [] as $item)
+                                    <option value="{{ $item }}" {{ request('jenis_olahan') == $item ? 'selected' : '' }}>{{ $item }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @if($jenis == 'penerimaan_kayu_olahan')
+                            <div class="filter-group">
+                                <label class="filter-label" for="asal_kayu">Asal Kayu</label>
+                                <select name="asal_kayu" id="asal_kayu" class="filter-input">
+                                    <option value="">Semua</option>
+                                    @foreach($filterOptions['asal_kayu'] ?? [] as $item)
+                                        <option value="{{ $item }}" {{ request('asal_kayu') == $item ? 'selected' : '' }}>{{ $item }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
                         @break
 
                     @case('penjualan_kayu_olahan')
-                        <thead class="bg-gray-100 border-b">
-                            <tr>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">No</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Perusahaan</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Nomor Dokumen</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Tanggal</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Tujuan Kirim</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Jenis Olahan</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Jumlah Keping</th>
-                                <th class="px-4 py-3 text-right font-semibold text-gray-700">Volume (m³)</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700">Keterangan</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            @foreach($items as $index => $item)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-4 py-3">{{ $index + 1 }}</td>
-                                    <td class="px-4 py-3 font-medium text-gray-800">{{ $item->laporan->industri->nama ?? '-' }}</td>
-                                    <td class="px-4 py-3">{{ $item->nomor_dokumen }}</td>
-                                    <td class="px-4 py-3">{{ date('d/m/Y', strtotime($item->tanggal)) }}</td>
-                                    <td class="px-4 py-3">{{ $item->tujuan_kirim }}</td>
-                                    <td class="px-4 py-3">{{ $item->jenis_olahan }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->jumlah_keping) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($item->volume, 2) }}</td>
-                                    <td class="px-4 py-3">{{ $item->keterangan }}</td>
-                                </tr>
-                            @endforeach
-                            @if($items->count() > 0)
-                                <tr class="bg-gray-100 font-bold">
-                                    <td colspan="6" class="px-4 py-3 text-right">TOTAL:</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
-                                    <td class="px-4 py-3 text-right">{{ number_format($items->sum('volume'), 2) }}</td>
-                                    <td class="px-4 py-3"></td>
-                                </tr>
-                            @endif
-                        </tbody>
+                        <div class="filter-group">
+                            <label class="filter-label" for="tujuan_kirim">Tujuan Kirim</label>
+                            <select name="tujuan_kirim" id="tujuan_kirim" class="filter-input">
+                                <option value="">Semua</option>
+                                @foreach($filterOptions['tujuan_kirim'] ?? [] as $item)
+                                    <option value="{{ $item }}" {{ request('tujuan_kirim') == $item ? 'selected' : '' }}>{{ $item }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label" for="jenis_olahan">Jenis Olahan</label>
+                            <select name="jenis_olahan" id="jenis_olahan" class="filter-input">
+                                <option value="">Semua</option>
+                                @foreach($filterOptions['jenis_olahan'] ?? [] as $item)
+                                    <option value="{{ $item }}" {{ request('jenis_olahan') == $item ? 'selected' : '' }}>{{ $item }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="filter-label" for="ekspor_impor">Ekspor/Lokal</label>
+                            <select name="ekspor_impor" id="ekspor_impor" class="filter-input" style="min-width: 120px;">
+                                <option value="">Semua</option>
+                                <option value="ekspor" {{ request('ekspor_impor') == 'ekspor' ? 'selected' : '' }}>Ekspor</option>
+                                <option value="lokal" {{ request('ekspor_impor') == 'lokal' ? 'selected' : '' }}>Lokal</option>
+                            </select>
+                        </div>
                         @break
                 @endswitch
-            </table>
+
+                <div style="margin-left: auto; display: flex; gap: 8px;">
+                    <a href="{{ route('laporan.detail', ['industri' => $industri_id ?? request('industri'), 'id' => $laporan_id ?? request('id')]) }}" class="btn btn-secondary">
+                        <i class="fas fa-undo-alt"></i> Reset
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Terapkan
+                    </button>
+                </div>
+            </form>
         </div>
 
-        @if($items->count() === 0)
-            <div class="p-6 text-center text-gray-500">Tidak ada data untuk periode ini.</div>
+        @if($items->count() > 0)
+            <div class="table-container">
+                <table class="ledger-table">
+                    @switch($jenis)
+                        @case('penerimaan_kayu_bulat')
+                            <thead>
+                                <tr>
+                                    <th class="col-center" style="width: 50px;">No</th>
+                                    <th>Perusahaan</th>
+                                    <th>Nomor Dokumen</th>
+                                    <th>Tanggal</th>
+                                    <th>Asal Kayu</th>
+                                    <th>Jenis Kayu</th>
+                                    <th class="col-right">Jumlah Batang</th>
+                                    <th class="col-right">Volume (m³)</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($items as $index => $item)
+                                    <tr>
+                                        <td class="col-center text-gray-400">{{ $index + 1 }}</td>
+                                        <td class="font-medium text-gray-900">{{ $item->laporan->industri->nama ?? '-' }}</td>
+                                        <td>{{ $item->nomor_dokumen }}</td>
+                                        <td>{{ date('d/m/Y', strtotime($item->tanggal)) }}</td>
+                                        <td>{{ $item->asal_kayu }}</td>
+                                        <td>{{ $item->jenis_kayu }}</td>
+                                        <td class="col-right">{{ number_format($item->jumlah_batang) }}</td>
+                                        <td class="col-right">{{ number_format($item->volume, 2) }}</td>
+                                        <td>{{ $item->keterangan }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr class="total-row">
+                                    <td colspan="6" class="col-right pr-4">TOTAL:</td>
+                                    <td class="col-right">{{ number_format($items->sum('jumlah_batang')) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                            @break
+
+                        @case('penerimaan_kayu_olahan')
+                            <thead>
+                                <tr>
+                                    <th class="col-center" style="width: 50px;">No</th>
+                                    <th>Perusahaan</th>
+                                    <th>Nomor Dokumen</th>
+                                    <th>Tanggal</th>
+                                    <th>Asal Kayu</th>
+                                    <th>Jenis Olahan</th>
+                                    <th class="col-right">Jumlah Keping</th>
+                                    <th class="col-right">Volume (m³)</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($items as $index => $item)
+                                    <tr>
+                                        <td class="col-center text-gray-400">{{ $index + 1 }}</td>
+                                        <td class="font-medium text-gray-900">{{ $item->laporan->industri->nama ?? '-' }}</td>
+                                        <td>{{ $item->nomor_dokumen }}</td>
+                                        <td>{{ date('d/m/Y', strtotime($item->tanggal)) }}</td>
+                                        <td>{{ $item->asal_kayu }}</td>
+                                        <td>{{ $item->jenis_olahan }}</td>
+                                        <td class="col-right">{{ number_format($item->jumlah_keping) }}</td>
+                                        <td class="col-right">{{ number_format($item->volume, 2) }}</td>
+                                        <td>{{ $item->keterangan }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr class="total-row">
+                                    <td colspan="6" class="col-right pr-4">TOTAL:</td>
+                                    <td class="col-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                            @break
+
+                        @case('mutasi_kayu_bulat')
+                            <thead>
+                                <tr>
+                                    <th class="col-center" style="width: 50px;">No</th>
+                                    <th>Perusahaan</th>
+                                    <th>Jenis Kayu</th>
+                                    <th class="col-right">Persediaan Awal</th>
+                                    <th class="col-right">Penambahan</th>
+                                    <th class="col-right">Penggunaan</th>
+                                    <th class="col-right">Persediaan Akhir</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($items as $index => $item)
+                                    <tr>
+                                        <td class="col-center text-gray-400">{{ $index + 1 }}</td>
+                                        <td class="font-medium text-gray-900">{{ $item->laporan->industri->nama ?? '-' }}</td>
+                                        <td>{{ $item->jenis_kayu }}</td>
+                                        <td class="col-right">{{ number_format($item->persediaan_awal_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->penambahan_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->penggunaan_pengurangan_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->persediaan_akhir_volume, 2) }}</td>
+                                        <td>{{ $item->keterangan }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr class="total-row">
+                                    <td colspan="3" class="col-right pr-4">TOTAL:</td>
+                                    <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                            @break
+
+                        @case('mutasi_kayu_olahan')
+                            <thead>
+                                <tr>
+                                    <th class="col-center" style="width: 50px;">No</th>
+                                    <th>Perusahaan</th>
+                                    <th>Jenis Olahan</th>
+                                    <th class="col-right">Persediaan Awal</th>
+                                    <th class="col-right">Penambahan</th>
+                                    <th class="col-right">Penggunaan</th>
+                                    <th class="col-right">Persediaan Akhir</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($items as $index => $item)
+                                    <tr>
+                                        <td class="col-center text-gray-400">{{ $index + 1 }}</td>
+                                        <td class="font-medium text-gray-900">{{ $item->laporan->industri->nama ?? '-' }}</td>
+                                        <td>{{ $item->jenis_olahan }}</td>
+                                        <td class="col-right">{{ number_format($item->persediaan_awal_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->penambahan_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->penggunaan_pengurangan_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->persediaan_akhir_volume, 2) }}</td>
+                                        <td>{{ $item->keterangan }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr class="total-row">
+                                    <td colspan="3" class="col-right pr-4">TOTAL:</td>
+                                    <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                            @break
+
+                        @case('penjualan_kayu_olahan')
+                            <thead>
+                                <tr>
+                                    <th class="col-center" style="width: 50px;">No</th>
+                                    <th>Perusahaan</th>
+                                    <th>Nomor Dokumen</th>
+                                    <th>Tanggal</th>
+                                    <th>Tujuan Kirim</th>
+                                    <th>Jenis Olahan</th>
+                                    <th class="col-right">Jumlah Keping</th>
+                                    <th class="col-right">Volume (m³)</th>
+                                    <th>Keterangan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($items as $index => $item)
+                                    <tr>
+                                        <td class="col-center text-gray-400">{{ $index + 1 }}</td>
+                                        <td class="font-medium text-gray-900">{{ $item->laporan->industri->nama ?? '-' }}</td>
+                                        <td>{{ $item->nomor_dokumen }}</td>
+                                        <td>{{ date('d/m/Y', strtotime($item->tanggal)) }}</td>
+                                        <td>{{ $item->tujuan_kirim }}</td>
+                                        <td>{{ $item->jenis_olahan }}</td>
+                                        <td class="col-right">{{ number_format($item->jumlah_keping) }}</td>
+                                        <td class="col-right">{{ number_format($item->volume, 2) }}</td>
+                                        <td>{{ $item->keterangan }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr class="total-row">
+                                    <td colspan="6" class="col-right pr-4">TOTAL:</td>
+                                    <td class="col-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                            @break
+                    @endswitch
+                </table>
+            </div>
+        @else
+            <div class="empty-state">
+                <div style="margin-bottom: 1rem; color: #D1D5DB;">
+                    <i class="far fa-folder-open fa-3x"></i>
+                </div>
+                <h3 style="font-weight: 600; color: #374151; margin-bottom: 0.5rem;">Data Tidak Ditemukan</h3>
+                <p style="font-size: 0.875rem;">Tidak ada data laporan untuk periode dan filter yang dipilih.</p>
+            </div>
         @endif
     </div>
-</div>
 
-<style>
-    @media print {
-        .app-sidebar, .no-print, button:not(.print-only), a {
-            display: none !important;
-        }
-        body {
-            background: white !important;
-        }
-        .container {
-            max-width: 100% !important;
-            padding: 20px
-        }
-    }
-</style>
 @endsection

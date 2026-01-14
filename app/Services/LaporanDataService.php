@@ -315,9 +315,15 @@ class LaporanDataService
      */
     public function getDetailLaporan($bulan, $tahun, $jenis, $filters = [])
     {
-        $laporanIds = Laporan::whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->pluck('id');
+        $laporanQuery = Laporan::whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun);
+
+        // Jika ada filter industri_id, batasi laporan hanya untuk industri tersebut
+        if (isset($filters['industri_id']) && $filters['industri_id']) {
+            $laporanQuery->where('industri_id', $filters['industri_id']);
+        }
+
+        $laporanIds = $laporanQuery->pluck('id');
 
         $items = collect();
         $filterOptions = [];
