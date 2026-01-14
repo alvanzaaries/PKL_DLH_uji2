@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $nomor_izin Nomor izin/NIB/SS
  * @property string $type Jenis industri (primer, sekunder, tpt_kb, end_user)
  */
-abstract class Industri extends Model
+class Industri extends Model
 {
     /**
      * Tabel database untuk base model
@@ -38,9 +38,12 @@ abstract class Industri extends Model
     ];
 
     /**
-     * Get jenis industri (harus di-override oleh child class)
+     * Get jenis industri (bisa di-override oleh child class)
      */
-    abstract public function getJenisIndustri(): string;
+    public function getJenisIndustri(): string
+    {
+        return $this->type ?? 'unknown';
+    }
 
     /**
      * Scope untuk filter berdasarkan kabupaten
@@ -88,5 +91,14 @@ abstract class Industri extends Model
     public function endUser()
     {
         return $this->hasOne(EndUser::class, 'industri_id');
+    }
+
+    /**
+     * Relationship ke Laporan (one-to-many)
+     */
+    
+    public function laporan()
+    {
+        return $this->hasMany(Laporan::class);
     }
 }
