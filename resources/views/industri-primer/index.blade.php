@@ -753,7 +753,7 @@
                 <span class="menu-text">Industri Primer</span>
             </a>
             
-            <a href="{{ route('industri-primer.index') }}" class="menu-item {{ request()->routeIs('industri-primer.*') ? 'active' : '' }}">
+            <a href="{{ route('industri-sekunder.index') }}" class="menu-item {{ request()->routeIs('industri-sekunder.*') ? 'active' : '' }}">
                 <i class="fas fa-microchip menu-icon"></i>
                 <span class="menu-text">Industri Sekunder</span>
             </a>

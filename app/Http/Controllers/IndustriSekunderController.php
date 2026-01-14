@@ -67,21 +67,22 @@ class IndustriSekunderController extends Controller
                 ->pluck('kabupaten');
         });
 
-        // Data untuk visualisasi chart
+        // Data untuk visualisasi chart — gunakan DATA YANG SAMA dengan hasil filter
+        $filteredData = (clone $query)->get();
+
         // 1. Distribusi perusahaan per tahun (berdasarkan created_at)
-        $allData = IndustriSekunder::with('industri')->get();
-        $yearStats = $allData->groupBy(function($item) {
+        $yearStats = $filteredData->groupBy(function($item) {
             return $item->created_at->format('Y');
         })->map->count()->sortKeys();
 
         // 2. Distribusi lokasi industri (Top 5 Kabupaten)
-        $locationStats = $allData->groupBy('industri.kabupaten')
+        $locationStats = $filteredData->groupBy('industri.kabupaten')
             ->map->count()
             ->sortDesc()
             ->take(5);
 
         // 3. Distribusi berdasarkan kapasitas izin
-        $capacityStats = $allData->groupBy(function($item) {
+        $capacityStats = $filteredData->groupBy(function($item) {
             $capacity = $item->kapasitas_izin;
             // Cek dengan format yang sesuai dengan data di database
             if (strpos($capacity, '0 - 1999') !== false || strpos($capacity, '0-1999') !== false) {

@@ -235,7 +235,7 @@
     <div class="container">
         <div class="form-card">
             <div class="page-header">
-                <h1 class="page-title">✏️ Edit Data TPT-KB</h1>
+                <h1 class="page-title">Edit Data TPT-KB</h1>
                 <p class="page-subtitle">Perbarui informasi Tempat Penampungan Tebangan Kayu Bulat</p>
             </div>
 
@@ -261,7 +261,7 @@
                 @method('PUT')
 
                 <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent);">
-                    🏢 Data Perusahaan
+                    Data Perusahaan
                 </h3>
 
                 <div class="form-group">
@@ -319,7 +319,7 @@
                 </div>
 
                 <h3 style="font-size: 18px; color: var(--primary); margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent);">
-                    📦 Data Izin & Kapasitas
+                    Data Izin & Kapasitas
                 </h3>
 
                 <div class="form-row">
@@ -382,10 +382,10 @@
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
-                        💾 Simpan Perubahan
+                        Simpan Perubahan
                     </button>
                     <a href="{{ route('tptkb.index') }}" class="btn btn-secondary">
-                        ← Batal
+                        Batal
                     </a>
                 </div>
             </form>

@@ -224,9 +224,9 @@
 @section('content')
     <div class="container">
         <div class="form-card">
-            <div class="form-header">
-                <h1 class="form-title">✏️ Edit Data Industri Sekunder</h1>
-                <p class="form-subtitle">Perbarui informasi perusahaan industri sekunder (PBUI)</p>
+            <div class="page-header" style="margin:0 0 20px 0; padding:18px 0;">
+                <h1 class="page-title" style="font-size:24px; margin:0;">Edit Industri Sekunder (PBUI)</h1>
+                <p class="page-subtitle" style="margin:6px 0 0 0;">Perbarui informasi perusahaan industri sekunder (PBUI)</p>
             </div>
 
             @if(session('success'))
@@ -251,8 +251,8 @@
                 @method('PUT')
 
                 <!-- Data Perusahaan -->
-                <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent);">
-                    🏢 Data Perusahaan
+                <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 20px; padding-bottom: 6px;">
+                    Data Perusahaan
                 </h3>
 
                 <div class="form-group">
@@ -292,8 +292,8 @@
                 </div>
 
                 <!-- Data Produksi -->
-                <h3 style="font-size: 18px; color: var(--primary); margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent);">
-                    📦 Data Produksi & Izin
+                <h3 style="font-size: 18px; color: var(--primary); margin: 30px 0 20px; padding-bottom: 6px;">
+                    Data Produksi & Izin
                 </h3>
 
                 <div class="form-row">
@@ -320,10 +320,10 @@
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
-                         Simpan Perubahan
+                        Simpan Perubahan
                     </button>
                     <a href="{{ route('industri-sekunder.index') }}" class="btn btn-secondary">
-                        ← Batal
+                        Batal
                     </a>
                 </div>
             </form>

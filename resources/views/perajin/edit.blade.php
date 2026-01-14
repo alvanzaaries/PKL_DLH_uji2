@@ -244,7 +244,7 @@
     <div class="container">
         @if($errors->any())
         <div class="alert alert-danger">
-            <strong>⚠️ Terdapat kesalahan:</strong>
+            <strong>Terdapat kesalahan:</strong>
             <ul class="error-list">
                 @foreach($errors->all() as $error)
                     <li>• {{ $error }}</li>
@@ -263,7 +263,7 @@
                 @csrf
                 @method('PUT')
 
-                <h3 class="section-title">📋 Data Perusahaan</h3>
+                <h3 class="section-title">Data Perusahaan</h3>
 
                 <div class="form-group">
                     <label class="form-label">Nama Perusahaan <span class="required">*</span></label>
@@ -350,10 +350,10 @@
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">
-                        💾 Update Data
+                        Update Data
                     </button>
                     <a href="{{ route('perajin.index') }}" class="btn btn-secondary">
-                        ❌ Batal
+                        Batal
                     </a>
                 </div>
             </form>

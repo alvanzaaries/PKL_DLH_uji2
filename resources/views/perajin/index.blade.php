@@ -419,9 +419,10 @@
 
         /* Statistics Section */
         .statistics-section {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            display: flex;
             gap: 20px;
+            justify-content: center; /* pusatkan kartu statistik secara horizontal */
+            flex-wrap: wrap;
             margin-bottom: 25px;
         }
 
@@ -444,6 +445,18 @@
             position: relative;
             height: 250px;
             margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Batasi ukuran canvas agar chart berada di tengah kartu (lebih besar) */
+        .chart-container canvas {
+            max-width: 300px;
+            max-height: 300px;
+            width: 100%;
+            height: auto;
+            display: block;
         }
 
         .pagination {
@@ -732,12 +745,7 @@
                         <canvas id="chartKabupaten"></canvas>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <h3>📋 Sebaran Jenis Usaha</h3>
-                    <div class="chart-container">
-                        <canvas id="chartJenis"></canvas>
-                    </div>
-                </div>
+                
             </div>
 
             <div class="table-card">
@@ -907,14 +915,7 @@
                     return $count;
                 });
 
-                // Statistik Jenis Usaha (menggunakan jenis_usaha dari tabel perajin)
-                $jenisStats = $perajin->groupBy(function($item) {
-                    return $item->jenis_usaha ?? 'Lainnya';
-                })->map(function($group) {
-                    return $group->count();
-                })->sortByDesc(function($count) {
-                    return $count;
-                })->take(8);
+                
             @endphp
 
             // Chart Tahun
@@ -986,39 +987,7 @@
                 }
             });
 
-            // Chart Jenis Usaha
-            const ctxJenis = document.getElementById('chartJenis').getContext('2d');
-            new Chart(ctxJenis, {
-                type: 'doughnut',
-                data: {
-                    labels: {!! json_encode($jenisStats->keys()) !!},
-                    datasets: [{
-                        data: {!! json_encode($jenisStats->values()) !!},
-                        backgroundColor: [
-                            '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6', 
-                            '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    let value = context.parsed;
-                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    let percentage = ((value / total) * 100).toFixed(1);
-                                    return label + ': ' + value + ' (' + percentage + '%)';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
+            
         });
     </script>
 </body>
