@@ -9,9 +9,6 @@ use App\Http\Controllers\IndustriController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IndustriPrimerController;
 use App\Http\Controllers\IndustriSekunderController;
-use App\Http\Controllers\TptkbController;
-use App\Http\Controllers\PerajinController;
-
 // Public routes - accessible without login
 Route::get('/', function () {
     return redirect()->route('dashboard');
