@@ -7,19 +7,15 @@
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <h1 class="text-xl font-semibold text-gray-900">Riwayat Upload Saya</h1>
-                <p class="mt-1 text-sm text-gray-600">Hanya menampilkan file yang Anda upload sendiri.</p>
+                <h1 class="text-xl font-semibold text-gray-900">Riwayat Laporan</h1>
+                <p class="mt-1 text-sm text-gray-600">Menampilkan laporan yang pernah diunggah.</p>
             </div>
         </div>
 
         <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="rounded-lg border border-gray-200 p-4">
-                <div class="text-xs text-gray-500">Total Upload</div>
+                <div class="text-xs text-gray-500">Total Laporan</div>
                 <div class="mt-1 text-2xl font-semibold text-gray-900">{{ $totals['total_upload'] ?? 0 }}</div>
-            </div>
-            <div class="rounded-lg border border-gray-200 p-4">
-                <div class="text-xs text-gray-500">Total Baris Data</div>
-                <div class="mt-1 text-2xl font-semibold text-gray-900">{{ number_format($totals['total_baris'] ?? 0, 0, ',', '.') }}</div>
             </div>
             <div class="rounded-lg border border-gray-200 p-4">
                 <div class="text-xs text-gray-500">Total Nilai Setor</div>

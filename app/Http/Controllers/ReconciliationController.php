@@ -34,7 +34,7 @@ class ReconciliationController extends Controller
     public function index()
     {
         $reconciliations = Reconciliation::with('uploader')->latest()->get();
-        return view('reconciliations.index', compact('reconciliations'));
+        return view('admin.reconciliations.index', compact('reconciliations'));
     }
 
     public function create()
@@ -47,7 +47,7 @@ class ReconciliationController extends Controller
             ->orderBy('kph')
             ->pluck('kph');
 
-        return view('reconciliations.create', compact('kphOptions'));
+        return view('admin.reconciliations.create', compact('kphOptions'));
     }
 
     public function show(Request $request, Reconciliation $reconciliation)
@@ -111,7 +111,7 @@ class ReconciliationController extends Controller
         $totalNilaiLhpFinal = $nilaiOverride ? (float) $nilaiOverride->value : $baseTotalNilaiLhp;
         $baseTotalNilaiSetor = (float) ReconciliationDetail::where('reconciliation_id', $reconciliation->id)->sum('setor_nilai');
 
-        return view('reconciliations.show', compact('reconciliation', 'details', 'totalPerSatuan', 'statsJenis', 'statsWilayah', 'statsBank', 'totalNilaiLhpFinal', 'baseTotalNilaiLhp', 'baseTotalNilaiSetor'));
+        return view('admin.reconciliations.show', compact('reconciliation', 'details', 'totalPerSatuan', 'statsJenis', 'statsWilayah', 'statsBank', 'totalNilaiLhpFinal', 'baseTotalNilaiLhp', 'baseTotalNilaiSetor'));
     }
 
     public function destroy(Reconciliation $reconciliation)
@@ -402,7 +402,7 @@ class ReconciliationController extends Controller
         if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $m)) $body = $m[1];
         else $body = $html;
 
-        return view('reconciliations.raw', ['reconciliation' => $reconciliation, 'rawHtml' => $body]);
+        return view('admin.reconciliations.raw', ['reconciliation' => $reconciliation, 'rawHtml' => $body]);
     }
 
     public function updateSummaryOverrides(Request $request, Reconciliation $reconciliation)

@@ -16,6 +16,7 @@ class DashboardController extends Controller
         $quarter = $request->input('quarter');
         $sampaiQuarter = $request->input('sampai_quarter');
         $kph = trim((string) $request->input('kph', ''));
+        $wilayah = trim((string) $request->input('wilayah', ''));
 
         // 2. Base Queries
         $reconQuery = Reconciliation::query();
@@ -31,6 +32,13 @@ class DashboardController extends Controller
         if ($kph !== '') {
             $reconQuery->where('kph', $kph);
             $detailQuery->where('reconciliations.kph', $kph);
+        }
+
+        if ($wilayah !== '') {
+            $detailQuery->where('reconciliation_details.wilayah', $wilayah);
+            $reconQuery->whereHas('details', function ($q) use ($wilayah) {
+                $q->where('wilayah', $wilayah);
+            });
         }
 
         if ($quarter) {
@@ -60,8 +68,13 @@ class DashboardController extends Controller
             ->select('wilayah', DB::raw('SUM(setor_nilai) as total'))
             ->groupBy('wilayah')
             ->orderByDesc('total')
-            ->limit(5)
             ->get();
+
+        $wilayahCount = $detailQuery->clone()
+            ->whereNotNull('reconciliation_details.wilayah')
+            ->where('reconciliation_details.wilayah', '!=', '')
+            ->distinct('reconciliation_details.wilayah')
+            ->count('reconciliation_details.wilayah');
 
         // Card 4: Stats per Jenis SDH
         $statsJenis = $detailQuery->clone()
@@ -79,14 +92,23 @@ class DashboardController extends Controller
             ->orderBy('kph')
             ->pluck('kph');
 
+        $availableWilayah = ReconciliationDetail::select('wilayah')
+            ->whereNotNull('wilayah')
+            ->where('wilayah', '!=', '')
+            ->distinct()
+            ->orderBy('wilayah')
+            ->pluck('wilayah');
+
         return view('admin.dashboard', compact(
             'totalFiles', 
             'financials', 
             'topWilayah', 
+            'wilayahCount',
             'statsJenis', 
             'availableYears', 
             'availableQuarters',
-            'availableKph'
+            'availableKph',
+            'availableWilayah'
         ));
     }
 }
