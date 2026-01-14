@@ -162,10 +162,10 @@
 
                     <h2
                         class="text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">
-                        SIBETAH</h2>
+                        SIP-JATENG</h2>
                     <h3
                         class="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-widest mb-4 border-b border-green-100 dark:border-green-800 pb-2">
-                        Sistem Informasi Benih Tani Hutan</h3>
+                        Sistem Pengelolan PNBP Jawa Tengah</h3>
                     <p class="text-gray-600 dark:text-gray-300 mb-6 text-sm leading-relaxed">Layanan digital untuk
                         memantau distribusi, sertifikasi, dan ketersediaan benih tani hutan secara real-time.</p>
 
@@ -195,16 +195,16 @@
 
                     <h2
                         class="text-2xl font-bold text-gray-900 dark:text-white mb-2 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">
-                        SIBETAH</h2>
+                        SIDI-HUT</h2>
                     <h3
                         class="text-xs font-bold text-green-600 dark:text-green-400 uppercase tracking-widest mb-4 border-b border-green-100 dark:border-green-800 pb-2">
-                        Sistem Informasi Benih Tani Hutan</h3>
+                        Sistem Informasi Database Industri Kehutanan</h3>
                     <p class="text-gray-600 dark:text-gray-300 mb-6 text-sm leading-relaxed">Layanan digital untuk
-                        memantau distribusi, sertifikasi, dan ketersediaan benih tani hutan secara real-time.</p>
+                        menambahkan, memantau Database keaktifan Industri Kehutanan di Jawa Tengah secara real-time.</p>
 
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 font-semibold py-3 px-6 rounded-xl transition-all duration-200 border border-green-200 dark:border-green-800"
-                            href="#">
+                            href="{{ route('dashboard') }}">
                             <span>Akses Aplikasi</span>
                             <span
                                 class="material-icons ml-2 text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
