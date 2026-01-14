@@ -73,6 +73,15 @@
             letter-spacing: -0.5px;
         }
 
+        .logo-area img {
+            width: 48px;
+            height: 48px;
+            object-fit: contain;
+            margin-right: 12px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
         .nav-links {
             display: flex;
             list-style: none;
@@ -259,7 +268,7 @@
     <nav>
         <div class="container nav-content">
             <div class="logo-area">
-                <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah" style="width: 40px; height: 40px; object-fit: contain; margin-right: 10px;">
+                <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah" class="site-logo">
                 <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
             </div>
             <ul class="nav-links">

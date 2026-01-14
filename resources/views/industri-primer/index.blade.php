@@ -47,30 +47,49 @@
         }
 
         .sidebar-header {
-            padding: 20px 20px 30px;
-            text-align: center;
+            padding: 15px 12px 20px;
+            background: transparent;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .sidebar-logo {
-            width: 50px;
-            height: 50px;
-            background: white;
-            border-radius: 12px;
-            margin: 0 auto 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: #5B4A9B;
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
         }
 
-        .sidebar-title {
-            color: white;
-            font-size: 16px;
+        .sidebar-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .sidebar-text {
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .sidebar-text-top {
+            font-size: 9px;
             font-weight: 600;
+            color: #fbbf24;
+            text-transform: uppercase;
+            margin: 0 0 2px 0;
+            letter-spacing: 0.3px;
+        }
+
+        .sidebar-text-bottom {
+            font-size: 10px;
+            font-weight: 700;
+            color: #86efac;
+            text-transform: uppercase;
             margin: 0;
+            letter-spacing: 0.2px;
+            line-height: 1.2;
         }
 
         .sidebar-menu {
@@ -738,9 +757,14 @@
 <body>
     <!-- Sidebar Navigation -->
     <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">AL</div>
-            <h2 class="sidebar-title">DLHK<span style="font-weight: 400;">al</span></h2>
+         <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah">
+            </div>
+            <div class="sidebar-text">
+                <p class="sidebar-text-top">Pemerintah Provinsi Jawa Tengah</p>
+                <p class="sidebar-text-bottom">Dinas Lingkungan Hidup<br>dan Kehutanan</p>
+            </div>
         </div>
         <div class="sidebar-menu">
             <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
@@ -798,7 +822,6 @@
         <nav>
             <div class="nav-content">
                 <div class="logo-area">
-                    <span style="font-size: 24px;"></span>
                     <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px;">
