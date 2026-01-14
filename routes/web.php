@@ -19,21 +19,29 @@ use App\Http\Controllers\IndustriPrimerController;
 use App\Http\Controllers\IndustriSekunderController;
 
 // ===================================================================
-// PUBLIC ROUTES - Accessible without login (From Incoming Project)
+// PUBLIC ROUTES - Accessible without login
 // ===================================================================
+
+// Landing Page
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-// Public viewing routes from Incoming (visualisasi publik)
+// Dashboard Publik (Visualisasi Industri - untuk SIDI-HUT)
 Route::get('/public/dashboard', [DashboardController::class, 'publicIndex'])->name('public.dashboard');
+
+// Resource Routes (Public Reading Index)
+// Digunakan oleh Dashboard Publik (Visualisasi)
 Route::get('/industri-primer', [IndustriPrimerController::class, 'index'])->name('industri-primer.index');
 Route::get('/industri-sekunder', [IndustriSekunderController::class, 'index'])->name('industri-sekunder.index');
 Route::get('/tptkb', [TptkbController::class, 'index'])->name('tptkb.index');
 Route::get('/perajin', [PerajinController::class, 'index'])->name('perajin.index');
-Route::get('/laporan', [IndustriController::class, 'index'])->name('data.industri');
 
-// Public document download routes
+// SIMPEL-HUT (Sistem Monitoring dan Pelaporan Kehutanan)
+// Entry point utama untuk modul pelaporan (halaman dashboard laporan)
+Route::get('/pelaporan', [IndustriController::class, 'index'])->name('pelaporan.index');
+
+// Public document download
 Route::get('/industri-primer/{id}/dokumen', [IndustriPrimerController::class, 'downloadDokumen'])->name('industri-primer.download-dokumen');
 
 // ===================================================================
@@ -44,7 +52,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ===================================================================
-// USER ROUTES (Role: user) - From HEAD
+// USER ROUTES (Role: user) - MODUL REKONSILIASI (PNBP)
 // ===================================================================
 Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/user/upload', [UserDashboardController::class, 'upload'])->name('user.upload');
@@ -54,15 +62,16 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     })->name('user.dashboard');
 });
 
-// Upload endpoint (admin + user)
+// Upload endpoint (admin + user) - REKONSILIASI
 Route::middleware(['auth', 'role:admin,user'])->group(function () {
     Route::post('reconciliations', [ReconciliationController::class, 'store'])->name('reconciliations.store');
 });
 
 // ===================================================================
-// ADMIN ROUTES (Role: admin) - From HEAD
+// ADMIN ROUTES (Role: admin) - MODUL REKONSILIASI (PNBP)
 // ===================================================================
 Route::middleware(['auth', 'role:admin'])->group(function () {
+    // Admin Dashboard (SIP-JATENG)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
     // User Management
@@ -73,61 +82,67 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/admin/users/{user}', [UserManagementController::class, 'update'])->name('admin.users.update');
     Route::post('/admin/users/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('admin.users.reset-password');
 
+    // Reconciliations (Admin CRUD)
     Route::get('reconciliations/create', [ReconciliationController::class, 'create'])->name('reconciliations.create');
-
     Route::resource('reconciliations', ReconciliationController::class)
         ->except(['create', 'store']);
-
-    // File download for stored Excel (verification)
     Route::get('reconciliations/{reconciliation}/file', [ReconciliationController::class, 'downloadFile'])->name('reconciliations.file');
-
-    // Raw view for uploaded Excel (unprocessed)
     Route::get('reconciliations/{reconciliation}/raw', [ReconciliationController::class, 'rawExcel'])->name('reconciliations.raw');
-
-    // Summary overrides (edit top totals)
     Route::post('reconciliations/{reconciliation}/summary-overrides', [ReconciliationController::class, 'updateSummaryOverrides'])->name('reconciliations.summary-overrides');
 });
 
 // ===================================================================
-// PROTECTED ROUTES FROM INCOMING (Auth only, no role check)
-// These are for the public/visualisasi project CRUD operations
+// MODUL PELAPORAN & CRUD DATA INDUSTRI (SIMPEL-HUT / SIDI-HUT Auth)
 // ===================================================================
 Route::middleware(['auth'])->group(function () {
-    // Industri Primer - Create, Update, Delete
-    Route::get('/industri-primer/create', [IndustriPrimerController::class, 'create'])->name('industri-primer.create');
-    Route::post('/industri-primer', [IndustriPrimerController::class, 'store'])->name('industri-primer.store');
-    Route::get('/industri-primer/{id}/edit', [IndustriPrimerController::class, 'edit'])->name('industri-primer.edit');
-    Route::put('/industri-primer/{id}', [IndustriPrimerController::class, 'update'])->name('industri-primer.update');
-    Route::delete('/industri-primer/{id}', [IndustriPrimerController::class, 'destroy'])->name('industri-primer.destroy');
+    
+    // Industri Primer - CRUD
+    Route::prefix('industri-primer')->name('industri-primer.')->group(function() {
+        Route::get('/create', [IndustriPrimerController::class, 'create'])->name('create');
+        Route::post('/', [IndustriPrimerController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [IndustriPrimerController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [IndustriPrimerController::class, 'update'])->name('update');
+        Route::delete('/{id}', [IndustriPrimerController::class, 'destroy'])->name('destroy');
+    });
 
-    // Industri Sekunder - Create, Update, Delete
-    Route::get('/industri-sekunder/create', [IndustriSekunderController::class, 'create'])->name('industri-sekunder.create');
-    Route::post('/industri-sekunder', [IndustriSekunderController::class, 'store'])->name('industri-sekunder.store');
-    Route::get('/industri-sekunder/{id}/edit', [IndustriSekunderController::class, 'edit'])->name('industri-sekunder.edit');
-    Route::put('/industri-sekunder/{id}', [IndustriSekunderController::class, 'update'])->name('industri-sekunder.update');
-    Route::delete('/industri-sekunder/{id}', [IndustriSekunderController::class, 'destroy'])->name('industri-sekunder.destroy');
+    // Industri Sekunder - CRUD
+    Route::prefix('industri-sekunder')->name('industri-sekunder.')->group(function() {
+        Route::get('/create', [IndustriSekunderController::class, 'create'])->name('create');
+        Route::post('/', [IndustriSekunderController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [IndustriSekunderController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [IndustriSekunderController::class, 'update'])->name('update');
+        Route::delete('/{id}', [IndustriSekunderController::class, 'destroy'])->name('destroy');
+    });
 
-    // TPTKB - Create, Update, Delete
-    Route::get('/tptkb/create', [TptkbController::class, 'create'])->name('tptkb.create');
-    Route::post('/tptkb', [TptkbController::class, 'store'])->name('tptkb.store');
-    Route::get('/tptkb/{id}/edit', [TptkbController::class, 'edit'])->name('tptkb.edit');
-    Route::put('/tptkb/{id}', [TptkbController::class, 'update'])->name('tptkb.update');
-    Route::delete('/tptkb/{id}', [TptkbController::class, 'destroy'])->name('tptkb.destroy');
+    // TPTKB - CRUD
+    Route::prefix('tptkb')->name('tptkb.')->group(function() {
+        Route::get('/create', [TptkbController::class, 'create'])->name('create');
+        Route::post('/', [TptkbController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [TptkbController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [TptkbController::class, 'update'])->name('update');
+        Route::delete('/{id}', [TptkbController::class, 'destroy'])->name('destroy');
+    });
 
-    // Perajin - Create, Update, Delete
-    Route::get('/perajin/create', [PerajinController::class, 'create'])->name('perajin.create');
-    Route::post('/perajin', [PerajinController::class, 'store'])->name('perajin.store');
-    Route::get('/perajin/{id}/edit', [PerajinController::class, 'edit'])->name('perajin.edit');
-    Route::put('/perajin/{id}', [PerajinController::class, 'update'])->name('perajin.update');
-    Route::delete('/perajin/{id}', [PerajinController::class, 'destroy'])->name('perajin.destroy');
+    // Perajin - CRUD
+    Route::prefix('perajin')->name('perajin.')->group(function() {
+        Route::get('/create', [PerajinController::class, 'create'])->name('create');
+        Route::post('/', [PerajinController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [PerajinController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [PerajinController::class, 'update'])->name('update');
+        Route::delete('/{id}', [PerajinController::class, 'destroy'])->name('destroy');
+    });
 
-    // Laporan Routes
-    Route::get('/laporan/upload', [LaporanController::class, 'showUploadForm'])->name('laporan.upload.form');
-    Route::post('/laporan/upload/preview', [LaporanController::class, 'preview'])->name('laporan.preview');
-    Route::post('/laporan/upload/store', [LaporanController::class, 'store'])->name('laporan.store');
-    Route::get('/laporan/{industri}/upload', [LaporanController::class, 'showByIndustri'])->name('industri.laporan');
-    Route::get('/laporan/rekap', [LaporanController::class, 'rekapLaporan'])->name('laporan.rekap');
-    Route::get('/laporan/rekap/export', [LaporanController::class, 'exportRekapLaporan'])->name('laporan.rekap.export');
-    Route::get('/laporan/{industri}/detail/{id}', [LaporanController::class, 'detailLaporan'])->name('laporan.detail');
+    // Fitur Pelaporan (SIMPEL-HUT)
+    Route::prefix('pelaporan')->name('laporan.')->group(function() {
+        Route::get('/upload', [LaporanController::class, 'showUploadForm'])->name('upload.form');
+        Route::post('/upload/preview', [LaporanController::class, 'preview'])->name('preview');
+        Route::post('/upload/store', [LaporanController::class, 'store'])->name('store');
+        Route::get('/rekap', [LaporanController::class, 'rekapLaporan'])->name('rekap');
+        Route::get('/rekap/export', [LaporanController::class, 'exportRekapLaporan'])->name('rekap.export');
+        
+        // Route parameter di tengah
+        Route::get('/{industri}/upload', [LaporanController::class, 'showByIndustri'])->name('industri');
+        Route::get('/{industri}/detail/{id}', [LaporanController::class, 'detailLaporan'])->name('detail');
+    });
 });
 

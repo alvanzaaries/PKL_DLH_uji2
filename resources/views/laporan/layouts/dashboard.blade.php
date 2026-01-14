@@ -265,8 +265,8 @@
                 <span>Beranda</span>
             </a>
 
-            <a href="{{ route('data.industri') }}"
-                class="nav-link {{ request()->routeIs('data.industri') || request()->routeIs('industri.laporan') || request()->routeIs('laporan.preview') ? 'active' : '' }}">
+            <a href="{{ route('pelaporan.index') }}"
+                class="nav-link {{ request()->routeIs('pelaporan.index') || request()->routeIs('laporan.industri') || request()->routeIs('laporan.preview') ? 'active' : '' }}">
                 <i class="fas fa-chart-pie nav-icon"></i> <span>Dashboard & Mon.</span>
             </a>
 
