@@ -8,6 +8,12 @@
         <h1 class="text-xl font-semibold text-gray-900">Login</h1>
         <p class="mt-1 text-sm text-gray-600">Masuk untuk melanjutkan.</p>
 
+        @if (session('success'))
+            <div class="mt-4 rounded-md bg-green-50 p-3 border border-green-200 text-sm text-green-700">
+                {{ session('success') }}
+            </div>
+        @endif
+
         @if ($errors->any())
             <div class="mt-4 rounded-md bg-red-50 p-3 border border-red-200 text-sm text-red-700">
                 <ul class="list-disc pl-5">

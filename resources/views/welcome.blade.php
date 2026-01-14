@@ -47,6 +47,22 @@
                             @endif
                         </div>
                     </div>
+
+                    <!-- Link to Public Dashboard (from Incoming project) -->
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <p class="text-sm text-gray-500 mb-3">Lihat data publik:</p>
+                        <div class="flex flex-wrap gap-2">
+                            <a href="{{ route('public.dashboard') }}" class="text-sm text-green-600 hover:text-green-700 underline">Dashboard Publik</a>
+                            <span class="text-gray-300">|</span>
+                            <a href="{{ route('industri-primer.index') }}" class="text-sm text-green-600 hover:text-green-700 underline">Industri Primer</a>
+                            <span class="text-gray-300">|</span>
+                            <a href="{{ route('industri-sekunder.index') }}" class="text-sm text-green-600 hover:text-green-700 underline">Industri Sekunder</a>
+                            <span class="text-gray-300">|</span>
+                            <a href="{{ route('tptkb.index') }}" class="text-sm text-green-600 hover:text-green-700 underline">TPTKB</a>
+                            <span class="text-gray-300">|</span>
+                            <a href="{{ route('perajin.index') }}" class="text-sm text-green-600 hover:text-green-700 underline">Perajin</a>
+                        </div>
+                    </div>
                 </div>
             </main>
         </div>

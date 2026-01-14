@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin account
+        // Admin account (from HEAD)
         User::updateOrCreate(
             ['email' => 'admin@sisudah.test'],
             [
@@ -26,7 +26,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // Regular users
+        // Regular users (from HEAD)
         $users = [
             ['name' => 'User 1', 'email' => 'user1@sisudah.test'],
             ['name' => 'User 2', 'email' => 'user2@sisudah.test'],
@@ -42,6 +42,11 @@ class DatabaseSeeder extends Seeder
                     'role' => 'user',
                 ]
             );
+        }
+
+        // Call UserSeeder from Incoming if it exists (for additional data)
+        if (class_exists(\Database\Seeders\UserSeeder::class)) {
+            $this->call(\Database\Seeders\UserSeeder::class);
         }
     }
 }

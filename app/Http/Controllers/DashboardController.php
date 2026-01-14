@@ -7,8 +7,17 @@ use App\Models\ReconciliationDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+// Models from Incoming (for public dashboard)
+use App\Models\IndustriPrimer;
+use App\Models\IndustriSekunder;
+use App\Models\Tptkb;
+use App\Models\Perajin;
+
 class DashboardController extends Controller
 {
+    /**
+     * Admin Dashboard (from HEAD) - Reconciliation analytics
+     */
     public function index(Request $request)
     {
         // 1. Filter Parameters
@@ -111,5 +120,23 @@ class DashboardController extends Controller
             'availableWilayah'
         ));
     }
-}
 
+    /**
+     * Public Dashboard (from Incoming) - Industry statistics for public viewing
+     */
+    public function publicIndex()
+    {
+        // Hitung data real dari database dengan TPT structure
+        $statistics = [
+            'primer_pbphh' => IndustriPrimer::count(),
+            'sekunder_pbui' => IndustriSekunder::count(),
+            'tpt_kb' => Tptkb::count(),
+            'perajin' => Perajin::count(),
+        ];
+
+        // Total keseluruhan industri
+        $statistics['total_industri'] = array_sum($statistics);
+
+        return view('dashboard', compact('statistics'));
+    }
+}

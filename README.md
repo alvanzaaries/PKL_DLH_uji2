@@ -1,9 +1,12 @@
-# SISUDAH (Rekonsiliasi PNBP)
+# SISUDAH (Rekonsiliasi PNBP + Visualisasi Data Industri)
 
-Aplikasi web untuk upload & analisis data rekonsiliasi (Excel) per periode (Tahun/Triwulan) dengan pemisahan akses **Admin** dan **User**.
+Aplikasi web gabungan:
+- **Admin/Internal (HEAD)**: Upload & analisis data rekonsiliasi (Excel) per periode (Tahun/Triwulan) dengan pemisahan akses Admin/User.
+- **Public/Visualisasi (Incoming)**: Dashboard publik untuk data industri kehutanan (Primer, Sekunder, TPTKB, Perajin).
 
 ## Fitur Utama
 
+### Modul Admin (Rekonsiliasi)
 - **RBAC (Admin vs User)**
 	- Admin: dashboard statistik, kelola user, lihat semua upload, detail data, download file.
 	- User: upload data, lihat riwayat upload miliknya.
@@ -11,10 +14,17 @@ Aplikasi web untuk upload & analisis data rekonsiliasi (Excel) per periode (Tahu
 - **KPH saat upload** (wajib) dan **filter KPH** di dashboard admin.
 - **Dashboard Admin** dengan filter:
 	- Tahun
-	- Triwulan spesifik, atau **Akumulasi “Sampai Dengan Triwulan”**
+	- Triwulan spesifik, atau **Akumulasi "Sampai Dengan Triwulan"**
 	- KPH
 - **Detail Rekonsiliasi**: ringkasan Nilai LHP, Billing, Setor, total setor, selisih (LHP − Setor), dan rekap per jenis/wilayah/bank.
-- Timezone aplikasi: **Asia/Jakarta (UTC+7)**.
+
+### Modul Publik (Visualisasi)
+- **Dashboard Publik** statistik industri (tanpa login).
+- **Data Industri Primer** (PBPHH).
+- **Data Industri Sekunder** (PBUI).
+- **Data TPTKB**.
+- **Data Perajin**.
+- **Laporan & Rekap** (dengan auth).
 
 ## Tech Stack
 
@@ -23,6 +33,7 @@ Aplikasi web untuk upload & analisis data rekonsiliasi (Excel) per periode (Tahu
 - Vite + Tailwind
 - PhpSpreadsheet (parsing Excel)
 - Default DB: SQLite (bisa diganti MySQL/PostgreSQL)
+- Timezone: **Asia/Jakarta (UTC+7)**
 
 ## Prasyarat
 
@@ -31,8 +42,6 @@ Aplikasi web untuk upload & analisis data rekonsiliasi (Excel) per periode (Tahu
 - Node.js + npm
 
 ## Setup Cepat
-
-Jalankan dari root project.
 
 ### 1) Install dependency
 
@@ -49,7 +58,6 @@ php artisan key:generate
 ```
 
 Pastikan env minimal:
-
 - `APP_URL=http://localhost:8000`
 - `APP_TIMEZONE=Asia/Jakarta`
 
@@ -57,30 +65,19 @@ Pastikan env minimal:
 
 #### Opsi A (default): SQLite
 
-Buat file DB jika belum ada:
-
 ```bash
 type nul > database\database.sqlite
 ```
 
-Lalu pastikan `.env`:
-
+`.env`:
 ```
 DB_CONNECTION=sqlite
 DB_DATABASE=database/database.sqlite
 ```
 
-Jalankan migrasi + seeder:
-
-```bash
-php artisan migrate
-php artisan db:seed
-```
-
 #### Opsi B: MySQL
 
-Atur `.env` (contoh):
-
+`.env`:
 ```
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -90,8 +87,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Lalu:
-
+Lalu jalankan:
 ```bash
 php artisan migrate
 php artisan db:seed
@@ -99,45 +95,42 @@ php artisan db:seed
 
 ### 4) Jalankan aplikasi
 
-Mode dev (server + vite):
-
 ```bash
 npm run dev
 php artisan serve
 ```
 
-Atau pakai script composer (menjalankan beberapa proses sekaligus jika environment mendukung):
-
-```bash
-composer run dev
-```
-
 ## Akun Default (Seeder)
 
-Seeder akan membuat akun berikut (password sama):
-
-- Admin
-	- Email: `admin@sisudah.test`
-	- Password: `password`
-- User
-	- `user1@sisudah.test` / `password`
-	- `user2@sisudah.test` / `password`
-	- `user3@sisudah.test` / `password`
+| Role  | Email                   | Password |
+|-------|-------------------------|----------|
+| Admin | admin@sisudah.test      | password |
+| User  | user1@sisudah.test      | password |
+| User  | user2@sisudah.test      | password |
+| User  | user3@sisudah.test      | password |
 
 ## URL Penting
 
+### Admin/Internal
 - Beranda: `/`
 - Login: `/login`
 - Admin Dashboard: `/dashboard`
 - User Upload: `/user/upload`
 - User Riwayat: `/user/history`
 
-## Format Excel (Upload)
+### Public/Visualisasi
+- Dashboard Publik: `/public/dashboard`
+- Industri Primer: `/industri-primer`
+- Industri Sekunder: `/industri-sekunder`
+- TPTKB: `/tptkb`
+- Perajin: `/perajin`
+- Laporan: `/laporan`
 
-Parser membaca data per sheet dan **mengabaikan sheet yang judulnya mengandung “REKAP”**.
+## Format Excel (Upload Rekonsiliasi)
+
+Parser membaca data per sheet dan **mengabaikan sheet yang judulnya mengandung "REKAP"**.
 
 Mapping kolom utama (format fixed):
-
 - `C` = No LHP
 - `D` = Tgl LHP
 - `E` = Jenis HH
@@ -147,24 +140,6 @@ Mapping kolom utama (format fixed):
 - `I` = No Billing
 - `J` = Tgl Billing
 - `K` = Nilai Billing
-- `L` = Tgl Setor
-- `M` = Bank
-- `N` = NTPN
-- `O` = NTB
-- `P` = Nilai Setor (Rp)
-
-Catatan:
-
-- Tahun, Triwulan, dan **KPH wajib diisi** pada form upload.
-- KPH disimpan di header rekonsiliasi dan dipakai untuk filter dashboard admin.
-
-## Troubleshooting
-
-- Jika setelah update view tidak berubah: jalankan `php artisan view:clear`.
-- Jika pakai `SESSION_DRIVER=database` dan muncul error table `sessions` tidak ada:
-	- Opsi cepat: ubah `.env` menjadi `SESSION_DRIVER=file`, atau
-	- Buat tabel sessions: `php artisan session:table` lalu `php artisan migrate`.
-
-## Lisensi
-
-Project ini menggunakan framework Laravel (MIT) dan dependensi open-source lainnya.
+- `L` = No NTPN/Setor
+- `M` = Tgl Setor
+- `N` = Nilai Setor
