@@ -137,6 +137,6 @@ class DashboardController extends Controller
         // Total keseluruhan industri
         $statistics['total_industri'] = array_sum($statistics);
 
-        return view('dashboard', compact('statistics'));
+        return view('public.dashboard', compact('statistics'));
     }
 }
