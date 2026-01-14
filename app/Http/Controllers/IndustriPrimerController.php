@@ -37,11 +37,20 @@ class IndustriPrimerController extends Controller
             'dokumen_izin' => 'nullable|file|mimes:pdf|max:5120', // max 5MB
         ]);
 
-        // Upload dokumen izin jika ada
+        // Upload dokumen izin jika ada dengan penamaan terstruktur
         if ($request->hasFile('dokumen_izin')) {
             $file = $request->file('dokumen_izin');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('dokumen-izin', $fileName, 'public');
+            
+            // Format penamaan: PRIMER_[NAMA]_[TANGGAL]_[RANDOM]
+            $namaClean = preg_replace('/[^A-Za-z0-9]/', '_', $validated['nama']);
+            $namaClean = substr($namaClean, 0, 50); // Batasi panjang nama
+            $tanggal = date('Ymd_His');
+            $random = substr(md5(uniqid()), 0, 6);
+            $fileName = "PRIMER_{$namaClean}_{$tanggal}_{$random}.pdf";
+            
+            // Simpan ke folder dokumen-izin/primer dengan folder per tahun
+            $year = date('Y');
+            $filePath = $file->storeAs("dokumen-izin/primer/{$year}", $fileName, 'public');
             $validated['dokumen_izin'] = $filePath;
         }
 
@@ -97,6 +106,11 @@ class IndustriPrimerController extends Controller
             $query->where('kapasitas_izin', $request->kapasitas);
         }
 
+        // Filter berdasarkan tahun (dari created_at)
+        if ($request->filled('tahun')) {
+            $query->whereYear('created_at', $request->tahun);
+        }
+
         // Ambil data dengan pagination
         $industriPrimer = $query->latest()->paginate(10);
 
@@ -122,7 +136,44 @@ class IndustriPrimerController extends Controller
                 ->pluck('kabupaten');
         });
 
-        return view('industri-primer.index', compact('industriPrimer', 'kabupatenList'));
+        // Data untuk visualisasi chart — gunakan DATA YANG SAMA dengan hasil filter
+        // Ambil semua record dari query yang sudah diberi filter (clone agar paginate tetap bekerja)
+        $filteredData = (clone $query)->get();
+
+        // 1. Distribusi perusahaan per tahun (berdasarkan created_at)
+        $yearStats = $filteredData->groupBy(function($item) {
+            return $item->created_at->format('Y');
+        })->map->count()->sortKeys();
+
+        // 2. Distribusi lokasi industri (Top 5 Kabupaten)
+        $locationStats = $filteredData->groupBy('industri.kabupaten')
+            ->map->count()
+            ->sortDesc()
+            ->take(5);
+
+        // 3. Distribusi berdasarkan kapasitas izin
+        $capacityStats = $filteredData->groupBy(function($item) {
+            $capacity = $item->kapasitas_izin;
+            // Cek dengan format yang sesuai dengan data di database
+            if (strpos($capacity, '0 - 1999') !== false || strpos($capacity, '0-1999') !== false) {
+                return '0-1999 m³/tahun';
+            }
+            if (strpos($capacity, '2000 - 5999') !== false || strpos($capacity, '2000-5999') !== false) {
+                return '2000-5999 m³/tahun';
+            }
+            if (strpos($capacity, '>= 6000') !== false || strpos($capacity, '>=6000') !== false) {
+                return '>=6000 m³/tahun';
+            }
+            return 'Lainnya';
+        })->map->count();
+
+        return view('industri-primer.index', compact(
+            'industriPrimer', 
+            'kabupatenList',
+            'yearStats',
+            'locationStats',
+            'capacityStats'
+        ));
     }
 
     /**
@@ -157,7 +208,7 @@ class IndustriPrimerController extends Controller
         $industriPrimer = IndustriPrimer::findOrFail($id);
         $industri = \App\Models\IndustriBase::findOrFail($industriPrimer->industri_id);
 
-        // Handle file upload jika ada file baru
+        // Handle file upload jika ada file baru dengan penamaan terstruktur
         if ($request->hasFile('dokumen_izin')) {
             // Hapus file lama jika ada
             if ($industriPrimer->dokumen_izin) {
@@ -165,8 +216,17 @@ class IndustriPrimerController extends Controller
             }
 
             $file = $request->file('dokumen_izin');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('dokumen-izin', $fileName, 'public');
+            
+            // Format penamaan: PRIMER_[NAMA]_[TANGGAL]_[RANDOM]
+            $namaClean = preg_replace('/[^A-Za-z0-9]/', '_', $validated['nama']);
+            $namaClean = substr($namaClean, 0, 50); // Batasi panjang nama
+            $tanggal = date('Ymd_His');
+            $random = substr(md5(uniqid()), 0, 6);
+            $fileName = "PRIMER_{$namaClean}_{$tanggal}_{$random}.pdf";
+            
+            // Simpan ke folder dokumen-izin/primer dengan folder per tahun
+            $year = date('Y');
+            $filePath = $file->storeAs("dokumen-izin/primer/{$year}", $fileName, 'public');
             $validated['dokumen_izin'] = $filePath;
         }
 
@@ -216,5 +276,29 @@ class IndustriPrimerController extends Controller
 
         return redirect()->route('industri-primer.index')
             ->with('success', "Perusahaan \"$namaPerusahaan\" berhasil dihapus!");
+    }
+
+    /**
+     * Download dokumen izin
+     */
+    public function downloadDokumen($id)
+    {
+        $industriPrimer = IndustriPrimer::with('industri')->findOrFail($id);
+        
+        if (!$industriPrimer->dokumen_izin) {
+            return redirect()->back()->with('error', 'Dokumen tidak ditemukan!');
+        }
+
+        $filePath = storage_path('app/public/' . $industriPrimer->dokumen_izin);
+        
+        if (!file_exists($filePath)) {
+            return redirect()->back()->with('error', 'File tidak ditemukan di server!');
+        }
+
+        // Generate nama file yang user-friendly untuk download
+        $namaFile = preg_replace('/[^A-Za-z0-9]/', '_', $industriPrimer->industri->nama);
+        $downloadName = "Dokumen_Izin_{$namaFile}.pdf";
+
+        return response()->download($filePath, $downloadName);
     }
 }

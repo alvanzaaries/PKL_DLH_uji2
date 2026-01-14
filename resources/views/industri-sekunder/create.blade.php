@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Industri Sekunder - SIIPPHH</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
+@extends('layouts.sidebar')
+
+@section('title', 'Tambah Industri Sekunder')
+
+@push('styles')
+<style>
         :root {
             --primary: #0f172a;
             --accent: #15803d;
@@ -31,9 +29,9 @@
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 100%;
+            margin: 0 ;
+            padding: 20px 30px;
         }
 
         /* Navigation */
@@ -254,23 +252,11 @@
                 width: 100%;
             }
         }
-    </style>
-</head>
-<body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-content">
-            <div class="logo-area">
-                <span style="font-size: 24px;"></span>
-                <span class="logo-text">Industri Sekunder (PBUI)</span>
-            </div>
-            <a href="{{ route('industri-sekunder.index') }}" class="back-link">
-                ← Kembali 
-            </a>
-        </div>
-    </nav>
+</style>
+@endpush
 
-    <div class="container">
+@section('content')
+<div class="container">
         <!-- Page Header -->
         <div class="page-header">
             <h1 class="page-title">Tambah Industri Sekunder (PBUI)</h1>
@@ -436,9 +422,9 @@
                             required
                         >
                             <option value="">-- Pilih Kapasitas Izin --</option>
-                            <option value="0-1999" {{ old('kapasitas_izin') == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
-                            <option value="2000-5999" {{ old('kapasitas_izin') == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
-                            <option value=">= 6000" {{ old('kapasitas_izin') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
+                            <option value="0 - 1999 m³/tahun" {{ old('kapasitas_izin') == '0 - 1999 m³/tahun' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
+                            <option value="2000 - 5999 m³/tahun" {{ old('kapasitas_izin') == '2000 - 5999 m³/tahun' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
+                            <option value=">= 6000 m³/tahun" {{ old('kapasitas_izin') == '>= 6000 m³/tahun' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
                         </select>
                         @error('kapasitas_izin')
                             <div class="error-message">{{ $message }}</div>
@@ -477,7 +463,8 @@
         </div>
     </div>
 
-    <script>
+@push('scripts')
+<script>
         // Load data kabupaten Jawa Tengah dari API wilayah.id
         // ID Provinsi Jawa Tengah = 33
         document.addEventListener('DOMContentLoaded', function() {
@@ -520,5 +507,5 @@
             }, 5000);
         }
     </script>
-</body>
-</html>
+@endpush
+@endsection

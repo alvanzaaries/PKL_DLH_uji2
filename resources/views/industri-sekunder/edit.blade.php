@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Industri Sekunder</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
+@extends('layouts.sidebar')
+
+@section('title', 'Edit Industri Sekunder')
+
+@push('styles')
+<style>
         :root {
             --primary: #0f172a;
             --accent: #15803d;
@@ -30,9 +28,9 @@
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 100%;
+            margin: 0 ;
+            padding: 20px 30px;
         }
 
         /* Navigation */
@@ -44,7 +42,7 @@
         }
 
         .nav-content {
-            max-width: 900px;
+            max-width: 100%;
             margin: 0 auto;
             padding: 0 20px;
             display: flex;
@@ -221,21 +219,9 @@
             }
         }
     </style>
-</head>
-<body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-content">
-            <div class="logo-area">
-                <span style="font-size: 24px;">🌲</span>
-                <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
-            </div>
-            <a href="{{ route('industri-sekunder.index') }}" class="back-link">
-                ← Kembali ke Daftar
-            </a>
-        </div>
-    </nav>
+@endpush
 
+@section('content')
     <div class="container">
         <div class="form-card">
             <div class="form-header">
@@ -326,9 +312,9 @@
                     <label class="form-label">Kapasitas Izin <span class="required">*</span></label>
                     <select name="kapasitas_izin" class="form-select" required>
                         <option value="">-- Pilih Kapasitas --</option>
-                        <option value="0-1999" {{ old('kapasitas_izin', $industriSekunder->kapasitas_izin) == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
-                        <option value="2000-5999" {{ old('kapasitas_izin', $industriSekunder->kapasitas_izin) == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
-                        <option value=">= 6000" {{ old('kapasitas_izin', $industriSekunder->kapasitas_izin) == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
+                        <option value="<= 2000" {{ old('kapasitas_izin', $industriSekunder->kapasitas_izin) == '<= 2000' ? 'selected' : '' }}><= 2000 m³/tahun</option>
+                        <option value="2001 - 6000" {{ old('kapasitas_izin', $industriSekunder->kapasitas_izin) == '2001 - 6000' ? 'selected' : '' }}>2001 - 6000 m³/tahun</option>
+                        <option value=">= 6001" {{ old('kapasitas_izin', $industriSekunder->kapasitas_izin) == '>= 6001' ? 'selected' : '' }}>>= 6001 m³/tahun</option>
                     </select>
                 </div>
 
@@ -343,7 +329,9 @@
             </form>
         </div>
     </div>
+@endsection
 
+@push('scripts')
     <script>
         // Load kabupaten dari API wilayah.id
         async function loadKabupaten() {
@@ -391,5 +379,4 @@
             });
         });
     </script>
-</body>
-</html>
+@endpush

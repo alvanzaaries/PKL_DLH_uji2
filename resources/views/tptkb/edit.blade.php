@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit TPT-KB</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
+@extends('layouts.sidebar')
+
+@section('title', 'Edit TPT-KB')
+
+@push('styles')
+<style>
         :root {
             --primary: #0f172a;
             --accent: #15803d;
@@ -30,9 +28,9 @@
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 100%;
+            margin: 0 ;
+            padding: 20px 30px;
         }
 
         nav {
@@ -43,7 +41,7 @@
         }
 
         .nav-content {
-            max-width: 900px;
+            max-width: 100%;
             margin: 0 auto;
             padding: 0 20px;
             display: flex;
@@ -231,20 +229,9 @@
             }
         }
     </style>
-</head>
-<body>
-    <nav>
-        <div class="nav-content">
-            <div class="logo-area">
-                <span style="font-size: 24px;">🌲</span>
-                <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
-            </div>
-            <a href="{{ route('tptkb.index') }}" class="back-link">
-                ← Kembali ke Daftar
-            </a>
-        </div>
-    </nav>
+@endpush
 
+@section('content')
     <div class="container">
         <div class="form-card">
             <div class="page-header">
@@ -404,7 +391,9 @@
             </form>
         </div>
     </div>
+@endsection
 
+@push('scripts')
     <script>
         // Load kabupaten dari API
         async function loadKabupaten() {
@@ -448,5 +437,4 @@
             });
         }, 5000);
     </script>
-</body>
-</html>
+@endpush

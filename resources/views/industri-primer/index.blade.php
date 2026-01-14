@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Industri Primer (PBPHH)</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --primary: #0f172a;
@@ -24,7 +25,7 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             line-height: 1.6;
@@ -248,7 +249,7 @@
 
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             margin-bottom: 20px;
         }
@@ -272,7 +273,7 @@
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 14px;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             transition: border-color 0.2s;
         }
 
@@ -357,50 +358,40 @@
         }
 
         thead {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #15803d 0%, #166534 100%);
         }
 
         th {
             padding: 16px;
             text-align: left;
             font-weight: 600;
-            color: #333;
+            color: #ffffff;
             font-size: 14px;
-            border-bottom: 2px solid #e0e0e0;
+            border-bottom: 3px solid #14532d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         td {
             padding: 16px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #e5e7eb;
             font-size: 14px;
-            color: #555;
+            color: #374151;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: #ffffff;
         }
 
         tbody tr:hover {
-            background: #f8f9fa;
-        }
-
-        .badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        .badge-success {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .badge-danger {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .badge-warning {
-            background: #fff3cd;
-            color: #856404;
+            background: #dbeafe;
+            transform: scale(1.001);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
         }
 
         .action-buttons {
@@ -409,37 +400,118 @@
         }
 
         .btn-action {
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 500;
             border: none;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
+            transition: all 0.2s;
         }
 
         .btn-view {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #2563eb;
         }
 
         .btn-edit {
-            background: #fef3c7;
-            color: #92400e;
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #059669;
         }
 
         .btn-delete {
-            background: #fee2e2;
-            color: #991b1b;
+            background: #ef4444;
+            color: white;
         }
 
         .btn-delete:hover {
-            background: #fecaca;
+            background: #dc2626;
         }
 
-        .btn-action:hover {
-            opacity: 0.8;
+        .btn-document {
+            background: #dc2626;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-document:hover {
+            background: #b91c1c;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-document i {
+            font-size: 14px;
+        }
+
+        /* Select2 Custom Styling */
+        .select2-container--default .select2-selection--single {
+            height: 42px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 12px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 28px;
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--accent);
+        }
+
+        /* Statistics Section */
+        .statistics-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin: 0 auto;
         }
 
         /* Pagination */
@@ -585,49 +657,6 @@
             grid-column: 1 / -1;
         }
 
-        .document-section {
-            background: #f8fafc;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 25px;
-            border: 1px solid var(--border);
-        }
-
-        .document-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 15px;
-        }
-
-        .btn-download {
-            background: var(--accent);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .btn-download:hover {
-            background: #166534;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
-        }
-
-        .no-document {
-            color: #94a3b8;
-            font-style: italic;
-            font-size: 14px;
-        }
-
         .alert {
             padding: 14px 18px;
             border-radius: 8px;
@@ -724,7 +753,7 @@
                 <span class="menu-text">Industri Primer</span>
             </a>
             
-            <a href="{{ route('industri-sekunder.index') }}" class="menu-item {{ request()->routeIs('industri-sekunder.*') ? 'active' : '' }}">
+            <a href="{{ route('industri-primer.index') }}" class="menu-item {{ request()->routeIs('industri-primer.*') ? 'active' : '' }}">
                 <i class="fas fa-microchip menu-icon"></i>
                 <span class="menu-text">Industri Sekunder</span>
             </a>
@@ -738,6 +767,28 @@
                 <i class="fas fa-tools menu-icon"></i>
                 <span class="menu-text">Perajin</span>
             </a>
+            
+            <div style="margin-top: 30px; padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                @guest
+                <a href="{{ route('login', ['from' => url()->current()]) }}" class="menu-item" style="background: rgba(76, 175, 80, 0.2); border-radius: 8px; justify-content: center;">
+                    <i class="fas fa-sign-in-alt menu-icon"></i>
+                    <span class="menu-text" style="font-weight: 600;">Login Admin</span>
+                </a>
+                @else
+                <div style="color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; text-align: center;">
+                    <i class="fas fa-user-circle" style="font-size: 36px; margin-bottom: 8px;"></i>
+                    <div style="font-size: 13px; font-weight: 600;">{{ Auth::user()->name }}</div>
+                    <div style="font-size: 11px; opacity: 0.7;">{{ Auth::user()->email }}</div>
+                </div>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="menu-item" style="width: 100%; background: rgba(239, 68, 68, 0.2); border: none; cursor: pointer; border-radius: 8px; justify-content: center;">
+                        <i class="fas fa-sign-out-alt menu-icon"></i>
+                        <span class="menu-text" style="font-weight: 600;">Logout</span>
+                    </button>
+                </form>
+                @endguest
+            </div>
         </div>
     </div>
 
@@ -751,39 +802,66 @@
                     <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px;">
+                    @auth
                     <div class="user-info">
-                        <div class="user-avatar">A</div>
-                        <span style="font-size: 14px; font-weight: 500;">Admin</span>
+                        <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+                        <span style="font-size: 14px; font-weight: 500;">{{ Auth::user()->name }}</span>
                     </div>
+                    @else
+                    <a href="{{ route('login', ['from' => url()->current()]) }}" style="padding: 8px 20px; background: var(--accent); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: all 0.2s;">
+                        <i class="fas fa-sign-in-alt"></i> Portal Login
+                    </a>
+                    @endauth
                 </div>
             </div>
-        </nav>
-
-        <div class="container">
-        <!-- Alert Messages -->
-        @if(session('success'))
-            <div class="alert alert-success">
-                <span style="font-size: 20px;">✓</span>
+            
+            <!-- Alert Messages -->
+            @if(session('success'))
+            <div class="alert alert-success" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
+                <span style="font-size: 20px;">?</span>
                 <span>{{ session('success') }}</span>
             </div>
-        @endif
+            @endif
 
-        @if(session('error'))
-            <div class="alert alert-error">
-                <span style="font-size: 20px;">⚠</span>
+            @if(session('error'))
+            <div class="alert alert-error" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
+                <span style="font-size: 20px;">?</span>
                 <span>{{ session('error') }}</span>
             </div>
-        @endif
+            @endif
+        </nav>
+
+        <script>
+            // Auto-hide alerts after 1.5 seconds
+            document.addEventListener('DOMContentLoaded', function() {
+                const alerts = document.querySelectorAll('.alert');
+                if (alerts.length > 0) {
+                    setTimeout(function() {
+                        alerts.forEach(function(alert) {
+                            alert.style.transition = 'opacity 0.3s ease';
+                            alert.style.opacity = '0';
+                            setTimeout(function() {
+                                alert.remove();
+                            }, 300);
+                        });
+                    }, 1500);
+                }
+            });
+        </script>
+
+        <div class="container">
 
         <!-- Page Header -->
         <div class="page-header">
             <div>
-                <h1 class="page-title">Data Industri Primer (PBPHH)</h1>
-                <p class="page-subtitle">Daftar perusahaan industri primer pengelolaan hasil hutan</p>
+                <h1 class="page-title">Data Industri Sekunder (PBUI)</h1>
+                <p class="page-subtitle">Daftar perusahaan industri sekunder pengolahan hasil hutan</p>
             </div>
+            @auth
             <a href="{{ route('industri-primer.create') }}" class="btn btn-primary">
                 <span>+</span> Tambah Data Baru
             </a>
+            @endauth
         </div>
 
         <!-- Filter Section -->
@@ -814,12 +892,46 @@
                             <option value=">= 6000" {{ request('kapasitas') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
                         </select>
                     </div>
+                    <div class="filter-group">
+                        <label>Tahun</label>
+                        <select name="tahun" class="filter-input">
+                            <option value="">-- Semua Tahun --</option>
+                            @php
+                                $currentYear = \Carbon\Carbon::now('Asia/Jakarta')->format('Y');
+                                for ($year = $currentYear; $year >= 2020; $year--) {
+                                    echo "<option value='$year' " . (request('tahun') == $year ? 'selected' : '') . ">$year</option>";
+                                }
+                            @endphp
+                        </select>
+                    </div>
                 </div>
                 <div class="filter-actions">
-                    <button type="submit" class="btn-filter">Cari Data</button>
+                    <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
                     <a href="{{ route('industri-primer.index') }}" class="btn-reset">↻ Reset Filter</a>
                 </div>
             </form>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="statistics-section">
+            <div class="stat-card">
+                <h3>📊 Sebaran Per Tahun</h3>
+                <div class="chart-container">
+                    <canvas id="chartTahun"></canvas>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3>🗺️ Sebaran Kabupaten/Kota</h3>
+                <div class="chart-container">
+                    <canvas id="chartKabupaten"></canvas>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3>📦 Sebaran Kapasitas Izin</h3>
+                <div class="chart-container">
+                    <canvas id="chartKapasitas"></canvas>
+                </div>
+            </div>
         </div>
 
         <!-- Table Card -->
@@ -858,14 +970,15 @@
                             <td>{{ $item->industri->nomor_izin }}</td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn-action btn-view" onclick='showDetail(@json($item))'>👁 Lihat</button>
-                                    <a href="{{ route('industri-primer.edit', $item->id) }}" class="btn-action btn-edit">✏️ Edit</a>
-                                    
+                                    <button class="btn-action btn-view" onclick='showDetail(@json($item))'>Lihat</button>
+                                    @auth
+                                    <a href="{{ route('industri-primer.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
                                     <form action="{{ route('industri-primer.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('{{ $item->industri->nama }}')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn-action btn-delete">🗑️ Hapus</button>
+                                        <button type="submit" class="btn-action btn-delete">Hapus</button>
                                     </form>
+                                    @endauth
                                 </div>
                             </td>
                         </tr>
@@ -874,7 +987,7 @@
                 </table>
                 @else
                 <div class="empty-state">
-                    <div class="empty-state-icon">📂</div>
+                    <div class="empty-state-icon">??</div>
                     <div class="empty-state-text">Tidak ada data ditemukan</div>
                     <p style="font-size: 14px;">Silakan ubah filter atau tambah data baru</p>
                 </div>
@@ -888,23 +1001,14 @@
             @endif
         </div>
     </div>
+    </div>
+    <!-- End Main Wrapper -->
 
     <!-- Modal Detail Perusahaan -->
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px; vertical-align: middle; opacity: 0.8;">
-                        <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
-                        <line x1="9" y1="22" x2="9" y2="2"></line>
-                        <line x1="15" y1="22" x2="15" y2="2"></line>
-                        <line x1="18" y1="6" x2="6" y2="6"></line>
-                        <line x1="18" y1="10" x2="6" y2="10"></line>
-                        <line x1="18" y1="14" x2="6" y2="14"></line>
-                        <line x1="18" y1="18" x2="6" y2="18"></line>
-                    </svg> 
-                    Detail Perusahaan
-                </h2>
+                <h2 class="modal-title">?? Detail Perusahaan</h2>
                 <span class="close-btn" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body">
@@ -945,15 +1049,9 @@
                         <div class="detail-label">Kapasitas Izin</div>
                         <div class="detail-value" id="modal-kapasitas">-</div>
                     </div>
-                </div>
-
-                <!-- Dokumen Izin Section -->
-                <div class="document-section">
-                    <div class="document-title">
-                        📄 Dokumen Izin
-                    </div>
-                    <div id="document-content">
-                        <!-- Will be filled by JavaScript -->
+                    <div class="detail-item detail-item-full">
+                        <div class="detail-label">Dokumen Izin</div>
+                        <div class="detail-value" id="modal-dokumen">-</div>
                     </div>
                 </div>
             </div>
@@ -973,19 +1071,20 @@
             document.getElementById('modal-jenis-produksi').textContent = item.jenis_produksi;
             document.getElementById('modal-kapasitas').textContent = item.kapasitas_izin;
 
-            // Dokumen izin
-            const documentContent = document.getElementById('document-content');
+            // Handle dokumen izin
+            const dokumenElement = document.getElementById('modal-dokumen');
             if (item.dokumen_izin) {
-                documentContent.innerHTML = `
+                dokumenElement.innerHTML = `
                     <a href="/storage/${item.dokumen_izin}" 
                        target="_blank" 
-                       class="btn-download" 
-                       download>
-                        📥 Download Dokumen Izin (PDF)
+                       style="color: #15803d; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500;">
+                        <i class="fas fa-file-pdf" style="color: #dc2626;"></i>
+                        <span>Download Dokumen Izin</span>
+                        <i class="fas fa-external-link-alt" style="font-size: 12px;"></i>
                     </a>
                 `;
             } else {
-                documentContent.innerHTML = '<p class="no-document">Tidak ada dokumen yang diupload</p>';
+                dokumenElement.innerHTML = '<span style="color: #94a3b8;">Tidak ada dokumen</span>';
             }
 
             // Tampilkan modal
@@ -1016,5 +1115,120 @@
             return confirm(`Apakah Anda yakin ingin menghapus perusahaan "${namaPerusahaan}"?\n\nData yang dihapus tidak dapat dikembalikan!`);
         }
     </script>
+
+    <!-- Select2 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('select[name="kabupaten"]').select2({
+                placeholder: '-- Pilih Kabupaten/Kota --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Generate Statistics Charts - Menggunakan data dari Controller
+            // Chart Tahun
+            const ctxTahun = document.getElementById('chartTahun').getContext('2d');
+            new Chart(ctxTahun, {
+                type: 'doughnut',
+                data: {
+                    labels: {!! json_encode($yearStats->keys()) !!},
+                    datasets: [{
+                        data: {!! json_encode($yearStats->values()) !!},
+                        backgroundColor: [
+                            '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6', '#a855f7',
+                            '#9333ea', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.parsed;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = ((value / total) * 100).toFixed(1);
+                                    return label + ': ' + value + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart Kabupaten
+            const ctxKabupaten = document.getElementById('chartKabupaten').getContext('2d');
+            new Chart(ctxKabupaten, {
+                type: 'doughnut',
+                data: {
+                    labels: {!! json_encode($locationStats->keys()) !!},
+                    datasets: [{
+                        data: {!! json_encode($locationStats->values()) !!},
+                        backgroundColor: [
+                            '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a',
+                            '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe', '#eff6ff',
+                            '#0ea5e9', '#0284c7', '#0369a1', '#075985', '#0c4a6e'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.parsed;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = ((value / total) * 100).toFixed(1);
+                                    return label + ': ' + value + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart Kapasitas
+            const ctxKapasitas = document.getElementById('chartKapasitas').getContext('2d');
+            new Chart(ctxKapasitas, {
+                type: 'doughnut',
+                data: {
+                    labels: {!! json_encode($capacityStats->keys()) !!},
+                    datasets: [{
+                        data: {!! json_encode($capacityStats->values()) !!},
+                        backgroundColor: ['#f59e0b', '#d97706', '#b45309']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.parsed;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = ((value / total) * 100).toFixed(1);
+                                    return label + ': ' + value + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
+

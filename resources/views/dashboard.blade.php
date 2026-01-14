@@ -133,6 +133,18 @@
             gap: 10px;
         }
 
+        .alert-success {
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+            color: #065f46;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            color: #991b1b;
+        }
+
         /* Stats Grid */
         .stats-grid {
             display: grid;
@@ -250,13 +262,62 @@
                 <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
             </div>
             <ul class="nav-links">
-                <li><a href="#">Beranda</a></li>
+                <li><a href="{{ route('dashboard') }}">Beranda</a></li>
                 <li><a href="#">Data Publik</a></li>
                 <li><a href="#">Regulasi</a></li>
-                <li><a href="#" class="btn-login">Portal Login</a></li>
+                @guest
+                <li><a href="{{ route('login') }}" class="btn-login">Portal Login</a></li>
+                @else
+                <li style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 14px; font-weight: 500; color: var(--text-main);">{{ Auth::user()->name }}</span>
+                    <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        @csrf
+                        <button type="submit" style="background: #fee2e2; color: #991b1b; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.2s;">
+                            Logout
+                        </button>
+                    </form>
+                </li>
+                @endguest
             </ul>
         </div>
+        
+        <!-- Alert Messages -->
+        @if(session('success'))
+        <div class="alert-mini alert-success" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: 1px solid #e2e8f0;">
+            <div class="container" style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 18px;">✓</span>
+                <span>{{ session('success') }}</span>
+            </div>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert-mini alert-error" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: 1px solid #e2e8f0;">
+            <div class="container" style="display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 18px;">⚠</span>
+                <span>{{ session('error') }}</span>
+            </div>
+        </div>
+        @endif
     </nav>
+
+    <script>
+        // Auto-hide alerts after 1.5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert-mini');
+            if (alerts.length > 0) {
+                setTimeout(function() {
+                    alerts.forEach(function(alert) {
+                        alert.style.transition = 'opacity 0.3s ease';
+                        alert.style.opacity = '0';
+                        setTimeout(function() {
+                            alert.remove();
+                        }, 300);
+                    });
+                }, 1500);
+            }
+        });
+    </script>
 
     <header class="hero">
         <div class="container">

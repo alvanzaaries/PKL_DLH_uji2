@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Perajin</title>
+    <title>Data Industri Sekunder (IPHHK)</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
@@ -33,6 +33,7 @@
             margin: 0;
         }
 
+        /* Sidebar */
         .sidebar {
             width: 260px;
             background: linear-gradient(180deg, rgb(26, 64, 48) 0%, #0f2a22 100%);
@@ -121,6 +122,7 @@
             padding: 20px;
         }
 
+        /* Navigation */
         nav {
             background: var(--white);
             border-bottom: 1px solid var(--border);
@@ -150,6 +152,21 @@
             color: var(--primary);
         }
 
+        .back-link {
+            text-decoration: none;
+            color: var(--accent);
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: opacity 0.2s;
+        }
+
+        .back-link:hover {
+            opacity: 0.7;
+        }
+
         .user-info {
             display: flex;
             align-items: center;
@@ -172,6 +189,7 @@
             font-size: 14px;
         }
 
+        /* Header Section */
         .page-header {
             background: var(--white);
             padding: 30px;
@@ -220,22 +238,7 @@
             box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
         }
 
-        .alert {
-            padding: 14px 18px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-
+        /* Filter Section */
         .filter-card {
             background: var(--white);
             padding: 25px;
@@ -246,9 +249,14 @@
 
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
         }
 
         .filter-group label {
@@ -265,7 +273,8 @@
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 14px;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            transition: border-color 0.2s;
         }
 
         .filter-input:focus {
@@ -310,6 +319,7 @@
             background: #e2e8f0;
         }
 
+        /* Table */
         .table-card {
             background: var(--white);
             border-radius: 12px;
@@ -338,6 +348,8 @@
 
         .table-container {
             overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
         }
 
         table {
@@ -388,33 +400,71 @@
         }
 
         .btn-action {
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 500;
             border: none;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
+            transition: all 0.2s;
         }
 
         .btn-view {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #3b82f6;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #2563eb;
         }
 
         .btn-edit {
-            background: #fef3c7;
-            color: #92400e;
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #059669;
         }
 
         .btn-delete {
-            background: #fee2e2;
-            color: #991b1b;
+            background: #ef4444;
+            color: white;
         }
 
-        .btn-action:hover {
-            opacity: 0.8;
+        .btn-delete:hover {
+            background: #dc2626;
+        }
+
+        /* Select2 Custom Styling */
+        .select2-container--default .select2-selection--single {
+            height: 42px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 12px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 28px;
+            color: var(--text-main);
+            font-size: 14px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+        }
+
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: var(--accent);
         }
 
         /* Statistics Section */
@@ -446,11 +496,35 @@
             margin: 0 auto;
         }
 
+        /* Pagination */
         .pagination {
             margin-top: 30px;
             display: flex;
             justify-content: center;
             gap: 8px;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 8px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            color: var(--text-main);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .pagination a:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .pagination .active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
         }
 
         .empty-state {
@@ -459,6 +533,12 @@
             color: #999;
         }
 
+        .empty-state h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -532,6 +612,7 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 20px;
+            margin-bottom: 25px;
         }
 
         .detail-item {
@@ -557,10 +638,87 @@
         .detail-item-full {
             grid-column: 1 / -1;
         }
+
+        .alert {
+            padding: 14px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        @media (max-width: 1024px) {
+            .filter-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .main-wrapper {
+                margin-left: 220px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+            }
+
+            .btn-search, .btn-reset {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .sidebar {
+                width: 70px;
+            }
+
+            .main-wrapper {
+                margin-left: 70px;
+            }
+
+            .menu-text {
+                display: none;
+            }
+
+            .sidebar-title {
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
+    <!-- Sidebar Navigation -->
     <div class="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-logo">AL</div>
@@ -646,6 +804,13 @@
                 <span>{{ session('success') }}</span>
             </div>
             @endif
+
+            @if(session('error'))
+            <div class="alert alert-error" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
+                <span style="font-size: 20px;">⚠</span>
+                <span>{{ session('error') }}</span>
+            </div>
+            @endif
         </nav>
 
         <script>
@@ -668,146 +833,164 @@
 
         <div class="container">
 
-            <div class="page-header">
-                <div>
-                    <h1 class="page-title">Data Perajin / End User</h1>
-                    <p class="page-subtitle">Daftar Perajin dan Pengguna Akhir</p>
-                </div>
-                @auth
-                <a href="{{ route('perajin.create') }}" class="btn btn-primary">
-                    + Tambah Data Baru
-                </a>
-                @endauth
+        <!-- Page Header -->
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Data Industri Sekunder (PBUI)</h1>
+                <p class="page-subtitle">Daftar perusahaan industri sekunder pengolahan hasil hutan</p>
             </div>
+            @auth
+            <a href="{{ route('industri-sekunder.create') }}" class="btn btn-primary">
+                <span>+</span> Tambah Data Baru
+            </a>
+            @endauth
+        </div>
 
-            <div class="filter-card">
-                <form method="GET" action="{{ route('perajin.index') }}">
-                    <div class="filter-grid">
-                        <div class="filter-group">
-                            <label>Nama Perusahaan</label>
-                            <input type="text" name="search" class="filter-input" placeholder="Cari nama atau nomor izin..." value="{{ request('search') }}">
-                        </div>
-                        <div class="filter-group">
-                            <label>Kabupaten/Kota</label>
-                            <select name="kabupaten" class="filter-input">
-                                <option value="">-- Pilih Kabupaten/Kota --</option>
-                                @foreach($kabupatenList as $kabupaten)
-                                    <option value="{{ $kabupaten }}" {{ request('kabupaten') == $kabupaten ? 'selected' : '' }}>
-                                        {{ $kabupaten }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Tahun</label>
-                            <select name="tahun" class="filter-input">
-                                <option value="">-- Semua Tahun --</option>
-                                @php
-                                    $currentYear = \Carbon\Carbon::now('Asia/Jakarta')->format('Y');
-                                    for ($year = $currentYear; $year >= 2020; $year--) {
-                                        echo "<option value='$year' " . (request('tahun') == $year ? 'selected' : '') . ">$year</option>";
-                                    }
-                                @endphp
-                            </select>
-                        </div>
+        <!-- Filter Section -->
+        <div class="filter-card">
+            <form method="GET" action="{{ route('industri-sekunder.index') }}">
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label>Nama Perusahaan</label>
+                        <input type="text" name="nama" class="filter-input" placeholder="Cari nama perusahaan..." value="{{ request('nama') }}">
                     </div>
-                    <div class="filter-actions">
-                        <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
-                        <a href="{{ route('perajin.index') }}" class="btn-reset">↻ Reset Filter</a>
+                    <div class="filter-group">
+                        <label>Kabupaten/Kota</label>
+                        <select name="kabupaten" class="filter-input">
+                            <option value="">-- Pilih Kabupaten/Kota --</option>
+                            @foreach($kabupatenList as $kabupaten)
+                                <option value="{{ $kabupaten }}" {{ request('kabupaten') == $kabupaten ? 'selected' : '' }}>
+                                    {{ $kabupaten }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
-                </form>
-            </div>
-
-            <!-- Statistics Section -->
-            <div class="statistics-section">
-                <div class="stat-card">
-                    <h3>📊 Sebaran Per Tahun</h3>
-                    <div class="chart-container">
-                        <canvas id="chartTahun"></canvas>
+                    <div class="filter-group">
+                        <label>Kapasitas Izin</label>
+                        <select name="kapasitas" class="filter-input">
+                            <option value="">-- Semua Kapasitas --</option>
+                            <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
+                            <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
+                            <option value=">= 6000" {{ request('kapasitas') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Tahun</label>
+                        <select name="tahun" class="filter-input">
+                            <option value="">-- Semua Tahun --</option>
+                            @php
+                                $currentYear = \Carbon\Carbon::now('Asia/Jakarta')->format('Y');
+                                for ($year = $currentYear; $year >= 2020; $year--) {
+                                    echo "<option value='$year' " . (request('tahun') == $year ? 'selected' : '') . ">$year</option>";
+                                }
+                            @endphp
+                        </select>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <h3>🗺️ Sebaran Kabupaten/Kota</h3>
-                    <div class="chart-container">
-                        <canvas id="chartKabupaten"></canvas>
-                    </div>
+                <div class="filter-actions">
+                    <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
+                    <a href="{{ route('industri-sekunder.index') }}" class="btn-reset">↻ Reset Filter</a>
                 </div>
-                <div class="stat-card">
-                    <h3>📋 Sebaran Jenis Usaha</h3>
-                    <div class="chart-container">
-                        <canvas id="chartJenis"></canvas>
-                    </div>
+            </form>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="statistics-section">
+            <div class="stat-card">
+                <h3>📊 Sebaran Per Tahun</h3>
+                <div class="chart-container">
+                    <canvas id="chartTahun"></canvas>
                 </div>
             </div>
-
-            <div class="table-card">
-                <div class="table-header">
-                    <h2 class="table-title">Daftar Perajin</h2>
-                    <div class="result-count">
-                        Total: <strong>{{ $perajin->total() }}</strong> perajin
-                    </div>
+            <div class="stat-card">
+                <h3>🗺️ Sebaran Kabupaten/Kota</h3>
+                <div class="chart-container">
+                    <canvas id="chartKabupaten"></canvas>
                 </div>
-
-                <div class="table-container">
-                    @if($perajin->count() > 0)
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>No</th>
-                                    <th>Nama Perusahaan</th>
-                                    <th>Nomor Izin</th>
-                                    <th>Kabupaten/Kota</th>
-                                    <th>Penanggung Jawab</th>
-                                    <th>Kontak</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($perajin as $index => $item)
-                                    <tr>
-                                        <td>{{ $perajin->firstItem() + $index }}</td>
-                                        <td>{{ $item->industri->nama }}</td>
-                                        <td>{{ $item->industri->nomor_izin }}</td>
-                                        <td>{{ $item->industri->kabupaten }}</td>
-                                        <td>{{ $item->industri->penanggungjawab }}</td>
-                                        <td>{{ $item->industri->kontak }}</td>
-                                        <td>
-                                            <div class="action-buttons">
-                                                <button class="btn-action btn-view" onclick='showDetail(@json($item))'><i class="fas fa-info-circle"></i> Lihat</button>
-                                                @auth
-                                                <a href="{{ route('perajin.edit', $item) }}" class="btn-action btn-edit"><i class="fas fa-pen"></i> Edit</a>
-                                                <form action="{{ route('perajin.destroy', $item) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn-action btn-delete"><i class="fas fa-times"></i> Hapus</button>
-                                                </form>
-                                                @endauth
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <div class="pagination">
-                            {{ $perajin->links() }}
-                        </div>
-                    @else
-                        <div class="empty-state">
-                            <div style="font-size: 48px;">📂</div>
-                            <div style="font-size: 18px; margin: 10px 0;">Tidak ada data ditemukan</div>
-                            <p style="font-size: 14px;">Silakan ubah filter atau tambah data baru</p>
-                        </div>
-                    @endif
+            </div>
+            <div class="stat-card">
+                <h3>📦 Sebaran Kapasitas Izin</h3>
+                <div class="chart-container">
+                    <canvas id="chartKapasitas"></canvas>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal Detail -->
+        <!-- Table Card -->
+        <div class="table-card">
+            <div class="table-header">
+                <h2 class="table-title">Daftar Perusahaan</h2>
+                <div class="result-count">
+                    Total: <strong>{{ $industriSekunder->total() }}</strong> perusahaan
+                </div>
+            </div>
+
+            <div class="table-container">
+                @if($industriSekunder->count() > 0)
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Perusahaan</th>
+                            <th>Kabupaten/Kota</th>
+                            <th>Penanggung Jawab</th>
+                            <th>Jenis Produksi</th>
+                            <th>Kapasitas Izin</th>
+                            <th>Nomor Izin</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($industriSekunder as $index => $item)
+                        <tr>
+                            <td>{{ $industriSekunder->firstItem() + $index }}</td>
+                            <td><strong>{{ $item->industri->nama }}</strong></td>
+                            <td>{{ $item->industri->kabupaten }}</td>
+                            <td>{{ $item->industri->penanggungjawab }}</td>
+                            <td>{{ $item->jenis_produksi }}</td>
+                            <td>{{ $item->kapasitas_izin }}</td>
+                            <td>{{ $item->industri->nomor_izin }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-action btn-view" onclick='showDetail(@json($item))'>Lihat</button>
+                                    @auth
+                                    <a href="{{ route('industri-sekunder.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
+                                    <form action="{{ route('industri-sekunder.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('{{ $item->industri->nama }}')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-action btn-delete">Hapus</button>
+                                    </form>
+                                    @endauth
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                @else
+                <div class="empty-state">
+                    <div class="empty-state-icon">📂</div>
+                    <div class="empty-state-text">Tidak ada data ditemukan</div>
+                    <p style="font-size: 14px;">Silakan ubah filter atau tambah data baru</p>
+                </div>
+                @endif
+            </div>
+
+            @if($industriSekunder->hasPages())
+            <div class="pagination">
+                {{ $industriSekunder->appends(request()->query())->links() }}
+            </div>
+            @endif
+        </div>
+    </div>
+    </div>
+    <!-- End Main Wrapper -->
+
+    <!-- Modal Detail Perusahaan -->
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">🎨 Detail Perajin</h2>
+                <h2 class="modal-title">📋 Detail Perusahaan</h2>
                 <span class="close-btn" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body">
@@ -836,6 +1019,18 @@
                         <div class="detail-label">Kontak</div>
                         <div class="detail-value" id="modal-kontak">-</div>
                     </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Pemberi Izin</div>
+                        <div class="detail-value" id="modal-pemberi-izin">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Jenis Produksi</div>
+                        <div class="detail-value" id="modal-jenis-produksi">-</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Kapasitas Izin</div>
+                        <div class="detail-value" id="modal-kapasitas">-</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -843,13 +1038,18 @@
 
     <script>
         function showDetail(item) {
+            // Populate modal dengan data
             document.getElementById('modal-nama').textContent = item.industri.nama;
             document.getElementById('modal-nomor-izin').textContent = item.industri.nomor_izin;
             document.getElementById('modal-alamat').textContent = item.industri.alamat;
             document.getElementById('modal-kabupaten').textContent = item.industri.kabupaten;
             document.getElementById('modal-penanggungjawab').textContent = item.industri.penanggungjawab;
             document.getElementById('modal-kontak').textContent = item.industri.kontak;
+            document.getElementById('modal-pemberi-izin').textContent = item.pemberi_izin;
+            document.getElementById('modal-jenis-produksi').textContent = item.jenis_produksi;
+            document.getElementById('modal-kapasitas').textContent = item.kapasitas_izin;
 
+            // Tampilkan modal
             document.getElementById('detailModal').style.display = 'block';
         }
 
@@ -857,6 +1057,7 @@
             document.getElementById('detailModal').style.display = 'none';
         }
 
+        // Close modal ketika click di luar modal
         window.onclick = function(event) {
             const modal = document.getElementById('detailModal');
             if (event.target == modal) {
@@ -864,20 +1065,17 @@
             }
         }
 
+        // Close modal dengan ESC key
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeModal();
             }
         });
 
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert-success');
-            alerts.forEach(alert => {
-                alert.style.transition = 'opacity 0.5s';
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 500);
-            });
-        }, 5000);
+        // Konfirmasi delete
+        function confirmDelete(namaPerusahaan) {
+            return confirm(`Apakah Anda yakin ingin menghapus perusahaan "${namaPerusahaan}"?\n\nData yang dihapus tidak dapat dikembalikan!`);
+        }
     </script>
 
     <!-- Select2 JS -->
@@ -894,27 +1092,40 @@
             // Generate Statistics Charts
             @php
                 // Statistik Tahun (dari created_at)
-                $tahunStats = $perajin->groupBy(function($item) {
+                $tahunStats = $industriSekunder->groupBy(function($item) {
                     return \Carbon\Carbon::parse($item->created_at)->format('Y');
                 })->map(function($group) {
                     return $group->count();
                 })->sortKeys();
 
                 // Statistik Kabupaten
-                $kabupatenStats = $perajin->groupBy('industri.kabupaten')->map(function($group) {
+                $kabupatenStats = $industriSekunder->groupBy('industri.kabupaten')->map(function($group) {
                     return $group->count();
                 })->sortByDesc(function($count) {
                     return $count;
                 });
 
-                // Statistik Jenis Usaha (menggunakan jenis_usaha dari tabel perajin)
-                $jenisStats = $perajin->groupBy(function($item) {
-                    return $item->jenis_usaha ?? 'Lainnya';
-                })->map(function($group) {
-                    return $group->count();
-                })->sortByDesc(function($count) {
-                    return $count;
-                })->take(8);
+                // Statistik Kapasitas
+                $range1 = $industriSekunder->filter(function($item) {
+                    $kapasitas = (float) preg_replace('/[^0-9.]/', '', $item->kapasitas_izin);
+                    return $kapasitas < 2000;
+                })->count();
+                
+                $range2 = $industriSekunder->filter(function($item) {
+                    $kapasitas = (float) preg_replace('/[^0-9.]/', '', $item->kapasitas_izin);
+                    return $kapasitas >= 2000 && $kapasitas < 6000;
+                })->count();
+                
+                $range3 = $industriSekunder->filter(function($item) {
+                    $kapasitas = (float) preg_replace('/[^0-9.]/', '', $item->kapasitas_izin);
+                    return $kapasitas >= 6000;
+                })->count();
+                
+                $kapasitasStats = collect([
+                    '0-1999 m³' => $range1,
+                    '2000-5999 m³' => $range2,
+                    '≥6000 m³' => $range3
+                ]);
             @endphp
 
             // Chart Tahun
@@ -986,18 +1197,15 @@
                 }
             });
 
-            // Chart Jenis Usaha
-            const ctxJenis = document.getElementById('chartJenis').getContext('2d');
-            new Chart(ctxJenis, {
+            // Chart Kapasitas
+            const ctxKapasitas = document.getElementById('chartKapasitas').getContext('2d');
+            new Chart(ctxKapasitas, {
                 type: 'doughnut',
                 data: {
-                    labels: {!! json_encode($jenisStats->keys()) !!},
+                    labels: {!! json_encode($kapasitasStats->keys()) !!},
                     datasets: [{
-                        data: {!! json_encode($jenisStats->values()) !!},
-                        backgroundColor: [
-                            '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6', 
-                            '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'
-                        ]
+                        data: {!! json_encode($kapasitasStats->values()) !!},
+                        backgroundColor: ['#f59e0b', '#d97706', '#b45309']
                     }]
                 },
                 options: {

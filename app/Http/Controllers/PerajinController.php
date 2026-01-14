@@ -31,6 +31,11 @@ class PerajinController extends Controller
             });
         }
 
+        // Filter berdasarkan tahun (dari created_at)
+        if ($request->filled('tahun')) {
+            $query->whereYear('created_at', $request->tahun);
+        }
+
         $perajin = $query->latest()->paginate(10);
         
         // Get kabupaten list untuk filter dari perajin yang ada
@@ -97,17 +102,18 @@ class PerajinController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Perajin $perajin)
+    public function edit($id)
     {
-        $perajin->load('industri');
+        $perajin = Perajin::with('industri')->findOrFail($id);
         return view('perajin.edit', compact('perajin'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Perajin $perajin)
+    public function update(Request $request, $id)
     {
+        $perajin = Perajin::with('industri')->findOrFail($id);
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'nomor_izin' => 'required|string|max:100|unique:industries,nomor_izin,' . $perajin->industri_id,

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\IndustriPrimer;
 use App\Models\IndustriSekunder;
-use App\Models\TptKb;
+use App\Models\Tptkb;
 use App\Models\Perajin;
 
 class DashboardController extends Controller
@@ -16,7 +16,7 @@ class DashboardController extends Controller
         $statistics = [
             'primer_pbphh' => IndustriPrimer::count(),
             'sekunder_pbui' => IndustriSekunder::count(),
-            'tpt_kb' => TptKb::count(),
+            'tpt_kb' => Tptkb::count(),
             'perajin' => Perajin::count(),
         ];
 

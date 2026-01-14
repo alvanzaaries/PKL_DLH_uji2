@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Industri Primer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
+@extends('layouts.sidebar')
+
+@section('title', 'Edit Industri Primer')
+
+@push('styles')
+<style>
         :root {
             --primary: #0f172a;
             --accent: #15803d;
@@ -30,9 +28,9 @@
         }
 
         .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
+            max-width: 100%;
+            margin: 0 ;
+            padding: 20px 30px;
         }
 
         /* Navigation */
@@ -44,7 +42,7 @@
         }
 
         .nav-content {
-            max-width: 900px;
+            max-width: 100%;
             margin: 0 auto;
             padding: 0 20px;
             display: flex;
@@ -151,13 +149,127 @@
         }
 
         .file-upload-wrapper {
-            position: relative;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            background: #f8fafc;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .file-upload-wrapper:hover {
+            border-color: var(--accent);
+            background: #f0fdf4;
+        }
+
+        .file-upload-wrapper.has-file {
+            border-color: var(--accent);
+            background: #f0fdf4;
+            border-style: solid;
+        }
+
+        .file-upload-icon {
+            font-size: 48px;
+            color: #94a3b8;
+            margin-bottom: 12px;
+        }
+
+        .file-upload-icon i {
+            display: block;
+        }
+
+        .file-upload-text {
+            font-size: 14px;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .file-upload-text strong {
+            color: var(--accent);
+            cursor: pointer;
+        }
+
+        .file-upload-text strong:hover {
+            text-decoration: underline;
+        }
+
+        .file-preview {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .file-preview.show {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-preview-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-preview-icon {
+            width: 40px;
+            height: 40px;
+            background: #fee2e2;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .file-preview-icon i {
+            color: #dc2626;
+        }
+
+        .file-preview-details {
+            text-align: left;
+        }
+
+        .file-preview-name {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .file-preview-size {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .file-remove-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .file-remove-btn:hover {
+            background: #fecaca;
+            transform: scale(1.05);
         }
 
         .file-info {
-            margin-top: 8px;
-            font-size: 13px;
+            font-size: 12px;
             color: #64748b;
+            margin-top: 6px;
         }
 
         .current-file {
@@ -250,26 +362,14 @@
                 padding: 25px;
             }
         }
-    </style>
-</head>
-<body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-content">
-            <div class="logo-area">
-                <span style="font-size: 24px;">🌲</span>
-                <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
-            </div>
-            <a href="{{ route('industri-primer.index') }}" class="back-link">
-                ← Kembali ke Daftar
-            </a>
-        </div>
-    </nav>
+</style>
+@endpush
 
-    <div class="container">
-        <div class="form-card">
-            <div class="form-header">
-                <h1 class="form-title">✏️ Edit Data Industri Primer</h1>
+@section('content')
+<div class="container">
+    <div class="form-card">
+        <div class="form-header">
+            <h1 class="form-title">Edit Data Industri Primer</h1>
                 <p class="form-subtitle">Perbarui informasi perusahaan industri primer (PBPHH)</p>
             </div>
 
@@ -296,7 +396,7 @@
 
                 <!-- Data Perusahaan -->
                 <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent);">
-                    🏢 Data Perusahaan
+                    Data Perusahaan
                 </h3>
 
                 <div class="form-group">
@@ -337,7 +437,7 @@
 
                 <!-- Data Produksi -->
                 <h3 style="font-size: 18px; color: var(--primary); margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent);">
-                    📦 Data Produksi & Izin
+                    Data Produksi & Izin
                 </h3>
 
                 <div class="form-row">
@@ -367,14 +467,44 @@
                     
                     @if($industriPrimer->dokumen_izin)
                         <div class="current-file">
-                            <span>📄 File saat ini:</span>
-                            <a href="/storage/{{ $industriPrimer->dokumen_izin }}" target="_blank">Lihat Dokumen</a>
+                            <span style="color: #64748b;">File saat ini:</span>
+                            <a href="{{ asset('storage/' . $industriPrimer->dokumen_izin) }}" target="_blank">
+                                <i class="fas fa-file-pdf" style="color: #dc2626;"></i> Lihat Dokumen
+                            </a>
                         </div>
                     @endif
 
-                    <input type="file" name="dokumen_izin" class="form-input" accept=".pdf" style="margin-top: 10px;">
-                    <div class="file-info">
-                        Upload file PDF baru jika ingin mengganti (maksimal 5MB). Kosongkan jika tidak ingin mengubah.
+                    <div class="file-upload-wrapper" id="fileUploadWrapper" style="margin-top: 10px;">
+                        <div class="file-upload-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="file-upload-text">
+                            <strong onclick="document.getElementById('dokumenInput').click()">Klik untuk pilih file baru</strong> atau drag & drop
+                        </div>
+                        <div class="file-info">
+                            Format: PDF | Maksimal: 5 MB | Kosongkan jika tidak ingin mengubah
+                        </div>
+                        <input 
+                            type="file" 
+                            id="dokumenInput"
+                            name="dokumen_izin" 
+                            accept=".pdf"
+                            style="display: none;"
+                        >
+                    </div>
+                    <div class="file-preview" id="filePreview">
+                        <div class="file-preview-info">
+                            <div class="file-preview-icon">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="file-preview-details">
+                                <div class="file-preview-name" id="fileName"></div>
+                                <div class="file-preview-size" id="fileSize"></div>
+                            </div>
+                        </div>
+                        <button type="button" class="file-remove-btn" id="removeFileBtn">
+                            <i class="fas fa-times"></i> Hapus
+                        </button>
                     </div>
                 </div>
 
@@ -390,7 +520,8 @@
         </div>
     </div>
 
-    <script>
+@push('scripts')
+<script>
         // Load kabupaten dari API wilayah.id
         async function loadKabupaten() {
             const kabupatenSelect = document.getElementById('kabupaten');
@@ -422,8 +553,93 @@
             }
         }
 
+        // File upload preview and validation
+        const fileInput = document.getElementById('dokumenInput');
+        const fileUploadWrapper = document.getElementById('fileUploadWrapper');
+        const filePreview = document.getElementById('filePreview');
+        const removeFileBtn = document.getElementById('removeFileBtn');
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function handleFileSelect(file) {
+            if (!file) return;
+
+            // Validasi tipe file
+            if (file.type !== 'application/pdf') {
+                alert('PERINGATAN: Hanya file PDF yang diperbolehkan!');
+                fileInput.value = '';
+                return;
+            }
+
+            // Validasi ukuran file
+            if (file.size > MAX_FILE_SIZE) {
+                alert('PERINGATAN: Ukuran file melebihi 5 MB!\nUkuran file: ' + formatFileSize(file.size));
+                fileInput.value = '';
+                return;
+            }
+
+            // Tampilkan preview
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            fileUploadWrapper.classList.add('has-file');
+            filePreview.classList.add('show');
+        }
+
+        fileInput.addEventListener('change', function(e) {
+            handleFileSelect(e.target.files[0]);
+        });
+
+        removeFileBtn.addEventListener('click', function() {
+            fileInput.value = '';
+            fileUploadWrapper.classList.remove('has-file');
+            filePreview.classList.remove('show');
+        });
+
+        // Drag and drop functionality
+        fileUploadWrapper.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.style.borderColor = 'var(--accent)';
+            this.style.background = '#f0fdf4';
+        });
+
+        fileUploadWrapper.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!this.classList.contains('has-file')) {
+                this.style.borderColor = '#cbd5e1';
+                this.style.background = '#f8fafc';
+            }
+        });
+
+        fileUploadWrapper.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect(files[0]);
+            }
+        });
+
+        // Click anywhere in the wrapper to open file dialog
+        fileUploadWrapper.addEventListener('click', function(e) {
+            if (e.target === this || e.target.classList.contains('file-upload-icon') || 
+                e.target.classList.contains('file-upload-text') || e.target.classList.contains('file-info')) {
+                fileInput.click();
+            }
+        });
+
         // Load data saat halaman dibuka
         loadKabupaten();
     </script>
-</body>
-</html>
+@endpush
+@endsection

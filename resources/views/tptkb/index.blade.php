@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data TPT-KB</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --primary: #0f172a;
@@ -24,7 +25,7 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             line-height: 1.6;
@@ -243,7 +244,7 @@
 
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
             margin-bottom: 20px;
         }
@@ -342,27 +343,40 @@
         }
 
         thead {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #15803d 0%, #166534 100%);
         }
 
         th {
             padding: 16px;
             text-align: left;
             font-weight: 600;
-            color: #333;
+            color: #ffffff;
             font-size: 14px;
-            border-bottom: 2px solid #e0e0e0;
+            border-bottom: 3px solid #14532d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         td {
             padding: 16px;
-            border-bottom: 1px solid #f0f0f0;
+            border-bottom: 1px solid #e5e7eb;
             font-size: 14px;
-            color: #555;
+            color: #374151;
+        }
+
+        tbody tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        tbody tr:nth-child(odd) {
+            background: #ffffff;
         }
 
         tbody tr:hover {
-            background: #f8f9fa;
+            background: #dbeafe;
+            transform: scale(1.001);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            transition: all 0.2s ease;
         }
 
         .badge {
@@ -416,6 +430,35 @@
 
         .btn-action:hover {
             opacity: 0.8;
+        }
+
+        /* Statistics Section */
+        .statistics-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            margin: 0 auto;
         }
 
         .pagination {
@@ -629,6 +672,28 @@
                 <i class="fas fa-tools menu-icon"></i>
                 <span class="menu-text">Perajin</span>
             </a>
+            
+            <div style="margin-top: 30px; padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                @guest
+                <a href="{{ route('login', ['from' => url()->current()]) }}" class="menu-item" style="background: rgba(76, 175, 80, 0.2); border-radius: 8px; justify-content: center;">
+                    <i class="fas fa-sign-in-alt menu-icon"></i>
+                    <span class="menu-text" style="font-weight: 600;">Login Admin</span>
+                </a>
+                @else
+                <div style="color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; text-align: center;">
+                    <i class="fas fa-user-circle" style="font-size: 36px; margin-bottom: 8px;"></i>
+                    <div style="font-size: 13px; font-weight: 600;">{{ Auth::user()->name }}</div>
+                    <div style="font-size: 11px; opacity: 0.7;">{{ Auth::user()->email }}</div>
+                </div>
+                <form action="{{ route('logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="menu-item" style="width: 100%; background: rgba(239, 68, 68, 0.2); border: none; cursor: pointer; border-radius: 8px; justify-content: center;">
+                        <i class="fas fa-sign-out-alt menu-icon"></i>
+                        <span class="menu-text" style="font-weight: 600;">Logout</span>
+                    </button>
+                </form>
+                @endguest
+            </div>
         </div>
     </div>
 
@@ -642,30 +707,57 @@
                     <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px;">
+                    @auth
                     <div class="user-info">
-                        <div class="user-avatar">A</div>
-                        <span style="font-size: 14px; font-weight: 500;">Admin</span>
+                        <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+                        <span style="font-size: 14px; font-weight: 500;">{{ Auth::user()->name }}</span>
                     </div>
+                    @else
+                    <a href="{{ route('login', ['from' => url()->current()]) }}" style="padding: 8px 20px; background: var(--accent); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: all 0.2s;">
+                        <i class="fas fa-sign-in-alt"></i> Portal Login
+                    </a>
+                    @endauth
                 </div>
             </div>
-        </nav>
-
-        <div class="container">
-        @if(session('success'))
-            <div class="alert alert-success">
+            
+            <!-- Alert Messages -->
+            @if(session('success'))
+            <div class="alert alert-success" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
                 <span style="font-size: 20px;">✓</span>
                 <span>{{ session('success') }}</span>
             </div>
-        @endif
+            @endif
+        </nav>
 
+        <script>
+            // Auto-hide alerts after 1.5 seconds
+            document.addEventListener('DOMContentLoaded', function() {
+                const alerts = document.querySelectorAll('.alert');
+                if (alerts.length > 0) {
+                    setTimeout(function() {
+                        alerts.forEach(function(alert) {
+                            alert.style.transition = 'opacity 0.3s ease';
+                            alert.style.opacity = '0';
+                            setTimeout(function() {
+                                alert.remove();
+                            }, 300);
+                        });
+                    }, 1500);
+                }
+            });
+        </script>
+
+        <div class="container">
         <div class="page-header">
             <div>
                 <h1 class="page-title">Data TPT-KB</h1>
                 <p class="page-subtitle">Daftar Tempat Penampungan Tebangan Kayu Bulat</p>
             </div>
+            @auth
             <a href="{{ route('tptkb.create') }}" class="btn btn-primary">
                 <span>+</span> Tambah Data Baru
             </a>
+            @endauth
         </div>
 
         <div class="filter-card">
@@ -695,12 +787,46 @@
                             <option value=">= 6000" {{ request('kapasitas') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
                         </select>
                     </div>
+                    <div class="filter-group">
+                        <label>Tahun</label>
+                        <select name="tahun" class="filter-input">
+                            <option value="">-- Semua Tahun --</option>
+                            @php
+                                $currentYear = \Carbon\Carbon::now('Asia/Jakarta')->format('Y');
+                                for ($year = $currentYear; $year >= 2020; $year--) {
+                                    echo "<option value='$year' " . (request('tahun') == $year ? 'selected' : '') . ">$year</option>";
+                                }
+                            @endphp
+                        </select>
+                    </div>
                 </div>
                 <div class="filter-actions">
-                    <button type="submit" class="btn-filter">🔍 Cari Data</button>
+                    <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
                     <a href="{{ route('tptkb.index') }}" class="btn-reset">↻ Reset Filter</a>
                 </div>
             </form>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="statistics-section">
+            <div class="stat-card">
+                <h3>📊 Sebaran Per Tahun</h3>
+                <div class="chart-container">
+                    <canvas id="chartTahun"></canvas>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3>🗺️ Sebaran Kabupaten/Kota</h3>
+                <div class="chart-container">
+                    <canvas id="chartKabupaten"></canvas>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3>📦 Sebaran Kapasitas Izin</h3>
+                <div class="chart-container">
+                    <canvas id="chartKapasitas"></canvas>
+                </div>
+            </div>
         </div>
 
         <div class="table-card">
@@ -746,13 +872,15 @@
                             </td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn-action btn-view" onclick='showDetail(@json($item), {{ $item->isMasaBerlakuAktif() ? 'true' : 'false' }})'>👁 Lihat</button>
-                                    <a href="{{ route('tptkb.edit', $item->id) }}" class="btn-action btn-edit">✏️ Edit</a>
+                                    <button class="btn-action btn-view" onclick='showDetail(@json($item), {{ $item->isMasaBerlakuAktif() ? 'true' : 'false' }})'>Lihat</button>
+                                    @auth
+                                    <a href="{{ route('tptkb.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
                                     <form action="{{ route('tptkb.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn-action btn-delete">🗑️ Hapus</button>
+                                        <button type="submit" class="btn-action btn-delete">Hapus</button>
                                     </form>
+                                    @endauth
                                 </div>
                             </td>
                         </tr>
@@ -893,6 +1021,120 @@
                 setTimeout(() => alert.remove(), 500);
             });
         }, 5000);
+    </script>
+
+    <!-- Select2 JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('select[name="kabupaten"]').select2({
+                placeholder: '-- Pilih Kabupaten/Kota --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            // Generate Statistics Charts - Menggunakan data dari Controller
+            // Chart Tahun
+            const ctxTahun = document.getElementById('chartTahun').getContext('2d');
+            new Chart(ctxTahun, {
+                type: 'doughnut',
+                data: {
+                    labels: {!! json_encode($yearStats->keys()) !!},
+                    datasets: [{
+                        data: {!! json_encode($yearStats->values()) !!},
+                        backgroundColor: [
+                            '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6', '#a855f7',
+                            '#9333ea', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.parsed;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = ((value / total) * 100).toFixed(1);
+                                    return label + ': ' + value + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart Kabupaten
+            const ctxKabupaten = document.getElementById('chartKabupaten').getContext('2d');
+            new Chart(ctxKabupaten, {
+                type: 'doughnut',
+                data: {
+                    labels: {!! json_encode($locationStats->keys()) !!},
+                    datasets: [{
+                        data: {!! json_encode($locationStats->values()) !!},
+                        backgroundColor: [
+                            '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a',
+                            '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe', '#eff6ff',
+                            '#0ea5e9', '#0284c7', '#0369a1', '#075985', '#0c4a6e'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.parsed;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = ((value / total) * 100).toFixed(1);
+                                    return label + ': ' + value + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Chart Kapasitas
+            const ctxKapasitas = document.getElementById('chartKapasitas').getContext('2d');
+            new Chart(ctxKapasitas, {
+                type: 'doughnut',
+                data: {
+                    labels: {!! json_encode($capacityStats->keys()) !!},
+                    datasets: [{
+                        data: {!! json_encode($capacityStats->values()) !!},
+                        backgroundColor: ['#f59e0b', '#d97706', '#b45309']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.parsed;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = ((value / total) * 100).toFixed(1);
+                                    return label + ': ' + value + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>

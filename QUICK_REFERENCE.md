@@ -116,6 +116,83 @@ resources/views/
 - User authentication & authorization
 - Audit logs untuk tracking changes
 
+## 📄 Document Upload System
+
+### File Storage Structure
+Dokumen izin disimpan dengan struktur folder terorganisir:
+```
+storage/app/public/dokumen-izin/primer/
+├── 2026/
+│   ├── PRIMER_PT_Example_20260114_152345_abc123.pdf
+│   ├── PRIMER_CV_Test_20260114_153012_def456.pdf
+│   └── ...
+├── 2027/
+│   └── ...
+```
+
+### File Naming Convention
+Format: `PRIMER_[NAMA_PERUSAHAAN]_[TANGGAL_JAM]_[RANDOM].pdf`
+- `PRIMER` = Tipe industri
+- `NAMA_PERUSAHAAN` = Nama perusahaan (sanitized, max 50 karakter)
+- `TANGGAL_JAM` = Format YmdHis (20260114_152345)
+- `RANDOM` = 6 karakter hash untuk uniqueness
+
+**Contoh:**
+`PRIMER_PT_Kayu_Lestari_Indonesia_20260114_152345_a1b2c3.pdf`
+
+### Access Methods
+
+#### 1. Via Web Browser (Public URL)
+```
+http://127.0.0.1:8000/storage/dokumen-izin/primer/2026/PRIMER_PT_Example_20260114_152345_abc123.pdf
+```
+
+#### 2. Via Download Button
+Klik tombol "📄 Lihat PDF" di tabel → file dibuka di tab baru
+
+#### 3. Via File Manager
+**Lokasi fisik di server:**
+```
+D:\Laragon-project\PKL_DLH_uji2\storage\app\public\dokumen-izin\primer\2026\
+```
+
+**Cara akses:**
+1. Buka File Explorer
+2. Navigate ke: `D:\Laragon-project\PKL_DLH_uji2\storage\app\public\dokumen-izin\primer\`
+3. Pilih folder tahun (contoh: `2026`)
+4. File PDF ada di sana!
+
+### Validasi Upload
+- **Format:** Hanya PDF (`.pdf`)
+- **Ukuran Maksimal:** 5 MB (5120 KB)
+- **Preview:** Real-time preview dengan nama file dan ukuran
+- **Drag & Drop:** Supported untuk upload yang lebih mudah
+- **Validasi Client-Side:** Cek ukuran dan tipe file sebelum submit
+
+### Important Notes
+⚠️ **Symlink Requirement:**
+File dokumen harus accessible via public URL. Pastikan symbolic link sudah dibuat:
+```bash
+php artisan storage:link
+```
+
+Ini membuat link dari `public/storage` → `storage/app/public`, sehingga file bisa diakses via browser.
+
+### Database Storage
+Field `dokumen_izin` di tabel `industri_primer` menyimpan **relative path**:
+```
+dokumen-izin/primer/2026/PRIMER_PT_Example_20260114_152345_abc123.pdf
+```
+
+### Features
+✅ **Upload dengan Preview** - Lihat nama file dan ukuran sebelum submit  
+✅ **Drag & Drop** - Upload file dengan cara drag file ke area upload  
+✅ **Real-time Validation** - Validasi ukuran dan tipe file langsung  
+✅ **Structured Naming** - Penamaan file terorganisir dan traceable  
+✅ **Year-based Folders** - File dikelompokkan per tahun untuk kemudahan management  
+✅ **Download/View** - Tombol di tabel untuk view PDF langsung di browser  
+✅ **Auto Delete** - File otomatis dihapus saat data industri dihapus
+
 ## 🚀 Server Running
 
 ```bash

@@ -37,6 +37,11 @@ class IndustriSekunderController extends Controller
             $query->where('kapasitas_izin', $request->kapasitas);
         }
 
+        // Filter berdasarkan tahun (dari created_at)
+        if ($request->filled('tahun')) {
+            $query->whereYear('created_at', $request->tahun);
+        }
+
         // Ambil data dengan pagination
         $industriSekunder = $query->latest()->paginate(10);
 
@@ -62,7 +67,42 @@ class IndustriSekunderController extends Controller
                 ->pluck('kabupaten');
         });
 
-        return view('industri-sekunder.index', compact('industriSekunder', 'kabupatenList'));
+        // Data untuk visualisasi chart
+        // 1. Distribusi perusahaan per tahun (berdasarkan created_at)
+        $allData = IndustriSekunder::with('industri')->get();
+        $yearStats = $allData->groupBy(function($item) {
+            return $item->created_at->format('Y');
+        })->map->count()->sortKeys();
+
+        // 2. Distribusi lokasi industri (Top 5 Kabupaten)
+        $locationStats = $allData->groupBy('industri.kabupaten')
+            ->map->count()
+            ->sortDesc()
+            ->take(5);
+
+        // 3. Distribusi berdasarkan kapasitas izin
+        $capacityStats = $allData->groupBy(function($item) {
+            $capacity = $item->kapasitas_izin;
+            // Cek dengan format yang sesuai dengan data di database
+            if (strpos($capacity, '0 - 1999') !== false || strpos($capacity, '0-1999') !== false) {
+                return '0-1999 m³/tahun';
+            }
+            if (strpos($capacity, '2000 - 5999') !== false || strpos($capacity, '2000-5999') !== false) {
+                return '2000-5999 m³/tahun';
+            }
+            if (strpos($capacity, '>= 6000') !== false || strpos($capacity, '>=6000') !== false) {
+                return '>=6000 m³/tahun';
+            }
+            return 'Lainnya';
+        })->map->count();
+
+        return view('industri-sekunder.index', compact(
+            'industriSekunder', 
+            'kabupatenList',
+            'yearStats',
+            'locationStats',
+            'capacityStats'
+        ));
     }
 
     /**
