@@ -31,10 +31,40 @@ class ReconciliationController extends Controller
             ->header('Content-Disposition', 'attachment; filename="' . $file->original_filename . '"');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $reconciliations = Reconciliation::with('uploader')->latest()->get();
-        return view('admin.reconciliations.index', compact('reconciliations'));
+        $query = Reconciliation::query()->with('uploader')->latest();
+
+        if ($year = $request->input('year')) {
+            $query->where('year', (int) $year);
+        }
+
+        if ($quarter = $request->input('quarter')) {
+            $q = (int) $quarter;
+            if ($q >= 1 && $q <= 4) {
+                $query->where('quarter', $q);
+            }
+        }
+
+        if ($search = trim((string) $request->input('search'))) {
+            $query->where(function ($q) use ($search) {
+                $q->where('original_filename', 'like', "%{$search}%")
+                    ->orWhereHas('uploader', function ($uq) use ($search) {
+                        $uq->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        $availableYears = Reconciliation::query()
+            ->select('year')
+            ->distinct()
+            ->orderByDesc('year')
+            ->pluck('year');
+
+        $reconciliations = $query->paginate(10)->withQueryString();
+
+        return view('admin.reconciliations.index', compact('reconciliations', 'availableYears'));
     }
 
     public function create()

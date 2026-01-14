@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('reconciliations', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->year('year');
             $table->tinyInteger('quarter');
+            $table->string('kph')->nullable()->index();
             $table->string('original_filename');
             $table->timestamps();
         });

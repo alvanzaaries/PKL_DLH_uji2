@@ -2,121 +2,171 @@
 
 @section('title', 'Riwayat Rekonsiliasi - SISUDAH')
 @section('header', 'Riwayat Rekonsiliasi')
+@section('subheader', 'Daftar semua proses rekonsiliasi yang telah diunggah ke dalam sistem.')
+
+@section('header_actions')
+    <a href="{{ route('reconciliations.create') }}" class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary_hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all">
+        <span class="material-icons-outlined text-lg mr-2">cloud_upload</span>
+        Upload Data Baru
+    </a>
+@endsection
 
 @section('content')
-<div class="sm:flex sm:items-center sm:justify-between mb-6">
-    <div>
-        {{-- Title moved to header section --}}
-        <p class="mt-2 text-sm text-gray-700">Daftar semua proses rekonsiliasi yang telah diunggah ke dalam sistem.</p>
-        
-    </div>
-    <div class="mt-4 sm:mt-0">
-        <a href="{{ route('reconciliations.create') }}" class="inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-            <svg class="-ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            Upload Data Baru
-        </a>
-    </div>
-</div>
-
-@if (session('success'))
-    <div class="rounded-md bg-green-50 p-4 mb-6 border-l-4 border-green-500">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm font-medium text-green-800">
-                    {{ session('success') }}
-                </p>
+    @if (session('success'))
+        <div class="rounded-md bg-green-50 p-4 border-l-4 border-green-500">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <span class="material-icons-outlined text-green-500">check_circle</span>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                </div>
             </div>
         </div>
-    </div>
-@endif
+    @endif
 
-<div class="bg-white shadow overflow-hidden rounded-lg">
-    <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tahun</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Triwulan</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Diunggah Oleh</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu Upload</th>
-                    <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Aksi</span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @forelse ($reconciliations as $item)
-                    <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item->year }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            @php
-                                $q = (int) $item->quarter;
-                                $badge = match($q) {
-                                    1 => ['bg' => 'bg-blue-100', 'text' => 'text-blue-800', 'label' => 'TW1'],
-                                    2 => ['bg' => 'bg-green-100', 'text' => 'text-green-800', 'label' => 'TW2'],
-                                    3 => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-800', 'label' => 'TW3'],
-                                    4 => ['bg' => 'bg-purple-100', 'text' => 'text-purple-800', 'label' => 'TW4'],
-                                    default => ['bg' => 'bg-gray-100', 'text' => 'text-gray-800', 'label' => 'TW?'],
-                                };
-                            @endphp
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $badge['bg'] }} {{ $badge['text'] }}">
-                                {{ $badge['label'] }} — Triwulan {{ $item->quarter }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <div class="flex items-center">
-                                <svg class="flex-shrink-0 h-5 w-5 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
-                                </svg>
-                                {{ $item->original_filename }}
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            @php($uploader = $item->uploader)
-                            @if($uploader)
-                                @php($isAdmin = ($uploader->role ?? 'user') === 'admin')
-                                <div class="flex items-center gap-2">
-                                    <span class="font-medium text-gray-900">{{ $uploader->name }}</span>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $isAdmin ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
-                                        {{ $isAdmin ? 'Admin' : 'User' }}
-                                    </span>
-                                </div>
-                            @else
-                                <span class="text-gray-400">-</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $item->created_at->format('d M Y, H:i') }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
-                            <a href="{{ route('reconciliations.show', $item->id) }}" class="text-green-600 hover:text-green-900">Detail</a>
-                            <form action="{{ route('reconciliations.destroy', $item->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini? Semua detail data akan ikut terhapus.')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-6 py-10 text-center text-sm text-gray-500">
-                            <div class="flex flex-col items-center justify-center">
-                                <svg class="h-10 w-10 text-gray-400 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                <p>Belum ada data rekonsiliasi.</p>
-                            </div>
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+    <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+        <form method="GET" action="{{ route('reconciliations.index') }}" class="flex flex-col lg:flex-row gap-4 justify-between items-center">
+            <div class="relative w-full lg:w-96 group">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="material-icons-outlined text-gray-400 group-focus-within:text-primary transition-colors">search</span>
+                </div>
+                <input
+                    name="search"
+                    value="{{ request('search') }}"
+                    class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm transition-shadow"
+                    placeholder="Cari file atau user..."
+                    type="text"
+                />
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                <div class="relative w-full sm:w-32">
+                    <select name="year" class="block w-full pl-3 pr-10 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white appearance-none cursor-pointer shadow-sm">
+                        <option value="">Semua Tahun</option>
+                        @foreach(($availableYears ?? []) as $y)
+                            <option value="{{ $y }}" @selected((string)request('year') === (string)$y)>{{ $y }}</option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <span class="material-icons-outlined text-sm">expand_more</span>
+                    </div>
+                </div>
+
+                <div class="relative w-full sm:w-40">
+                    <select name="quarter" class="block w-full pl-3 pr-10 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white appearance-none cursor-pointer shadow-sm">
+                        <option value="">Semua Triwulan</option>
+                        @for($q = 1; $q <= 4; $q++)
+                            <option value="{{ $q }}" @selected((string)request('quarter') === (string)$q)>Triwulan {{ $q }}</option>
+                        @endfor
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                        <span class="material-icons-outlined text-sm">expand_more</span>
+                    </div>
+                </div>
+
+                <button class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm" type="submit">
+                    <span class="material-icons-outlined text-lg mr-2">filter_alt</span>
+                    Terapkan
+                </button>
+
+                @if(request()->filled('search') || request()->filled('year') || request()->filled('quarter'))
+                    <a href="{{ route('reconciliations.index') }}" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
+                        <span class="material-icons-outlined text-lg mr-2">restart_alt</span>
+                        Reset
+                    </a>
+                @endif
+            </div>
+        </form>
     </div>
-</div>
+
+    <div class="bg-surface-light dark:bg-surface-dark shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead class="bg-gray-50 dark:bg-gray-800/50">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Tahun</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Triwulan</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">File</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Diunggah Oleh</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Waktu Upload</th>
+                        <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider" scope="col">Aksi</th>
+                    </tr>
+                </thead>
+
+                <tbody class="bg-surface-light dark:bg-surface-dark divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse ($reconciliations as $item)
+                        @php
+                            $uploader = $item->uploader;
+                            $uName = $uploader?->name ?? '-';
+                            $uInitials = collect(explode(' ', trim((string)$uName)))->filter()->map(fn($p) => mb_substr($p, 0, 1))->take(2)->join('');
+                            $uInitials = $uInitials !== '' ? mb_strtoupper($uInitials) : 'U';
+                            $isAdmin = $uploader && (($uploader->role ?? 'user') === 'admin');
+                        @endphp
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ $item->year }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                                    TW{{ (int)$item->quarter }} — Triwulan {{ $item->quarter }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <span class="material-icons-outlined text-green-500 mr-2 text-xl">description</span>
+                                    <span class="text-sm text-gray-900 dark:text-gray-200 font-medium">{{ $item->original_filename }}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-500 dark:text-gray-400">{{ $uInitials }}</div>
+                                    <div class="ml-3">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $uName }}</div>
+                                        @if($uploader)
+                                            <div class="text-xs text-primary dark:text-primary bg-primary/10 px-1.5 py-0.5 rounded inline-block mt-0.5">{{ $isAdmin ? 'Admin' : 'User' }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $item->created_at->format('d M Y, H:i') }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a class="text-gray-400 hover:text-primary dark:hover:text-primary transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="Detail" href="{{ route('reconciliations.show', $item->id) }}">
+                                        <span class="material-icons-outlined">visibility</span>
+                                    </a>
+                                    <form action="{{ route('reconciliations.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini? Semua detail data akan ikut terhapus.')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20" title="Hapus" type="submit">
+                                            <span class="material-icons-outlined">delete_outline</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr class="bg-gray-50/30 dark:bg-gray-800/20">
+                            <td class="px-6 py-8 text-center text-sm text-gray-400 dark:text-gray-500 italic" colspan="6">Tidak ada data.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if(method_exists($reconciliations, 'total'))
+            <div class="bg-surface-light dark:bg-surface-dark px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
+                <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm text-gray-700 dark:text-gray-400">
+                            Menampilkan <span class="font-medium text-gray-900 dark:text-white">{{ $reconciliations->firstItem() ?? 0 }}</span>
+                            sampai <span class="font-medium text-gray-900 dark:text-white">{{ $reconciliations->lastItem() ?? 0 }}</span>
+                            dari <span class="font-medium text-gray-900 dark:text-white">{{ $reconciliations->total() }}</span> hasil
+                        </p>
+                    </div>
+                    <div>
+                        {{ $reconciliations->onEachSide(1)->links() }}
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
 @endsection

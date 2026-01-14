@@ -49,10 +49,10 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Triwulan</label>
                         <select name="quarter" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 py-2 px-3 border bg-white" required>
-                            <option value="1" {{ old('quarter') == 1 ? 'selected' : '' }}>Triwulan I (Jan - Mar)</option>
-                            <option value="2" {{ old('quarter') == 2 ? 'selected' : '' }}>Triwulan II (Apr - Jun)</option>
-                            <option value="3" {{ old('quarter') == 3 ? 'selected' : '' }}>Triwulan III (Jul - Sep)</option>
-                            <option value="4" {{ old('quarter') == 4 ? 'selected' : '' }}>Triwulan IV (Okt - Des)</option>
+                            <option value="1" {{ old('quarter') == 1 ? 'selected' : '' }}>Triwulan I</option>
+                            <option value="2" {{ old('quarter') == 2 ? 'selected' : '' }}>Triwulan II</option>
+                            <option value="3" {{ old('quarter') == 3 ? 'selected' : '' }}>Triwulan III</option>
+                            <option value="4" {{ old('quarter') == 4 ? 'selected' : '' }}>Triwulan IV</option>
                         </select>
                     </div>
 
