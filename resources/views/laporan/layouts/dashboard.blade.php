@@ -260,6 +260,11 @@
         <nav class="sidebar-menu">
             <div class="menu-label">Main Menu</div>
 
+            <a href="{{ route('welcome') }}" class="nav-link">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+
             <a href="{{ route('data.industri') }}"
                 class="nav-link {{ request()->routeIs('data.industri') || request()->routeIs('industri.laporan') || request()->routeIs('laporan.preview') ? 'active' : '' }}">
                 <i class="fas fa-chart-pie nav-icon"></i> <span>Dashboard & Mon.</span>

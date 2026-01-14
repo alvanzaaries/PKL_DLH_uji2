@@ -12,7 +12,7 @@ use App\Http\Controllers\IndustriSekunderController;
 // Public routes - accessible without login
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
