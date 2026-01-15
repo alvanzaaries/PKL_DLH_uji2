@@ -1,4 +1,4 @@
-@extends('layouts.sidebar')
+@extends('Industri.layouts.sidebar')
 
 @section('title', 'Edit Industri Primer')
 
@@ -443,23 +443,63 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Pemberi Izin <span class="required">*</span></label>
-                        <input type="text" name="pemberi_izin" class="form-input" value="{{ old('pemberi_izin', $industriPrimer->pemberi_izin) }}" placeholder="Contoh: Dinas LHK Jateng" required>
+                        <select name="pemberi_izin" class="form-select" required>
+                            <option value="">-- Pilih Pemberi Izin --</option>
+                            <option value="Menteri Kehutanan" {{ old('pemberi_izin', $industriPrimer->pemberi_izin) == 'Menteri Kehutanan' ? 'selected' : '' }}>Menteri Kehutanan</option>
+                            <option value="BKPM" {{ old('pemberi_izin', $industriPrimer->pemberi_izin) == 'BKPM' ? 'selected' : '' }}>BKPM</option>
+                            <option value="Gubernur" {{ old('pemberi_izin', $industriPrimer->pemberi_izin) == 'Gubernur' ? 'selected' : '' }}>Gubernur</option>
+                            <option value="Bupati/Walikota" {{ old('pemberi_izin', $industriPrimer->pemberi_izin) == 'Bupati/Walikota' ? 'selected' : '' }}>Bupati/Walikota</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label">Jenis Produksi <span class="required">*</span></label>
-                        <input type="text" name="jenis_produksi" class="form-input" value="{{ old('jenis_produksi', $industriPrimer->jenis_produksi) }}" placeholder="Contoh: Kayu Bulat, Kayu Gergajian" required>
+                        <select 
+                            name="jenis_produksi" 
+                            class="form-select" 
+                            id="jenis_produksi_select_edit"
+                            onchange="toggleJenisProduksiInputEdit()"
+                            required
+                        >
+                            <option value="">-- Pilih Jenis Produksi --</option>
+                            <option value="Kayu Gergajian" {{ old('jenis_produksi', $industriPrimer->jenis_produksi) == 'Kayu Gergajian' ? 'selected' : '' }}>Kayu Gergajian</option>
+                            <option value="Kayu Lapis" {{ old('jenis_produksi', $industriPrimer->jenis_produksi) == 'Kayu Lapis' ? 'selected' : '' }}>Kayu Lapis</option>
+                            <option value="Kayu Veneer" {{ old('jenis_produksi', $industriPrimer->jenis_produksi) == 'Kayu Veneer' ? 'selected' : '' }}>Kayu Veneer</option>
+                            <option value="Lainnya" {{ old('jenis_produksi', $industriPrimer->jenis_produksi) == 'Lainnya' || (old('jenis_produksi', $industriPrimer->jenis_produksi) && !in_array(old('jenis_produksi', $industriPrimer->jenis_produksi), ['Kayu Gergajian', 'Kayu Lapis', 'Kayu Veneer'])) ? 'selected' : '' }}>Lainnya</option>
+                        </select>
+                        <input 
+                            type="text" 
+                            name="jenis_produksi_lainnya" 
+                            id="jenis_produksi_lainnya_edit"
+                            class="form-input" 
+                            placeholder="Sebutkan jenis produksi lainnya"
+                            value="{{ !in_array(old('jenis_produksi', $industriPrimer->jenis_produksi), ['Kayu Gergajian', 'Kayu Lapis', 'Kayu Veneer', '']) ? old('jenis_produksi', $industriPrimer->jenis_produksi) : '' }}"
+                            style="{{ !in_array(old('jenis_produksi', $industriPrimer->jenis_produksi), ['Kayu Gergajian', 'Kayu Lapis', 'Kayu Veneer', '']) ? '' : 'display: none;' }} margin-top: 10px;"
+                        >
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Kapasitas Izin <span class="required">*</span></label>
-                    <select name="kapasitas_izin" class="form-select" required>
-                        <option value="">-- Pilih Kapasitas --</option>
-                        <option value="0-1999" {{ old('kapasitas_izin', $industriPrimer->kapasitas_izin) == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
-                        <option value="2000-5999" {{ old('kapasitas_izin', $industriPrimer->kapasitas_izin) == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
-                        <option value=">= 6000" {{ old('kapasitas_izin', $industriPrimer->kapasitas_izin) == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
-                    </select>
+                    <input 
+                        type="text" 
+                        name="kapasitas_izin" 
+                        class="form-input" 
+                        value="{{ old('kapasitas_izin', $industriPrimer->kapasitas_izin) }}" 
+                        placeholder="Contoh: 5000 m³/tahun" 
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tanggal <span class="required">*</span></label>
+                    <input 
+                        type="date" 
+                        name="tanggal" 
+                        class="form-input" 
+                        value="{{ old('tanggal', $industriPrimer->industri->tanggal ?? '') }}" 
+                        required
+                    >
                 </div>
 
                 <div class="form-group">
@@ -640,6 +680,24 @@
 
         // Load data saat halaman dibuka
         loadKabupaten();
+
+        // Toggle jenis produksi input
+        function toggleJenisProduksiInputEdit() {
+            const select = document.getElementById('jenis_produksi_select_edit');
+            const input = document.getElementById('jenis_produksi_lainnya_edit');
+            
+            if (select.value === 'Lainnya') {
+                input.style.display = 'block';
+                input.required = true;
+            } else {
+                input.style.display = 'none';
+                input.required = false;
+                input.value = '';
+            }
+        }
+
+        // Call on page load
+        toggleJenisProduksiInputEdit();
     </script>
 @endpush
 @endsection

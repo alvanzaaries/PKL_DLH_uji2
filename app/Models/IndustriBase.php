@@ -19,6 +19,7 @@ class IndustriBase extends Model
         'kabupaten',
         'kontak',
         'nomor_izin',
+        'tanggal',
         'type',
     ];
 

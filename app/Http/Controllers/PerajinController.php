@@ -70,6 +70,7 @@ class PerajinController extends Controller
             'kabupaten' => $validated['kabupaten'],
             'penanggungjawab' => $validated['penanggungjawab'],
             'kontak' => $validated['kontak'],
+            'tanggal' => $validated['tanggal'],
         ]);
 
         // Create perajin
@@ -116,6 +117,7 @@ class PerajinController extends Controller
             'kabupaten' => $validated['kabupaten'],
             'penanggungjawab' => $validated['penanggungjawab'],
             'kontak' => $validated['kontak'],
+            'tanggal' => $validated['tanggal'],
         ]);
 
         // Update perajin

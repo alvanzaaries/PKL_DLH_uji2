@@ -268,7 +268,7 @@
 
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 20px;
             margin-bottom: 20px;
         }
@@ -767,7 +767,7 @@
             </div>
         </div>
         <div class="sidebar-menu">
-            <a href="{{ url('/') }}" class="menu-item {{ request()->is('/') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <i class="fas fa-th-large menu-icon"></i>
                 <span class="menu-text">Beranda</span>
             </a>
@@ -877,8 +877,8 @@
         <!-- Page Header -->
         <div class="page-header">
             <div>
-                <h1 class="page-title">Data Industri Sekunder (PBUI)</h1>
-                <p class="page-subtitle">Daftar perusahaan industri sekunder pengolahan hasil hutan</p>
+                <h1 class="page-title">Data Industri Primer (IPHHK)</h1>
+                <p class="page-subtitle">Daftar perusahaan industri primer pengolahan hasil hutan kayu</p>
             </div>
             @auth
             <a href="{{ route('industri-primer.create') }}" class="btn btn-primary">
@@ -913,6 +913,24 @@
                             <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
                             <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
                             <option value=">= 6000" {{ request('kapasitas') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Bulan</label>
+                        <select name="bulan" class="filter-input">
+                            <option value="">-- Semua Bulan --</option>
+                            <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
+                            <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
+                            <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
+                            <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
+                            <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
+                            <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
+                            <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
+                            <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
+                            <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
+                            <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
+                            <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
+                            <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -973,6 +991,7 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Perusahaan</th>
+                            <th>Tanggal</th>
                             <th>Kabupaten/Kota</th>
                             <th>Penanggung Jawab</th>
                             <th>Jenis Produksi</th>
@@ -986,6 +1005,7 @@
                         <tr>
                             <td>{{ $industriPrimer->firstItem() + $index }}</td>
                             <td><strong>{{ $item->industri->nama }}</strong></td>
+                            <td>{{ $item->industri->tanggal ? \Carbon\Carbon::parse($item->industri->tanggal)->format('d/m/Y') : '-' }}</td>
                             <td>{{ $item->industri->kabupaten }}</td>
                             <td>{{ $item->industri->penanggungjawab }}</td>
                             <td>{{ $item->jenis_produksi }}</td>
@@ -1044,6 +1064,10 @@
                         <div class="detail-label">Nomor Izin</div>
                         <div class="detail-value" id="modal-nomor-izin">-</div>
                     </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Tanggal</div>
+                        <div class="detail-value" id="modal-tanggal">-</div>
+                    </div>
                     <div class="detail-item detail-item-full">
                         <div class="detail-label">Alamat Lengkap</div>
                         <div class="detail-value" id="modal-alamat">-</div>
@@ -1093,6 +1117,13 @@
             document.getElementById('modal-pemberi-izin').textContent = item.pemberi_izin;
             document.getElementById('modal-jenis-produksi').textContent = item.jenis_produksi;
             document.getElementById('modal-kapasitas').textContent = item.kapasitas_izin;
+            // Tanggal (from parent industri)
+            if(item.industri && item.industri.tanggal) {
+                const t = new Date(item.industri.tanggal);
+                document.getElementById('modal-tanggal').textContent = t.toLocaleDateString('id-ID');
+            } else {
+                document.getElementById('modal-tanggal').textContent = '-';
+            }
 
             // Handle dokumen izin
             const dokumenElement = document.getElementById('modal-dokumen');

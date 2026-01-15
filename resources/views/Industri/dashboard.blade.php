@@ -273,7 +273,7 @@
                 <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
             </div>
             <ul class="nav-links">
-                <li><a href="{{ url('/') }}">Beranda</a></li>
+                <li><a href="{{ route('industri.dashboard') }}">Beranda</a></li>
                 <li><a href="#">Data Publik</a></li>
                 <li><a href="#">Regulasi</a></li>
                 @guest

@@ -223,7 +223,7 @@
             </div>
         </div>
         <div class="sidebar-menu">
-            <a href="{{ url('/') }}" class="menu-item {{ request()->is('/') ? 'active' : '' }}">
+            <a href="{{ route('industri.dashboard') }}" class="menu-item {{ request()->routeIs('industri.dashboard') ? 'active' : '' }}">
                 <i class="fas fa-th-large menu-icon"></i>
                 <span class="menu-text">Beranda</span>
             </a>

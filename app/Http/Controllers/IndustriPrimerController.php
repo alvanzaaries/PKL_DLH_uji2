@@ -32,10 +32,17 @@ class IndustriPrimerController extends Controller
             'kontak' => 'required|string|max:255',
             'pemberi_izin' => 'required|string|max:255',
             'jenis_produksi' => 'required|string|max:255',
+            'jenis_produksi_lainnya' => 'nullable|string|max:255',
             'kapasitas_izin' => 'required|string|max:255',
+            'tanggal' => 'required|date',
             'nomor_izin' => 'required|string|max:255',
             'dokumen_izin' => 'nullable|file|mimes:pdf|max:5120', // max 5MB
         ]);
+
+        // Jika jenis produksi adalah Lainnya, gunakan input manual
+        if ($validated['jenis_produksi'] === 'Lainnya' && $request->filled('jenis_produksi_lainnya')) {
+            $validated['jenis_produksi'] = $validated['jenis_produksi_lainnya'];
+        }
 
         // Upload dokumen izin jika ada dengan penamaan terstruktur
         if ($request->hasFile('dokumen_izin')) {
@@ -62,6 +69,7 @@ class IndustriPrimerController extends Controller
             'kabupaten' => $validated['kabupaten'],
             'kontak' => $validated['kontak'],
             'nomor_izin' => $validated['nomor_izin'],
+            'tanggal' => $validated['tanggal'],
             'type' => 'primer',
         ]);
 
@@ -102,13 +110,35 @@ class IndustriPrimerController extends Controller
         }
 
         // Filter berdasarkan kapasitas izin (dari tabel industri_primer)
+        // Karena kapasitas_izin sekarang VARCHAR, kita extract angka dan bandingkan dengan rentang
         if ($request->filled('kapasitas')) {
-            $query->where('kapasitas_izin', $request->kapasitas);
+            $kapasitasRange = $request->kapasitas;
+            
+            $query->where(function($q) use ($kapasitasRange) {
+                // Extract angka dari string kapasitas_izin menggunakan REGEXP atau CAST
+                // Untuk MySQL: CAST(REGEXP_SUBSTR(kapasitas_izin, '[0-9]+') AS UNSIGNED)
+                // Alternatif lebih portable: filter di PHP setelah query
+                
+                if ($kapasitasRange == '0-1999') {
+                    // Cari data dengan angka 0-1999
+                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) BETWEEN 0 AND 1999");
+                } elseif ($kapasitasRange == '2000-5999') {
+                    // Cari data dengan angka 2000-5999
+                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) BETWEEN 2000 AND 5999");
+                } elseif ($kapasitasRange == '>= 6000') {
+                    // Cari data dengan angka >= 6000
+                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) >= 6000");
+                }
+            });
         }
 
-        // Filter berdasarkan tahun (dari created_at)
+        // Filter berdasarkan tahun dan bulan (dari created_at) dengan logika AND
         if ($request->filled('tahun')) {
             $query->whereYear('created_at', $request->tahun);
+        }
+        
+        if ($request->filled('bulan')) {
+            $query->whereMonth('created_at', $request->bulan);
         }
 
         // Ambil data dengan pagination
@@ -154,14 +184,17 @@ class IndustriPrimerController extends Controller
         // 3. Distribusi berdasarkan kapasitas izin
         $capacityStats = $filteredData->groupBy(function($item) {
             $capacity = $item->kapasitas_izin;
-            // Cek dengan format yang sesuai dengan data di database
-            if (strpos($capacity, '0 - 1999') !== false || strpos($capacity, '0-1999') !== false) {
+            
+            // Extract angka dari string (misal "1500 m³/tahun" -> 1500)
+            preg_match('/\d+/', $capacity, $matches);
+            $numericCapacity = isset($matches[0]) ? (int)$matches[0] : 0;
+            
+            // Kelompokkan berdasarkan rentang numerik
+            if ($numericCapacity >= 0 && $numericCapacity <= 1999) {
                 return '0-1999 m³/tahun';
-            }
-            if (strpos($capacity, '2000 - 5999') !== false || strpos($capacity, '2000-5999') !== false) {
+            } elseif ($numericCapacity >= 2000 && $numericCapacity <= 5999) {
                 return '2000-5999 m³/tahun';
-            }
-            if (strpos($capacity, '>= 6000') !== false || strpos($capacity, '>=6000') !== false) {
+            } elseif ($numericCapacity >= 6000) {
                 return '>=6000 m³/tahun';
             }
             return 'Lainnya';
@@ -199,10 +232,17 @@ class IndustriPrimerController extends Controller
             'kontak' => 'required|string|max:255',
             'pemberi_izin' => 'required|string|max:255',
             'jenis_produksi' => 'required|string|max:255',
+            'jenis_produksi_lainnya' => 'nullable|string|max:255',
             'kapasitas_izin' => 'required|string|max:255',
+            'tanggal' => 'required|date',
             'nomor_izin' => 'required|string|max:255',
             'dokumen_izin' => 'nullable|file|mimes:pdf|max:5120'
         ]);
+
+        // Jika jenis produksi adalah Lainnya, gunakan input manual
+        if ($validated['jenis_produksi'] === 'Lainnya' && $request->filled('jenis_produksi_lainnya')) {
+            $validated['jenis_produksi'] = $validated['jenis_produksi_lainnya'];
+        }
 
         // Find records
         $industriPrimer = IndustriPrimer::findOrFail($id);
@@ -238,6 +278,7 @@ class IndustriPrimerController extends Controller
             'kabupaten' => $validated['kabupaten'],
             'kontak' => $validated['kontak'],
             'nomor_izin' => $validated['nomor_izin'],
+            'tanggal' => $validated['tanggal'],
         ]);
 
         // Update child table (industri_primer)

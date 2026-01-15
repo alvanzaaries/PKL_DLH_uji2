@@ -1,4 +1,4 @@
-@extends('layouts.sidebar')
+@extends('Industri.layouts.sidebar')
 
 @section('title', 'Tambah Industri Primer')
 
@@ -442,14 +442,17 @@
                         <label class="form-label">
                             Pemberi Izin <span class="required">*</span>
                         </label>
-                        <input 
-                            type="text" 
+                        <select 
                             name="pemberi_izin" 
-                            class="form-input" 
-                            placeholder="Instansi pemberi izin"
-                            value="{{ old('pemberi_izin') }}"
+                            class="form-select" 
                             required
                         >
+                            <option value="">-- Pilih Pemberi Izin --</option>
+                            <option value="Menteri Kehutanan" {{ old('pemberi_izin') == 'Menteri Kehutanan' ? 'selected' : '' }}>Menteri Kehutanan</option>
+                            <option value="BKPM" {{ old('pemberi_izin') == 'BKPM' ? 'selected' : '' }}>BKPM</option>
+                            <option value="Gubernur" {{ old('pemberi_izin') == 'Gubernur' ? 'selected' : '' }}>Gubernur</option>
+                            <option value="Bupati/Walikota" {{ old('pemberi_izin') == 'Bupati/Walikota' ? 'selected' : '' }}>Bupati/Walikota</option>
+                        </select>
                         @error('pemberi_izin')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
@@ -462,13 +465,27 @@
                         <label class="form-label">
                             Jenis Produksi <span class="required">*</span>
                         </label>
+                        <select 
+                            name="jenis_produksi" 
+                            class="form-select" 
+                            id="jenis_produksi_select"
+                            onchange="toggleJenisProduksiInput()"
+                            required
+                        >
+                            <option value="">-- Pilih Jenis Produksi --</option>
+                            <option value="Kayu Gergajian" {{ old('jenis_produksi') == 'Kayu Gergajian' ? 'selected' : '' }}>Kayu Gergajian</option>
+                            <option value="Kayu Lapis" {{ old('jenis_produksi') == 'Kayu Lapis' ? 'selected' : '' }}>Kayu Lapis</option>
+                            <option value="Kayu Veneer" {{ old('jenis_produksi') == 'Kayu Veneer' ? 'selected' : '' }}>Kayu Veneer</option>
+                            <option value="Lainnya" {{ old('jenis_produksi') == 'Lainnya' || (old('jenis_produksi') && !in_array(old('jenis_produksi'), ['Kayu Gergajian', 'Kayu Lapis', 'Kayu Veneer'])) ? 'selected' : '' }}>Lainnya</option>
+                        </select>
                         <input 
                             type="text" 
-                            name="jenis_produksi" 
+                            name="jenis_produksi_lainnya" 
+                            id="jenis_produksi_lainnya"
                             class="form-input" 
-                            placeholder="Contoh: Kayu Olahan, Kayu Bulat"
-                            value="{{ old('jenis_produksi') }}"
-                            required
+                            placeholder="Sebutkan jenis produksi lainnya"
+                            value="{{ old('jenis_produksi_lainnya') }}"
+                            style="display: none; margin-top: 10px;"
                         >
                         @error('jenis_produksi')
                             <div class="error-message">{{ $message }}</div>
@@ -479,20 +496,35 @@
                         <label class="form-label">
                             Kapasitas Izin <span class="required">*</span>
                         </label>
-                        <select 
+                        <input 
+                            type="text" 
                             name="kapasitas_izin" 
-                            class="form-select" 
+                            class="form-input" 
+                            placeholder="Contoh: 5000 m³/tahun"
+                            value="{{ old('kapasitas_izin') }}"
                             required
                         >
-                        <option value="">-- Pilih Kapasitas Izin --</option>
-                            <option value="0 - 1999 m³/tahun" {{ old('kapasitas_izin') == '0 - 1999 m³/tahun' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
-                            <option value="2000 - 5999 m³/tahun" {{ old('kapasitas_izin') == '2000 - 5999 m³/tahun' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
-                            <option value=">= 6000 m³/tahun" {{ old('kapasitas_izin') == '>= 6000 m³/tahun' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
-                        </select>
                         @error('kapasitas_izin')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
+                </div>
+
+                <!-- Row: Tanggal -->
+                <div class="form-group">
+                    <label class="form-label">
+                        Tanggal <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="date" 
+                        name="tanggal" 
+                        class="form-input" 
+                        value="{{ old('tanggal') }}"
+                        required
+                    >
+                    @error('tanggal')
+                        <div class="error-message">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <!-- Nomor Izin/NIB/SS -->
@@ -698,6 +730,24 @@
                 setTimeout(() => successAlert.remove(), 300);
             }, 5000);
         }
+
+        // Toggle jenis produksi input
+        function toggleJenisProduksiInput() {
+            const select = document.getElementById('jenis_produksi_select');
+            const input = document.getElementById('jenis_produksi_lainnya');
+            
+            if (select.value === 'Lainnya') {
+                input.style.display = 'block';
+                input.required = true;
+            } else {
+                input.style.display = 'none';
+                input.required = false;
+                input.value = '';
+            }
+        }
+
+        // Call on page load
+        toggleJenisProduksiInput();
     </script>
 @endpush
 @endsection

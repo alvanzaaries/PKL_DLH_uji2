@@ -1,4 +1,4 @@
-@extends('layouts.sidebar')
+@extends('Industri.layouts.sidebar')
 
 @section('title', 'Edit Perajin')
 
@@ -343,6 +343,19 @@
                             required
                             placeholder="Nomor izin usaha">
                         @error('nomor_izin')
+                            <div class="error-message">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tanggal <span class="required">*</span></label>
+                        <input 
+                            type="date" 
+                            name="tanggal" 
+                            class="form-input @error('tanggal') form-error @enderror" 
+                            value="{{ old('tanggal', $perajin->industri->tanggal) }}" 
+                            required>
+                        @error('tanggal')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>

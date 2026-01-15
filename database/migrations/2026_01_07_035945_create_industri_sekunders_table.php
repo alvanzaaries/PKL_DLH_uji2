@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('industri_id')->constrained('industries')->onDelete('cascade');
             $table->string('pemberi_izin');
             $table->string('jenis_produksi'); // jenis produksi/komoditas
-            $table->enum('kapasitas_izin', ['<= 2000', '2001 - 6000', '>= 6001']);
+            $table->string('kapasitas_izin');
             $table->timestamps();
         });
     }
