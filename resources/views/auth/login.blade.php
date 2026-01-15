@@ -1,49 +1,189 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="id">
 
-@section('title', 'Login - SISUDAH')
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DLHK</title>
+    <link rel="icon" href="{{ asset('logo jateng.webp') }}" type="image/webp">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-@section('content')
-<div class="min-h-[60vh] flex items-center justify-center">
-    <div class="w-full max-w-md bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-        <h1 class="text-xl font-semibold text-gray-900">Login</h1>
-        <p class="mt-1 text-sm text-gray-600">Masuk untuk melanjutkan.</p>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a4030 0%, #0f2a22 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            margin: 0 auto 15px;
+            object-fit: contain;
+        }
+
+        .login-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .login-subtitle {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #15803d;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .remember-me input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .remember-me label {
+            font-size: 14px;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: #15803d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-login:hover {
+            background: #166534;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah" class="logo">
+            <h1 class="login-title">Login</h1>
+            <p class="login-subtitle">Dinas Lingkungan Hidup dan Kehutanan</p>
+        </div>
+
+        @if (session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
 
         @if ($errors->any())
-            <div class="mt-4 rounded-md bg-red-50 p-3 border border-red-200 text-sm text-red-700">
-                <ul class="list-disc pl-5">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+            <div class="alert alert-error">
+                {{ $errors->first() }}
             </div>
         @endif
 
-        <form method="POST" action="{{ route('login') }}" class="mt-5 space-y-4">
+        <form method="POST" action="{{ route('login') }}">
             @csrf
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Email</label>
-                <input name="email" type="email" value="{{ old('email') }}" class="mt-1 w-full border rounded-md px-3 py-2" autocomplete="email" required />
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="admin@example.com"
+                    value="{{ old('email') }}" required autofocus autocomplete="email">
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Password</label>
-                <input name="password" type="password" class="mt-1 w-full border rounded-md px-3 py-2" autocomplete="current-password" required />
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-input"
+                    placeholder="Masukkan password" required autocomplete="current-password">
             </div>
 
-            <div class="flex items-center justify-between">
-                <label class="inline-flex items-center text-sm text-gray-600">
-                    <input type="checkbox" name="remember" class="rounded border-gray-300" />
-                    <span class="ml-2">Remember me</span>
-                </label>
+            <div class="remember-me">
+                <input type="checkbox" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
+                <label for="remember">Ingat saya</label>
             </div>
 
-            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-md">Masuk</button>
+            <button type="submit" class="btn-login">Masuk</button>
         </form>
-
-        <div class="mt-4 text-center">
-            <a href="{{ url('/') }}" class="text-sm text-gray-600 hover:text-green-600">&larr; Kembali ke beranda</a>
-        </div>
     </div>
-</div>
-@endsection
+</body>
+
+</html>

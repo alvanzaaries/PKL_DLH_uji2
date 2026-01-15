@@ -64,7 +64,7 @@ class ReconciliationController extends Controller
 
         $reconciliations = $query->paginate(10)->withQueryString();
 
-        return view('admin.reconciliations.index', compact('reconciliations', 'availableYears'));
+        return view('PNBP.admin.reconciliations.index', compact('reconciliations', 'availableYears'));
     }
 
     public function create()
@@ -77,7 +77,7 @@ class ReconciliationController extends Controller
             ->orderBy('kph')
             ->pluck('kph');
 
-        return view('admin.reconciliations.create', compact('kphOptions'));
+        return view('PNBP.admin.reconciliations.create', compact('kphOptions'));
     }
 
     public function show(Request $request, Reconciliation $reconciliation)
@@ -141,7 +141,7 @@ class ReconciliationController extends Controller
         $totalNilaiLhpFinal = $nilaiOverride ? (float) $nilaiOverride->value : $baseTotalNilaiLhp;
         $baseTotalNilaiSetor = (float) ReconciliationDetail::where('reconciliation_id', $reconciliation->id)->sum('setor_nilai');
 
-        return view('admin.reconciliations.show', compact('reconciliation', 'details', 'totalPerSatuan', 'statsJenis', 'statsWilayah', 'statsBank', 'totalNilaiLhpFinal', 'baseTotalNilaiLhp', 'baseTotalNilaiSetor'));
+        return view('PNBP.admin.reconciliations.show', compact('reconciliation', 'details', 'totalPerSatuan', 'statsJenis', 'statsWilayah', 'statsBank', 'totalNilaiLhpFinal', 'baseTotalNilaiLhp', 'baseTotalNilaiSetor'));
     }
 
     public function destroy(Reconciliation $reconciliation)
@@ -432,7 +432,7 @@ class ReconciliationController extends Controller
         if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $m)) $body = $m[1];
         else $body = $html;
 
-        return view('admin.reconciliations.raw', ['reconciliation' => $reconciliation, 'rawHtml' => $body]);
+        return view('PNBP.admin.reconciliations.raw', ['reconciliation' => $reconciliation, 'rawHtml' => $body]);
     }
 
     public function updateSummaryOverrides(Request $request, Reconciliation $reconciliation)

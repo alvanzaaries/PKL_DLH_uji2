@@ -18,7 +18,7 @@ class UserDashboardController extends Controller
             ->orderBy('kph')
             ->pluck('kph');
 
-        return view('user.upload', compact('kphOptions'));
+        return view('PNBP.user.upload', compact('kphOptions'));
     }
 
     public function history(Request $request)
@@ -44,6 +44,6 @@ class UserDashboardController extends Controller
             'total_setor_nilai' => (float) $reconciliations->sum(fn ($r) => (float) ($r->total_setor_nilai ?? 0)),
         ];
 
-        return view('user.history', compact('reconciliations', 'totals'));
+        return view('PNBP.user.history', compact('reconciliations', 'totals'));
     }
 }
