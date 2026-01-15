@@ -8,14 +8,11 @@ use Illuminate\Http\Request;
 
 class PerajinController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $query = Perajin::with('industri');
 
-        // Filter pencarian nama atau nomor izin
+        // Filter pencarian
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('industri', function($q) use ($search) {
@@ -24,41 +21,30 @@ class PerajinController extends Controller
             });
         }
 
-        // Filter kabupaten
-        if ($request->filled('kabupaten')) {
-            $query->whereHas('industri', function($q) use ($request) {
-                $q->where('kabupaten', $request->kabupaten);
-            });
+        // Filter jenis kerajinan
+        if ($request->filled('jenis_kerajinan')) {
+            $query->where('jenis_kerajinan', $request->jenis_kerajinan);
         }
 
-        // Filter berdasarkan tahun (dari created_at)
-        if ($request->filled('tahun')) {
-            $query->whereYear('created_at', $request->tahun);
+        // Filter status
+        if ($request->filled('status')) {
+            if ($request->status === 'aktif') {
+                $query->whereDate('masa_berlaku', '>=', now());
+            } elseif ($request->status === 'kadaluarsa') {
+                $query->whereDate('masa_berlaku', '<', now());
+            }
         }
 
         $perajin = $query->latest()->paginate(10);
-        
-        // Get kabupaten list untuk filter dari perajin yang ada
-        $kabupatenList = \App\Models\IndustriBase::whereHas('perajin')
-            ->distinct()
-            ->pluck('kabupaten')
-            ->sort()
-            ->values();
 
-        return view('Industri.perajin.index', compact('perajin', 'kabupatenList'));
+        return view('industri.perajin.index', compact('perajin'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return view('Industri.perajin.create');
+        return view('industri.perajin.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -68,12 +54,16 @@ class PerajinController extends Controller
             'kabupaten' => 'required|string|max:100',
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:50',
-            'tanggal' => 'required|date',
+            'jenis_kerajinan' => 'required|string|max:255',
+            'bahan_baku' => 'required|string|max:255',
+            'kapasitas_produksi' => 'required|string|max:255',
+            'pemberi_izin' => 'required|string|max:255',
+            'masa_berlaku' => 'required|date',
         ]);
 
         // Create industri base
         $industri = IndustriBase::create([
-            'type' => 'end_user',
+            'jenis_industri' => 'perajin',
             'nama' => $validated['nama'],
             'nomor_izin' => $validated['nomor_izin'],
             'alamat' => $validated['alamat'],
@@ -86,36 +76,25 @@ class PerajinController extends Controller
         // Create perajin
         Perajin::create([
             'industri_id' => $industri->id,
+            'jenis_kerajinan' => $validated['jenis_kerajinan'],
+            'bahan_baku' => $validated['bahan_baku'],
+            'kapasitas_produksi' => $validated['kapasitas_produksi'],
+            'pemberi_izin' => $validated['pemberi_izin'],
+            'masa_berlaku' => $validated['masa_berlaku'],
         ]);
 
-        return redirect()->route('perajin.index')
+        return redirect()->route('industri.perajin.index')
             ->with('success', 'Data perajin berhasil ditambahkan');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Perajin $perajin)
+    public function edit(Perajin $perajin)
     {
         $perajin->load('industri');
-        return view('Industri.perajin.show', compact('perajin'));
+        return view('industri.perajin.edit', compact('perajin'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function update(Request $request, Perajin $perajin)
     {
-        $perajin = Perajin::with('industri')->findOrFail($id);
-        return view('Industri.perajin.edit', compact('perajin'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        $perajin = Perajin::with('industri')->findOrFail($id);
         $validated = $request->validate([
             'nama' => 'required|string|max:255',
             'nomor_izin' => 'required|string|max:100|unique:industries,nomor_izin,' . $perajin->industri_id,
@@ -123,7 +102,11 @@ class PerajinController extends Controller
             'kabupaten' => 'required|string|max:100',
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:50',
-            'tanggal' => 'required|date',
+            'jenis_kerajinan' => 'required|string|max:255',
+            'bahan_baku' => 'required|string|max:255',
+            'kapasitas_produksi' => 'required|string|max:255',
+            'pemberi_izin' => 'required|string|max:255',
+            'masa_berlaku' => 'required|date',
         ]);
 
         // Update industri base
@@ -137,19 +120,23 @@ class PerajinController extends Controller
             'tanggal' => $validated['tanggal'],
         ]);
 
-        return redirect()->route('perajin.index')
+        // Update perajin
+        $perajin->update([
+            'jenis_kerajinan' => $validated['jenis_kerajinan'],
+            'bahan_baku' => $validated['bahan_baku'],
+            'kapasitas_produksi' => $validated['kapasitas_produksi'],
+            'pemberi_izin' => $validated['pemberi_izin'],
+            'masa_berlaku' => $validated['masa_berlaku'],
+        ]);
+
+        return redirect()->route('industri.perajin.index')
             ->with('success', 'Data perajin berhasil diperbarui');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Perajin $perajin)
     {
-        // Delete industri base (cascade akan delete perajin)
-        $perajin->industri->delete();
-        
-        return redirect()->route('perajin.index')
+        $perajin->industri->delete(); // Cascade delete
+        return redirect()->route('industri.perajin.index')
             ->with('success', 'Data perajin berhasil dihapus');
     }
 }

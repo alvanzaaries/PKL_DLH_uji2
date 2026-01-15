@@ -349,7 +349,7 @@
                 <p>{{ $jenisLabel }} - Periode: {{ $periodeLabel }}</p>
             </div>
             <div style="display: flex; gap: 8px;">
-                <a href="{{ route('data.industri') }}" class="btn btn-secondary">
+                <a href="{{ route('pelaporan.index') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Kembali
                 </a>
                 <a href="{{ route('laporan.rekap.export', ['bulan' => $bulan, 'tahun' => $tahun, 'jenis' => $jenis]) }}"

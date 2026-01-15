@@ -244,7 +244,7 @@
         .btn {
             padding: 12px 24px;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 600;   F]
             font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
@@ -758,7 +758,7 @@
             </div>
         </div>
         <div class="sidebar-menu">
-            <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <a href="{{ route('industri.dashboard') }}" class="menu-item {{ request()->routeIs('industri.dashboard') ? 'active' : '' }}">
                 <i class="fas fa-th-large menu-icon"></i>
                 <span class="menu-text">Beranda</span>
             </a>

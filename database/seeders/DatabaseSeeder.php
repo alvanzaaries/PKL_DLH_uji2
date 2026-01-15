@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,6 +16,37 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(UserSeeder::class);
+        // Admin account (from HEAD)
+        User::updateOrCreate(
+            ['email' => 'admin@sisudah.test'],
+            [
+                'name' => 'Administrator',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+            ]
+        );
+
+        // Regular users (from HEAD)
+        $users = [
+            ['name' => 'User 1', 'email' => 'user1@sisudah.test'],
+            ['name' => 'User 2', 'email' => 'user2@sisudah.test'],
+            ['name' => 'User 3', 'email' => 'user3@sisudah.test'],
+        ];
+
+        foreach ($users as $u) {
+            User::updateOrCreate(
+                ['email' => $u['email']],
+                [
+                    'name' => $u['name'],
+                    'password' => Hash::make('password'),
+                    'role' => 'user',
+                ]
+            );
+        }
+
+        // Call UserSeeder from Incoming if it exists (for additional data)
+        if (class_exists(\Database\Seeders\UserSeeder::class)) {
+            $this->call(\Database\Seeders\UserSeeder::class);
+        }
     }
 }

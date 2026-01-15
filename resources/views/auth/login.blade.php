@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Admin DLHK</title>
+    <title>Login - DLHK</title>
     <link rel="icon" href="{{ asset('logo jateng.webp') }}" type="image/webp">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -44,7 +45,6 @@
             margin: 0 auto 15px;
             object-fit: contain;
         }
-        }
 
         .login-title {
             font-size: 24px;
@@ -83,12 +83,6 @@
         .form-input:focus {
             outline: none;
             border-color: #15803d;
-        }
-
-        .error-message {
-            color: #dc2626;
-            font-size: 13px;
-            margin-top: 6px;
         }
 
         .remember-me {
@@ -149,21 +143,22 @@
         }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <div class="logo-section">
             <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah" class="logo">
-            <h1 class="login-title">Login Admin</h1>
+            <h1 class="login-title">Login</h1>
             <p class="login-subtitle">Dinas Lingkungan Hidup dan Kehutanan</p>
         </div>
 
-        @if(session('success'))
+        @if (session('success'))
             <div class="alert alert-success">{{ session('success') }}</div>
         @endif
 
-        @if($errors->any())
+        @if ($errors->any())
             <div class="alert alert-error">
-                {{ $errors->first('email') }}
+                {{ $errors->first() }}
             </div>
         @endif
 
@@ -171,18 +166,18 @@
             @csrf
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" name="email" class="form-input" 
-                       placeholder="admin@example.com" value="{{ old('email') }}" required autofocus>
+                <input type="email" id="email" name="email" class="form-input" placeholder="admin@example.com"
+                    value="{{ old('email') }}" required autofocus autocomplete="email">
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" class="form-input" 
-                       placeholder="Masukkan password" required>
+                <input type="password" id="password" name="password" class="form-input"
+                    placeholder="Masukkan password" required autocomplete="current-password">
             </div>
 
             <div class="remember-me">
-                <input type="checkbox" id="remember" name="remember">
+                <input type="checkbox" id="remember" name="remember" {{ old('remember') ? 'checked' : '' }}>
                 <label for="remember">Ingat saya</label>
             </div>
 
@@ -190,4 +185,5 @@
         </form>
     </div>
 </body>
+
 </html>
