@@ -244,7 +244,7 @@
         .btn {
             padding: 12px 24px;
             border-radius: 8px;
-            font-weight: 600;   F]
+            font-weight: 600;
             font-size: 14px;
             cursor: pointer;
             transition: all 0.2s;
