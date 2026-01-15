@@ -1,4 +1,4 @@
-@extends('laporan/layouts.dashboard')
+@extends('laporan/layouts.layout')
 
 @section('title', 'Monitoring Pelaporan')
 
@@ -446,6 +446,28 @@
                                 {{ $company->nama }}
                             </a>
                             <span class="meta-info">No Izin : {{ $company->nomor_izin ?? 'N/A' }}</span>
+                            @php
+                                $typeLabel = 'N/A';
+                                if(isset($company->type)) {
+                                    switch($company->type) {
+                                        case 'primer':
+                                            $typeLabel = 'Industri Primer';
+                                            break;
+                                        case 'sekunder':
+                                            $typeLabel = 'Industri Sekunder';
+                                            break;
+                                        case 'tpt_kb':
+                                            $typeLabel = 'TPT-KB';
+                                            break;
+                                        case 'end_user':
+                                            $typeLabel = 'End User / Perajin';
+                                            break;
+                                        default:
+                                            $typeLabel = ucfirst($company->type);
+                                    }
+                                }
+                            @endphp
+                            <span class="meta-info">{{ $typeLabel }}</span>
                         </div>
                     </td>
                     <td class="meta-info">{{ $company->kabupaten }}</td>

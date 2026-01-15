@@ -66,6 +66,8 @@ class IndustriController extends Controller
                 'nomor_izin' => $industri->nomor_izin,
                 'nama' => $industri->nama,
                 'kabupaten' => $industri->kabupaten,
+                // Sertakan tipe/jenis industri jika tersedia
+                'type' => $industri->type ?? $industri->getJenisIndustri(),
                 'laporan' => $laporanPerBulan
             ];
         });

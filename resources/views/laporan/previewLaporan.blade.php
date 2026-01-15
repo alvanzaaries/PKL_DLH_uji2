@@ -1,4 +1,4 @@
-@extends('laporan.layouts.dashboard')
+@extends('laporan.layouts.layout')
 @section('title', 'Pratinjau Laporan')
 @section('page-title', 'Pratinjau Laporan')
 

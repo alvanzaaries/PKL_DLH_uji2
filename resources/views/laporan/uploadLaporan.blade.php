@@ -1,4 +1,4 @@
-@extends('laporan/layouts.dashboard')
+@extends('laporan/layouts.layout')
 
 @section('title', 'Input Laporan')
 
@@ -109,7 +109,7 @@
                             <select name="tahun" id="tahun" required class="w-full form-input px-3 py-2 border text-sm">
                                 @php
                                     $currentYear = date('Y');
-                                    $startYear = 2020;
+                                    $startYear = 2026;
                                 @endphp
                                 @for ($y = $currentYear; $y >= $startYear; $y--)
                                     <option value="{{ $y }}" {{ (old('tahun') ?? $currentYear) == $y ? 'selected' : '' }}>{{ $y }}</option>

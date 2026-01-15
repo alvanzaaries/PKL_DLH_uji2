@@ -260,31 +260,35 @@
         <nav class="sidebar-menu">
             <div class="menu-label">Main Menu</div>
 
-            <a href="{{ route('welcome') }}" class="nav-link">
-                <i class="fas fa-home nav-icon"></i>
-                <span>Beranda</span>
-            </a>
-
-            <a href="{{ route('pelaporan.index') }}"
-                class="nav-link {{ request()->routeIs('pelaporan.index') || request()->routeIs('laporan.industri') || request()->routeIs('laporan.preview') ? 'active' : '' }}">
+            <a href="{{ route('data.industri') }}"
+                class="nav-link {{ request()->routeIs('data.industri') || request()->routeIs('industri.laporan') || request()->routeIs('laporan.preview') ? 'active' : '' }}">
                 <i class="fas fa-chart-pie nav-icon"></i> <span>Dashboard & Mon.</span>
             </a>
 
             <div class="menu-label">Pengelolaan Data</div>
 
-            <a href="{{ route('laporan.upload.form') }}"
-                class="nav-link {{ request()->routeIs('laporan.upload.form') ? 'active' : '' }}">
-                <i class="fas fa-plus-circle nav-icon"></i>
-                <span>Input Laporan</span>
+            @auth
+                <a href="{{ route('laporan.upload.form') }}"
+                    class="nav-link {{ request()->routeIs('laporan.upload.form') ? 'active' : '' }}">
+                    <i class="fas fa-plus-circle nav-icon"></i>
+                    <span>Input Laporan</span>
+                </a>
+
+                <a href="{{ route('laporan.rekap') }}"
+                    class="nav-link {{ request()->routeIs('laporan.rekap') || request()->routeIs('laporan.detail') ? 'active' : '' }}">
+                    <i class="fas fa-table nav-icon"></i>
+                    <span>Rekapitulasi</span>
+                </a>
+            @endauth
+
+            <div class="mt-auto mb-2 border-t border-white/10 mx-2"></div>
+
+            <a href="{{ route('welcome') }}" class="nav-link">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
             </a>
 
-            <a href="{{ route('laporan.rekap') }}"
-                class="nav-link {{ request()->routeIs('laporan.rekap') || request()->routeIs('laporan.detail') ? 'active' : '' }}">
-                <i class="fas fa-table nav-icon"></i>
-                <span>Rekapitulasi</span>
-            </a>
-
-            </nav>
+        </nav>
 
         <div class="sidebar-footer">
             @guest
@@ -349,7 +353,7 @@
                 <div class="mb-6 alert-institutional alert-success-inst shadow-sm">
                     <i class="fas fa-check-circle icon mt-0.5 mr-3"></i>
                     <div>
-                        <h3 class="title">Data Berhasil Disimpan</h3>
+                        <h3 class="title">Berhasil  </h3>
                         <p class="text">{{ session('success') }}</p>
                     </div>
                 </div>

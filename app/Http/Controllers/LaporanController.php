@@ -328,6 +328,18 @@ class LaporanController extends Controller
         // Get detail data menggunakan service dengan filter tambahan jika ada
         $detailData = $this->dataService->getDetailLaporan($bulan, $tahun, $jenis, $filters);
 
+        // Determine earliest year from Laporan.tanggal to populate the year dropdown in the view.
+        // Fallback to 2020 if there are no records or parsing fails.
+        $firstDate = Laporan::orderBy('tanggal', 'asc')->value('tanggal');
+        $earliestYear = 2020;
+        if ($firstDate) {
+            try {
+                $earliestYear = (int) \Carbon\Carbon::parse($firstDate)->year;
+            } catch (\Exception $e) {
+                // keep default earliestYear
+            }
+        }
+
         return view('laporan.rekapLaporan', [
             'bulan' => $bulan,
             'tahun' => $tahun,
@@ -335,6 +347,7 @@ class LaporanController extends Controller
             'jenisLabel' => $jenisOptions[$jenis],
             'items' => $detailData['items'],
             'filterOptions' => $detailData['filterOptions'],
+            'earliestYear' => $earliestYear,
         ]);
     }
 
