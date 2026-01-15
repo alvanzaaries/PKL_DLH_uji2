@@ -362,7 +362,7 @@
     </div>
 
     <div class="filter-ribbon">
-        <form method="GET" action="{{ route('data.industri') }}" style="display: contents;">
+        <form method="GET" action="{{ route('pelaporan.index') }}" style="display: contents;">
             
             <div class="filter-group">
                 <label class="filter-label" for="search">Cari Perusahaan</label>
@@ -413,7 +413,7 @@
             </div>
 
             <div class="filter-actions" style="margin-left: auto; display: flex; gap: 8px;">
-                <a href="{{ route('data.industri') }}" class="btn btn-secondary">
+                <a href="{{ route('pelaporan.index') }}" class="btn btn-secondary">
                     <i class="fas fa-undo-alt"></i> Reset
                 </a>
                 <button type="submit" class="btn btn-primary">

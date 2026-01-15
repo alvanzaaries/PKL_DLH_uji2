@@ -410,7 +410,7 @@
 
                 <!-- Form Actions -->
                 <div class="form-actions">
-                    <a href="{{ route('dashboard') }}" class="btn btn-secondary">
+                    <a href="{{ route('industri.dashboard') }}" class="btn btn-secondary">
                         Batal
                     </a>
                     <button type="submit" class="btn btn-primary">
