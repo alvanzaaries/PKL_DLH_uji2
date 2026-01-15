@@ -99,7 +99,7 @@
         .menu-item {
             display: flex;
             align-items: center;
-            padding: 14px 24px;
+            padding: 14px   ;
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
             transition: all 0.3s;

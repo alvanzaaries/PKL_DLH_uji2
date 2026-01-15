@@ -35,7 +35,12 @@ class DashboardController extends Controller
         $data['filter'] = $this->buildDashboardFilterLabel($request);
 
         $pdf = Pdf::loadView('PNBP.admin.dashboard_pdf', $data)
-            ->setPaper('a4', 'portrait');
+            ->setPaper('a4', 'portrait')
+            ->setOptions([
+                'isRemoteEnabled' => false,
+                'defaultFont' => 'Helvetica',
+                'isHtml5ParserEnabled' => true,
+            ]);
 
         return $pdf->download('pnbp-dashboard-' . now()->format('Ymd-His') . '.pdf');
     }
