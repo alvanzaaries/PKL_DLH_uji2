@@ -1,28 +1,31 @@
 @extends('PNBP.layouts.admin')
 
 @section('title', 'Detail Rekonsiliasi - ' . $reconciliation->original_filename)
+
 @section('header')
     Detail Rekonsiliasi <span class="text-sm font-normal text-gray-500 ml-2">{{ $reconciliation->original_filename }}</span>
 @endsection
 
 @section('content')
+    {{-- Notifikasi Sukses --}}
     @if (session('success'))
-        <div class="rounded-md bg-green-50 p-4 mb-6 border-l-4 border-green-500">
+        <div class="rounded-md bg-green-50 dark:bg-green-900/20 p-4 mb-6 border-l-4 border-green-500">
             <div class="flex">
                 <div class="flex-shrink-0">
-                    <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <svg class="h-5 w-5 text-green-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                    <p class="text-sm font-medium text-green-800 dark:text-green-200">{{ session('success') }}</p>
                 </div>
             </div>
         </div>
     @endif
 
+    {{-- Notifikasi Error --}}
     @if ($errors->any())
-        <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+        <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-300 p-4 mb-6" role="alert">
             <p class="font-bold">Terjadi Kesalahan</p>
             <ul class="list-disc pl-5 mt-1 text-sm">
                 @foreach ($errors->all() as $error)
@@ -32,13 +35,14 @@
         </div>
     @endif
 
-    <div class="flex justify-between items-center mb-6">
+    {{-- Header Action Buttons --}}
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-            <div class="text-sm text-gray-500 mt-1">
+            <div class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Tahun {{ $reconciliation->year }} - Triwulan {{ $reconciliation->quarter }}
             </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
             <a href="{{ route('reconciliations.export-pdf', array_merge(['reconciliation' => $reconciliation->id], request()->query())) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary_hover transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 17v-6m0 0l-3 3m3-3l3 3M6 20h12" />
@@ -49,13 +53,13 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                Unduh Excel Asli
+                Excel Asli
             </a>
             <a href="{{ route('reconciliations.raw', $reconciliation->id) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Lihat Raw
+                Raw Data
             </a>
             <a href="{{ route('reconciliations.index') }}" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                 &larr; Kembali
@@ -63,15 +67,15 @@
         </div>
     </div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div class="py-6">
+        <div class="max-w-7xl mx-auto space-y-6">
 
-            {{-- Summary cards omitted for brevity; kept from previous template --}}
+            {{-- Summary Cards (KEMBALI BERWARNA) --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @foreach($totalPerSatuan as $t)
                     @if($t->total_volume <= 0) @continue @endif
                     <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                        <div class="text-gray-500 text-sm font-medium uppercase">Total {{ $t->satuan == '-' ? 'LAINNYA' : $t->satuan }}</div>
+                        <div class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">Total {{ $t->satuan == '-' ? 'LAINNYA' : $t->satuan }}</div>
                         <div class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
                             {{ rtrim(rtrim(number_format(($t->total_volume_final ?? $t->total_volume), 3, '.', ','), '0'), ',') }}
                             <span class="text-sm text-gray-400 font-normal">{{ $t->satuan == '-' ? '' : $t->satuan }}</span>
@@ -79,44 +83,50 @@
                     </div>
                 @endforeach
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                    <div class="text-gray-500 text-sm font-medium">Total Nilai LHP</div>
-                    <div class="text-2xl font-bold text-yellow-600 mt-2">
+                    <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Nilai LHP</div>
+                    {{-- Warna Kuning Dikembalikan --}}
+                    <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-500 mt-2">
                         <span class="text-sm text-gray-500 font-normal">Rp</span>
                         {{ number_format(($totalNilaiLhpFinal ?? $statsJenis->sum('total_nilai')), 0, '.', ',') }}
                     </div>
                 </div>
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                    <div class="text-gray-500 text-sm font-medium">Total Nilai Setor</div>
-                    <div class="text-2xl font-bold text-green-600 mt-2">
+                    <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Nilai Setor</div>
+                    {{-- Warna Hijau Dikembalikan --}}
+                    <div class="text-2xl font-bold text-green-600 dark:text-green-500 mt-2">
                         <span class="text-sm text-gray-500 font-normal">Rp</span>
                         {{ number_format(($baseTotalNilaiSetor ?? 0), 0, '.', ',') }}
                     </div>
                 </div>
             </div>
 
-            {{-- Tables (Jenis & Bank) retained from previous template --}}
+            {{-- Rekap Tables (WARNA ASLI + FIX HOVER) --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {{-- Rekap Jenis --}}
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 lg:col-span-1">
-                    <div class="p-4 border-b border-gray-200 bg-gray-50 dark:bg-transparent">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-transparent">
                         <h3 class="font-bold text-gray-800 dark:text-white">Rekap Jenis Hasil Hutan</h3>
                     </div>
                     <div class="p-4 overflow-x-auto">
                         <table class="w-full text-sm text-left">
                             <thead>
-                                    <tr class="border-b">
-                                        <th class="py-2">Jenis</th>
-                                        <th class="py-2 text-right">Volume</th>
-                                        <th class="py-2 text-center"></th>
-                                        <th class="py-2 text-right text-primary">Nilai LHP (Rp)</th>
-                                    </tr>
+                                <tr class="border-b dark:border-gray-700 text-gray-500 dark:text-gray-400">
+                                    <th class="py-2 font-medium">Jenis</th>
+                                    <th class="py-2 text-right font-medium">Volume</th>
+                                    <th class="py-2 text-center font-medium"></th>
+                                    {{-- Text Primary Dikembalikan --}}
+                                    <th class="py-2 text-right font-medium text-primary dark:text-primary-400">Nilai LHP (Rp)</th>
+                                </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach($statsJenis as $s)
-                                    <tr class="border-b last:border-0 hover:bg-gray-50">
-                                        <td class="py-2 font-medium text-xs dark:text-white">{{ $s->label }}</td>
-                                        <td class="py-2 text-right">{{ number_format($s->total_volume, 2, '.', ',') }}</td>
-                                        <td class="py-2 text-center">{{ $s->satuan }}</td>
-                                        <td class="py-2 text-right text-primary font-semibold">{{ "Rp " . number_format(($s->total_nilai ?? 0), 0, '.', ',') }}</td>
+                                    {{-- Fix Hover: Tambahkan dark:hover:bg-gray-700 --}}
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        <td class="py-2 font-medium text-xs text-gray-900 dark:text-gray-200">{{ $s->label }}</td>
+                                        <td class="py-2 text-right text-gray-700 dark:text-gray-300">{{ number_format($s->total_volume, 2, '.', ',') }}</td>
+                                        <td class="py-2 text-center text-gray-500 dark:text-gray-400">{{ $s->satuan }}</td>
+                                        {{-- Text Primary Dikembalikan --}}
+                                        <td class="py-2 text-right text-primary dark:text-primary-400 font-semibold">{{ "Rp " . number_format(($s->total_nilai ?? 0), 0, '.', ',') }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -124,25 +134,29 @@
                     </div>
                 </div>
 
+                {{-- Rekap Bank --}}
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 lg:col-span-1">
-                    <div class="p-4 border-b border-gray-200 bg-gray-50 dark:bg-transparent">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-transparent">
                         <h3 class="font-bold text-gray-800 dark:text-white">Rekap Bank Penyetor</h3>
                     </div>
                     <div class="p-4 overflow-x-auto">
                         <table class="w-full text-sm text-left">
                             <thead>
-                                <tr class="border-b">
-                                    <th class="py-2">Bank</th>
-                                    <th class="py-2 text-right">Total Setor (Rp)</th>
-                                    <th class="py-2 text-right text-primary">Trx</th>
+                                <tr class="border-b dark:border-gray-700 text-gray-500 dark:text-gray-400">
+                                    <th class="py-2 font-medium">Bank</th>
+                                    <th class="py-2 text-right font-medium">Total Setor (Rp)</th>
+                                    {{-- Text Primary Dikembalikan --}}
+                                    <th class="py-2 text-right font-medium text-primary dark:text-primary-400">Trx</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach($statsBank as $s)
-                                    <tr class="border-b last:border-0 hover:bg-gray-50">
-                                        <td class="py-2 font-medium truncate max-w-[100px] dark:text-white" title="{{ $s->label }}">{{ $s->label }}</td>
-                                        <td class="py-2 text-right text-gray-900 dark:text-gray-200">{{ "Rp " . number_format($s->total_nilai, 0, '.', ',') }}</td>
-                                        <td class="py-2 text-right text-primary font-semibold">{{ $s->count }}</td>
+                                    {{-- Fix Hover: Tambahkan dark:hover:bg-gray-700 --}}
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                        <td class="py-2 font-medium truncate max-w-[100px] text-gray-900 dark:text-gray-200" title="{{ $s->label }}">{{ $s->label }}</td>
+                                        <td class="py-2 text-right text-gray-900 dark:text-gray-200 font-medium">{{ number_format($s->total_nilai, 0, '.', ',') }}</td>
+                                        {{-- Text Primary Dikembalikan --}}
+                                        <td class="py-2 text-right text-primary dark:text-primary-400 font-semibold">{{ $s->count }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -151,7 +165,7 @@
                 </div>
             </div>
 
-            {{-- Detail Table --}}
+            {{-- MAIN TABLE: Detail Data Transaksi (TETAP NETRAL / MONOKROM) --}}
             <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
                 <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-white dark:bg-surface-dark">
                     <h3 class="font-bold text-gray-800 dark:text-white">Detail Data Transaksi ({{ $details->total() }} baris)</h3>
@@ -250,4 +264,3 @@
         });
     </script>
 @endsection
-
