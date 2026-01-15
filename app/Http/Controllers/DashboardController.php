@@ -6,6 +6,7 @@ use App\Models\Reconciliation;
 use App\Models\ReconciliationDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 // Models from Incoming (for public dashboard)
 use App\Models\IndustriPrimer;
@@ -19,6 +20,27 @@ class DashboardController extends Controller
      * Admin Dashboard (from HEAD) - Reconciliation analytics
      */
     public function index(Request $request)
+    {
+        $data = $this->buildDashboardData($request);
+
+        return view('PNBP.admin.dashboard', $data);
+    }
+
+    /**
+     * Export filtered PNBP dashboard statistics to PDF.
+     */
+    public function exportPdf(Request $request)
+    {
+        $data = $this->buildDashboardData($request);
+        $data['filter'] = $this->buildDashboardFilterLabel($request);
+
+        $pdf = Pdf::loadView('PNBP.admin.dashboard_pdf', $data)
+            ->setPaper('a4', 'portrait');
+
+        return $pdf->download('pnbp-dashboard-' . now()->format('Ymd-His') . '.pdf');
+    }
+
+    private function buildDashboardData(Request $request): array
     {
         // 1. Filter Parameters
         $year = $request->input('year');
@@ -60,11 +82,8 @@ class DashboardController extends Controller
         }
 
         // 4. Aggregations (Infographics)
-        
-        // Card 1: Total Uploaded Files
         $totalFiles = $reconQuery->count();
 
-        // Card 2: Financials (Total Nilai Setor, Billing, LHP)
         $financials = $detailQuery->clone()->select(
             DB::raw('SUM(lhp_nilai) as total_lhp'),
             DB::raw('SUM(billing_nilai) as total_billing'),
@@ -72,7 +91,6 @@ class DashboardController extends Controller
             DB::raw('SUM(volume) as total_volume')
         )->first();
 
-        // Card 3: Top Wilayah (by Setor Nilai)
         $topWilayah = $detailQuery->clone()
             ->select('wilayah', DB::raw('SUM(setor_nilai) as total'))
             ->groupBy('wilayah')
@@ -85,7 +103,6 @@ class DashboardController extends Controller
             ->distinct('reconciliation_details.wilayah')
             ->count('reconciliation_details.wilayah');
 
-        // Card 4: Stats per Jenis SDH
         $statsJenis = $detailQuery->clone()
             ->select('jenis_sdh', DB::raw('SUM(volume) as total_vol'), DB::raw('SUM(setor_nilai) as total_setor'))
             ->groupBy('jenis_sdh')
@@ -108,17 +125,42 @@ class DashboardController extends Controller
             ->orderBy('wilayah')
             ->pluck('wilayah');
 
-        return view('PNBP.admin.dashboard', compact(
-            'totalFiles', 
-            'financials', 
-            'topWilayah', 
+        return compact(
+            'totalFiles',
+            'financials',
+            'topWilayah',
             'wilayahCount',
-            'statsJenis', 
-            'availableYears', 
+            'statsJenis',
+            'availableYears',
             'availableQuarters',
             'availableKph',
             'availableWilayah'
-        ));
+        );
+    }
+
+    private function buildDashboardFilterLabel(Request $request): string
+    {
+        $parts = [];
+
+        if ($request->filled('year')) {
+            $parts[] = 'Tahun ' . $request->input('year');
+        }
+
+        if ($request->filled('kph')) {
+            $parts[] = 'KPH ' . $request->input('kph');
+        }
+
+        if ($request->filled('wilayah')) {
+            $parts[] = 'Wilayah ' . $request->input('wilayah');
+        }
+
+        if ($request->filled('quarter')) {
+            $parts[] = 'Triwulan ' . $request->input('quarter');
+        } elseif ($request->filled('sampai_quarter')) {
+            $parts[] = 'Sampai TW ' . $request->input('sampai_quarter');
+        }
+
+        return $parts ? implode(' | ', $parts) : 'Semua Data';
     }
 
     /**

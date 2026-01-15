@@ -9,6 +9,7 @@ use App\Models\ReconciliationFile;
 use App\Models\ReconciliationSummaryOverride;
 use App\Models\MappingAlias;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Illuminate\Support\Facades\DB;
@@ -82,31 +83,70 @@ class ReconciliationController extends Controller
 
     public function show(Request $request, Reconciliation $reconciliation)
     {
+        $query = $this->buildDetailsQuery($request, $reconciliation);
+        $details = $query->paginate(50);
+
+        $stats = $this->buildReconciliationStats($reconciliation);
+
+        return view('PNBP.admin.reconciliations.show', array_merge(
+            ['reconciliation' => $reconciliation, 'details' => $details],
+            $stats
+        ));
+    }
+
+    /**
+     * Export reconciliation detail + statistics to PDF for printing.
+     */
+    public function exportPdf(Request $request, Reconciliation $reconciliation)
+    {
+        $query = $this->buildDetailsQuery($request, $reconciliation);
+        $details = $query->get();
+
+        $stats = $this->buildReconciliationStats($reconciliation);
+
+        $pdf = Pdf::loadView('PNBP.admin.reconciliations.show_pdf', array_merge(
+            ['reconciliation' => $reconciliation, 'details' => $details],
+            $stats
+        ))->setPaper('a4', 'landscape');
+
+        return $pdf->download('rekonsiliasi-' . $reconciliation->id . '-' . now()->format('Ymd-His') . '.pdf');
+    }
+
+    public function destroy(Reconciliation $reconciliation)
+    {
+        $reconciliation->delete();
+        return back()->with('success', 'Data dihapus');
+    }
+
+    private function buildDetailsQuery(Request $request, Reconciliation $reconciliation)
+    {
         $query = ReconciliationDetail::where('reconciliation_id', $reconciliation->id);
 
-        if ($search = trim((string)$request->input('search'))) {
-            $query->where(function($q) use ($search) {
+        if ($search = trim((string) $request->input('search'))) {
+            $query->where(function ($q) use ($search) {
                 $q->orWhere('wilayah', 'like', "%$search%")
-                  ->orWhere('lhp_no', 'like', "%$search%")
-                  ->orWhere('jenis_sdh', 'like', "%$search%")
-                  ->orWhere('billing_no', 'like', "%$search%")
-                  ->orWhere('setor_ntpn', 'like', "%$search%");
+                    ->orWhere('lhp_no', 'like', "%$search%")
+                    ->orWhere('jenis_sdh', 'like', "%$search%")
+                    ->orWhere('billing_no', 'like', "%$search%")
+                    ->orWhere('setor_ntpn', 'like', "%$search%");
             });
         }
 
         $sort = $request->input('sort', 'id');
         $dir = $request->input('direction', 'asc') === 'desc' ? 'desc' : 'asc';
         $allowed = ['no_urut','wilayah','lhp_no','lhp_tanggal','jenis_sdh','volume','satuan','lhp_nilai','billing_no','billing_tanggal','billing_nilai','setor_tanggal','setor_bank','setor_ntpn','setor_ntb','setor_nilai'];
-        
+
         if (in_array($sort, $allowed)) {
             $query->orderBy($sort, $dir);
         } else {
             $query->orderBy('id', 'asc');
         }
 
-        $details = $query->paginate(50);
+        return $query;
+    }
 
-        // Statistik
+    private function buildReconciliationStats(Reconciliation $reconciliation): array
+    {
         $totalPerSatuan = ReconciliationDetail::where('reconciliation_id', $reconciliation->id)
             ->select('satuan', DB::raw('SUM(volume) as total_volume'))
             ->groupBy('satuan')->orderByDesc('total_volume')->get();
@@ -124,9 +164,8 @@ class ReconciliationController extends Controller
             ->select('setor_bank as label', DB::raw('SUM(setor_nilai) as total_nilai'), DB::raw('COUNT(*) as count'))
             ->groupBy('setor_bank')->orderByDesc('total_nilai')->get();
 
-        // Load Overrides
         $overrides = ReconciliationSummaryOverride::where('reconciliation_id', $reconciliation->id)->get()
-            ->keyBy(fn($o) => strtolower(($o->metric ?? '') . '|' . ($o->satuan ?? '')));
+            ->keyBy(fn ($o) => strtolower(($o->metric ?? '') . '|' . ($o->satuan ?? '')));
 
         $totalPerSatuan = $totalPerSatuan->map(function ($row) use ($overrides) {
             $key = strtolower('total_volume|' . ($row->satuan ?? ''));
@@ -141,13 +180,15 @@ class ReconciliationController extends Controller
         $totalNilaiLhpFinal = $nilaiOverride ? (float) $nilaiOverride->value : $baseTotalNilaiLhp;
         $baseTotalNilaiSetor = (float) ReconciliationDetail::where('reconciliation_id', $reconciliation->id)->sum('setor_nilai');
 
-        return view('PNBP.admin.reconciliations.show', compact('reconciliation', 'details', 'totalPerSatuan', 'statsJenis', 'statsWilayah', 'statsBank', 'totalNilaiLhpFinal', 'baseTotalNilaiLhp', 'baseTotalNilaiSetor'));
-    }
-
-    public function destroy(Reconciliation $reconciliation)
-    {
-        $reconciliation->delete();
-        return back()->with('success', 'Data dihapus');
+        return compact(
+            'totalPerSatuan',
+            'statsJenis',
+            'statsWilayah',
+            'statsBank',
+            'totalNilaiLhpFinal',
+            'baseTotalNilaiLhp',
+            'baseTotalNilaiSetor'
+        );
     }
 
     // =========================================================================

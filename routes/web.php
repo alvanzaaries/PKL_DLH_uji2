@@ -87,6 +87,7 @@ Route::prefix('pnbp')->group(function () {
     // ADMIN ROUTES (Role: admin) - PNBP
     Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+        Route::get('/dashboard/export-pdf', [DashboardController::class, 'exportPdf'])->name('dashboard.export');
 
         // User Management
         Route::get('/admin/users', [UserManagementController::class, 'index'])->name('admin.users.index');
@@ -102,6 +103,7 @@ Route::prefix('pnbp')->group(function () {
             ->except(['create', 'store']);
         Route::get('/reconciliations/{reconciliation}/file', [ReconciliationController::class, 'downloadFile'])->name('reconciliations.file');
         Route::get('/reconciliations/{reconciliation}/raw', [ReconciliationController::class, 'rawExcel'])->name('reconciliations.raw');
+        Route::get('/reconciliations/{reconciliation}/export-pdf', [ReconciliationController::class, 'exportPdf'])->name('reconciliations.export-pdf');
         Route::post('/reconciliations/{reconciliation}/summary-overrides', [ReconciliationController::class, 'updateSummaryOverrides'])->name('reconciliations.summary-overrides');
     });
 });

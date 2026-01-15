@@ -69,6 +69,9 @@
                 <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
                     <i class="fas fa-filter mr-2"></i> Filter Data
                 </button>
+                <a href="{{ route('dashboard.export', request()->query()) }}" class="ml-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition inline-flex items-center">
+                    <i class="fas fa-file-pdf mr-2"></i> Export PDF
+                </a>
                 @if(request('year') || request('kph') || request('wilayah') || request('quarter') || request('sampai_quarter'))
                     <a href="{{ route('dashboard.index') }}" class="ml-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border px-3 py-2 rounded-md">Reset</a>
                 @endif
