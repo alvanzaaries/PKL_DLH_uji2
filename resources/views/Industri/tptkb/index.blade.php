@@ -963,59 +963,69 @@
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">📋 Detail TPT-KB</h2>
+                <h2 class="modal-title">Detail TPT-KB</h2>
                 <span class="close-btn" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body">
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <div class="detail-label">Nama Perusahaan</div>
-                        <div class="detail-value" id="modal-nama">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Tanggal</div>
-                        <div class="detail-value" id="modal-tanggal">-</div>
-                    <div class="detail-item">
-                        <div class="detail-label">Nomor Izin</div>
-                        <div class="detail-value" id="modal-nomor-izin">-</div>
-                    </div>
-                    <div class="detail-item detail-item-full">
-                        <div class="detail-label">Alamat Lengkap</div>
-                        <div class="detail-value" id="modal-alamat">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Kabupaten/Kota</div>
-                        <div class="detail-value" id="modal-kabupaten">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Penanggung Jawab</div>
-                        <div class="detail-value" id="modal-penanggungjawab">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Kontak</div>
-                        <div class="detail-value" id="modal-kontak">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Pemberi Izin</div>
-                        <div class="detail-value" id="modal-pemberi-izin">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Sumber Bahan Baku</div>
-                        <div class="detail-value" id="modal-sumber-bahan-baku">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Kapasitas Izin</div>
-                        <div class="detail-value" id="modal-kapasitas">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Masa Berlaku</div>
-                        <div class="detail-value" id="modal-masa-berlaku">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Status Izin</div>
-                        <div class="detail-value" id="modal-status">-</div>
-                    </div>
-                </div>
+                <div class="detail-section-title">Informasi Umum</div>
+                <table class="table-detail">
+                    <tr>
+                        <td class="detail-label-col">Nama Perusahaan</td>
+                        <td class="detail-value-col" id="modal-nama">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Penanggung Jawab</td>
+                        <td class="detail-value-col" id="modal-penanggungjawab">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Kontak</td>
+                        <td class="detail-value-col" id="modal-kontak">-</td>
+                    </tr>
+                </table>
+
+                <div class="detail-section-title">Detail Izin & Usaha</div>
+                <table class="table-detail">
+                    <tr>
+                        <td class="detail-label-col">Nomor Izin</td>
+                        <td class="detail-value-col" id="modal-nomor-izin">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Tanggal Izin</td>
+                        <td class="detail-value-col" id="modal-tanggal">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Masa Berlaku</td>
+                        <td class="detail-value-col" id="modal-masa-berlaku">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Status Izin</td>
+                        <td class="detail-value-col" id="modal-status">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Pemberi Izin</td>
+                        <td class="detail-value-col" id="modal-pemberi-izin">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Sumber Bahan Baku</td>
+                        <td class="detail-value-col" id="modal-sumber-bahan-baku">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Kapasitas Izin</td>
+                        <td class="detail-value-col" id="modal-kapasitas">-</td>
+                    </tr>
+                </table>
+
+                <div class="detail-section-title">Lokasi</div>
+                <table class="table-detail">
+                    <tr>
+                        <td class="detail-label-col">Alamat Lengkap</td>
+                        <td class="detail-value-col" id="modal-alamat">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Kabupaten/Kota</td>
+                        <td class="detail-value-col" id="modal-kabupaten">-</td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
@@ -1031,6 +1041,14 @@
             document.getElementById('modal-pemberi-izin').textContent = item.pemberi_izin;
             document.getElementById('modal-sumber-bahan-baku').textContent = item.sumber_bahan_baku;
             document.getElementById('modal-kapasitas').textContent = item.kapasitas_izin;
+            
+            // Format tanggal izin
+            if(item.industri.tanggal) {
+                const date = new Date(item.industri.tanggal);
+                document.getElementById('modal-tanggal').textContent = date.toLocaleDateString('id-ID');
+            } else {
+                document.getElementById('modal-tanggal').textContent = '-';
+            }
             
             // Format masa berlaku
             if(item.masa_berlaku) {

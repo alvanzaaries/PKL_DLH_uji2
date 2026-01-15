@@ -643,37 +643,71 @@
 
         .modal-body {
             padding: 30px;
+            background-color: #f8fafc;
         }
 
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
+        /* Table Detail Style - Spek Kantoran */
+        .table-detail {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
         }
 
-        .detail-item {
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 12px;
+        .table-detail tr:first-child td {
+            border-top: none;
         }
 
-        .detail-label {
-            font-size: 12px;
-            font-weight: 600;
+        .table-detail td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .table-detail tr:last-child td {
+            border-bottom: none;
+        }
+
+        .detail-label-col {
+            width: 35%;
+            background-color: #f8fafc;
             color: #64748b;
+            font-weight: 600;
             text-transform: uppercase;
+            font-size: 11px !important;
             letter-spacing: 0.5px;
-            margin-bottom: 6px;
+            border-right: 1px solid #f1f5f9;
         }
 
-        .detail-value {
-            font-size: 15px;
-            color: var(--primary);
+        .detail-value-col {
+            width: 65%;
+            color: #334155;
             font-weight: 500;
         }
 
-        .detail-item-full {
-            grid-column: 1 / -1;
+        .detail-section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 12px 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .detail-section-title::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 2px;
         }
 
         .alert {
@@ -1051,56 +1085,65 @@
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">?? Detail Perusahaan</h2>
+                <h2 class="modal-title">Detail Perusahaan</h2>
                 <span class="close-btn" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body">
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <div class="detail-label">Nama Perusahaan</div>
-                        <div class="detail-value" id="modal-nama">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Nomor Izin</div>
-                        <div class="detail-value" id="modal-nomor-izin">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Tanggal</div>
-                        <div class="detail-value" id="modal-tanggal">-</div>
-                    </div>
-                    <div class="detail-item detail-item-full">
-                        <div class="detail-label">Alamat Lengkap</div>
-                        <div class="detail-value" id="modal-alamat">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Kabupaten/Kota</div>
-                        <div class="detail-value" id="modal-kabupaten">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Penanggung Jawab</div>
-                        <div class="detail-value" id="modal-penanggungjawab">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Kontak</div>
-                        <div class="detail-value" id="modal-kontak">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Pemberi Izin</div>
-                        <div class="detail-value" id="modal-pemberi-izin">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Jenis Produksi</div>
-                        <div class="detail-value" id="modal-jenis-produksi">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Kapasitas Izin</div>
-                        <div class="detail-value" id="modal-kapasitas">-</div>
-                    </div>
-                    <div class="detail-item detail-item-full">
-                        <div class="detail-label">Dokumen Izin</div>
-                        <div class="detail-value" id="modal-dokumen">-</div>
-                    </div>
-                </div>
+                <div class="detail-section-title">Informasi Umum</div>
+                <table class="table-detail">
+                    <tr>
+                        <td class="detail-label-col">Nama Perusahaan</td>
+                        <td class="detail-value-col" id="modal-nama">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Penanggung Jawab</td>
+                        <td class="detail-value-col" id="modal-penanggungjawab">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Kontak</td>
+                        <td class="detail-value-col" id="modal-kontak">-</td>
+                    </tr>
+                </table>
+
+                <div class="detail-section-title">Detail Izin & Produksi</div>
+                <table class="table-detail">
+                    <tr>
+                        <td class="detail-label-col">Nomor Izin</td>
+                        <td class="detail-value-col" id="modal-nomor-izin">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Tanggal Izin</td>
+                        <td class="detail-value-col" id="modal-tanggal">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Pemberi Izin</td>
+                        <td class="detail-value-col" id="modal-pemberi-izin">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Jenis Produksi</td>
+                        <td class="detail-value-col" id="modal-jenis-produksi">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Kapasitas Izin</td>
+                        <td class="detail-value-col" id="modal-kapasitas">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Dokumen Izin</td>
+                        <td class="detail-value-col" id="modal-dokumen">-</td>
+                    </tr>
+                </table>
+
+                <div class="detail-section-title">Lokasi</div>
+                <table class="table-detail">
+                    <tr>
+                        <td class="detail-label-col">Alamat Lengkap</td>
+                        <td class="detail-value-col" id="modal-alamat">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Kabupaten/Kota</td>
+                        <td class="detail-value-col" id="modal-kabupaten">-</td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>

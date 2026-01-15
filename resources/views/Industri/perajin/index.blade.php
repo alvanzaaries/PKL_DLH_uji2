@@ -265,7 +265,7 @@
 
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 20px;
             margin-bottom: 20px;
         }
@@ -745,6 +745,24 @@
                             </select>
                         </div>
                         <div class="filter-group">
+                            <label>Bulan</label>
+                            <select name="bulan" class="filter-input">
+                                <option value="">-- Semua Bulan --</option>
+                                <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
+                                <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
+                                <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
+                                <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
+                                <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
+                                <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
+                                <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
+                                <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
+                                <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
+                                <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
+                                <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
+                                <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
                             <label>Tahun</label>
                             <select name="tahun" class="filter-input">
                                 <option value="">-- Semua Tahun --</option>
@@ -850,40 +868,49 @@
     <div id="detailModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 class="modal-title">🎨 Detail Perajin</h2>
+                <h2 class="modal-title">Detail Perajin</h2>
                 <span class="close-btn" onclick="closeModal()">&times;</span>
             </div>
             <div class="modal-body">
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <div class="detail-label">Nama Perusahaan</div>
-                        <div class="detail-value" id="modal-nama">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Nomor Izin</div>
-                        <div class="detail-value" id="modal-nomor-izin">-</div>
-                    </div>
-                    <div class ="detail-item">
-                        <div class="detail-label">Tanggal</div>
-                        <div class="detail-value" id="modal-tanggal">-</div>
-                    </div>
-                    <div class="detail-item detail-item-full">
-                        <div class="detail-label">Alamat Lengkap</div>
-                        <div class="detail-value" id="modal-alamat">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Kabupaten/Kota</div>
-                        <div class="detail-value" id="modal-kabupaten">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Penanggung Jawab</div>
-                        <div class="detail-value" id="modal-penanggungjawab">-</div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Kontak</div>
-                        <div class="detail-value" id="modal-kontak">-</div>
-                    </div>
-                </div>
+                <div class="detail-section-title">Informasi Umum</div>
+                <table class="table-detail">
+                    <tr>
+                        <td class="detail-label-col">Nama Perusahaan</td>
+                        <td class="detail-value-col" id="modal-nama">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Penanggung Jawab</td>
+                        <td class="detail-value-col" id="modal-penanggungjawab">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Kontak</td>
+                        <td class="detail-value-col" id="modal-kontak">-</td>
+                    </tr>
+                </table>
+
+                <div class="detail-section-title">Detail Izin</div>
+                <table class="table-detail">
+                    <tr>
+                        <td class="detail-label-col">Nomor Izin</td>
+                        <td class="detail-value-col" id="modal-nomor-izin">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Tanggal Izin</td>
+                        <td class="detail-value-col" id="modal-tanggal">-</td>
+                    </tr>
+                </table>
+
+                <div class="detail-section-title">Lokasi</div>
+                <table class="table-detail">
+                    <tr>
+                        <td class="detail-label-col">Alamat Lengkap</td>
+                        <td class="detail-value-col" id="modal-alamat">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Kabupaten/Kota</td>
+                        <td class="detail-value-col" id="modal-kabupaten">-</td>
+                    </tr>
+                </table>
             </div>
         </div>
     </div>
@@ -896,6 +923,14 @@
             document.getElementById('modal-kabupaten').textContent = item.industri.kabupaten;
             document.getElementById('modal-penanggungjawab').textContent = item.industri.penanggungjawab;
             document.getElementById('modal-kontak').textContent = item.industri.kontak;
+            
+            // Format tanggal izin
+            if(item.industri.tanggal) {
+                const date = new Date(item.industri.tanggal);
+                document.getElementById('modal-tanggal').textContent = date.toLocaleDateString('id-ID');
+            } else {
+                document.getElementById('modal-tanggal').textContent = '-';
+            }
 
             document.getElementById('detailModal').style.display = 'block';
         }
@@ -962,9 +997,9 @@
             new Chart(ctxTahun, {
                 type: 'doughnut',
                 data: {
-                    labels: {!! json_encode($tahunStats->keys()) !!},
+                    labels: {!! json_encode($yearStats->keys()) !!},
                     datasets: [{
-                        data: {!! json_encode($tahunStats->values()) !!},
+                        data: {!! json_encode($yearStats->values()) !!},
                         backgroundColor: [
                             '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6', '#a855f7',
                             '#9333ea', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'
@@ -996,9 +1031,9 @@
             new Chart(ctxKabupaten, {
                 type: 'doughnut',
                 data: {
-                    labels: {!! json_encode($kabupatenStats->keys()) !!},
+                    labels: {!! json_encode($locationStats->keys()) !!},
                     datasets: [{
-                        data: {!! json_encode($kabupatenStats->values()) !!},
+                        data: {!! json_encode($locationStats->values()) !!},
                         backgroundColor: [
                             '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a',
                             '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe', '#eff6ff',

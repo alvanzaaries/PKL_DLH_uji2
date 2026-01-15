@@ -132,13 +132,17 @@ class IndustriPrimerController extends Controller
             });
         }
 
-        // Filter berdasarkan tahun dan bulan (dari created_at) dengan logika AND
+        // Filter berdasarkan tahun dan bulan (dari kolom tanggal di tabel industries) dengan logika AND
         if ($request->filled('tahun')) {
-            $query->whereYear('created_at', $request->tahun);
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereYear('tanggal', $request->tahun);
+            });
         }
         
         if ($request->filled('bulan')) {
-            $query->whereMonth('created_at', $request->bulan);
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereMonth('tanggal', $request->bulan);
+            });
         }
 
         // Ambil data dengan pagination
@@ -170,9 +174,14 @@ class IndustriPrimerController extends Controller
         // Ambil semua record dari query yang sudah diberi filter (clone agar paginate tetap bekerja)
         $filteredData = (clone $query)->get();
 
-        // 1. Distribusi perusahaan per tahun (berdasarkan created_at)
-        $yearStats = $filteredData->groupBy(function($item) {
-            return $item->created_at->format('Y');
+        // 1. Distribusi perusahaan per tahun (berdasarkan kolom tanggal di tabel industries)
+        // Jika filter bulan aktif, tampilkan per bulan-tahun. Jika tidak, per tahun saja
+        $yearStats = $filteredData->groupBy(function($item) use ($request) {
+            if ($request->filled('bulan')) {
+                // Format: "Jan 2025", "Feb 2025", dll
+                return \Carbon\Carbon::parse($item->industri->tanggal)->format('M Y');
+            }
+            return \Carbon\Carbon::parse($item->industri->tanggal)->format('Y');
         })->map->count()->sortKeys();
 
         // 2. Distribusi lokasi industri (Top 5 Kabupaten)

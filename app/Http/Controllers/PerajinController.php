@@ -31,9 +31,17 @@ class PerajinController extends Controller
             });
         }
 
-        // Filter berdasarkan tahun (dari created_at)
+        // Filter berdasarkan tahun dan bulan (dari kolom tanggal di tabel industries) dengan logika AND
         if ($request->filled('tahun')) {
-            $query->whereYear('created_at', $request->tahun);
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereYear('tanggal', $request->tahun);
+            });
+        }
+        
+        if ($request->filled('bulan')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereMonth('tanggal', $request->bulan);
+            });
         }
 
         $perajin = $query->latest()->paginate(10);
@@ -45,7 +53,26 @@ class PerajinController extends Controller
             ->sort()
             ->values();
 
-        return view('Industri.perajin.index', compact('perajin', 'kabupatenList'));
+        // Data untuk visualisasi chart — gunakan DATA YANG SAMA dengan hasil filter
+        $filteredData = (clone $query)->get();
+
+        // 1. Distribusi perusahaan per tahun (berdasarkan kolom tanggal di tabel industries)
+        // Jika filter bulan aktif, tampilkan per bulan-tahun. Jika tidak, per tahun saja
+        $yearStats = $filteredData->groupBy(function($item) use ($request) {
+            if ($request->filled('bulan')) {
+                // Format: "Jan 2025", "Feb 2025", dll
+                return \Carbon\Carbon::parse($item->industri->tanggal)->format('M Y');
+            }
+            return \Carbon\Carbon::parse($item->industri->tanggal)->format('Y');
+        })->map->count()->sortKeys();
+
+        // 2. Distribusi lokasi industri (Top 5 Kabupaten)
+        $locationStats = $filteredData->groupBy('industri.kabupaten')
+            ->map->count()
+            ->sortDesc()
+            ->take(5);
+
+        return view('Industri.perajin.index', compact('perajin', 'kabupatenList', 'yearStats', 'locationStats'));
     }
 
     /**
