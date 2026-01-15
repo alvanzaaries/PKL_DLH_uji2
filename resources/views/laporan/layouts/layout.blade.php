@@ -261,7 +261,7 @@
             <div class="menu-label">Main Menu</div>
 
             <a href="{{ route('laporan.index') }}"
-                class="nav-link {{ request()->routeIs('laporan.index') || request()->routeIs('laporan.preview') || request()->routeIs('data.industri') || request()->routeIs('industri.laporan') ? 'active' : '' }}">
+                class="nav-link {{ request()->routeIs('laporan.index') || request()->routeIs('laporan.preview') || request()->routeIs('data.industri') || request()->routeIs('laporan.industri') ? 'active' : '' }}">
                 <i class="fas fa-chart-pie nav-icon"></i> <span>Monitoring</span>
             </a>
 

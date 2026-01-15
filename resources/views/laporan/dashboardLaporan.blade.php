@@ -442,7 +442,7 @@
                     <td class="col-center" style="color: #9CA3AF;">{{ $loop->iteration }}</td>
                     <td>
                         <div style="display: flex; flex-direction: column;">
-                            <a href="{{ route('laporan.index', $company->id) }}" class="company-name">
+                            <a href="{{ route('laporan.industri', $company->id) }}" class="company-name">
                                 {{ $company->nama }}
                             </a>
                             <span class="meta-info">No Izin : {{ $company->nomor_izin ?? 'N/A' }}</span>
