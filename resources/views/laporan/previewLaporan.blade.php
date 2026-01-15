@@ -456,7 +456,7 @@
         <input type="hidden" name="edited_data" id="editedDataInput">
 
         <div class="action-footer">
-            <a href="{{ route('industri.laporan', $metadata['industri_id']) }}" class="btn-action btn-secondary">
+            <a href="{{ route('laporan.industri', $metadata['industri_id']) }}" class="btn-action btn-secondary">
                 <i class="fas fa-arrow-left"></i>
                 <span>Kembali</span>
             </a>

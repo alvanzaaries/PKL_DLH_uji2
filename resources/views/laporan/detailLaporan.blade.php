@@ -237,7 +237,7 @@
             <div style="display: flex; gap: 8px;">
                 @php $industriId = $industri_id ?? null; @endphp
                 @if($industriId)
-                    <a href="{{ route('industri.laporan', ['industri' => $industriId]) }}" class="btn btn-secondary">
+                    <a href="{{ route('laporan.industri', ['industri' => $industriId]) }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Kembali ke Perusahaan
                     </a>
                 @else
