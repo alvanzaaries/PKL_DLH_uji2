@@ -260,25 +260,27 @@
         <nav class="sidebar-menu">
             <div class="menu-label">Main Menu</div>
 
-            <a href="{{ route('data.industri') }}"
+            <a href="{{ route('laporan.index') }}"
                 class="nav-link {{ request()->routeIs('data.industri') || request()->routeIs('industri.laporan') || request()->routeIs('laporan.preview') ? 'active' : '' }}">
-                <i class="fas fa-chart-pie nav-icon"></i> <span>Dashboard & Mon.</span>
+                <i class="fas fa-chart-pie nav-icon"></i> <span>Monitoring</span>
             </a>
 
             <div class="menu-label">Pengelolaan Data</div>
 
             @auth
-                <a href="{{ route('laporan.upload.form') }}"
-                    class="nav-link {{ request()->routeIs('laporan.upload.form') ? 'active' : '' }}">
-                    <i class="fas fa-plus-circle nav-icon"></i>
-                    <span>Input Laporan</span>
-                </a>
+                @if(Auth::user()->role === 'admin')
+                    <a href="{{ route('laporan.upload.form') }}"
+                        class="nav-link {{ request()->routeIs('laporan.upload.form') ? 'active' : '' }}">
+                        <i class="fas fa-plus-circle nav-icon"></i>
+                        <span>Input Laporan</span>
+                    </a>
 
-                <a href="{{ route('laporan.rekap') }}"
-                    class="nav-link {{ request()->routeIs('laporan.rekap') || request()->routeIs('laporan.detail') ? 'active' : '' }}">
-                    <i class="fas fa-table nav-icon"></i>
-                    <span>Rekapitulasi</span>
-                </a>
+                    <a href="{{ route('laporan.rekap') }}"
+                        class="nav-link {{ request()->routeIs('laporan.rekap') || request()->routeIs('laporan.detail') ? 'active' : '' }}">
+                        <i class="fas fa-table nav-icon"></i>
+                        <span>Rekapitulasi</span>
+                    </a>
+                @endif
             @endauth
 
             <div class="mt-auto mb-2 border-t border-white/10 mx-2"></div>

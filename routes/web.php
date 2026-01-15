@@ -149,10 +149,10 @@ Route::prefix('industri')->middleware(['auth', 'role:admin'])->group(function ()
 // PELAPORAN (SIMPEL-HUT)
 // ===================================================================
 // Entry point (Dashboard Pelaporan) - public read access
-Route::get('/pelaporan', [IndustriController::class, 'index'])->name('pelaporan.index');
+Route::get('/laporan', [IndustriController::class, 'index'])->name('laporan.index');
 
 // Admin operations (upload/rekap/detail) tetap khusus admin
-Route::prefix('pelaporan')->middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('laporan')->middleware(['auth', 'role:admin'])->group(function () {
 
     // Upload + proses pelaporan
     Route::get('/upload', [LaporanController::class, 'showUploadForm'])->name('laporan.upload.form');

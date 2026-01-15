@@ -362,7 +362,7 @@
     </div>
 
     <div class="filter-ribbon">
-        <form method="GET" action="{{ route('pelaporan.index') }}" style="display: contents;">
+        <form method="GET" action="{{ route('laporan.index') }}" style="display: contents;">
             
             <div class="filter-group">
                 <label class="filter-label" for="search">Cari Perusahaan</label>
@@ -413,7 +413,7 @@
             </div>
 
             <div class="filter-actions" style="margin-left: auto; display: flex; gap: 8px;">
-                <a href="{{ route('pelaporan.index') }}" class="btn btn-secondary">
+                <a href="{{ route('laporan.index') }}" class="btn btn-secondary">
                     <i class="fas fa-undo-alt"></i> Reset
                 </a>
                 <button type="submit" class="btn btn-primary">
@@ -442,7 +442,7 @@
                     <td class="col-center" style="color: #9CA3AF;">{{ $loop->iteration }}</td>
                     <td>
                         <div style="display: flex; flex-direction: column;">
-                            <a href="{{ route('industri.laporan', $company->id) }}" class="company-name">
+                            <a href="{{ route('laporan.index', $company->id) }}" class="company-name">
                                 {{ $company->nama }}
                             </a>
                             <span class="meta-info">No Izin : {{ $company->nomor_izin ?? 'N/A' }}</span>
