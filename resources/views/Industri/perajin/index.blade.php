@@ -613,7 +613,7 @@
             </div>
         </div>
         <div class="sidebar-menu">
-            <a href="{{ url('/') }}" class="menu-item {{ request()->is('/') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <i class="fas fa-th-large menu-icon"></i>
                 <span class="menu-text">Beranda</span>
             </a>
@@ -796,6 +796,7 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Perusahaan</th>
+                                    <th>Tanggal</th>
                                     <th>Nomor Izin</th>
                                     <th>Kabupaten/Kota</th>
                                     <th>Penanggung Jawab</th>
@@ -808,6 +809,7 @@
                                     <tr>
                                         <td>{{ $perajin->firstItem() + $index }}</td>
                                         <td>{{ $item->industri->nama }}</td>
+                                        <td>{{ $item->industri->tanggal ? \Carbon\Carbon::parse($item->industri->tanggal)->format('d/m/Y') : '-' }}</td>
                                         <td>{{ $item->industri->nomor_izin }}</td>
                                         <td>{{ $item->industri->kabupaten }}</td>
                                         <td>{{ $item->industri->penanggungjawab }}</td>
@@ -860,6 +862,10 @@
                     <div class="detail-item">
                         <div class="detail-label">Nomor Izin</div>
                         <div class="detail-value" id="modal-nomor-izin">-</div>
+                    </div>
+                    <div class ="detail-item">
+                        <div class="detail-label">Tanggal</div>
+                        <div class="detail-value" id="modal-tanggal">-</div>
                     </div>
                     <div class="detail-item detail-item-full">
                         <div class="detail-label">Alamat Lengkap</div>

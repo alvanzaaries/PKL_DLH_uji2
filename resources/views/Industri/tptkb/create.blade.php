@@ -1,4 +1,4 @@
-@extends('layouts.sidebar')
+@extends('Industri.layouts.sidebar')
 
 @section('title', 'Tambah TPT-KB')
 
@@ -398,14 +398,14 @@
                         <label class="form-label">
                             Pemberi Izin <span class="required">*</span>
                         </label>
-                        <input 
-                            type="text" 
+                        <select 
                             name="pemberi_izin" 
-                            class="form-input" 
-                            placeholder="Contoh: Dinas LHK Jateng"
-                            value="{{ old('pemberi_izin') }}"
+                            class="form-select" 
                             required
                         >
+                            <option value="">-- Pilih Pemberi Izin --</option>
+                            <option value="Gubernur" {{ old('pemberi_izin') == 'Gubernur' ? 'selected' : '' }}>Gubernur</option>
+                        </select>
                         @error('pemberi_izin')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
@@ -431,22 +431,20 @@
                     </div>
                 </div>
 
-                <!-- Row: Kapasitas Izin & Masa Berlaku -->
+                <!-- Row: Kapasitas Izin & Tanggal -->
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">
                             Kapasitas Izin <span class="required">*</span>
                         </label>
-                        <select 
+                        <input 
+                            type="text" 
                             name="kapasitas_izin" 
-                            class="form-select" 
+                            class="form-input" 
+                            placeholder="Contoh: 5000 m³/tahun"
+                            value="{{ old('kapasitas_izin') }}"
                             required
                         >
-                            <option value="">-- Pilih Kapasitas Izin --</option>
-                            <option value="0-1999" {{ old('kapasitas_izin') == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
-                            <option value="2000-5999" {{ old('kapasitas_izin') == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
-                            <option value=">= 6000" {{ old('kapasitas_izin') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
-                        </select>
                         @error('kapasitas_izin')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
@@ -454,19 +452,36 @@
 
                     <div class="form-group">
                         <label class="form-label">
-                            Masa Berlaku Izin <span class="required">*</span>
+                            Tanggal <span class="required">*</span>
                         </label>
                         <input 
                             type="date" 
-                            name="masa_berlaku" 
+                            name="tanggal" 
                             class="form-input" 
-                            value="{{ old('masa_berlaku') }}"
+                            value="{{ old('tanggal') }}"
                             required
                         >
-                        @error('masa_berlaku')
+                        @error('tanggal')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
+                </div>
+
+                <!-- Masa Berlaku -->
+                <div class="form-group">
+                    <label class="form-label">
+                        Masa Berlaku Izin <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="date" 
+                        name="masa_berlaku" 
+                        class="form-input" 
+                        value="{{ old('masa_berlaku') }}"
+                        required
+                    >
+                    @error('masa_berlaku')
+                        <div class="error-message">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <!-- Form Actions -->

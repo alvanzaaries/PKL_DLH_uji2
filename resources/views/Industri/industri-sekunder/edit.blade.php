@@ -1,4 +1,4 @@
-@extends('layouts.sidebar')
+@extends('Industri.layouts.sidebar')
 
 @section('title', 'Edit Industri Sekunder')
 
@@ -299,7 +299,13 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Pemberi Izin <span class="required">*</span></label>
-                        <input type="text" name="pemberi_izin" class="form-input" value="{{ old('pemberi_izin', $industriSekunder->pemberi_izin) }}" placeholder="Contoh: Dinas LHK Jateng" required>
+                        <select name="pemberi_izin" class="form-select" required>
+                            <option value="">-- Pilih Pemberi Izin --</option>
+                            <option value="Menteri Kehutanan" {{ old('pemberi_izin', $industriSekunder->pemberi_izin) == 'Menteri Kehutanan' ? 'selected' : '' }}>Menteri Kehutanan</option>
+                            <option value="BKPM" {{ old('pemberi_izin', $industriSekunder->pemberi_izin) == 'BKPM' ? 'selected' : '' }}>BKPM</option>
+                            <option value="Gubernur" {{ old('pemberi_izin', $industriSekunder->pemberi_izin) == 'Gubernur' ? 'selected' : '' }}>Gubernur</option>
+                            <option value="Bupati/Walikota" {{ old('pemberi_izin', $industriSekunder->pemberi_izin) == 'Bupati/Walikota' ? 'selected' : '' }}>Bupati/Walikota</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
@@ -308,14 +314,16 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">Kapasitas Izin <span class="required">*</span></label>
-                    <select name="kapasitas_izin" class="form-select" required>
-                        <option value="">-- Pilih Kapasitas --</option>
-                        <option value="<= 2000" {{ old('kapasitas_izin', $industriSekunder->kapasitas_izin) == '<= 2000' ? 'selected' : '' }}><= 2000 m³/tahun</option>
-                        <option value="2001 - 6000" {{ old('kapasitas_izin', $industriSekunder->kapasitas_izin) == '2001 - 6000' ? 'selected' : '' }}>2001 - 6000 m³/tahun</option>
-                        <option value=">= 6001" {{ old('kapasitas_izin', $industriSekunder->kapasitas_izin) == '>= 6001' ? 'selected' : '' }}>>= 6001 m³/tahun</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Kapasitas Izin <span class="required">*</span></label>
+                        <input type="text" name="kapasitas_izin" class="form-input" value="{{ old('kapasitas_izin', $industriSekunder->kapasitas_izin) }}" placeholder="Contoh: 5000 m³/tahun" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Tanggal <span class="required">*</span></label>
+                        <input type="date" name="tanggal" class="form-input" value="{{ old('tanggal', $industriSekunder->industri->tanggal) }}" required>
+                    </div>
                 </div>
 
                 <div class="form-actions">

@@ -68,6 +68,7 @@ class PerajinController extends Controller
             'kabupaten' => 'required|string|max:100',
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:50',
+            'tanggal' => 'required|date',
         ]);
 
         // Create industri base
@@ -79,6 +80,7 @@ class PerajinController extends Controller
             'kabupaten' => $validated['kabupaten'],
             'penanggungjawab' => $validated['penanggungjawab'],
             'kontak' => $validated['kontak'],
+            'tanggal' => $validated['tanggal'],
         ]);
 
         // Create perajin
@@ -121,6 +123,7 @@ class PerajinController extends Controller
             'kabupaten' => 'required|string|max:100',
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:50',
+            'tanggal' => 'required|date',
         ]);
 
         // Update industri base
@@ -131,6 +134,7 @@ class PerajinController extends Controller
             'kabupaten' => $validated['kabupaten'],
             'penanggungjawab' => $validated['penanggungjawab'],
             'kontak' => $validated['kontak'],
+            'tanggal' => $validated['tanggal'],
         ]);
 
         return redirect()->route('perajin.index')

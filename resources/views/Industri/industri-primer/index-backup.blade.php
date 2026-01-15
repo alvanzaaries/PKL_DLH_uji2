@@ -725,7 +725,7 @@
             <h2 class="sidebar-title">DLHK<span style="font-weight: 400;">al</span></h2>
         </div>
         <div class="sidebar-menu">
-            <a href="{{ url('/') }}" class="menu-item {{ request()->is('/') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <i class="fas fa-th-large menu-icon"></i>
                 <span class="menu-text">Beranda</span>
             </a>

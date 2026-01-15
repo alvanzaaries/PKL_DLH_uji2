@@ -1,4 +1,4 @@
-@extends('layouts.sidebar')
+@extends('Industri.layouts.sidebar')
 
 @section('title', 'Tambah Industri Sekunder')
 
@@ -246,6 +246,7 @@
 
             .form-actions {
                 flex-direction: column;
+                align-items: flex-end;
             }
 
             .btn {
@@ -379,14 +380,17 @@
                         <label class="form-label">
                             Pemberi Izin <span class="required">*</span>
                         </label>
-                        <input 
-                            type="text" 
+                        <select 
                             name="pemberi_izin" 
-                            class="form-input" 
-                            placeholder="Instansi pemberi izin"
-                            value="{{ old('pemberi_izin') }}"
+                            class="form-select" 
                             required
                         >
+                            <option value="">-- Pilih Pemberi Izin --</option>
+                            <option value="Menteri Kehutanan" {{ old('pemberi_izin') == 'Menteri Kehutanan' ? 'selected' : '' }}>Menteri Kehutanan</option>
+                            <option value="BKPM" {{ old('pemberi_izin') == 'BKPM' ? 'selected' : '' }}>BKPM</option>
+                            <option value="Gubernur" {{ old('pemberi_izin') == 'Gubernur' ? 'selected' : '' }}>Gubernur</option>
+                            <option value="Bupati/Walikota" {{ old('pemberi_izin') == 'Bupati/Walikota' ? 'selected' : '' }}>Bupati/Walikota</option>
+                        </select>
                         @error('pemberi_izin')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
@@ -416,21 +420,37 @@
                         <label class="form-label">
                             Kapasitas Izin <span class="required">*</span>
                         </label>
-                        <select 
+                        <input 
+                            type="text" 
                             name="kapasitas_izin" 
-                            class="form-select" 
+                            class="form-input" 
+                            placeholder="Contoh: 5000 m³/tahun"
+                            value="{{ old('kapasitas_izin') }}"
                             required
                         >
-                            <option value="">-- Pilih Kapasitas Izin --</option>
-                            <option value="0 - 1999 m³/tahun" {{ old('kapasitas_izin') == '0 - 1999 m³/tahun' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
-                            <option value="2000 - 5999 m³/tahun" {{ old('kapasitas_izin') == '2000 - 5999 m³/tahun' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
-                            <option value=">= 6000 m³/tahun" {{ old('kapasitas_izin') == '>= 6000 m³/tahun' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
-                        </select>
                         @error('kapasitas_izin')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
+
+                <!-- Row: Tanggal & Nomor Izin -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            Tanggal <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="date" 
+                            name="tanggal" 
+                            class="form-input" 
+                            value="{{ old('tanggal') }}"
+                            required
+                        >
+                        @error('tanggal')
+                            <div class="error-message">{{ $message }}</div>
+                        @enderror
+                    </div>
 
                 <!-- Nomor Izin/NIB/SS -->
                 <div class="form-group">

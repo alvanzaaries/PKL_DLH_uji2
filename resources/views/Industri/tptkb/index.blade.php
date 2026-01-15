@@ -263,7 +263,7 @@
 
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 20px;
             margin-bottom: 20px;
         }
@@ -681,7 +681,7 @@
             </div>
         </div>
         <div class="sidebar-menu">
-            <a href="{{ url('/') }}" class="menu-item {{ request()->is('/') ? 'active' : '' }}">
+            <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <i class="fas fa-th-large menu-icon"></i>
                 <span class="menu-text">Beranda</span>
             </a>
@@ -821,6 +821,24 @@
                         </select>
                     </div>
                     <div class="filter-group">
+                        <label>Bulan</label>
+                        <select name="bulan" class="filter-input">
+                            <option value="">-- Semua Bulan --</option>
+                            <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
+                            <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
+                            <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
+                            <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
+                            <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
+                            <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
+                            <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
+                            <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
+                            <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
+                            <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
+                            <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
+                            <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
                         <label>Tahun</label>
                         <select name="tahun" class="filter-input">
                             <option value="">-- Semua Tahun --</option>
@@ -877,6 +895,7 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Perusahaan</th>
+                            <th>Tanggal</th>
                             <th>Kabupaten/Kota</th>
                             <th>Penanggung Jawab</th>
                             <th>Sumber Bahan Baku</th>
@@ -891,6 +910,7 @@
                         <tr>
                             <td>{{ $tptkb->firstItem() + $index }}</td>
                             <td><strong>{{ $item->industri->nama }}</strong></td>
+                            <td>{{ $item->industri->tanggal ? \Carbon\Carbon::parse($item->industri->tanggal)->format('d/m/Y') : '-' }}</td>
                             <td>{{ $item->industri->kabupaten }}</td>
                             <td>{{ $item->industri->penanggungjawab }}</td>
                             <td>{{ $item->sumber_bahan_baku }}</td>
@@ -952,6 +972,9 @@
                         <div class="detail-label">Nama Perusahaan</div>
                         <div class="detail-value" id="modal-nama">-</div>
                     </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Tanggal</div>
+                        <div class="detail-value" id="modal-tanggal">-</div>
                     <div class="detail-item">
                         <div class="detail-label">Nomor Izin</div>
                         <div class="detail-value" id="modal-nomor-izin">-</div>

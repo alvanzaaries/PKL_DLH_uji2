@@ -1,4 +1,4 @@
-@extends('layouts.sidebar')
+@extends('Industri.layouts.sidebar')
 
 @section('title', 'Edit TPT-KB')
 
@@ -325,7 +325,10 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">Pemberi Izin <span class="required">*</span></label>
-                        <input type="text" name="pemberi_izin" class="form-input" value="{{ old('pemberi_izin', $tptkb->pemberi_izin) }}" placeholder="Contoh: Dinas LHK Jateng" required>
+                        <select name="pemberi_izin" class="form-select" required>
+                            <option value="">-- Pilih Pemberi Izin --</option>
+                            <option value="Gubernur" {{ old('pemberi_izin', $tptkb->pemberi_izin) == 'Gubernur' ? 'selected' : '' }}>Gubernur</option>
+                        </select>
                         @error('pemberi_izin')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
@@ -353,31 +356,29 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">
-                            Kapasitas Izin <span class="required">*</span>
-                        </label>
-                        <select 
-                            name="kapasitas_izin" 
-                            class="form-select" 
-                            required
-                        >
-                            <option value="">-- Pilih Kapasitas Izin --</option>
-                            <option value="0-1999" {{ old('kapasitas_izin') == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
-                            <option value="2000-5999" {{ old('kapasitas_izin') == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
-                            <option value=">= 6000" {{ old('kapasitas_izin') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
-                        </select>
+                        <label class="form-label">Kapasitas Izin <span class="required">*</span></label>
+                        <input type="text" name="kapasitas_izin" class="form-input" value="{{ old('kapasitas_izin', $tptkb->kapasitas_izin) }}" placeholder="Contoh: 5000 m³/tahun" required>
                         @error('kapasitas_izin')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Masa Berlaku Izin <span class="required">*</span></label>
-                        <input type="date" name="masa_berlaku" class="form-input" value="{{ old('masa_berlaku', $tptkb->masa_berlaku ? $tptkb->masa_berlaku->format('Y-m-d') : '') }}" required>
-                        @error('masa_berlaku')
+                        <label class="form-label">Tanggal <span class="required">*</span></label>
+                        <input type="date" name="tanggal" class="form-input" value="{{ old('tanggal', $tptkb->industri->tanggal) }}" required>
+                        @error('tanggal')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Masa Berlaku Izin <span class="required">*</span></label>
+                    <input type="date" name="masa_berlaku" class="form-input" value="{{ old('masa_berlaku', $tptkb->masa_berlaku ? $tptkb->masa_berlaku->format('Y-m-d') : '') }}" required>
+                    @error('masa_berlaku')
+                        <div class="error-message">{{ $message }}</div>
+                    @enderror
+                </div>
                 </div>
 
                 <div class="form-actions">
