@@ -77,7 +77,7 @@
             <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                 <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
-                        <a href="{{ route('pelaporan.index') }}" class="text-gray-400 hover:text-[#1B5E20] transition-colors" title="Kembali">
+                        <a href="{{ route('laporan.index') }}" class="text-gray-400 hover:text-[#1B5E20] transition-colors" title="Kembali">
                             <i class="fas fa-arrow-left text-lg"></i>
                         </a>
                         <div>

@@ -55,7 +55,7 @@
 
         <div class="bg-white border border-gray-200 shadow-sm rounded-md p-6 mb-6">
             <div class="flex items-center gap-3 mb-2">
-                <a href="{{ route('pelaporan.index') }}" class="text-gray-400 hover:text-[#1A4030] transition-colors" title="Kembali">
+                <a href="{{ route('laporan.index') }}" class="text-gray-400 hover:text-[#1A4030] transition-colors" title="Kembali">
                     <i class="fas fa-arrow-left text-lg"></i>
                 </a>
                 <div>
