@@ -50,7 +50,7 @@
         </tbody>
     </table>
 
-    <h2>Top Wilayah</h2>
+    <h2>Sebaran Wilayah</h2>
     <table>
         <thead>
             <tr>
