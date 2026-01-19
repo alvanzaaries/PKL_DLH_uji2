@@ -399,7 +399,7 @@
                             type="date" 
                             name="tanggal" 
                             class="form-input" 
-                            value="{{ old('tanggal') }}"
+                            value="{{ old('tanggal', date('Y-m-d')) }}"
                             required
                         >
                         @error('tanggal')
@@ -410,7 +410,7 @@
 
                 <!-- Form Actions -->
                 <div class="form-actions">
-                    <a href="{{ route('industri.dashboard') }}" class="btn btn-secondary">
+                    <a href="{{ route('perajin.index') }}" class="btn btn-secondary">
                         Batal
                     </a>
                     <button type="submit" class="btn btn-primary">

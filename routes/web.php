@@ -146,9 +146,9 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
     // Perajin - CRUD
     Route::get('/perajin/create', [PerajinController::class, 'create'])->name('perajin.create');
     Route::post('/perajin', [PerajinController::class, 'store'])->name('perajin.store');
-    Route::get('/perajin/{id}/edit', [PerajinController::class, 'edit'])->name('perajin.edit');
-    Route::put('/perajin/{id}', [PerajinController::class, 'update'])->name('perajin.update');
-    Route::delete('/perajin/{id}', [PerajinController::class, 'destroy'])->name('perajin.destroy');
+    Route::get('/perajin/{perajin}/edit', [PerajinController::class, 'edit'])->name('perajin.edit');
+    Route::put('/perajin/{perajin}', [PerajinController::class, 'update'])->name('perajin.update');
+    Route::delete('/perajin/{perajin}', [PerajinController::class, 'destroy'])->name('perajin.destroy');
 });
 
 // ===================================================================

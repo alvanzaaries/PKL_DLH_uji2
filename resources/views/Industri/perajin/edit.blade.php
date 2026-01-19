@@ -259,7 +259,7 @@
                 <p class="page-subtitle">Ubah data Perajin / End User</p>
             </div>
 
-            <form action="{{ route('perajin.update', ['id' => $perajin->id]) }}" method="POST">
+            <form action="{{ route('perajin.update', $perajin) }}" method="POST">
                 @csrf
                 @method('PUT')
 

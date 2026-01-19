@@ -81,7 +81,7 @@ class PerajinController extends Controller implements HasMiddleware
 
     public function create()
     {
-        return view('industri.perajin.create');
+        return view('Industri.perajin.create');
     }
 
     public function store(Request $request)
@@ -94,11 +94,6 @@ class PerajinController extends Controller implements HasMiddleware
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:50',
             'tanggal' => 'required|date',
-            'jenis_kerajinan' => 'required|string|max:255',
-            'bahan_baku' => 'required|string|max:255',
-            'kapasitas_produksi' => 'required|string|max:255',
-            'pemberi_izin' => 'required|string|max:255',
-            'masa_berlaku' => 'required|date',
         ]);
 
         // Create industri base
@@ -116,11 +111,6 @@ class PerajinController extends Controller implements HasMiddleware
         // Create perajin
         Perajin::create([
             'industri_id' => $industri->id,
-            'jenis_kerajinan' => $validated['jenis_kerajinan'],
-            'bahan_baku' => $validated['bahan_baku'],
-            'kapasitas_produksi' => $validated['kapasitas_produksi'],
-            'pemberi_izin' => $validated['pemberi_izin'],
-            'masa_berlaku' => $validated['masa_berlaku'],
         ]);
 
         return redirect()->route('perajin.index')
@@ -130,7 +120,7 @@ class PerajinController extends Controller implements HasMiddleware
     public function edit(Perajin $perajin)
     {
         $perajin->load('industri');
-        return view('industri.perajin.edit', compact('perajin'));
+        return view('Industri.perajin.edit', compact('perajin'));
     }
 
     public function update(Request $request, Perajin $perajin)
@@ -142,11 +132,7 @@ class PerajinController extends Controller implements HasMiddleware
             'kabupaten' => 'required|string|max:100',
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:50',
-            'jenis_kerajinan' => 'required|string|max:255',
-            'bahan_baku' => 'required|string|max:255',
-            'kapasitas_produksi' => 'required|string|max:255',
-            'pemberi_izin' => 'required|string|max:255',
-            'masa_berlaku' => 'required|date',
+            'tanggal' => 'required|date',
         ]);
 
         // Update industri base
@@ -160,23 +146,14 @@ class PerajinController extends Controller implements HasMiddleware
             'tanggal' => $validated['tanggal'],
         ]);
 
-        // Update perajin
-        $perajin->update([
-            'jenis_kerajinan' => $validated['jenis_kerajinan'],
-            'bahan_baku' => $validated['bahan_baku'],
-            'kapasitas_produksi' => $validated['kapasitas_produksi'],
-            'pemberi_izin' => $validated['pemberi_izin'],
-            'masa_berlaku' => $validated['masa_berlaku'],
-        ]);
-
-        return redirect()->route('industri.perajin.index')
+        return redirect()->route('perajin.index')
             ->with('success', 'Data perajin berhasil diperbarui');
     }
 
     public function destroy(Perajin $perajin)
     {
         $perajin->industri->delete(); // Cascade delete
-        return redirect()->route('industri.perajin.index')
+        return redirect()->route('perajin.index')
             ->with('success', 'Data perajin berhasil dihapus');
     }
 }

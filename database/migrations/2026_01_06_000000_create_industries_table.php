@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('kabupaten');
             $table->string('kontak');
             $table->string('nomor_izin');
-            $table->date('tanggal');
+            $table->date('tanggal')->nullable();
             $table->enum('type', ['primer', 'sekunder', 'tpt_kb', 'end_user']);
             $table->timestamps();
         });
