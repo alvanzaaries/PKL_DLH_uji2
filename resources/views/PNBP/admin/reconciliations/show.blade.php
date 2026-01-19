@@ -43,25 +43,32 @@
             </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <a href="{{ route('reconciliations.export-pdf', array_merge(['reconciliation' => $reconciliation->id], request()->query())) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary_hover transition-colors">
+            {{-- REMOVED: class "transition-colors" --}}
+            <a href="{{ route('reconciliations.export-pdf', array_merge(['reconciliation' => $reconciliation->id], request()->query())) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary_hover">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 17v-6m0 0l-3 3m3-3l3 3M6 20h12" />
                 </svg>
                 Export PDF
             </a>
-            <a href="{{ route('reconciliations.file', $reconciliation->id) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
+            
+            {{-- REMOVED: class "transition-colors" --}}
+            <a href="{{ route('reconciliations.file', $reconciliation->id) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 Excel Asli
             </a>
-            <a href="{{ route('reconciliations.raw', $reconciliation->id) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
+
+            {{-- REMOVED: class "transition-colors" --}}
+            <a href="{{ route('reconciliations.raw', $reconciliation->id) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Raw Data
             </a>
-            <a href="{{ route('reconciliations.index') }}" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+
+            {{-- REMOVED: class "transition-colors" --}}
+            <a href="{{ route('reconciliations.index') }}" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700">
                 &larr; Kembali
             </a>
         </div>
@@ -70,7 +77,7 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto space-y-6">
 
-            {{-- Summary Cards (KEMBALI BERWARNA) --}}
+            {{-- Summary Cards --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 @foreach($totalPerSatuan as $t)
                     @if($t->total_volume <= 0) @continue @endif
@@ -84,7 +91,6 @@
                 @endforeach
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Nilai LHP</div>
-                    {{-- Warna Kuning Dikembalikan --}}
                     <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-500 mt-2">
                         <span class="text-sm text-gray-500 font-normal">Rp</span>
                         {{ number_format(($totalNilaiLhpFinal ?? $statsJenis->sum('total_nilai')), 0, '.', ',') }}
@@ -92,7 +98,6 @@
                 </div>
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Nilai Setor</div>
-                    {{-- Warna Hijau Dikembalikan --}}
                     <div class="text-2xl font-bold text-green-600 dark:text-green-500 mt-2">
                         <span class="text-sm text-gray-500 font-normal">Rp</span>
                         {{ number_format(($baseTotalNilaiSetor ?? 0), 0, '.', ',') }}
@@ -100,7 +105,7 @@
                 </div>
             </div>
 
-            {{-- Rekap Tables (WARNA ASLI + FIX HOVER) --}}
+            {{-- Rekap Tables --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {{-- Rekap Jenis --}}
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 lg:col-span-1">
@@ -114,18 +119,16 @@
                                     <th class="py-2 font-medium">Jenis</th>
                                     <th class="py-2 text-right font-medium">Volume</th>
                                     <th class="py-2 text-center font-medium"></th>
-                                    {{-- Text Primary Dikembalikan --}}
                                     <th class="py-2 text-right font-medium text-primary dark:text-primary-400">Nilai LHP (Rp)</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach($statsJenis as $s)
-                                    {{-- Fix Hover: Tambahkan dark:hover:bg-gray-700 --}}
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    {{-- REMOVED: class "transition-colors" --}}
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td class="py-2 font-medium text-xs text-gray-900 dark:text-gray-200">{{ $s->label }}</td>
                                         <td class="py-2 text-right text-gray-700 dark:text-gray-300">{{ number_format($s->total_volume, 2, '.', ',') }}</td>
                                         <td class="py-2 text-center text-gray-500 dark:text-gray-400">{{ $s->satuan }}</td>
-                                        {{-- Text Primary Dikembalikan --}}
                                         <td class="py-2 text-right text-primary dark:text-primary-400 font-semibold">{{ "Rp " . number_format(($s->total_nilai ?? 0), 0, '.', ',') }}</td>
                                     </tr>
                                 @endforeach
@@ -145,17 +148,15 @@
                                 <tr class="border-b dark:border-gray-700 text-gray-500 dark:text-gray-400">
                                     <th class="py-2 font-medium">Bank</th>
                                     <th class="py-2 text-right font-medium">Total Setor (Rp)</th>
-                                    {{-- Text Primary Dikembalikan --}}
                                     <th class="py-2 text-right font-medium text-primary dark:text-primary-400">Trx</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach($statsBank as $s)
-                                    {{-- Fix Hover: Tambahkan dark:hover:bg-gray-700 --}}
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    {{-- REMOVED: class "transition-colors" --}}
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td class="py-2 font-medium truncate max-w-[100px] text-gray-900 dark:text-gray-200" title="{{ $s->label }}">{{ $s->label }}</td>
                                         <td class="py-2 text-right text-gray-900 dark:text-gray-200 font-medium">{{ number_format($s->total_nilai, 0, '.', ',') }}</td>
-                                        {{-- Text Primary Dikembalikan --}}
                                         <td class="py-2 text-right text-primary dark:text-primary-400 font-semibold">{{ $s->count }}</td>
                                     </tr>
                                 @endforeach
@@ -165,7 +166,7 @@
                 </div>
             </div>
 
-            {{-- MAIN TABLE: Detail Data Transaksi (TETAP NETRAL / MONOKROM) --}}
+            {{-- MAIN TABLE: Detail Data Transaksi --}}
             <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700">
                 <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-white dark:bg-surface-dark">
                     <h3 class="font-bold text-gray-800 dark:text-white">Detail Data Transaksi ({{ $details->total() }} baris)</h3>
@@ -180,8 +181,12 @@
                     {{-- Filter & Search --}}
                     <form action="{{ route('reconciliations.show', $reconciliation->id) }}" method="GET" id="filterForm" class="flex gap-2 mb-4">
                         <input type="text" name="search" value="{{ request('search') }}" class="w-full md:w-1/3 px-3 py-2 border dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-500" placeholder="Cari data (Wilayah, NTPN, Billing, dll)...">
-                        <button type="submit" class="inline-flex items-center px-4 py-2.5 bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors">Cari</button>
-                        <button type="button" id="resetBtn" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium transition-colors {{ request('search') ? '' : 'hidden' }}">Reset</button>
+                        
+                        {{-- REMOVED: class "transition-colors" --}}
+                        <button type="submit" class="inline-flex items-center px-4 py-2.5 bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white rounded-lg text-sm font-medium">Cari</button>
+                        
+                        {{-- REMOVED: class "transition-colors" --}}
+                        <button type="button" id="resetBtn" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium {{ request('search') ? '' : 'hidden' }}">Reset</button>
                     </form>
 
                     {{-- TABEL NETRAL MULAI DARI SINI --}}
@@ -215,7 +220,8 @@
                             {{-- Body Netral --}}
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                 @forelse($details as $detail)
-                                    <tr class="bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                                    {{-- REMOVED: class "transition-colors" --}}
+                                    <tr class="bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-700">
                                         {{-- No & Wilayah --}}
                                         <td class="px-3 py-2 sticky left-0 bg-white dark:bg-surface-dark font-medium text-center shadow-sm border-r dark:border-gray-700 text-gray-500 dark:text-gray-400">{{ $detail->no_urut ?? '-' }}</td>
                                         <td class="px-3 py-2 font-medium text-gray-900 dark:text-gray-200 whitespace-nowrap">{{ $detail->wilayah }}</td>
