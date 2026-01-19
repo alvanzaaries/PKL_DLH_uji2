@@ -21,13 +21,9 @@
                                     $role = (auth()->user()->role ?? 'user');
                                     $dashboardUrl = $role === 'admin' ? route('dashboard.index') : route('user.upload');
                                 @endphp
-                                <a href="{{ $dashboardUrl }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg">
-                                    Ke Dashboard
-                                </a>
+                                
                             @else
-                                <a href="{{ route('login') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 md:py-4 md:text-lg">
-                                    Login
-                                </a>
+                                
                             @endif
                         </div>
                         <div class="mt-3 sm:mt-0 sm:ml-3">
@@ -41,7 +37,7 @@
                                     @csrf
                                 </form>
                             @else
-                                <a href="{{ route('login') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 md:py-4 md:text-lg">
+                                <a href="{{ route('dashboard.index') }}" class="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 md:py-4 md:text-lg">
                                     Masuk ke Dashboard
                                 </a>
                             @endif
