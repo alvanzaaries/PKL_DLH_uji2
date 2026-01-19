@@ -149,7 +149,7 @@ class LaporanController extends Controller
 
         // Cek apakah ada data preview di session
         if (!session()->has('preview_data')) {
-            return redirect()->route('laporan.upload')
+            return redirect()->route('laporan.upload.form')
                 ->with('error', 'Data preview tidak ditemukan. Silakan upload ulang.');
         }
 
@@ -161,7 +161,7 @@ class LaporanController extends Controller
             ->first();
 
         if ($existingLaporan) {
-            return redirect()->route('laporan.upload')
+            return redirect()->route('laporan.upload.form')
                 ->with('error', 'Laporan jenis "' . $request->jenis_laporan . '" untuk bulan ' . $request->bulan . ' tahun ' . $request->tahun . ' sudah pernah diupload.');
         }
 
@@ -212,19 +212,19 @@ class LaporanController extends Controller
             if ($redirectUrl) {
                 return redirect($redirectUrl)->with('success', 'Laporan berhasil disimpan!');
             } else {
-                return redirect()->route('industri.laporan', ['industri' => $request->industri_id])
+                return redirect()->route('laporan.industri', ['industri' => $request->industri_id])
                     ->with('success', 'Laporan berhasil disimpan!');
             }
 
         } catch (\Exception $e) {
             DB::rollBack();
             
-            // Gunakan redirect URL dari session atau fallback ke industri.laporan
+            // Gunakan redirect URL dari session atau fallback ke laporan.industri
             $redirectUrl = session('redirect_after_save');
             if ($redirectUrl) {
                 return redirect($redirectUrl)->with('error', 'Gagal menyimpan laporan: ' . $e->getMessage());
             } else {
-                return redirect()->route('industri.laporan', ['industri' => $request->industri_id])
+                return redirect()->route('laporan.industri', ['industri' => $request->industri_id])
                     ->with('error', 'Gagal menyimpan laporan: ' . $e->getMessage());
             }
         }
@@ -281,16 +281,16 @@ class LaporanController extends Controller
             DB::commit();
 
             if ($result['uploaded'] > 0) {
-                return redirect()->route('industri.laporan', $request->industri_id)
+                return redirect()->route('laporan.industri', $request->industri_id)
                     ->with('success', $result['message']);
             } else {
-                return redirect()->route('industri.laporan', $request->industri_id)
+                return redirect()->route('laporan.industri', $request->industri_id)
                     ->with('warning', $result['message']);
             }
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('industri.laporan', $request->industri_id)
+            return redirect()->route('laporan.industri', $request->industri_id)
                 ->with('error', 'Gagal mengupload laporan: ' . $e->getMessage());
         }
     }

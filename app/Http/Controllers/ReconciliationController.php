@@ -99,17 +99,42 @@ class ReconciliationController extends Controller
      */
     public function exportPdf(Request $request, Reconciliation $reconciliation)
     {
+        @ini_set('memory_limit', '1024M');
+        @set_time_limit(120);
+
         $query = $this->buildDetailsQuery($request, $reconciliation);
-        $details = $query->get();
+
+        // Export current page to keep PDF size reasonable
+        $paginator = $query->paginate(50);
+        $details = collect($paginator->items());
 
         $stats = $this->buildReconciliationStats($reconciliation);
 
         $pdf = Pdf::loadView('PNBP.admin.reconciliations.show_pdf', array_merge(
-            ['reconciliation' => $reconciliation, 'details' => $details],
+            [
+                'reconciliation' => $reconciliation,
+                'details' => $details,
+                'pageInfo' => [
+                    'current' => $paginator->currentPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                ],
+            ],
             $stats
-        ))->setPaper('a4', 'landscape');
+        ))->setPaper('a4', 'landscape')
+          ->setOptions([
+              'isRemoteEnabled' => false,
+              'defaultFont' => 'Helvetica',
+              'isHtml5ParserEnabled' => true,
+          ]);
 
-        return $pdf->download('rekonsiliasi-' . $reconciliation->id . '-' . now()->format('Ymd-His') . '.pdf');
+        $kphRaw = (string) ($reconciliation->kph ?? 'kph');
+        $kphSlug = preg_replace('/[^a-zA-Z0-9\-_]+/', '-', trim($kphRaw));
+        $kphSlug = trim($kphSlug, '-');
+        $quarter = (int) $reconciliation->quarter;
+        $year = (int) $reconciliation->year;
+
+        return $pdf->download('pnbp.' . $kphSlug . '.triwulan' . $quarter . '.' . $year . '.pdf');
     }
 
     public function destroy(Reconciliation $reconciliation)

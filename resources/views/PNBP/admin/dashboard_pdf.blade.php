@@ -4,43 +4,53 @@
     <meta charset="UTF-8">
     <title>Export Dashboard PNBP</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; color: #111827; font-size: 12px; }
-        h1 { font-size: 18px; margin: 0 0 6px; }
+        body { font-family: Helvetica, Arial, sans-serif; color: #111827; font-size: 10px; }
+        h1 { font-size: 14px; margin: 0 0 4px; }
+        h2 { font-size: 11px; margin: 10px 0 4px; }
         .muted { color: #6b7280; }
-        .grid { display: table; width: 100%; margin: 12px 0; }
-        .card { display: table-cell; border: 1px solid #e5e7eb; padding: 8px; vertical-align: top; }
-        .card + .card { border-left: none; }
-        .label { font-size: 11px; color: #6b7280; }
-        .value { font-size: 14px; font-weight: 700; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #e5e7eb; padding: 6px; text-align: left; }
-        th { background: #f9fafb; }
+        table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+        th, td { border: 1px solid #e5e7eb; padding: 4px; text-align: left; }
         .right { text-align: right; }
     </style>
 </head>
 <body>
-    <h1>Dashboard Statistik PNBP</h1>
+    <h1>Statistik PNBP</h1>
     <div class="muted">Filter: {{ $filter ?? 'Semua Data' }}</div>
     <div class="muted">Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
 
-    <div class="grid">
-        <div class="card">
-            <div class="label">Total File Rekonsiliasi</div>
-            <div class="value">{{ number_format($totalFiles) }}</div>
-        </div>
-        <div class="card">
-            <div class="label">Total Nilai Setor</div>
-            <div class="value">Rp {{ number_format($financials->total_setor ?? 0, 0, ',', '.') }}</div>
-            <div class="label">Billing: Rp {{ number_format($financials->total_billing ?? 0, 0, ',', '.') }}</div>
-            <div class="label">LHP: Rp {{ number_format($financials->total_lhp ?? 0, 0, ',', '.') }}</div>
-        </div>
-        <div class="card">
-            <div class="label">Total Volume Produksi</div>
-            <div class="value">{{ number_format($financials->total_volume ?? 0, 2, ',', '.') }}</div>
-        </div>
-    </div>
+    <h2>Ringkasan</h2>
+    <table>
+        <thead>
+            <tr>
+                <th></th>
+                <th class="right">Nilai</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Total File Ter-Upload</td>
+                <td class="right">{{ number_format($totalFiles) }}</td>
+            </tr>
+            <tr>
+                <td>Total Nilai Setor</td>
+                <td class="right">Rp {{ number_format($financials->total_setor ?? 0, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td>Total Nilai Billing</td>
+                <td class="right">Rp {{ number_format($financials->total_billing ?? 0, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td>Total Nilai LHP</td>
+                <td class="right">Rp {{ number_format($financials->total_lhp ?? 0, 0, ',', '.') }}</td>
+            </tr>
+            <tr>
+                <td>Total Volume Produksi</td>
+                <td class="right">{{ number_format($financials->total_volume ?? 0, 2, ',', '.') }}</td>
+            </tr>
+        </tbody>
+    </table>
 
-    <h2 style="font-size:14px; margin: 10px 0 6px;">Top Wilayah</h2>
+    <h2>Top Wilayah</h2>
     <table>
         <thead>
             <tr>
@@ -62,11 +72,11 @@
         </tbody>
     </table>
 
-    <h2 style="font-size:14px; margin: 12px 0 6px;">Statistik per Jenis SDH</h2>
+    <h2>Statistik SDH</h2>
     <table>
         <thead>
             <tr>
-                <th>Jenis SDH</th>
+                <th>SDH</th>
                 <th class="right">Volume</th>
                 <th class="right">Nilai Setor</th>
             </tr>
