@@ -157,18 +157,18 @@
                     <div class="w-12 h-12 mb-3 relative group-hover:scale-110 transition-transform duration-300">
                         <div class="absolute inset-0 bg-green-100 dark:bg-green-900/30 rounded-full animate-pulse">
                         </div>
-                        <div
+                        <a href="{{ route('industri.dashboard') }}" target="_blank"
                             class="relative w-full h-full rounded-full border-2 border-white dark:border-gray-700 shadow bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                            <span class="material-icons text-white text-2xl">forest</span>
-                        </div>
+                            <span class="material-icons text-white text-2xl">storage</span>
+                        </a>
                     </div>
 
                     <h2
                         class="text-lg font-extrabold text-gray-900 dark:text-white mb-1 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">
-                        SIDI-HUT</h2>
+                        DATABASE INDUSTRI </h2>
                     <h3
                         class="text-[11px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider mb-2 border-b border-green-100 dark:border-green-800 pb-1">
-                        Database Industri Kehutanan</h3>
+                        Database Industri Kehutanan </h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-4 text-xs leading-snug line-clamp-3">Layanan digital untuk
                         menambahkan, memantau database keaktifan industri kehutanan di Jawa Tengah secara real-time.</p>
 
@@ -201,7 +201,7 @@
                         PELAPORAN PUHH</h2>
                     <h3
                         class="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2 border-b border-amber-100 dark:border-amber-800 pb-1">
-                        Monitoring & Pelaporan Kehutanan</h3>
+                        Monitoring Pelaporan Kehutanan</h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-4 text-xs leading-snug line-clamp-3">Portal pelaporan kehutanan terpadu untuk pengumpulan, pengelolaan,
                         dan rekapitulasi data.</p>
 
