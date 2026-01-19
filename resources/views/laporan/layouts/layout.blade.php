@@ -305,6 +305,12 @@
                         </div>
                     </div>
                 </a>
+                <div style="margin-top:0.75rem;">
+                    <a href="{{ route('template.download') }}" class="btn btn-export" style="display:flex; align-items:center; gap:8px; width:100%; justify-content:center;">
+                        <i class="fas fa-file-download"></i>
+                        <span>Download Template</span>
+                    </a>
+                </div>
             @else
                 <div class="user-card">
                     <div class="flex items-center gap-3 overflow-hidden">
