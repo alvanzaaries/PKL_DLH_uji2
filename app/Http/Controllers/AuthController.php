@@ -47,6 +47,8 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             $user = $request->user();
+            // initialize last activity timestamp for session timeout middleware
+            $request->session()->put('last_activity', time());
             
             // Check for intended URL first (from Incoming feature)
             $intendedUrl = session('url.intended');
