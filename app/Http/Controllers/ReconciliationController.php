@@ -128,7 +128,13 @@ class ReconciliationController extends Controller
               'isHtml5ParserEnabled' => true,
           ]);
 
-        return $pdf->download('rekonsiliasi-' . $reconciliation->id . '-' . now()->format('Ymd-His') . '.pdf');
+        $kphRaw = (string) ($reconciliation->kph ?? 'kph');
+        $kphSlug = preg_replace('/[^a-zA-Z0-9\-_]+/', '-', trim($kphRaw));
+        $kphSlug = trim($kphSlug, '-');
+        $quarter = (int) $reconciliation->quarter;
+        $year = (int) $reconciliation->year;
+
+        return $pdf->download('pnbp.' . $kphSlug . '.triwulan' . $quarter . '.' . $year . '.pdf');
     }
 
     public function destroy(Reconciliation $reconciliation)

@@ -14,7 +14,7 @@
     </style>
 </head>
 <body>
-    <h1>Dashboard Statistik PNBP</h1>
+    <h1>Statistik PNBP</h1>
     <div class="muted">Filter: {{ $filter ?? 'Semua Data' }}</div>
     <div class="muted">Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
 
@@ -22,13 +22,13 @@
     <table>
         <thead>
             <tr>
-                <th>Metric</th>
+                <th></th>
                 <th class="right">Nilai</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>Total File Rekonsiliasi</td>
+                <td>Total File Ter-Upload</td>
                 <td class="right">{{ number_format($totalFiles) }}</td>
             </tr>
             <tr>
@@ -72,11 +72,11 @@
         </tbody>
     </table>
 
-    <h2>Statistik per Jenis SDH</h2>
+    <h2>Statistik SDH</h2>
     <table>
         <thead>
             <tr>
-                <th>Jenis SDH</th>
+                <th>SDH</th>
                 <th class="right">Volume</th>
                 <th class="right">Nilai Setor</th>
             </tr>

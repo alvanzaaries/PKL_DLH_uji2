@@ -42,7 +42,7 @@ class DashboardController extends Controller
                 'isHtml5ParserEnabled' => true,
             ]);
 
-        return $pdf->download('pnbp-dashboard-' . now()->format('Ymd-His') . '.pdf');
+        return $pdf->download('pnbp.' . now()->format('Ymd_His') . '.pdf');
     }
 
     private function buildDashboardData(Request $request): array
