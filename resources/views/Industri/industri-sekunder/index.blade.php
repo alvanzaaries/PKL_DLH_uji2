@@ -1,13 +1,30 @@
-﻿<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Industri Sekunder (IPHHK)</title>
-    <link rel="icon" href="{{ asset('logo jateng.webp') }}" type="image/webp">
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <style>
+﻿@extends('Industri.layouts.sidebar')
+
+@section('title', 'Data Industri Sekunder (IPHHK)')
+
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+        /* Prevent sidebar overlap */
+        body {
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            z-index: 1000;
+        }
+
+        .main-wrapper {
+            margin-left: 260px;
+            width: calc(100% - 260px);
+        }
+
         :root {
             --primary: #0f172a;
             --accent: #15803d;
@@ -31,6 +48,7 @@
             line-height: 1.6;
             display: flex;
             margin: 0;
+            overflow-x: hidden;
         }
 
         /* Sidebar */
@@ -44,6 +62,7 @@
             padding: 20px 0;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
+            z-index: 1000;
         }
 
         .sidebar-header {
@@ -132,6 +151,8 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            width: calc(100% - 260px);
+            position: relative;
         }
 
         .container {
@@ -738,6 +759,7 @@
 
             .main-wrapper {
                 margin-left: 220px;
+                width: calc(100% - 220px);
             }
         }
 
@@ -767,6 +789,7 @@
 
             .main-wrapper {
                 margin-left: 70px;
+                width: calc(100% - 70px);
             }
 
             .menu-text {
@@ -778,125 +801,9 @@
             }
         }
     </style>
-</head>
-<body>
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-logo">
-                <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah">
-            </div>
-            <div class="sidebar-text">
-                <p class="sidebar-text-top">Pemerintah Provinsi Jawa Tengah</p>
-                <p class="sidebar-text-bottom">Dinas Lingkungan Hidup<br>dan Kehutanan</p>
-            </div>
-        </div>
-        <div class="sidebar-menu">
-            <a href="{{ route('industri.dashboard') }}" class="menu-item {{ request()->routeIs('industri.dashboard') ? 'active' : '' }}">
-                <i class="fas fa-th-large menu-icon"></i>
-                <span class="menu-text">Beranda</span>
-            </a>
-            
-            <a href="{{ route('industri-primer.index') }}" class="menu-item {{ request()->routeIs('industri-primer.*') ? 'active' : '' }}">
-                <i class="fas fa-industry menu-icon"></i>
-                <span class="menu-text">Industri Primer</span>
-            </a>
-            
-            <a href="{{ route('industri-sekunder.index') }}" class="menu-item {{ request()->routeIs('industri-sekunder.*') ? 'active' : '' }}">
-                <i class="fas fa-microchip menu-icon"></i>
-                <span class="menu-text">Industri Sekunder</span>
-            </a>
-            
-            <a href="{{ route('tptkb.index') }}" class="menu-item {{ request()->routeIs('tptkb.*') ? 'active' : '' }}">
-                <i class="fas fa-map-marked-alt menu-icon"></i>
-                <span class="menu-text">TPTKB</span>
-            </a>
-            
-            <a href="{{ route('perajin.index') }}" class="menu-item {{ request()->routeIs('perajin.*') ? 'active' : '' }}">
-                <i class="fas fa-tools menu-icon"></i>
-                <span class="menu-text">Perajin</span>
-            </a>
-            
-            <div style="margin-top: 30px; padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                @guest
-                <a href="{{ route('login', ['from' => url()->current()]) }}" class="menu-item" style="background: rgba(76, 175, 80, 0.2); border-radius: 8px; justify-content: center;">
-                    <i class="fas fa-sign-in-alt menu-icon"></i>
-                    <span class="menu-text" style="font-weight: 600;">Login Admin</span>
-                </a>
-                @else
-                <div style="color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; text-align: center;">
-                    <i class="fas fa-user-circle" style="font-size: 36px; margin-bottom: 8px;"></i>
-                    <div style="font-size: 13px; font-weight: 600;">{{ Auth::user()->name }}</div>
-                    <div style="font-size: 11px; opacity: 0.7;">{{ Auth::user()->email }}</div>
-                </div>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="menu-item" style="width: 100%; background: rgba(239, 68, 68, 0.2); border: none; cursor: pointer; border-radius: 8px; justify-content: center;">
-                        <i class="fas fa-sign-out-alt menu-icon"></i>
-                        <span class="menu-text" style="font-weight: 600;">Logout</span>
-                    </button>
-                </form>
-                @endguest
-            </div>
-        </div>
-    </div>
+@endpush
 
-    <!-- Main Content Wrapper -->
-    <div class="main-wrapper">
-        <!-- Navigation -->
-        <nav>
-            <div class="nav-content">
-                <div class="logo-area">
-                    <span class="logo-text">Dinas Lingkungan Hidup dan Kehutanan</span>
-                </div>
-                <div style="display: flex; align-items: center; gap: 20px;">
-                    @auth
-                    <div class="user-info">
-                        <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
-                        <span style="font-size: 14px; font-weight: 500;">{{ Auth::user()->name }}</span>
-                    </div>
-                    @else
-                    <a href="{{ route('login', ['from' => url()->current()]) }}" style="padding: 8px 20px; background: var(--accent); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: all 0.2s;">
-                        <i class="fas fa-sign-in-alt"></i> Portal Login
-                    </a>
-                    @endauth
-                </div>
-            </div>
-            
-            <!-- Alert Messages -->
-            @if(session('success'))
-            <div class="alert alert-success" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
-                <span style="font-size: 20px;">✓</span>
-                <span>{{ session('success') }}</span>
-            </div>
-            @endif
-
-            @if(session('error'))
-            <div class="alert alert-error" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
-                <span style="font-size: 20px;">⚠</span>
-                <span>{{ session('error') }}</span>
-            </div>
-            @endif
-        </nav>
-
-        <script>
-            // Auto-hide alerts after 1.5 seconds
-            document.addEventListener('DOMContentLoaded', function() {
-                const alerts = document.querySelectorAll('.alert');
-                if (alerts.length > 0) {
-                    setTimeout(function() {
-                        alerts.forEach(function(alert) {
-                            alert.style.transition = 'opacity 0.3s ease';
-                            alert.style.opacity = '0';
-                            setTimeout(function() {
-                                alert.remove();
-                            }, 300);
-                        });
-                    }, 1500);
-                }
-            });
-        </script>
-
+@section('content')
         <div class="container">
 
         <!-- Page Header -->
@@ -1134,7 +1041,9 @@
             </div>
         </div>
     </div>
+@endsection
 
+@push('scripts')
     <script>
         function showDetail(item) {
             // Populate modal dengan data
@@ -1298,5 +1207,4 @@
             });
         });
     </script>
-</body>
-</html>
+@endpush

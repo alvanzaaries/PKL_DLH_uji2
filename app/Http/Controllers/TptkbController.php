@@ -149,6 +149,7 @@ class TptkbController extends Controller implements HasMiddleware
             'kontak' => $validated['kontak'],
             'nomor_izin' => $validated['nomor_izin'],
             'tanggal' => $validated['tanggal'],
+            'type' => 'tpt_kb',
         ]);
 
         // Create TPTKB

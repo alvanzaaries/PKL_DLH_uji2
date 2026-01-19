@@ -93,6 +93,7 @@ class PerajinController extends Controller implements HasMiddleware
             'kabupaten' => 'required|string|max:100',
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:50',
+            'tanggal' => 'required|date',
             'jenis_kerajinan' => 'required|string|max:255',
             'bahan_baku' => 'required|string|max:255',
             'kapasitas_produksi' => 'required|string|max:255',
@@ -102,7 +103,7 @@ class PerajinController extends Controller implements HasMiddleware
 
         // Create industri base
         $industri = IndustriBase::create([
-            'jenis_industri' => 'perajin',
+            'type' => 'end_user',
             'nama' => $validated['nama'],
             'nomor_izin' => $validated['nomor_izin'],
             'alamat' => $validated['alamat'],
@@ -122,7 +123,7 @@ class PerajinController extends Controller implements HasMiddleware
             'masa_berlaku' => $validated['masa_berlaku'],
         ]);
 
-        return redirect()->route('industri.perajin.index')
+        return redirect()->route('perajin.index')
             ->with('success', 'Data perajin berhasil ditambahkan');
     }
 

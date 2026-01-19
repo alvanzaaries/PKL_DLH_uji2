@@ -17,6 +17,11 @@ class Perajin extends Model
      */
     protected $fillable = [
         'industri_id',
+        'jenis_kerajinan',
+        'bahan_baku',
+        'kapasitas_produksi',
+        'pemberi_izin',
+        'masa_berlaku',
     ];
 
     /**

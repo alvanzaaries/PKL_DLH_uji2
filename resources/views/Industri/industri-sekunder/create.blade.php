@@ -245,12 +245,7 @@
             }
 
             .form-actions {
-                flex-direction: column;
-                align-items: flex-end;
-            }
-
-            .btn {
-                width: 100%;
+                flex-wrap: wrap;
             }
         }
 </style>
