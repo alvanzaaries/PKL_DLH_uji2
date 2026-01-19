@@ -99,31 +99,72 @@ class ReconciliationController extends Controller
      */
     public function exportPdf(Request $request, Reconciliation $reconciliation)
     {
-        @ini_set('memory_limit', '1024M');
-        @set_time_limit(120);
+        @ini_set('memory_limit', '2048M');
+        @set_time_limit(300);
 
+        // Fetch ALL details (removed pagination)
         $query = $this->buildDetailsQuery($request, $reconciliation);
+        $details = $query->get();
 
-        // Export current page to keep PDF size reasonable
-        $paginator = $query->paginate(50);
-        $details = collect($paginator->items());
+        // 1. Grouping Logic
+        $groupedData = [
+            'HASIL HUTAN KAYU' => [
+                'details' => collect(),
+                'total_volume' => 0,
+                'total_lhp' => 0,
+                'total_setor' => 0,
+            ],
+            'HASIL HUTAN BUKAN KAYU (HHBK)' => [
+                'details' => collect(),
+                'total_volume' => 0,
+                'total_lhp' => 0,
+                'total_setor' => 0,
+            ],
+            'HASIL HUTAN LAINNYA' => [
+                'details' => collect(),
+                'total_volume' => 0,
+                'total_lhp' => 0,
+                'total_setor' => 0,
+            ],
+        ];
 
+        foreach ($details as $d) {
+            $unit = strtolower(trim((string)$d->satuan));
+            $category = 'HASIL HUTAN LAINNYA';
+
+            if (in_array($unit, ['m3', 'm^3', 'kbk'])) {
+                $category = 'HASIL HUTAN KAYU';
+            } elseif (in_array($unit, ['ton', 'kg'])) {
+                $category = 'HASIL HUTAN BUKAN KAYU (HHBK)';
+            }
+
+            // Assign to group
+            $groupedData[$category]['details']->push($d);
+
+            // Accumulate totals
+            $groupedData[$category]['total_volume'] += (float) $d->volume;
+            $groupedData[$category]['total_lhp'] += (float) $d->lhp_nilai;
+            $groupedData[$category]['total_setor'] += (float) $d->setor_nilai;
+        }
+
+        // Stats aren't strictly needed for the main table provided by user, 
+        // but might be useful if the template still uses them. 
+        // We'll keep passing them just in case transparency is needed.
         $stats = $this->buildReconciliationStats($reconciliation);
 
         $pdf = Pdf::loadView('PNBP.admin.reconciliations.show_pdf', array_merge(
             [
                 'reconciliation' => $reconciliation,
-                'details' => $details,
+                'groupedData' => $groupedData,
                 'pageInfo' => [
-                    'current' => $paginator->currentPage(),
-                    'per_page' => $paginator->perPage(),
-                    'total' => $paginator->total(),
+                    'total_rows' => $details->count(),
+                    'generated_at' => now()->format('d/m/Y H:i'),
                 ],
             ],
             $stats
-        ))->setPaper('a4', 'landscape')
+        ))->setPaper('a4', 'portrait')
           ->setOptions([
-              'isRemoteEnabled' => false,
+              'isRemoteEnabled' => false, // Performance
               'defaultFont' => 'Helvetica',
               'isHtml5ParserEnabled' => true,
           ]);
@@ -200,6 +241,26 @@ class ReconciliationController extends Controller
             return $row;
         });
 
+        // Group Volume by Category for Dashboard Cards
+        $volumeByCat = [
+            'HASIL HUTAN KAYU' => 0,
+            'HASIL HUTAN BUKAN KAYU (HHBK)' => 0,
+            'HASIL HUTAN LAINNYA' => 0,
+        ];
+
+        foreach ($totalPerSatuan as $row) {
+            $unit = strtolower(trim((string)$row->satuan));
+            $vol = (float) ($row->total_volume_final ?? 0); // Use final value (after override)
+
+            if (in_array($unit, ['m3', 'm^3', 'kbk'])) {
+                $volumeByCat['HASIL HUTAN KAYU'] += $vol;
+            } elseif (in_array($unit, ['ton', 'kg'])) {
+                $volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $vol;
+            } else {
+                $volumeByCat['HASIL HUTAN LAINNYA'] += $vol;
+            }
+        }
+
         $baseTotalNilaiLhp = (float) ReconciliationDetail::where('reconciliation_id', $reconciliation->id)->sum('lhp_nilai');
         $nilaiOverride = $overrides->get(strtolower('total_nilai_lhp|'));
         $totalNilaiLhpFinal = $nilaiOverride ? (float) $nilaiOverride->value : $baseTotalNilaiLhp;
@@ -207,6 +268,7 @@ class ReconciliationController extends Controller
 
         return compact(
             'totalPerSatuan',
+            'volumeByCat',
             'statsJenis',
             'statsWilayah',
             'statsBank',

@@ -1,6 +1,6 @@
 @extends('PNBP.layouts.admin')
 
-@section('title', 'Riwayat Rekonsiliasi - SIP-Jateng')
+@section('title', 'Riwayat Rekonsiliasi - Pelaporan PNBP')
 @section('header', 'Riwayat Rekonsiliasi')
 @section('subheader', 'Daftar semua proses rekonsiliasi yang telah diunggah ke dalam sistem.')
 

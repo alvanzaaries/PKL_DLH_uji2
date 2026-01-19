@@ -1,6 +1,6 @@
 @extends('PNBP.layouts.app')
 
-@section('title', 'Upload Rekonsiliasi - SIP-Jateng')
+@section('title', 'Upload Rekonsiliasi - Pelaporan PNBP')
 
 @section('content')
 <div class="w-full max-w-4xl mx-auto space-y-6">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Dashboard - SIP-Jateng')</title>
+    <title>@yield('title', 'Admin Dashboard - Pelaporan PNBP')</title>
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
@@ -102,7 +102,7 @@
 
     <main class="flex-1 flex flex-col h-full overflow-hidden relative">
         <header class="md:hidden h-16 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4">
-            <span class="text-lg font-bold text-primary">SIP-Jateng</span>
+            <span class="text-lg font-bold text-primary">Pelaporan PNBP</span>
             <div class="flex items-center gap-2">
                 <button id="toggleDark" class="text-gray-500" type="button" title="Tema">
                     <span class="material-icons-outlined">dark_mode</span>

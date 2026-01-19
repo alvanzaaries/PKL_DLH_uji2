@@ -137,15 +137,29 @@
             </div>
         </div>
 
-        {{-- Volume --}}
+        {{-- Volume Breakdown --}}
         <div class="bg-surface-light dark:bg-surface-dark rounded-lg shadow p-5 border-l-4 border-yellow-500">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-yellow-100 rounded-full p-3 text-yellow-600">
+            <div class="flex items-start">
+                <div class="flex-shrink-0 bg-yellow-100 rounded-full p-3 text-yellow-600 mt-1">
                     <i class="fas fa-cubes text-2xl"></i>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Volume Produksi</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($financials->total_volume ?? 0, 2, ',', '.') }}</p>
+                <div class="ml-4 flex-1">
+                    <p class="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Total Volume Produksi</p>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm border-b border-gray-100 dark:border-gray-700 pb-1">
+                            <span class="text-gray-500 dark:text-gray-400">Kayu</span>
+                            <span class="font-bold text-gray-900 dark:text-white">{{ number_format($volumeByCat['HASIL HUTAN KAYU'], 2, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm border-b border-gray-100 dark:border-gray-700 pb-1">
+                            <span class="text-gray-500 dark:text-gray-400">HHBK</span>
+                            <span class="font-bold text-gray-900 dark:text-white">{{ number_format($volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'], 2, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500 dark:text-gray-400">Lainnya</span>
+                            <span class="font-bold text-gray-900 dark:text-white">{{ number_format($volumeByCat['HASIL HUTAN LAINNYA'], 2, ',', '.') }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

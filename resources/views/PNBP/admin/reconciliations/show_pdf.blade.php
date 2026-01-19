@@ -2,134 +2,147 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Export Rekonsiliasi</title>
+    <title>Export Rekonsiliasi - {{ $reconciliation->kph ?? 'PNBP' }}</title>
     <style>
-        body { font-family: Helvetica, Arial, sans-serif; color: #111827; font-size: 9px; }
-        h1 { font-size: 14px; margin: 0 0 4px; }
-        h2 { font-size: 11px; margin: 10px 0 4px; }
-        .muted { color: #6b7280; }
-        table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-        th, td { border: 1px solid #e5e7eb; padding: 3px; text-align: left; }
+        body { font-family: Helvetica, Arial, sans-serif; color: #111827; font-size: 10px; line-height: 1.3; }
+        h1 { font-size: 14px; margin: 0 0 5px; font-weight: bold; text-align: center; text-transform: uppercase; }
+        h2 { font-size: 11px; margin: 15px 0 6px; font-weight: bold; border-bottom: 2px solid #4b5563; padding-bottom: 4px; text-transform: uppercase; }
+        h3 { font-size: 10px; margin: 12px 0 4px; font-weight: bold; color: #374151; }
+        .muted { color: #6b7280; font-size: 9px; margin-bottom: 4px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th, td { border: 1px solid #9ca3af; padding: 4px 6px; text-align: left; vertical-align: top; }
+        th { background-color: #f3f4f6; font-weight: bold; text-transform: uppercase; font-size: 9px; }
+        
         .right { text-align: right; }
-        .page-break { page-break-before: always; }
+        .center { text-align: center; }
+        .total-row { background-color: #e5e7eb; font-weight: bold; }
+        .page-break { page-break-after: always; }
+        
+        /* Helper for header info */
+        .info-header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }
+        .info-header p { margin: 2px 0; font-size: 10px; }
     </style>
 </head>
 <body>
-    <h1>Detail Rekonsiliasi</h1>
-    <div class="muted">File: {{ $reconciliation->original_filename }}</div>
-    <div class="muted">Tahun {{ $reconciliation->year }} - Triwulan {{ $reconciliation->quarter }}</div>
-    <div class="muted">Dicetak: {{ now()->format('d/m/Y H:i') }}</div>
 
+    {{-- HEADER UTAMA --}}
+    <div class="info-header">
+        <h1>RINGKASAN PNBP</h1>
+        <p><strong>{{ strtoupper($reconciliation->kph ?? 'PROVINSI JAWA TENGAH') }}</strong></p>
+        <p>TAHUN {{ $reconciliation->year }} — TRIWULAN {{ $reconciliation->quarter }}</p>
+        <p class="muted">Dicetak pada: {{ $pageInfo['generated_at'] ?? date('d/m/Y H:i') }} | File Asli: {{ $reconciliation->original_filename }}</p>
+    </div>
 
-    <h2>Ringkasan</h2>
+    {{-- BAGIAN 1: REKAPITULASI PENERIMAAN NEGARA --}}
+    <h2>REKAPITULASI HASIL HUTAN</h2>
     <table>
         <thead>
             <tr>
-                <th>Metric</th>
-                <th class="right">Nilai</th>
+                <th style="width: 40%">URAIAN / KATEGORI</th>
+                <th class="right" style="width: 20%">TOTAL VOLUME</th>
+                <th class="right" style="width: 20%">TOTAL NILAI LHP (Rp)</th>
+                <th class="right" style="width: 20%">TOTAL NILAI SETOR (Rp)</th>
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>Total Nilai LHP</td>
-                <td class="right">Rp {{ number_format(($totalNilaiLhpFinal ?? $statsJenis->sum('total_nilai')), 0, '.', ',') }}</td>
-            </tr>
-            <tr>
-                <td>Total Nilai Setor</td>
-                <td class="right">Rp {{ number_format(($baseTotalNilaiSetor ?? 0), 0, '.', ',') }}</td>
+            @php
+                $grandVol = 0;
+                $grandLhp = 0;
+                $grandSetor = 0;
+            @endphp
+
+            @foreach($groupedData as $catName => $data)
+                @php
+                    $grandVol += $data['total_volume'];
+                    $grandLhp += $data['total_lhp'];
+                    $grandSetor += $data['total_setor'];
+                @endphp
+                <tr>
+                    <td>{{ $catName }}</td>
+                    <td class="right">{{ number_format($data['total_volume'], 2, '.', ',') }}</td>
+                    <td class="right">Rp {{ number_format($data['total_lhp'], 0, '.', ',') }}</td>
+                    <td class="right">Rp {{ number_format($data['total_setor'], 0, '.', ',') }}</td>
+                </tr>
+            @endforeach
+
+            <tr class="total-row">
+                <td>GRAND TOTAL</td>
+                <td class="right">{{ number_format($grandVol, 2, '.', ',') }}</td>
+                <td class="right">Rp {{ number_format($grandLhp, 0, '.', ',') }}</td>
+                <td class="right">Rp {{ number_format($grandSetor, 0, '.', ',') }}</td>
             </tr>
         </tbody>
     </table>
 
-    <h2>Rekap Jenis Hasil Hutan</h2>
+    <div style="margin-bottom: 20px;"></div>
+
+    {{-- BAGIAN 2: REKAPITULASI TAMBAHAN --}}
+    
+    <h2>REKAPITULASI BERDASARKAN JENIS HASIL HUTAN</h2>
     <table>
         <thead>
             <tr>
-                <th>Jenis</th>
-                <th class="right">Volume</th>
-                <th class="right">Nilai LHP</th>
+                <th>JENIS HASIL HUTAN</th>
+                <th class="center" style="width: 10%">SATUAN</th>
+                <th class="right" style="width: 20%">TOTAL VOLUME</th>
+                <th class="right" style="width: 25%">TOTAL NILAI LHP (Rp)</th>
             </tr>
         </thead>
         <tbody>
             @foreach($statsJenis as $s)
                 <tr>
                     <td>{{ $s->label }}</td>
-                    <td class="right">{{ number_format($s->total_volume, 2, '.', ',') }} {{ $s->satuan }}</td>
-                    <td class="right">Rp {{ number_format(($s->total_nilai ?? 0), 0, '.', ',') }}</td>
+                    <td class="center">{{ $s->satuan }}</td>
+                    <td class="right">{{ number_format($s->total_volume, 2, '.', ',') }}</td>
+                    <td class="right">Rp {{ number_format($s->total_nilai ?? 0, 0, '.', ',') }}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>
 
-    <h2>Total Volume per Satuan</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Satuan</th>
-                <th class="right">Total Volume</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse($totalPerSatuan as $t)
-                <tr>
-                    <td>{{ $t->satuan == '-' ? 'LAINNYA' : $t->satuan }}</td>
-                    <td class="right">{{ rtrim(rtrim(number_format(($t->total_volume_final ?? $t->total_volume), 3, '.', ','), '0'), ',') }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="2" class="muted">Tidak ada data.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
 
-    <h2>Sebaran Wilayah</h2>
+    <h2>REKAPITULASI BERDASARKAN WILAYAH</h2>
     <table>
         <thead>
             <tr>
-                <th>Wilayah</th>
-                <th class="right">Volume</th>
-                <th class="right">Nilai LHP</th>
-                <th class="right">Transaksi</th>
+                <th>WILAYAH (KABUPATEN / KOTA)</th>
+                <th class="center" style="width: 15%">FREKUENSI TRANS.</th>
+                <th class="right" style="width: 20%">TOTAL VOLUME</th>
+                <th class="right" style="width: 25%">TOTAL NILAI LHP (Rp)</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($statsWilayah as $s)
+            @foreach($statsWilayah as $s)
                 <tr>
                     <td>{{ $s->label }}</td>
+                    <td class="center">{{ $s->count }}</td>
                     <td class="right">{{ number_format($s->total_volume, 2, '.', ',') }}</td>
                     <td class="right">Rp {{ number_format($s->total_nilai ?? 0, 0, '.', ',') }}</td>
-                    <td class="right">{{ $s->count }}</td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="4" class="muted">Tidak ada data.</td>
-                </tr>
-            @endforelse
+            @endforeach
         </tbody>
     </table>
 
-    <h2>Rekap Bank Penyetor</h2>
+    <div style="margin-bottom: 20px;"></div>
+
+    <h2>REKAPITULASI PENYETORAN BANK</h2>
     <table>
         <thead>
             <tr>
-                <th>Bank</th>
-                <th class="right">Total Setor</th>
-                <th class="right">Transaksi</th>
+                <th>NAMA BANK</th>
+                <th class="center" style="width: 15%">FREKUENSI TRANS.</th>
+                <th class="right" style="width: 30%">TOTAL SETOR (Rp)</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($statsBank as $s)
+            @foreach($statsBank as $s)
                 <tr>
                     <td>{{ $s->label }}</td>
-                    <td class="right">Rp {{ number_format($s->total_nilai, 0, '.', ',') }}</td>
-                    <td class="right">{{ $s->count }}</td>
+                    <td class="center">{{ $s->count }}</td>
+                    <td class="right">Rp {{ number_format($s->total_nilai ?? 0, 0, '.', ',') }}</td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="3" class="muted">Tidak ada data.</td>
-                </tr>
-            @endforelse
+            @endforeach
         </tbody>
     </table>
 

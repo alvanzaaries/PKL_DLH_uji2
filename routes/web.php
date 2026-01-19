@@ -67,7 +67,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ===================================================================
-// PNBP (SIP-JATENG) - Rekonsiliasi
+// PNBP (Pelaporan PNBP) - Rekonsiliasi
 // ===================================================================
 Route::prefix('pnbp')->group(function () {
     // USER ROUTES (Role: user) - hanya PNBP

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'SIP-Jateng - Sistem Rekonsiliasi LHK')</title>
+    <title>@yield('title', 'Pelaporan PNBP - Sistem Rekonsiliasi LHK')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" type="image/png" href="{{ asset('img/Logo Provinsi Jawa Tengah.png') }}">   
 </head>
@@ -15,7 +15,7 @@
             <div class="flex justify-between h-16">
                 <div class="flex">
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="{{ route('pnbp.landing') }}" class="text-2xl font-bold text-green-600">SIP-Jateng</a>
+                        <a href="{{ route('pnbp.landing') }}" class="text-2xl font-bold text-green-600">Pelaporan PNBP</a>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
@@ -54,7 +54,7 @@
     <footer class="bg-white mt-auto border-t border-gray-200">
         <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
             <p class="text-center text-gray-500 text-sm">
-                &copy; {{ date('Y') }} Kementerian Lingkungan Hidup dan Kehutanan. SIP-Jateng v1.0
+                &copy; {{ date('Y') }} Kementerian Lingkungan Hidup dan Kehutanan. Pelaporan PNBP v1.0
             </p>
         </div>
     </footer>
