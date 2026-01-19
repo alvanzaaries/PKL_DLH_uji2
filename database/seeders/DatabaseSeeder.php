@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         // Admin account (from HEAD)
         User::updateOrCreate(
-            ['email' => 'admin@sisudah.test'],
+            ['email' => 'admin@sipjateng.test'],
             [
                 'name' => 'Administrator',
                 'password' => Hash::make('password'),
@@ -28,9 +28,9 @@ class DatabaseSeeder extends Seeder
 
         // Regular users (from HEAD)
         $users = [
-            ['name' => 'User 1', 'email' => 'user1@sisudah.test'],
-            ['name' => 'User 2', 'email' => 'user2@sisudah.test'],
-            ['name' => 'User 3', 'email' => 'user3@sisudah.test'],
+            ['name' => 'User 1', 'email' => 'user1@sipjateng.test'],
+            ['name' => 'User 2', 'email' => 'user2@sipjateng.test'],
+            ['name' => 'User 3', 'email' => 'user3@sipjateng.test'],
         ];
 
         foreach ($users as $u) {
