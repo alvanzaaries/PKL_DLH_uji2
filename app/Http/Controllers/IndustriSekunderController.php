@@ -7,9 +7,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class IndustriSekunderController extends Controller
+class IndustriSekunderController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(['auth', 'role:admin'], only: [
+                'create', 'store', 'edit', 'update', 'destroy'
+            ]),
+        ];
+    }
+
     /**
      * Tampilkan daftar industri sekunder dengan filtering
      */

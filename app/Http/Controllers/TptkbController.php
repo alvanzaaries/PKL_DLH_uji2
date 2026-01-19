@@ -5,9 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\Tptkb;
 use App\Models\IndustriBase;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 
-class TptkbController extends Controller
+class TptkbController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware(['auth', 'role:admin'], only: [
+                'create', 'store', 'edit', 'update', 'destroy'
+            ]),
+        ];
+    }
     public function index(Request $request)
     {
         $query = Tptkb::with('industri');
