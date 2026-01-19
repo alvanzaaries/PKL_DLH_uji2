@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin Dashboard - SISUDAH')</title>
+    <title>@yield('title', 'Admin Dashboard - SIP-Jateng')</title>
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
     <script>
@@ -53,10 +53,10 @@
 <body class="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200 antialiased h-screen flex overflow-hidden selection:bg-primary selection:text-white">
 
     <aside id="sidebar" class="w-64 bg-surface-light dark:bg-surface-dark border-r border-gray-200 dark:border-gray-700 flex-shrink-0 flex flex-col hidden md:flex">
-        <div class="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-700">
-            <span class="text-xl font-bold text-primary tracking-tight flex items-center gap-2">
+            <div class="h-16 flex items-center px-6 border-b border-gray-200 dark:border-gray-700">
+            <a href="{{ route('pnbp.landing') }}" class="text-xl font-bold text-primary tracking-tight flex items-center gap-2">
                 <img src="{{ asset('img/logoDLHK.png') }}" alt="Logo Jawa Tengah" style="width: 240px; height: 45px;">
-            </span>
+            </a>
         </div>
 
         <nav class="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
@@ -102,7 +102,7 @@
 
     <main class="flex-1 flex flex-col h-full overflow-hidden relative">
         <header class="md:hidden h-16 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4">
-            <span class="text-lg font-bold text-primary">SISUDAH</span>
+            <span class="text-lg font-bold text-primary">SIP-Jateng</span>
             <div class="flex items-center gap-2">
                 <button id="toggleDark" class="text-gray-500" type="button" title="Tema">
                     <span class="material-icons-outlined">dark_mode</span>

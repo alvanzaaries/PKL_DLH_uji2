@@ -251,8 +251,8 @@
                 <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah"
                     style="width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
             </div>
-            <div class="brand-text">
-                <div>SIMPEL-HUT</div>
+            <div class="brand-text">    
+                <div style="color:#fbbf24">PELAPORAN PUHH</div>
                 <small>DLHK PROVINSI JAWA TENGAH</small>
             </div>
         </div>

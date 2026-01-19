@@ -71,7 +71,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // ===================================================================
 Route::prefix('pnbp')->group(function () {
     // USER ROUTES (Role: user) - hanya PNBP
-    Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::middleware(['auth', 'session.timeout', 'role:user'])->group(function () {
         Route::get('/upload', [UserDashboardController::class, 'upload'])->name('user.upload');
         Route::get('/history', [UserDashboardController::class, 'history'])->name('user.history');
         Route::get('/home', function () {
@@ -80,12 +80,12 @@ Route::prefix('pnbp')->group(function () {
     });
 
     // Upload endpoint (admin + user) - REKONSILIASI
-    Route::middleware(['auth', 'role:admin,user'])->group(function () {
+    Route::middleware(['auth', 'session.timeout', 'role:admin,user'])->group(function () {
         Route::post('/reconciliations', [ReconciliationController::class, 'store'])->name('reconciliations.store');
     });
 
     // ADMIN ROUTES (Role: admin) - PNBP
-    Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::middleware(['auth', 'session.timeout', 'role:admin'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
         Route::get('/dashboard/export-pdf', [DashboardController::class, 'exportPdf'])->name('dashboard.export');
 
@@ -117,7 +117,7 @@ Route::get('/user/dashboard', fn () => redirect()->route('user.dashboard'));
 // ===================================================================
 // INDUSTRI (SIDI-HUT) - Admin CRUD
 // ===================================================================
-Route::prefix('industri')->middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])->group(function () {
     // Industri Primer - CRUD
     Route::get('/primer/create', [IndustriPrimerController::class, 'create'])->name('industri-primer.create');
     Route::post('/primer', [IndustriPrimerController::class, 'store'])->name('industri-primer.store');
@@ -154,7 +154,7 @@ Route::prefix('industri')->middleware(['auth', 'role:admin'])->group(function ()
 Route::get('/laporan', [IndustriController::class, 'index'])->name('laporan.index');
 
 // Admin operations (upload/rekap/detail) tetap khusus admin
-Route::prefix('laporan')->middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('laporan')->middleware(['auth', 'session.timeout', 'role:admin'])->group(function () {
 
     // Upload + proses pelaporan
     Route::get('/upload', [LaporanController::class, 'showUploadForm'])->name('laporan.upload.form');

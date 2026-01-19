@@ -1,6 +1,6 @@
 @extends('PNBP.layouts.admin')
 
-@section('title', 'Upload Rekonsiliasi Baru - SISUDAH')
+@section('title', 'Upload Rekonsiliasi Baru - SIP-Jateng')
 @section('header', 'Upload Rekonsiliasi Baru')
 
 @section('content')

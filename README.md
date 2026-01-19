@@ -1,4 +1,4 @@
-# SISUDAH (Rekonsiliasi PNBP + Visualisasi Data Industri)
+# SIP-Jateng (Rekonsiliasi PNBP + Visualisasi Data Industri)
 
 Aplikasi web gabungan:
 - **Admin/Internal (HEAD)**: Upload & analisis data rekonsiliasi (Excel) per periode (Tahun/Triwulan) dengan pemisahan akses Admin/User.
@@ -82,7 +82,7 @@ DB_DATABASE=database/database.sqlite
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=sisudah
+DB_DATABASE=sip_jateng
 DB_USERNAME=root
 DB_PASSWORD=
 ```
@@ -104,10 +104,10 @@ php artisan serve
 
 | Role  | Email                   | Password |
 |-------|-------------------------|----------|
-| Admin | admin@sisudah.test      | password |
-| User  | user1@sisudah.test      | password |
-| User  | user2@sisudah.test      | password |
-| User  | user3@sisudah.test      | password |
+| Admin | admin@sipjateng.test      | password |
+| User  | user1@sipjateng.test      | password |
+| User  | user2@sipjateng.test      | password |
+| User  | user3@sipjateng.test      | password |
 
 ## URL Penting
 
