@@ -116,7 +116,6 @@
 
     {{-- BAGIAN 4: DETAIL JENIS SDH --}}
     @if(count($statsJenis) > 0)
-    <div class="page-break"></div>
     <h2>DETAIL JENIS SUMBER DAYA HUTAN (SDH)</h2>
     <table>
         <thead>
