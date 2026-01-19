@@ -65,16 +65,25 @@
                 <input type="hidden" name="quarter" id="input_quarter" value="{{ request('quarter') }}">
                 <input type="hidden" name="sampai_quarter" id="input_sampai_quarter" value="{{ request('sampai_quarter') }}">
             </div>
-            <div class="flex-none">
-                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
+            <div class="flex-none flex gap-2"> {{-- Tambahkan flex & gap-2 biar rapi --}}
+                
+                {{-- Tombol Filter --}}
+                <button type="submit" class="inline-flex items-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition shadow-sm h-[38px]"> {{-- Tambah h-[38px] biar tinggi fix sama --}}
                     <i class="fas fa-filter mr-2"></i> Filter Data
                 </button>
-                <a href="{{ route('dashboard.export', request()->query()) }}" class="ml-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition inline-flex items-center">
+
+                {{-- Tombol Export --}}
+                <a href="{{ route('dashboard.export', request()->query()) }}" class="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition shadow-sm h-[38px]">
                     <i class="fas fa-file-pdf mr-2"></i> Export PDF
                 </a>
+
+                {{-- Tombol Reset --}}
                 @if(request('year') || request('kph') || request('wilayah') || request('quarter') || request('sampai_quarter'))
-                    <a href="{{ route('dashboard.index') }}" class="ml-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border px-3 py-2 rounded-md">Reset</a>
+                    <a href="{{ route('dashboard.index') }}" class="inline-flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 px-3 py-2 rounded-md h-[38px]">
+                        Reset
+                    </a>
                 @endif
+
             </div>
         </form>
         <script>
