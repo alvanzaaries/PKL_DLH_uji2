@@ -416,6 +416,7 @@
                 <a href="{{ route('laporan.index') }}" class="btn btn-secondary">
                     <i class="fas fa-undo-alt"></i> Reset
                 </a>
+                
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-filter"></i> Terapkan Filter
                 </button>
@@ -503,6 +504,8 @@
         </div>
         @endif
     </div>
+
+    {{-- Download button moved to layout for guests --}}
 </div>
 
 <script>
@@ -563,6 +566,8 @@
             }
         }
     }
+
+    // (Template download moved to a dedicated page)
 </script>
 
 @endsection

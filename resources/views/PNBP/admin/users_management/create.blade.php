@@ -1,6 +1,6 @@
 @extends('PNBP.layouts.admin')
 
-@section('title', 'Tambah User - SIP-Jateng')
+@section('title', 'Tambah User - Pelaporan PNBP')
 @section('header', 'Tambah User')
 
 @section('content')

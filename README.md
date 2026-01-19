@@ -1,4 +1,4 @@
-# SIP-Jateng (Rekonsiliasi PNBP + Visualisasi Data Industri)
+# Pelaporan PNBP (Rekonsiliasi PNBP + Visualisasi Data Industri)
 
 Aplikasi web gabungan:
 - **Admin/Internal (HEAD)**: Upload & analisis data rekonsiliasi (Excel) per periode (Tahun/Triwulan) dengan pemisahan akses Admin/User.

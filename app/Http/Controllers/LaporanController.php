@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use App\Services\LaporanValidationService;
 use App\Services\LaporanDataService;
+use Illuminate\Support\Facades\Log;
 use App\Http\Requests\UpdateLaporanRequest;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -82,9 +83,10 @@ class LaporanController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Laporan preview failed', ['exception' => $e]);
             return back()
                 ->withInput()
-                ->with('error', 'Gagal memproses file: ' . $e->getMessage());
+                ->with('error', 'Gagal memproses file. Silakan periksa format template.');
         }
     }
 
@@ -218,14 +220,22 @@ class LaporanController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+            Log::error('Failed to save laporan', [
+                'exception' => $e,
+                'industri_id' => $request->industri_id ?? null,
+                'jenis_laporan' => $request->jenis_laporan ?? null,
+                'bulan' => $request->bulan ?? null,
+                'tahun' => $request->tahun ?? null,
+            ]);
+
             // Gunakan redirect URL dari session atau fallback ke laporan.industri
             $redirectUrl = session('redirect_after_save');
+            $msg = 'Gagal menyimpan laporan. Silakan coba lagi atau hubungi administrator.';
             if ($redirectUrl) {
-                return redirect($redirectUrl)->with('error', 'Gagal menyimpan laporan: ' . $e->getMessage());
+                return redirect($redirectUrl)->with('error', $msg);
             } else {
                 return redirect()->route('laporan.industri', ['industri' => $request->industri_id])
-                    ->with('error', 'Gagal menyimpan laporan: ' . $e->getMessage());
+                    ->with('error', $msg);
             }
         }
     }
@@ -290,8 +300,9 @@ class LaporanController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('storeMultipleLaporan failed', ['exception' => $e, 'industri_id' => $request->industri_id ?? null]);
             return redirect()->route('laporan.industri', $request->industri_id)
-                ->with('error', 'Gagal mengupload laporan: ' . $e->getMessage());
+                ->with('error', 'Gagal mengupload laporan. Silakan coba lagi atau hubungi administrator.');
         }
     }
 

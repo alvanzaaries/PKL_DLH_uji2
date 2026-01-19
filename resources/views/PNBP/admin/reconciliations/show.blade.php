@@ -79,16 +79,39 @@
 
             {{-- Summary Cards --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                @foreach($totalPerSatuan as $t)
-                    @if($t->total_volume <= 0) @continue @endif
-                    <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-                        <div class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">Total {{ $t->satuan == '-' ? 'LAINNYA' : $t->satuan }}</div>
-                        <div class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
-                            {{ rtrim(rtrim(number_format(($t->total_volume_final ?? $t->total_volume), 3, '.', ','), '0'), ',') }}
-                            <span class="text-sm text-gray-400 font-normal">{{ $t->satuan == '-' ? '' : $t->satuan }}</span>
-                        </div>
+                {{-- Kategori: Kayu --}}
+                @if(($volumeByCat['HASIL HUTAN KAYU'] ?? 0) > 0)
+                <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <div class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">Total Hasil Hutan Kayu</div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+                        {{ number_format($volumeByCat['HASIL HUTAN KAYU'], 2, '.', ',') }}
+                        <span class="text-sm text-gray-400 font-normal">m&sup3;</span>
                     </div>
-                @endforeach
+                </div>
+                @endif
+
+                {{-- Kategori: HHBK --}}
+                @if(($volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] ?? 0) > 0)
+                <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <div class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">Total HHBK</div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+                        {{ number_format($volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'], 2, '.', ',') }}
+                        <span class="text-sm text-gray-400 font-normal">ton / kg</span>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Kategori: Lainnya --}}
+                @if(($volumeByCat['HASIL HUTAN LAINNYA'] ?? 0) > 0)
+                <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+                    <div class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">Total HH Lainnya</div>
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+                        {{ number_format($volumeByCat['HASIL HUTAN LAINNYA'], 2, '.', ',') }}
+                        <span class="text-sm text-gray-400 font-normal">unit</span>
+                    </div>
+                </div>
+                @endif
+                
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Nilai LHP</div>
                     <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-500 mt-2">
@@ -104,6 +127,57 @@
                     </div>
                 </div>
             </div>
+
+    {{-- Edit Summary Overrides (Restored) --}}
+    <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 mb-6 p-6">
+        <h3 class="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit Ringkasan (Manual Override)
+        </h3>
+        
+        <form action="{{ route('reconciliations.summary-overrides', $reconciliation->id) }}" method="POST">
+            @csrf
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                {{-- Override Total Nilai LHP --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Nilai LHP (Rp)</label>
+                    <div class="relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <span class="text-gray-500 sm:text-sm">Rp</span>
+                        </div>
+                        <input type="text" name="total_nilai_lhp" 
+                            value="{{ number_format($totalNilaiLhpFinal, 0, '.', ',') }}"
+                            class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5"
+                            placeholder="0">
+                    </div>
+                </div>
+
+                {{-- Loop per satuan --}}
+                @foreach($totalPerSatuan as $t)
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Volume ({{ $t->satuan == '-' ? 'LAINNYA' : $t->satuan }})</label>
+                        <input type="text" name="total_volume[{{ $t->satuan }}]" 
+                            value="{{ number_format(($t->total_volume_final), 3, '.', '') }}"
+                            class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                            placeholder="0">
+                        @if(!empty($t->is_overridden))
+                            <p class="text-xs text-yellow-600 mt-1">*Nilai manual (Asli: {{ number_format($t->total_volume, 3) }})</p>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+
+            <div class="mt-4 flex justify-between items-center">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Kosongkan kolom untuk kembali ke hitungan otomatis.</p>
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary hover:bg-primary_hover text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
 
             {{-- Rekap Tables --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

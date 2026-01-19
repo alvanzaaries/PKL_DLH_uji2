@@ -132,7 +132,7 @@
 
                     <h2
                         class="text-lg font-extrabold text-gray-900 dark:text-white mb-1 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">
-                        SIP-JATENG</h2>
+                        Pelaporan PNBP</h2>
                     <h3
                         class="text-[11px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider mb-2 border-b border-green-100 dark:border-green-800 pb-1">
                         Sistem Pengelolan PNBP Jateng</h3>

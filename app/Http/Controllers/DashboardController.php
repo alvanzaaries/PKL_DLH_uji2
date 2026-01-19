@@ -113,7 +113,34 @@ class DashboardController extends Controller
             ->groupBy('jenis_sdh')
             ->get();
 
-        // 5. Filter Data Options (Dropdowns)
+        // 6. Calculate Volume by Category (Kayu, HHBK, Lainnya)
+        // Grouping logic matching ReconciliationController
+        $volumeByCat = [
+            'HASIL HUTAN KAYU' => 0,
+            'HASIL HUTAN BUKAN KAYU (HHBK)' => 0,
+            'HASIL HUTAN LAINNYA' => 0, 
+        ];
+
+        // We need to fetch data grouped by Satuan to apply the categorization logic
+        $statsSatuan = $detailQuery->clone()
+            ->select('satuan', DB::raw('SUM(volume) as total_vol'))
+            ->groupBy('satuan')
+            ->get();
+
+        foreach ($statsSatuan as $row) {
+            $unit = strtolower(trim((string)$row->satuan));
+            $vol = (float) $row->total_vol;
+
+            if (in_array($unit, ['m3', 'm^3', 'kbk'])) {
+                $volumeByCat['HASIL HUTAN KAYU'] += $vol;
+            } elseif (in_array($unit, ['ton', 'kg'])) {
+                $volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $vol;
+            } else {
+                $volumeByCat['HASIL HUTAN LAINNYA'] += $vol;
+            }
+        }
+
+        // 7. Filter Data Options (Dropdowns)
         $availableYears = Reconciliation::select('year')->distinct()->orderByDesc('year')->pluck('year');
         $availableQuarters = Reconciliation::select('quarter')->distinct()->orderBy('quarter')->pluck('quarter');
         $availableKph = Reconciliation::select('kph')
@@ -136,6 +163,7 @@ class DashboardController extends Controller
             'topWilayah',
             'wilayahCount',
             'statsJenis',
+            'volumeByCat',
             'availableYears',
             'availableQuarters',
             'availableKph',

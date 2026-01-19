@@ -17,6 +17,7 @@ use App\Http\Controllers\PerajinController;
 use App\Http\Controllers\IndustriController;
 use App\Http\Controllers\IndustriPrimerController;
 use App\Http\Controllers\IndustriSekunderController;
+use App\Http\Controllers\TemplateController;
 
 // ===================================================================
 // PUBLIC ROUTES - Accessible without login
@@ -31,6 +32,9 @@ Route::get('/', function () {
 Route::get('/pnbp', function () {
     return view('PNBP.dashboard');
 })->name('pnbp.landing');
+
+// Template download page (public)
+Route::get('/template-download', [TemplateController::class, 'index'])->name('template.download');
 
 // ===================================================================
 // INDUSTRI (SIDI-HUT) - Public (Read Only)
@@ -67,7 +71,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // ===================================================================
-// PNBP (SIP-JATENG) - Rekonsiliasi
+// PNBP (Pelaporan PNBP) - Rekonsiliasi
 // ===================================================================
 Route::prefix('pnbp')->group(function () {
     // USER ROUTES (Role: user) - hanya PNBP

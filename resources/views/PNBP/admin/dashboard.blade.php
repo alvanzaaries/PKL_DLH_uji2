@@ -65,16 +65,25 @@
                 <input type="hidden" name="quarter" id="input_quarter" value="{{ request('quarter') }}">
                 <input type="hidden" name="sampai_quarter" id="input_sampai_quarter" value="{{ request('sampai_quarter') }}">
             </div>
-            <div class="flex-none">
-                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
+            <div class="flex-none flex gap-2"> {{-- Tambahkan flex & gap-2 biar rapi --}}
+                
+                {{-- Tombol Filter --}}
+                <button type="submit" class="inline-flex items-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition shadow-sm h-[38px]"> {{-- Tambah h-[38px] biar tinggi fix sama --}}
                     <i class="fas fa-filter mr-2"></i> Filter Data
                 </button>
-                <a href="{{ route('dashboard.export', request()->query()) }}" class="ml-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition inline-flex items-center">
+
+                {{-- Tombol Export --}}
+                <a href="{{ route('dashboard.export', request()->query()) }}" class="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition shadow-sm h-[38px]">
                     <i class="fas fa-file-pdf mr-2"></i> Export PDF
                 </a>
+
+                {{-- Tombol Reset --}}
                 @if(request('year') || request('kph') || request('wilayah') || request('quarter') || request('sampai_quarter'))
-                    <a href="{{ route('dashboard.index') }}" class="ml-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border px-3 py-2 rounded-md">Reset</a>
+                    <a href="{{ route('dashboard.index') }}" class="inline-flex items-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 px-3 py-2 rounded-md h-[38px]">
+                        Reset
+                    </a>
                 @endif
+
             </div>
         </form>
         <script>
@@ -137,15 +146,29 @@
             </div>
         </div>
 
-        {{-- Volume --}}
+        {{-- Volume Breakdown --}}
         <div class="bg-surface-light dark:bg-surface-dark rounded-lg shadow p-5 border-l-4 border-yellow-500">
-            <div class="flex items-center">
-                <div class="flex-shrink-0 bg-yellow-100 rounded-full p-3 text-yellow-600">
+            <div class="flex items-start">
+                <div class="flex-shrink-0 bg-yellow-100 rounded-full p-3 text-yellow-600 mt-1">
                     <i class="fas fa-cubes text-2xl"></i>
                 </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Volume Produksi</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($financials->total_volume ?? 0, 2, ',', '.') }}</p>
+                <div class="ml-4 flex-1">
+                    <p class="text-base font-medium text-gray-700 dark:text-gray-300 mb-2">Total Volume Produksi</p>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm border-b border-gray-100 dark:border-gray-700 pb-1">
+                            <span class="text-gray-500 dark:text-gray-400">Kayu</span>
+                            <span class="font-bold text-gray-900 dark:text-white">{{ number_format($volumeByCat['HASIL HUTAN KAYU'], 2, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm border-b border-gray-100 dark:border-gray-700 pb-1">
+                            <span class="text-gray-500 dark:text-gray-400">HHBK</span>
+                            <span class="font-bold text-gray-900 dark:text-white">{{ number_format($volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'], 2, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500 dark:text-gray-400">Lainnya</span>
+                            <span class="font-bold text-gray-900 dark:text-white">{{ number_format($volumeByCat['HASIL HUTAN LAINNYA'], 2, ',', '.') }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

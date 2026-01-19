@@ -10,6 +10,7 @@ use App\Models\laporan_penjualan_kayu_olahan;
 use App\Models\laporan_penerimaan_kayu_olahan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class LaporanDataService
 {
@@ -170,7 +171,8 @@ class LaporanDataService
 
                 $uploaded++;
             } catch (\Exception $e) {
-                $errors[] = $jenis . ': ' . $e->getMessage();
+                Log::error('Error processing uploaded laporan file', ['exception' => $e, 'jenis' => $jenis]);
+                $errors[] = $jenis . ': Gagal memproses file.';
             }
         }
 
