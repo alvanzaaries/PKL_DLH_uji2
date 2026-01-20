@@ -121,31 +121,20 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         }
 
         // Filter berdasarkan jenis produksi (dari tabel industri_primer)
+        // Gunakan LIKE untuk partial matching agar bisa menemukan data 
+        // walaupun jenis_produksi berisi beberapa nilai (misal: "olahan, papan, dan gergajian")
         if ($request->filled('jenis_produksi')) {
-            $query->where('jenis_produksi', $request->jenis_produksi);
+            $query->where('jenis_produksi', 'like', '%' . $request->jenis_produksi . '%');
         }
 
         // Filter berdasarkan kapasitas izin (dari tabel industri_primer)
-        // Karena kapasitas_izin sekarang VARCHAR, kita extract angka dan bandingkan dengan rentang
+        // kapasitas_izin disimpan sebagai string (mis. "1500 m³/tahun") sehingga
+        // ekstraksi angka dengan fungsi SQL tidak portable (SQLite tidak mendukung REGEXP_REPLACE dll).
+        // Untuk kompatibilitas, jika filter kapasitas di-set, lakukan filtering di PHP setelah mengambil hasil.
+        $kapasitasFilter = null;
         if ($request->filled('kapasitas')) {
-            $kapasitasRange = $request->kapasitas;
-            
-            $query->where(function($q) use ($kapasitasRange) {
-                // Extract angka dari string kapasitas_izin menggunakan REGEXP atau CAST
-                // Untuk MySQL: CAST(REGEXP_SUBSTR(kapasitas_izin, '[0-9]+') AS UNSIGNED)
-                // Alternatif lebih portable: filter di PHP setelah query
-                
-                if ($kapasitasRange == '0-1999') {
-                    // Cari data dengan angka 0-1999
-                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) BETWEEN 0 AND 1999");
-                } elseif ($kapasitasRange == '2000-5999') {
-                    // Cari data dengan angka 2000-5999
-                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) BETWEEN 2000 AND 5999");
-                } elseif ($kapasitasRange == '>= 6000') {
-                    // Cari data dengan angka >= 6000
-                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) >= 6000");
-                }
-            });
+            $kapasitasFilter = $request->kapasitas;
+            // do NOT add SQL whereRaw here because it may not be supported on all drivers
         }
 
         // Filter berdasarkan tahun dan bulan (dari kolom tanggal di tabel industries) dengan logika AND
@@ -161,10 +150,48 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             });
         }
 
-        // Ambil data dengan pagination
-        $industriPrimer = $query->latest()->paginate(10);
+        // Jika ada filter kapasitas, ambil semua hasil (setelah filter lain) lalu lakukan filter kapasitas di PHP,
+        // kemudian paginasi manual agar kompatibel dengan SQLite dan driver lain.
+        if ($kapasitasFilter) {
+            $allFiltered = (clone $query)->latest()->get();
 
-        // Ambil daftar kabupaten Jawa Tengah dari API wilayah.id dengan cache
+            $filteredCollection = $allFiltered->filter(function($item) use ($kapasitasFilter) {
+                $capacity = $item->kapasitas_izin ?? '';
+                preg_match('/\d+/', $capacity, $matches);
+                $numericCapacity = isset($matches[0]) ? (int)$matches[0] : 0;
+
+                if ($kapasitasFilter == '0-1999') {
+                    return $numericCapacity >= 0 && $numericCapacity <= 1999;
+                } elseif ($kapasitasFilter == '2000-5999') {
+                    return $numericCapacity >= 2000 && $numericCapacity <= 5999;
+                } elseif ($kapasitasFilter == '>= 6000' || $kapasitasFilter == '>=6000') {
+                    return $numericCapacity >= 6000;
+                }
+                return false;
+            })->values();
+
+            // Manual pagination
+            $currentPage = \request()->get('page', 1);
+            $perPage = 10;
+            $currentItems = $filteredCollection->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+            $industriPrimer = new \Illuminate\Pagination\LengthAwarePaginator(
+                $currentItems,
+                $filteredCollection->count(),
+                $perPage,
+                $currentPage,
+                ['path' => url()->current(), 'query' => request()->query()]
+            );
+
+            // Untuk statistik, gunakan seluruh koleksi yang sudah difilter
+            $filteredData = $filteredCollection;
+        } else {
+            // Ambil data dengan pagination
+            $industriPrimer = $query->latest()->paginate(10);
+
+            // Ambil daftar kabupaten Jawa Tengah dari API wilayah.id dengan cache
+            $filteredData = (clone $query)->get();
+        }
         // ID Provinsi Jawa Tengah = 33
         $kabupatenList = Cache::remember('wilayah_jateng_kabupaten', 86400, function () {
             try {
@@ -185,6 +212,26 @@ class IndustriPrimerController extends Controller implements HasMiddleware
                 ->orderBy('kabupaten')
                 ->pluck('kabupaten');
         });
+
+        // Ambil daftar jenis produksi yang sudah terdaftar di database
+        $jenisProduksiList = IndustriPrimer::distinct()
+            ->orderBy('jenis_produksi')
+            ->pluck('jenis_produksi')
+            ->filter() // Remove null values
+            ->values();
+            
+        // Parse jenis produksi yang mengandung multiple values (misal: "olahan, papan, gergajian")
+        // Split by comma dan ambil unique values
+        $jenisProduksiUnique = collect();
+        foreach ($jenisProduksiList as $jenis) {
+            $split = array_map('trim', explode(',', $jenis));
+            foreach ($split as $item) {
+                if (!empty($item)) {
+                    $jenisProduksiUnique->push($item);
+                }
+            }
+        }
+        $jenisProduksiList = $jenisProduksiUnique->unique()->sort()->values();
 
         // Data untuk visualisasi chart — gunakan DATA YANG SAMA dengan hasil filter
         // Ambil semua record dari query yang sudah diberi filter (clone agar paginate tetap bekerja)
@@ -228,6 +275,7 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         return view('Industri.industri-primer.index', compact(
             'industriPrimer', 
             'kabupatenList',
+            'jenisProduksiList',
             'yearStats',
             'locationStats',
             'capacityStats'
@@ -355,16 +403,37 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             return redirect()->back()->with('error', 'Dokumen tidak ditemukan!');
         }
 
-        $filePath = storage_path('app/public/' . $industriPrimer->dokumen_izin);
-        
-        if (!file_exists($filePath)) {
-            return redirect()->back()->with('error', 'File tidak ditemukan di server!');
-        }
+        // Prefer menggunakan Storage disk agar streaming dan header ditangani oleh framework
+        $disk = Storage::disk('public');
+        $relativePath = $industriPrimer->dokumen_izin;
 
         // Generate nama file yang user-friendly untuk download
         $namaFile = preg_replace('/[^A-Za-z0-9]/', '_', $industriPrimer->industri->nama);
         $downloadName = "Dokumen_Izin_{$namaFile}.pdf";
 
-        return response()->download($filePath, $downloadName);
+        // Cek keberadaan file pada disk 'public'
+        if ($disk->exists($relativePath)) {
+            try {
+                return $disk->download($relativePath, $downloadName);
+            } catch (\Exception $e) {
+                \Log::error('Storage download failed: ' . $e->getMessage());
+                // fallback ke response()->download menggunakan path langsung
+                $fullPath = $disk->path($relativePath);
+                if (file_exists($fullPath)) {
+                    return response()->download($fullPath, $downloadName);
+                }
+                return redirect()->back()->with('error', 'Gagal mengunduh file.');
+            }
+        }
+
+        // Fallback: cek langsung di storage/app/public
+        $fullPath = storage_path('app/public/' . $relativePath);
+        if (file_exists($fullPath)) {
+            \Log::warning("File exists at storage path but not via Storage disk: {$fullPath}");
+            return response()->download($fullPath, $downloadName);
+        }
+
+        \Log::warning('File not found for download: ' . $relativePath);
+        return redirect()->back()->with('error', 'File tidak ditemukan di server!');
     }
 }
