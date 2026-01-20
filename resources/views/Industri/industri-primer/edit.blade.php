@@ -430,7 +430,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Nomor Izin <span class="required">*</span></label>
+                        <label class="form-label">Nomor SK <span class="required">*</span></label>
                         <input type="text" name="nomor_izin" class="form-input" value="{{ old('nomor_izin', $industriPrimer->industri->nomor_izin) }}" required>
                     </div>
                 </div>

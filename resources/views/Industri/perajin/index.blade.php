@@ -641,8 +641,8 @@
                 <form method="GET" action="{{ route('perajin.index') }}">
                     <div class="filter-grid">
                         <div class="filter-group">
-                            <label>Nama Perusahaan</label>
-                            <input type="text" name="search" class="filter-input" placeholder="Cari nama atau nomor izin..." value="{{ request('search') }}">
+                            <label>Nama Pemilik</label>
+                            <input type="text" name="search" class="filter-input" placeholder="Cari nama atau nomor SK" value="{{ request('search') }}">
                         </div>
                         <div class="filter-group">
                             <label>Kabupaten/Kota</label>
@@ -724,9 +724,9 @@
                             <thead>
                                 <tr>
                                     <th>No</th>
-                                    <th>Nama Perusahaan</th>
-                                    <th>Tanggal</th>
-                                    <th>Nomor Izin</th>
+                                    <th>Nama Pemilik</th>
+                                    <th>Tanggal SK</th>
+                                    <th>Nomor SK</th>
                                     <th>Kabupaten/Kota</th>
                                     <th>Penanggung Jawab</th>
                                     <th>Kontak</th>
@@ -786,7 +786,7 @@
                 <div class="detail-section-title">Informasi Umum</div>
                 <table class="table-detail">
                     <tr>
-                        <td class="detail-label-col">Nama Perusahaan</td>
+                        <td class="detail-label-col">Nama Pemilik</td>
                         <td class="detail-value-col" id="modal-nama">-</td>
                     </tr>
                     <tr>
@@ -802,11 +802,11 @@
                 <div class="detail-section-title">Detail Izin</div>
                 <table class="table-detail">
                     <tr>
-                        <td class="detail-label-col">Nomor Izin</td>
+                        <td class="detail-label-col">Nomor SK</td>
                         <td class="detail-value-col" id="modal-nomor-izin">-</td>
                     </tr>
                     <tr>
-                        <td class="detail-label-col">Tanggal Izin</td>
+                        <td class="detail-label-col">Tanggal SK</td>
                         <td class="detail-value-col" id="modal-tanggal">-</td>
                     </tr>
                 </table>

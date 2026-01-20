@@ -756,7 +756,7 @@
                             <th>Penanggung Jawab</th>
                             <th>Jenis Produksi</th>
                             <th>Kapasitas Izin</th>
-                            <th>Nomor Izin</th>
+                            <th>Nomor SK</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -832,7 +832,7 @@
                 <div class="detail-section-title">Detail Izin & Produksi</div>
                 <table class="table-detail">
                     <tr>
-                        <td class="detail-label-col">Nomor Izin</td>
+                        <td class="detail-label-col">Nomor SK</td>
                         <td class="detail-value-col" id="modal-nomor-izin">-</td>
                     </tr>
                     <tr>
@@ -879,6 +879,8 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+        const isLoggedIn = @json(auth()->check());
+
         function showDetail(item) {
             // Populate modal dengan data
             document.getElementById('modal-nama').textContent = item.industri.nama;
@@ -901,15 +903,27 @@
             // Handle dokumen izin
             const dokumenElement = document.getElementById('modal-dokumen');
             if (item.dokumen_izin) {
-                dokumenElement.innerHTML = `
-                    <a href="/storage/${item.dokumen_izin}" 
-                       target="_blank" 
-                       style="color: #15803d; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500;">
-                        <i class="fas fa-file-pdf" style="color: #dc2626;"></i>
-                        <span>Download Dokumen Izin</span>
-                        <i class="fas fa-external-link-alt" style="font-size: 12px;"></i>
-                    </a>
-                `;
+                if (isLoggedIn) {
+                    dokumenElement.innerHTML = `
+                        <a href="/storage/${item.dokumen_izin}" 
+                           target="_blank" 
+                           style="color: #15803d; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500;">
+                            <i class="fas fa-file-pdf" style="color: #dc2626;"></i>
+                            <span>Download Dokumen Izin</span>
+                            <i class="fas fa-external-link-alt" style="font-size: 12px;"></i>
+                        </a>
+                    `;
+                } else {
+                    const currentUrl = encodeURIComponent(window.location.href);
+                    const loginUrl = `{{ route('login') }}?from=${currentUrl}`;
+                    
+                    dokumenElement.innerHTML = `
+                        <a href="${loginUrl}" style="color: #64748b; text-decoration: none; font-style: italic; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-lock"></i>
+                            <span>Klik login untuk melihatnya</span>
+                        </a>
+                    `;
+                }
             } else {
                 dokumenElement.innerHTML = '<span style="color: #94a3b8;">Tidak ada dokumen</span>';
             }

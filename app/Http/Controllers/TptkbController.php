@@ -56,6 +56,11 @@ class TptkbController extends Controller implements HasMiddleware
             });
         }
 
+        // Filter berdasarkan sumber bahan baku
+        if ($request->filled('sumber_bahan_baku')) {
+            $query->where('sumber_bahan_baku', $request->sumber_bahan_baku);
+        }
+
         // Filter berdasarkan tahun dan bulan (dari kolom tanggal di tabel industries) dengan logika AND
         if ($request->filled('tahun')) {
             $query->whereHas('industri', function($q) use ($request) {
@@ -77,6 +82,13 @@ class TptkbController extends Controller implements HasMiddleware
             ->pluck('kabupaten')
             ->sort()
             ->values();
+
+        // Get list sumber bahan baku sesuai form create
+        $sumberBahanBakuList = [
+            'Hutan Alam' => 'Hutan Alam',
+            'Perhutani' => 'Hutan Tanaman',
+            'Hutan Rakyat' => 'Hutan Rakyat'
+        ];
 
         // Data untuk visualisasi chart — gunakan hasil dari query yang sudah difilter
         $filteredData = (clone $query)->get();
@@ -116,7 +128,14 @@ class TptkbController extends Controller implements HasMiddleware
             return 'Lainnya';
         })->map->count();
 
-        return view('Industri.tptkb.index', compact('tptkb', 'kabupatenList', 'yearStats', 'locationStats', 'capacityStats'));
+        return view('Industri.tptkb.index', compact(
+            'tptkb', 
+            'kabupatenList', 
+            'sumberBahanBakuList',
+            'yearStats', 
+            'locationStats', 
+            'capacityStats'
+        ));
     }
 
     public function create()

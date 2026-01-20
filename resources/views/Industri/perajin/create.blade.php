@@ -286,7 +286,7 @@
                 <!-- Nama Perusahaan -->
                 <div class="form-group">
                     <label class="form-label">
-                        Nama Perusahaan <span class="required">*</span>
+                        Nama Pemilik <span class="required">*</span>
                     </label>
                     <input 
                         type="text" 
@@ -345,7 +345,7 @@
                             type="text" 
                             name="penanggungjawab" 
                             class="form-input" 
-                            placeholder="Nama lengkap direktur"
+                            placeholder="Nama lengkap pemilik"
                             value="{{ old('penanggungjawab') }}"
                             required
                         >
@@ -355,7 +355,7 @@
                     </div>
                 </div>
 
-                <!-- Row: Kontak & Nomor Izin -->
+                <!-- Row: Kontak & Nomor SK -->
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">
@@ -376,7 +376,7 @@
 
                     <div class="form-group">
                         <label class="form-label">
-                            Nomor Izin <span class="required">*</span>
+                            Nomor SK <span class="required">*</span>
                         </label>
                         <input 
                             type="text" 
@@ -393,7 +393,7 @@
 
                     <div class="form-group">
                         <label class="form-label">
-                            Tanggal <span class="required">*</span>
+                            Tanggal SK<span class="required">*</span>
                         </label>
                         <input 
                             type="date" 

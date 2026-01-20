@@ -168,6 +168,53 @@
             align-items: center;
         }
 
+        /* Table Styles */
+        .table-container {
+            background-color: var(--white);
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .data-table th {
+            font-weight: 600;
+            color: var(--text-main);
+            background-color: #f8fafc;
+        }
+
+        .data-table tr:hover {
+            background-color: #f1f5f9;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .badge-primer { background-color: #dbeafe; color: #1e40af; }
+        .badge-sekunder { background-color: #dcfce7; color: #166534; }
+        .badge-tptkb { background-color: #fef9c3; color: #854d0e; }
+        .badge-perajin { background-color: #f3e8ff; color: #6b21a8; }
+
+
         @media (max-width: 768px) {
             .total-banner { flex-direction: column; text-align: center; gap: 20px; }
         }
@@ -210,6 +257,64 @@
             <div class="total-text">
                 <h3>Total Industri Terintegrasi</h3>
                 <h2>{{ number_format($statistics['total_industri']) }} <span style="font-size: 20px; font-weight: 300;">Unit Usaha</span></h2>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                <h3 style="color: var(--primary); font-size: 18px; margin: 0;">Daftar Semua Industri</h3>
+                <form action="{{ route('industri.dashboard') }}" method="GET" style="display: flex; gap: 10px; max-width: 100%;">
+                    <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama / Lokasi..." style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; width: 250px;">
+                    <button type="submit" style="background: var(--accent); color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">Cari</button>
+                    @if(request('search'))
+                        <a href="{{ route('industri.dashboard') }}" style="background: #e2e8f0; color: #475569; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; display: flex; align-items: center;">Reset</a>
+                    @endif
+                </form>
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">No</th>
+                            <th>Nama Industri</th>
+                            <th>Jenis</th>
+                            <th>Lokasi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($dataIndustri as $index => $item)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $item->nama }}</td>
+                            <td>
+                                @php
+                                    $rawType = $item->type;
+                                    $label = match($rawType) {
+                                        'primer', 'PBPHH' => 'Industri Primer',
+                                        'sekunder', 'PBUI' => 'Industri Sekunder',
+                                        'tpt_kb' => 'TPT-KB',
+                                        'perajin', 'end_user' => 'Perajin',
+                                        default => ucwords(str_replace('_', ' ', $rawType))
+                                    };
+                                    $badge = match($rawType) {
+                                        'primer', 'PBPHH' => 'badge-primer',
+                                        'sekunder', 'PBUI' => 'badge-sekunder',
+                                        'tpt_kb' => 'badge-tptkb',
+                                        'perajin', 'end_user' => 'badge-perajin',
+                                        default => 'badge-primer'
+                                    };
+                                @endphp
+                                <span class="badge {{ $badge }}">{{ $label }}</span>
+                            </td>
+                            <td>{{ $item->kabupaten }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #94a3b8;">Tidak ada data industri ditemukan.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
 

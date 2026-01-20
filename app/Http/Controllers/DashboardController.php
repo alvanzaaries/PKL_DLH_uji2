@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 // Models from Incoming (for public dashboard)
+use App\Models\Industri;
 use App\Models\IndustriPrimer;
 use App\Models\IndustriSekunder;
 use App\Models\Tptkb;
@@ -209,7 +210,7 @@ class DashboardController extends Controller
     /**
      * Public Dashboard (from Incoming) - Industry statistics for public viewing
      */
-    public function publicIndex()
+    public function publicIndex(Request $request)
     {
         // Hitung data real dari database dengan TPT structure
         $statistics = [
@@ -222,6 +223,19 @@ class DashboardController extends Controller
         // Total keseluruhan industri
         $statistics['total_industri'] = array_sum($statistics);
 
-        return view('Industri.dashboard', compact('statistics'));
+        // Ambil data untuk tabel dengan filter pencarian
+        $query = Industri::query();
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('kabupaten', 'like', "%{$search}%");
+            });
+        }
+
+        $dataIndustri = $query->orderBy('type')->orderBy('nama')->get();
+
+        return view('Industri.dashboard', compact('statistics', 'dataIndustri'));
     }
 }

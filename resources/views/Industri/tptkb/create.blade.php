@@ -376,7 +376,7 @@
 
                     <div class="form-group">
                         <label class="form-label">
-                            Nomor Izin <span class="required">*</span>
+                            Nomor SK <span class="required">*</span>
                         </label>
                         <input 
                             type="text" 
@@ -435,7 +435,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">
-                            Kapasitas Izin <span class="required">*</span>
+                            Daya Tampung Izin <span class="required">*</span>
                         </label>
                         <input 
                             type="text" 

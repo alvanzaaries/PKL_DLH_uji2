@@ -530,7 +530,7 @@
                 <!-- Nomor Izin/NIB/SS -->
                 <div class="form-group">
                     <label class="form-label">
-                        Nomor Izin/NIB/SS <span class="required">*</span>
+                        Nomor SK/NIB/SS <span class="required">*</span>
                     </label>
                     <input 
                         type="text" 

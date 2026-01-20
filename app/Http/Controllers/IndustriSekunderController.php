@@ -66,6 +66,11 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             });
         }
 
+        // Filter berdasarkan jenis produksi
+        if ($request->filled('jenis_produksi')) {
+            $query->where('jenis_produksi', $request->jenis_produksi);
+        }
+
         // Filter berdasarkan tahun dan bulan (dari kolom tanggal di tabel industries) dengan logika AND
         if ($request->filled('tahun')) {
             $query->whereHas('industri', function($q) use ($request) {
@@ -103,6 +108,14 @@ class IndustriSekunderController extends Controller implements HasMiddleware
                 ->orderBy('kabupaten')
                 ->pluck('kabupaten');
         });
+
+        // Ambil daftar jenis produksi
+        $jenisProduksiList = IndustriSekunder::select('jenis_produksi')
+            ->distinct()
+            ->whereNotNull('jenis_produksi')
+            ->where('jenis_produksi', '!=', '')
+            ->orderBy('jenis_produksi')
+            ->pluck('jenis_produksi');
 
         // Data untuk visualisasi chart — gunakan DATA YANG SAMA dengan hasil filter
         $filteredData = (clone $query)->get();
@@ -145,6 +158,7 @@ class IndustriSekunderController extends Controller implements HasMiddleware
         return view('Industri.industri-sekunder.index', compact(
             'industriSekunder', 
             'kabupatenList',
+            'jenisProduksiList',
             'yearStats',
             'locationStats',
             'capacityStats'

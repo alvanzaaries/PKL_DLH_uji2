@@ -286,7 +286,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Nomor Izin <span class="required">*</span></label>
+                        <label class="form-label">Nomor SK <span class="required">*</span></label>
                         <input type="text" name="nomor_izin" class="form-input" value="{{ old('nomor_izin', $industriSekunder->industri->nomor_izin) }}" required>
                     </div>
                 </div>
@@ -321,7 +321,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Tanggal <span class="required">*</span></label>
+                        <label class="form-label">Tanggal SK <span class="required">*</span></label>
                         <input type="date" name="tanggal" class="form-input" value="{{ old('tanggal', $industriSekunder->industri->tanggal) }}" required>
                     </div>
                 </div>

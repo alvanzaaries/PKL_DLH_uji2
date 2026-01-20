@@ -839,6 +839,17 @@
                         </select>
                     </div>
                     <div class="filter-group">
+                        <label>Jenis Produksi</label>
+                        <select name="jenis_produksi" class="filter-input">
+                            <option value="">-- Semua Jenis Produksi --</option>
+                            @foreach($jenisProduksiList as $jp)
+                                <option value="{{ $jp }}" {{ request('jenis_produksi') == $jp ? 'selected' : '' }}>
+                                    {{ $jp }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group">
                         <label>Kapasitas Izin</label>
                         <select name="kapasitas" class="filter-input">
                             <option value="">-- Semua Kapasitas --</option>
@@ -923,12 +934,12 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Perusahaan</th>
-                            <th>Tanggal</th>
+                            <th>Tanggal SK</th>
                             <th>Kabupaten/Kota</th>
                             <th>Penanggung Jawab</th>
                             <th>Jenis Produksi</th>
                             <th>Kapasitas Izin</th>
-                            <th>Nomor Izin</th>
+                            <th>Nomor SK</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -1006,11 +1017,11 @@
                 <div class="detail-section-title">Detail Izin & Produksi</div>
                 <table class="table-detail">
                     <tr>
-                        <td class="detail-label-col">Nomor Izin</td>
+                        <td class="detail-label-col">Nomor SK</td>
                         <td class="detail-value-col" id="modal-nomor-izin">-</td>
                     </tr>
                     <tr>
-                        <td class="detail-label-col">Tanggal Izin</td>
+                        <td class="detail-label-col">Tanggal SK</td>
                         <td class="detail-value-col" id="modal-tanggal">-</td>
                     </tr>
                     <tr>
@@ -1101,6 +1112,12 @@
         $(document).ready(function() {
             $('select[name="kabupaten"]').select2({
                 placeholder: '-- Pilih Kabupaten/Kota --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('select[name="jenis_produksi"]').select2({
+                placeholder: '-- Semua Jenis Produksi --',
                 allowClear: true,
                 width: '100%'
             });

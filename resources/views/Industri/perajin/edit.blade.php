@@ -266,14 +266,14 @@
                 <h3 class="section-title">Data Perusahaan</h3>
 
                 <div class="form-group">
-                    <label class="form-label">Nama Perusahaan <span class="required">*</span></label>
+                    <label class="form-label">Nama Pemilik <span class="required">*</span></label>
                     <input 
                         type="text" 
                         name="nama" 
                         class="form-input @error('nama') form-error @enderror" 
                         value="{{ old('nama', $perajin->industri->nama) }}" 
                         required
-                        placeholder="Masukkan nama perusahaan">
+                        placeholder="Masukkan nama pemilik">
                     @error('nama')
                         <div class="error-message">{{ $message }}</div>
                     @enderror
@@ -304,14 +304,14 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Penanggung Jawab/Direktur <span class="required">*</span></label>
+                        <label class="form-label">Penanggung Jawab/Pemilik <span class="required">*</span></label>
                         <input 
                             type="text" 
                             name="penanggungjawab" 
                             class="form-input @error('penanggungjawab') form-error @enderror" 
                             value="{{ old('penanggungjawab', $perajin->industri->penanggungjawab) }}" 
                             required
-                            placeholder="Nama lengkap direktur">
+                            placeholder="Nama lengkap pemilik">
                         @error('penanggungjawab')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
@@ -334,7 +334,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Nomor Izin <span class="required">*</span></label>
+                        <label class="form-label">Nomor SK <span class="required">*</span></label>
                         <input 
                             type="text" 
                             name="nomor_izin" 
@@ -348,7 +348,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Tanggal <span class="required">*</span></label>
+                        <label class="form-label">Tanggal SK <span class="required">*</span></label>
                         <input 
                             type="date" 
                             name="tanggal" 

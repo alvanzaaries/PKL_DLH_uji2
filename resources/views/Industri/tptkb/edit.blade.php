@@ -310,7 +310,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Nomor Izin <span class="required">*</span></label>
+                        <label class="form-label">Nomor SK <span class="required">*</span></label>
                         <input type="text" name="nomor_izin" class="form-input" value="{{ old('nomor_izin', $tptkb->industri->nomor_izin) }}" required>
                         @error('nomor_izin')
                             <div class="error-message">{{ $message }}</div>
@@ -319,7 +319,7 @@
                 </div>
 
                 <h3 style="font-size: 18px; color: var(--primary); margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent);">
-                    Data Izin & Kapasitas
+                    Data Izin & Daya Tampung
                 </h3>
 
                 <div class="form-row">
@@ -356,7 +356,7 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">Kapasitas Izin <span class="required">*</span></label>
+                        <label class="form-label">Daya Tampung Izin <span class="required">*</span></label>
                         <input type="text" name="kapasitas_izin" class="form-input" value="{{ old('kapasitas_izin', $tptkb->kapasitas_izin) }}" placeholder="Contoh: 5000 m³/tahun" required>
                         @error('kapasitas_izin')
                             <div class="error-message">{{ $message }}</div>
@@ -364,7 +364,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Tanggal <span class="required">*</span></label>
+                        <label class="form-label">Tanggal SK <span class="required">*</span></label>
                         <input type="date" name="tanggal" class="form-input" value="{{ old('tanggal', $tptkb->industri->tanggal) }}" required>
                         @error('tanggal')
                             <div class="error-message">{{ $message }}</div>

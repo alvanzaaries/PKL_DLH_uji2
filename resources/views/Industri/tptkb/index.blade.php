@@ -725,9 +725,20 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>Kapasitas Izin</label>
+                        <label>Sumber Bahan Baku</label>
+                        <select name="sumber_bahan_baku" class="filter-input">
+                            <option value="">-- Semua Sumber --</option>
+                            @foreach($sumberBahanBakuList as $value => $label)
+                                <option value="{{ $value }}" {{ request('sumber_bahan_baku') == $value ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Daya Tampung Izin</label>
                         <select name="kapasitas" class="filter-input">
-                            <option value="">-- Semua Kapasitas --</option>
+                            <option value="">-- Semua Daya Tampung --</option>
                             <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
                             <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
                             <option value=">= 6000" {{ request('kapasitas') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
@@ -786,7 +797,7 @@
                 </div>
             </div>
             <div class="stat-card">
-                <h3>📦 Sebaran Kapasitas Izin</h3>
+                <h3>📦 Sebaran Daya Tampung Izin</h3>
                 <div class="chart-container">
                     <canvas id="chartKapasitas"></canvas>
                 </div>
@@ -808,11 +819,11 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Perusahaan</th>
-                            <th>Tanggal</th>
+                            <th>Tanggal SK</th>
                             <th>Kabupaten/Kota</th>
                             <th>Penanggung Jawab</th>
                             <th>Sumber Bahan Baku</th>
-                            <th>Kapasitas Izin</th>
+                            <th>Daya Tampung Izin</th>
                             <th>Masa Berlaku</th>
                             <th>Status</th>
                             <th>Aksi</th>
@@ -899,11 +910,11 @@
                 <div class="detail-section-title">Detail Izin & Usaha</div>
                 <table class="table-detail">
                     <tr>
-                        <td class="detail-label-col">Nomor Izin</td>
+                        <td class="detail-label-col">Nomor SK</td>
                         <td class="detail-value-col" id="modal-nomor-izin">-</td>
                     </tr>
                     <tr>
-                        <td class="detail-label-col">Tanggal Izin</td>
+                        <td class="detail-label-col">Tanggal SK</td>
                         <td class="detail-value-col" id="modal-tanggal">-</td>
                     </tr>
                     <tr>
@@ -923,7 +934,7 @@
                         <td class="detail-value-col" id="modal-sumber-bahan-baku">-</td>
                     </tr>
                     <tr>
-                        <td class="detail-label-col">Kapasitas Izin</td>
+                        <td class="detail-label-col">Daya Tampung Izin</td>
                         <td class="detail-value-col" id="modal-kapasitas">-</td>
                     </tr>
                 </table>
@@ -1019,6 +1030,12 @@
         $(document).ready(function() {
             $('select[name="kabupaten"]').select2({
                 placeholder: '-- Pilih Kabupaten/Kota --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('select[name="sumber_bahan_baku"]').select2({
+                placeholder: '-- Semua Sumber --',
                 allowClear: true,
                 width: '100%'
             });
