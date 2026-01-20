@@ -70,13 +70,8 @@
                 Riwayat Rekonsiliasi
             </a>
 
-            <a class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.users.*') ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700' }}" href="{{ route('admin.users.index') }}">
-                <span class="material-icons-outlined mr-3 {{ request()->routeIs('admin.users.*') ? '' : 'text-gray-400 group-hover:text-primary dark:text-gray-500 dark:group-hover:text-primary' }}">group</span>
-                Manajemen User
-            </a>
-
-            <a class="group flex items-center px-3 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" href="#">
-                <span class="material-icons-outlined mr-3 text-gray-400 group-hover:text-primary dark:text-gray-500 dark:group-hover:text-primary">settings</span>
+            <a class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.settings.*') ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700' }}" href="{{ route('admin.settings.index') }}">
+                <span class="material-icons-outlined mr-3 {{ request()->routeIs('admin.settings.*') ? '' : 'text-gray-400 group-hover:text-primary dark:text-gray-500 dark:group-hover:text-primary' }}">settings</span>
                 Pengaturan
             </a>
         </nav>
@@ -104,9 +99,6 @@
         <header class="md:hidden h-16 bg-surface-light dark:bg-surface-dark border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4">
             <span class="text-lg font-bold text-primary">Pelaporan PNBP</span>
             <div class="flex items-center gap-2">
-                <button id="toggleDark" class="text-gray-500" type="button" title="Tema">
-                    <span class="material-icons-outlined">dark_mode</span>
-                </button>
                 <button id="toggleSidebar" class="text-gray-500" type="button" title="Menu">
                     <span class="material-icons-outlined">menu</span>
                 </button>
@@ -124,10 +116,6 @@
                     </div>
                     <div class="flex items-center gap-3">
                         @yield('header_actions')
-                        <button id="toggleDarkDesktop" class="hidden md:inline-flex items-center justify-center px-3 py-2 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm" type="button">
-                            <span class="material-icons-outlined text-lg mr-2">dark_mode</span>
-                            Tema
-                        </button>
                     </div>
                 </div>
 
@@ -164,6 +152,7 @@
 
             document.getElementById('toggleDark')?.addEventListener('click', toggle);
             document.getElementById('toggleDarkDesktop')?.addEventListener('click', toggle);
+            document.getElementById('toggleDarkSettings')?.addEventListener('click', toggle);
 
             document.getElementById('toggleSidebar')?.addEventListener('click', () => {
                 const s = document.getElementById('sidebar');

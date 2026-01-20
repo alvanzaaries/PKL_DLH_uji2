@@ -61,14 +61,12 @@
                     {{-- Input KPH --}}
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">KPH</label>
-                        <input type="text" name="kph" value="{{ old('kph') }}" list="kph-list" 
-                            class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary/50 py-2 px-3 border" 
-                            placeholder="Ketik / pilih KPH" required>
-                        <datalist id="kph-list">
+                        <select name="kph" class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white shadow-sm focus:border-primary focus:ring focus:ring-primary/50 py-2 px-3 border bg-white" required>
+                            <option value="">-- Pilih KPH --</option>
                             @foreach(($kphOptions ?? []) as $kph)
-                                <option value="{{ $kph }}"></option>
+                                <option value="{{ $kph }}" {{ old('kph') == $kph ? 'selected' : '' }}>{{ $kph }}</option>
                             @endforeach
-                        </datalist>
+                        </select>
                     </div>
                 </div>
 

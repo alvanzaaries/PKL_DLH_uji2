@@ -8,7 +8,9 @@ use App\Http\Controllers\ReconciliationController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\UserManagementController; // Moved to root controllers
+use App\Http\Controllers\SettingsPNBPController; // Renamed Settings controller
+
 
 // Controllers from Incoming (Public/Visualisasi)
 use App\Http\Controllers\TptkbController;
@@ -100,6 +102,11 @@ Route::prefix('pnbp')->group(function () {
         Route::get('/admin/users/{user}/edit', [UserManagementController::class, 'edit'])->name('admin.users.edit');
         Route::put('/admin/users/{user}', [UserManagementController::class, 'update'])->name('admin.users.update');
         Route::post('/admin/users/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('admin.users.reset-password');
+
+        // Settings (Pengaturan)
+        Route::get('/settings', [SettingsPNBPController::class, 'index'])->name('admin.settings.index');
+        Route::post('/settings/kph', [SettingsPNBPController::class, 'storeKph'])->name('admin.settings.kph.store');
+        Route::delete('/settings/kph/{kph}', [SettingsPNBPController::class, 'destroyKph'])->name('admin.settings.kph.destroy');
 
         // Reconciliations (Admin CRUD)
         Route::get('/reconciliations/create', [ReconciliationController::class, 'create'])->name('reconciliations.create');

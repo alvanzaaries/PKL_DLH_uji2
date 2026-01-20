@@ -15,6 +15,8 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
+use App\Models\Kph; // Add this import
+
 class ReconciliationController extends Controller
 {
     // =========================================================================
@@ -70,13 +72,7 @@ class ReconciliationController extends Controller
 
     public function create()
     {
-        $kphOptions = Reconciliation::query()
-            ->select('kph')
-            ->whereNotNull('kph')
-            ->where('kph', '!=', '')
-            ->distinct()
-            ->orderBy('kph')
-            ->pluck('kph');
+        $kphOptions = Kph::orderBy('nama')->pluck('nama');
 
         return view('PNBP.admin.reconciliations.create', compact('kphOptions'));
     }
