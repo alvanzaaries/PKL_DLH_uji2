@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Export Dashboard PNBP</title>
+    <title>Export Ringkasan PNBP</title>
     <style>
         body { font-family: Helvetica, Arial, sans-serif; color: #111827; font-size: 10px; line-height: 1.3; }
         h1 { font-size: 14px; margin: 0 0 5px; font-weight: bold; text-align: center; text-transform: uppercase; }
@@ -73,20 +73,24 @@
             <tr>
                 <th>HASIL HUTAN</th>
                 <th class="right">TOTAL VOLUME</th>
+                <th class="right">TOTAL NILAI SETOR</th>
             </tr>
         </thead>
         <tbody>
             <tr>
                 <td>HASIL HUTAN KAYU</td>
                 <td class="right">{{ number_format($volumeByCat['HASIL HUTAN KAYU'] ?? 0, 2, ',', '.') }} m3</td>
+                <td class="right">Rp {{ number_format($setorByCat['HASIL HUTAN KAYU'] ?? 0, 0, ',', '.') }}</td>
             </tr>
             <tr>
                 <td>HASIL HUTAN BUKAN KAYU (HHBK)</td>
                 <td class="right">{{ number_format($volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] ?? 0, 2, ',', '.') }} Ton/Kg</td>
+                <td class="right">Rp {{ number_format($setorByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] ?? 0, 0, ',', '.') }}</td>           
             </tr>
             <tr>
                 <td>HASIL HUTAN LAINNYA</td>
                 <td class="right">{{ number_format($volumeByCat['HASIL HUTAN LAINNYA'] ?? 0, 2, ',', '.') }}</td>
+                <td class="right">Rp {{ number_format($setorByCat['HASIL HUTAN LAINNYA'] ?? 0, 0, ',', '.') }}</td>
             </tr>
         </tbody>
     </table>

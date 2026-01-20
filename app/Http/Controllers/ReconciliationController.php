@@ -257,6 +257,30 @@ class ReconciliationController extends Controller
             }
         }
 
+        // Group Setor (total setor nilai) by Category
+        $setorByCat = [
+            'HASIL HUTAN KAYU' => 0,
+            'HASIL HUTAN BUKAN KAYU (HHBK)' => 0,
+            'HASIL HUTAN LAINNYA' => 0,
+        ];
+
+        $totalPerSatuanSetor = ReconciliationDetail::where('reconciliation_id', $reconciliation->id)
+            ->select('satuan', DB::raw('SUM(setor_nilai) as total_setor'))
+            ->groupBy('satuan')
+            ->get();
+
+        foreach ($totalPerSatuanSetor as $row) {
+            $unit = strtolower(trim((string)$row->satuan));
+            $s = (float) ($row->total_setor ?? 0);
+            if (in_array($unit, ['m3', 'm^3', 'kbk'])) {
+                $setorByCat['HASIL HUTAN KAYU'] += $s;
+            } elseif (in_array($unit, ['ton', 'kg'])) {
+                $setorByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $s;
+            } else {
+                $setorByCat['HASIL HUTAN LAINNYA'] += $s;
+            }
+        }
+
         $baseTotalNilaiLhp = (float) ReconciliationDetail::where('reconciliation_id', $reconciliation->id)->sum('lhp_nilai');
         $nilaiOverride = $overrides->get(strtolower('total_nilai_lhp|'));
         $totalNilaiLhpFinal = $nilaiOverride ? (float) $nilaiOverride->value : $baseTotalNilaiLhp;
@@ -265,6 +289,7 @@ class ReconciliationController extends Controller
         return compact(
             'totalPerSatuan',
             'volumeByCat',
+            'setorByCat',
             'statsJenis',
             'statsWilayah',
             'statsBank',
