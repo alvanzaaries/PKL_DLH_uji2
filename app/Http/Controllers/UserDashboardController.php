@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reconciliation;
+use App\Models\Kph;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -10,13 +11,8 @@ class UserDashboardController extends Controller
 {
     public function upload(Request $request)
     {
-        $kphOptions = Reconciliation::query()
-            ->select('kph')
-            ->whereNotNull('kph')
-            ->where('kph', '!=', '')
-            ->distinct()
-            ->orderBy('kph')
-            ->pluck('kph');
+        // Use Master Kph table
+        $kphOptions = Kph::orderBy('nama')->pluck('nama');
 
         return view('PNBP.user.upload', compact('kphOptions'));
     }

@@ -48,5 +48,9 @@ class DatabaseSeeder extends Seeder
         if (class_exists(\Database\Seeders\UserSeeder::class)) {
             $this->call(\Database\Seeders\UserSeeder::class);
         }
+        // Call KphSeeder from Incoming if it exists (for additional data)
+        if (class_exists(\Database\Seeders\KphSeeder::class)) {
+            $this->call(\Database\Seeders\KphSeeder::class);
+        }
     }
 }

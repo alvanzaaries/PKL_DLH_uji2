@@ -43,7 +43,6 @@
             </div>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            {{-- REMOVED: class "transition-colors" --}}
             <a href="{{ route('reconciliations.export-pdf', array_merge(['reconciliation' => $reconciliation->id], request()->query())) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary_hover">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 17v-6m0 0l-3 3m3-3l3 3M6 20h12" />
@@ -51,7 +50,6 @@
                 Export PDF
             </a>
             
-            {{-- REMOVED: class "transition-colors" --}}
             <a href="{{ route('reconciliations.file', $reconciliation->id) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -59,7 +57,6 @@
                 Excel Asli
             </a>
 
-            {{-- REMOVED: class "transition-colors" --}}
             <a href="{{ route('reconciliations.raw', $reconciliation->id) }}" target="_blank" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -67,7 +64,6 @@
                 Raw Data
             </a>
 
-            {{-- REMOVED: class "transition-colors" --}}
             <a href="{{ route('reconciliations.index') }}" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700">
                 &larr; Kembali
             </a>
@@ -112,6 +108,7 @@
                 </div>
                 @endif
                 
+                {{-- Card Nilai LHP (Kuning) --}}
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Nilai LHP</div>
                     <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-500 mt-2">
@@ -119,6 +116,8 @@
                         {{ number_format(($totalNilaiLhpFinal ?? $statsJenis->sum('total_nilai')), 0, '.', ',') }}
                     </div>
                 </div>
+
+                {{-- Card Nilai Setor (Hijau) --}}
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg p-6 border border-gray-200 dark:border-gray-700">
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Nilai Setor</div>
                     <div class="text-2xl font-bold text-green-600 dark:text-green-500 mt-2">
@@ -128,60 +127,61 @@
                 </div>
             </div>
 
-    {{-- Edit Summary Overrides (Restored) --}}
-    <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 mb-6 p-6">
-        <h3 class="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Edit Ringkasan (Manual Override)
-        </h3>
-        
-        <form action="{{ route('reconciliations.summary-overrides', $reconciliation->id) }}" method="POST">
-            @csrf
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {{-- Edit Summary Overrides (Manual Override) --}}
+            <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 mb-6 p-6">
+                <h3 class="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    Edit Ringkasan (Manual Override)
+                </h3>
                 
-                {{-- Override Total Nilai LHP --}}
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Nilai LHP (Rp)</label>
-                    <div class="relative rounded-md shadow-sm">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span class="text-gray-500 sm:text-sm">Rp</span>
+                <form action="{{ route('reconciliations.summary-overrides', $reconciliation->id) }}" method="POST">
+                    @csrf
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        
+                        {{-- Override Total Nilai LHP --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Nilai LHP (Rp)</label>
+                            <div class="relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm">Rp</span>
+                                </div>
+                                <input type="text" name="total_nilai_lhp" 
+                                    value="{{ number_format($totalNilaiLhpFinal, 0, '.', ',') }}"
+                                    class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5"
+                                    placeholder="0">
+                            </div>
                         </div>
-                        <input type="text" name="total_nilai_lhp" 
-                            value="{{ number_format($totalNilaiLhpFinal, 0, '.', ',') }}"
-                            class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5"
-                            placeholder="0">
-                    </div>
-                </div>
 
-                {{-- Loop per satuan --}}
-                @foreach($totalPerSatuan as $t)
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Volume ({{ $t->satuan == '-' ? 'LAINNYA' : $t->satuan }})</label>
-                        <input type="text" name="total_volume[{{ $t->satuan }}]" 
-                            value="{{ number_format(($t->total_volume_final), 3, '.', '') }}"
-                            class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
-                            placeholder="0">
-                        @if(!empty($t->is_overridden))
-                            <p class="text-xs text-yellow-600 mt-1">*Nilai manual (Asli: {{ number_format($t->total_volume, 3) }})</p>
-                        @endif
+                        {{-- Loop per satuan --}}
+                        @foreach($totalPerSatuan as $t)
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Volume ({{ $t->satuan == '-' ? 'LAINNYA' : $t->satuan }})</label>
+                                <input type="text" name="total_volume[{{ $t->satuan }}]" 
+                                    value="{{ number_format(($t->total_volume_final), 3, '.', '') }}"
+                                    class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full p-2.5"
+                                    placeholder="0">
+                                @if(!empty($t->is_overridden))
+                                    <p class="text-xs text-yellow-600 mt-1">*Nilai manual (Asli: {{ number_format($t->total_volume, 3) }})</p>
+                                @endif
+                            </div>
+                        @endforeach
                     </div>
-                @endforeach
+
+                    <div class="mt-4 flex justify-between items-center">
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Kosongkan kolom untuk kembali ke hitungan otomatis.</p>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary hover:bg-primary_hover text-white text-sm font-medium rounded-lg shadow-sm">
+                            Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
             </div>
 
-            <div class="mt-4 flex justify-between items-center">
-                <p class="text-xs text-gray-500 dark:text-gray-400">Kosongkan kolom untuk kembali ke hitungan otomatis.</p>
-                <button type="submit" class="inline-flex items-center px-4 py-2 bg-primary hover:bg-primary_hover text-white text-sm font-medium rounded-lg shadow-sm transition-colors">
-                    Simpan Perubahan
-                </button>
-            </div>
-        </form>
-    </div>
-
-            {{-- Rekap Tables --}}
+            {{-- 3 KOLOM: Rekap Jenis, Rekap Bank, & Sebaran Wilayah (Chart) --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {{-- Rekap Jenis --}}
+                
+                {{-- 1. Rekap Jenis --}}
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 lg:col-span-1">
                     <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-transparent">
                         <h3 class="font-bold text-gray-800 dark:text-white">Rekap Jenis Hasil Hutan</h3>
@@ -198,7 +198,6 @@
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach($statsJenis as $s)
-                                    {{-- REMOVED: class "transition-colors" --}}
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td class="py-2 font-medium text-xs text-gray-900 dark:text-gray-200">{{ $s->label }}</td>
                                         <td class="py-2 text-right text-gray-700 dark:text-gray-300">{{ number_format($s->total_volume, 2, '.', ',') }}</td>
@@ -211,7 +210,7 @@
                     </div>
                 </div>
 
-                {{-- Rekap Bank --}}
+                {{-- 2. Rekap Bank --}}
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 lg:col-span-1">
                     <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-transparent">
                         <h3 class="font-bold text-gray-800 dark:text-white">Rekap Bank Penyetor</h3>
@@ -227,7 +226,6 @@
                             </thead>
                             <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                 @foreach($statsBank as $s)
-                                    {{-- REMOVED: class "transition-colors" --}}
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                         <td class="py-2 font-medium truncate max-w-[100px] text-gray-900 dark:text-gray-200" title="{{ $s->label }}">{{ $s->label }}</td>
                                         <td class="py-2 text-right text-gray-900 dark:text-gray-200 font-medium">{{ number_format($s->total_nilai, 0, '.', ',') }}</td>
@@ -238,6 +236,27 @@
                         </table>
                     </div>
                 </div>
+
+                {{-- 3. Sebaran Wilayah (PIE CHART) --}}
+                <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 lg:col-span-1 flex flex-col">
+                    <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-transparent">
+                        <h3 class="font-bold text-gray-800 dark:text-white">Sebaran Wilayah</h3>
+                    </div>
+                    
+                    {{-- Container Chart --}}
+                    <div class="p-4 flex-1 flex flex-col justify-center items-center">
+                        @if(count($statsWilayah ?? []) > 0)
+                            <div class="relative w-full h-64">
+                                <canvas id="wilayahChart"></canvas>
+                            </div>
+                        @else
+                            <div class="flex items-center justify-center h-full text-gray-500 text-sm py-10">
+                                Tidak ada data wilayah.
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
             </div>
 
             {{-- MAIN TABLE: Detail Data Transaksi --}}
@@ -256,10 +275,8 @@
                     <form action="{{ route('reconciliations.show', $reconciliation->id) }}" method="GET" id="filterForm" class="flex gap-2 mb-4">
                         <input type="text" name="search" value="{{ request('search') }}" class="w-full md:w-1/3 px-3 py-2 border dark:border-gray-600 dark:bg-gray-800 dark:text-white rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-gray-500" placeholder="Cari data (Wilayah, NTPN, Billing, dll)...">
                         
-                        {{-- REMOVED: class "transition-colors" --}}
                         <button type="submit" class="inline-flex items-center px-4 py-2.5 bg-gray-800 hover:bg-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 text-white rounded-lg text-sm font-medium">Cari</button>
                         
-                        {{-- REMOVED: class "transition-colors" --}}
                         <button type="button" id="resetBtn" class="inline-flex items-center px-4 py-2.5 bg-white dark:bg-surface-dark border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium {{ request('search') ? '' : 'hidden' }}">Reset</button>
                     </form>
 
@@ -294,7 +311,6 @@
                             {{-- Body Netral --}}
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                 @forelse($details as $detail)
-                                    {{-- REMOVED: class "transition-colors" --}}
                                     <tr class="bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-700">
                                         {{-- No & Wilayah --}}
                                         <td class="px-3 py-2 sticky left-0 bg-white dark:bg-surface-dark font-medium text-center shadow-sm border-r dark:border-gray-700 text-gray-500 dark:text-gray-400">{{ $detail->no_urut ?? '-' }}</td>
@@ -342,5 +358,83 @@
             f.querySelector('input[name="search"]').value = '';
             f.submit();
         });
+
+        // Render wilayah chart (PIE CHART - DOUGHNUT)
+        @if(count($statsWilayah ?? []) > 0)
+            (function(){
+                const rawLabels = {!! json_encode($statsWilayah->pluck('label')) !!};
+                const rawData = {!! json_encode($statsWilayah->pluck('total_nilai')) !!};
+
+                const canvas = document.getElementById('wilayahChart');
+                if (!canvas) return;
+                
+                const ctx = canvas.getContext('2d');
+
+                // --- FUNGSI GENERATE WARNA DINAMIS ---\
+                const dynamicColors = rawLabels.map((_, i) => {
+                    const hue = (i * 137.508) % 360; 
+                    return `hsl(${hue}, 65%, 55%)`;
+                });
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: rawLabels,
+                        datasets: [{
+                            data: rawData,
+                            backgroundColor: dynamicColors, 
+                            borderWidth: 1,
+                            borderColor: '#ffffff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'right',
+                                labels: {
+                                    boxWidth: 10,
+                                    font: { size: 10 },
+                                    generateLabels: function(chart) {
+                                        const data = chart.data;
+                                        if (data.labels.length && data.datasets.length) {
+                                            return data.labels.map((label, i) => {
+                                                if (i > 9) return null; 
+                                                const meta = chart.getDatasetMeta(0);
+                                                const style = meta.controller.getStyle(i);
+                                                return {
+                                                    text: label,
+                                                    fillStyle: style.backgroundColor,
+                                                    strokeStyle: style.borderColor,
+                                                    lineWidth: style.borderWidth,
+                                                    hidden: isNaN(data.datasets[0].data[i]) || meta.data[i].hidden,
+                                                    index: i
+                                                };
+                                            }).filter(item => item !== null);
+                                        }
+                                        return [];
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) label += ': ';
+                                        label += new Intl.NumberFormat('id-ID').format(context.raw);
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        layout: {
+                            padding: 0
+                        }
+                    }
+                });
+            })();
+        @endif
     </script>
 @endsection
