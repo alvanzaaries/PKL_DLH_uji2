@@ -120,23 +120,32 @@ class DashboardController extends Controller
             'HASIL HUTAN BUKAN KAYU (HHBK)' => 0,
             'HASIL HUTAN LAINNYA' => 0, 
         ];
+        $setorByCat = [
+            'HASIL HUTAN KAYU' => 0,
+            'HASIL HUTAN BUKAN KAYU (HHBK)' => 0,
+            'HASIL HUTAN LAINNYA' => 0, 
+        ];
 
         // We need to fetch data grouped by Satuan to apply the categorization logic
         $statsSatuan = $detailQuery->clone()
-            ->select('satuan', DB::raw('SUM(volume) as total_vol'))
+            ->select('satuan', DB::raw('SUM(volume) as total_vol'), DB::raw('SUM(setor_nilai) as total_setor'))
             ->groupBy('satuan')
             ->get();
 
         foreach ($statsSatuan as $row) {
             $unit = strtolower(trim((string)$row->satuan));
             $vol = (float) $row->total_vol;
+            $setor = (float) $row->total_setor;
 
             if (in_array($unit, ['m3', 'm^3', 'kbk'])) {
                 $volumeByCat['HASIL HUTAN KAYU'] += $vol;
+                $setorByCat['HASIL HUTAN KAYU'] += $setor;
             } elseif (in_array($unit, ['ton', 'kg'])) {
                 $volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $vol;
+                $setorByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $setor;
             } else {
                 $volumeByCat['HASIL HUTAN LAINNYA'] += $vol;
+                $setorByCat['HASIL HUTAN LAINNYA'] += $setor;
             }
         }
 
@@ -164,6 +173,7 @@ class DashboardController extends Controller
             'wilayahCount',
             'statsJenis',
             'volumeByCat',
+            'setorByCat',
             'availableYears',
             'availableQuarters',
             'availableKph',

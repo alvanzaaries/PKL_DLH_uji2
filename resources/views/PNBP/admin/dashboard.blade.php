@@ -123,7 +123,7 @@
                     <i class="fas fa-file-excel text-2xl"></i>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total File Rekonsiliasi</p>
+                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total File Ter-Upload</p>
                     <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalFiles) }}</p>
                 </div>
             </div>
