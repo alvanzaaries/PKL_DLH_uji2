@@ -435,6 +435,9 @@ class ReconciliationController extends Controller
             $lhpNo  = trim($row['C'] ?? '');
             $lhpTgl = $row['D'] ?? '';
 
+            // Skip jika LHP No kosong untuk menghindari redundansi
+            if ($lhpNo === '') continue;
+
             $this->saveDetail($recon, $activeWilayah, $activeBulan, $colA, $colJenis, $volume, $colSat, $rupiah, $row, 
                 $lhpNo, $lhpTgl,
                 $billNo, $billTgl, $billRp,
