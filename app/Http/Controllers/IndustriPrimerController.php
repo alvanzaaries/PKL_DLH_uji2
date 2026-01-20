@@ -120,6 +120,11 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             });
         }
 
+        // Filter berdasarkan jenis produksi (dari tabel industri_primer)
+        if ($request->filled('jenis_produksi')) {
+            $query->where('jenis_produksi', $request->jenis_produksi);
+        }
+
         // Filter berdasarkan kapasitas izin (dari tabel industri_primer)
         // Karena kapasitas_izin sekarang VARCHAR, kita extract angka dan bandingkan dengan rentang
         if ($request->filled('kapasitas')) {

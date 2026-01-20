@@ -42,6 +42,14 @@ class IndustriPrimer extends Model
     }
 
     /**
+     * Scope untuk filter berdasarkan jenis produksi
+     */
+    public function scopeByJenisProduksi($query, $jenisProduksi)
+    {
+        return $query->where('jenis_produksi', $jenisProduksi);
+    }
+
+    /**
      * Check if pelaporan is active
      */
     public function isAktif(): bool

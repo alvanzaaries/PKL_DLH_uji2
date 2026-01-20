@@ -32,55 +32,6 @@
             padding: 20px;
         }
 
-        /* Header Section */
-        .page-header {
-            background: var(--white);
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            margin-bottom: 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .page-title {
-            font-size: 28px;
-            color: var(--primary);
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .page-subtitle {
-            color: #64748b;
-            font-size: 14px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #166534;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
-        }
-
         /* Filter Section */
         .filter-card {
             background: var(--white);
@@ -300,6 +251,10 @@
         }
 
         /* Select2 Custom Styling */
+        .select2-container {
+            max-width: 100%;
+        }
+
         .select2-container--default .select2-selection--single {
             height: 42px;
             border: 1px solid var(--border);
@@ -618,19 +573,6 @@
 @section('content')
     <div class="container">
 
-        <!-- Page Header -->
-        <div class="page-header">
-            <div>
-                <h1 class="page-title">Data Industri Primer (IPHHK)</h1>
-                <p class="page-subtitle">Daftar perusahaan industri primer pengolahan hasil hutan kayu</p>
-            </div>
-            @auth
-            <a href="{{ route('industri-primer.create') }}" class="btn btn-primary">
-                <span>+</span> Tambah Data Baru
-            </a>
-            @endauth
-        </div>
-
         <!-- Filter Section -->
         <div class="filter-card">
             <form method="GET" action="{{ route('industri-primer.index') }}">
@@ -651,6 +593,15 @@
                         </select>
                     </div>
                     <div class="filter-group">
+                        <label>Jenis Produksi</label>
+                        <select name="jenis_produksi" class="filter-input">
+                            <option value="">-- Semua Jenis --</option>
+                            <option value="Kayu Gergajian" {{ request('jenis_produksi') == 'Kayu Gergajian' ? 'selected' : '' }}>Kayu Gergajian</option>
+                            <option value="Kayu Lapis" {{ request('jenis_produksi') == 'Kayu Lapis' ? 'selected' : '' }}>Kayu Lapis</option>
+                            <option value="Kayu Veneer" {{ request('jenis_produksi') == 'Kayu Veneer' ? 'selected' : '' }}>Kayu Veneer</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
                         <label>Kapasitas Izin</label>
                         <select name="kapasitas" class="filter-input">
                             <option value="">-- Semua Kapasitas --</option>
@@ -660,6 +611,15 @@
                         </select>
                     </div>
                     <div class="filter-group">
+                        <label>Jenis Produksi</label>
+                        <select name="jenis_produksi" class ="filter-input">
+                            <option value"">-- Semua jenis --</option>
+                            <option value=Kayu Gergajian" {{ request('jenis') == 'Kayu Gergajian' ? 'selected' : ''}}>Kayu Gergajian</option>
+                            <option value=Kayu Lapis" {{ request('jenis') == 'Kayu Lapis' ? 'selected' : ''}}>Kayu lapis</option>
+                            <option value=Kayu Veneer" {{ request('jenis') == 'Kayu Gergajian' ? 'selected' : ''}}>Kayu Veneer</option>
+                        </select>
+                    </div>
+                        <div class="filter-group">
                         <label>Bulan</label>
                         <select name="bulan" class="filter-input">
                             <option value="">-- Semua Bulan --</option>
@@ -735,7 +695,7 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Perusahaan</th>
-                            <th>Tanggal</th>
+                            <th>Tanggal  SK</th>
                             <th>Kabupaten/Kota</th>
                             <th>Penanggung Jawab</th>
                             <th>Jenis Produksi</th>
@@ -820,7 +780,7 @@
                         <td class="detail-value-col" id="modal-nomor-izin">-</td>
                     </tr>
                     <tr>
-                        <td class="detail-label-col">Tanggal Izin</td>
+                        <td class="detail-label-col">Tanggal SK</td>
                         <td class="detail-value-col" id="modal-tanggal">-</td>
                     </tr>
                     <tr>
@@ -934,6 +894,12 @@
         $(document).ready(function() {
             $('select[name="kabupaten"]').select2({
                 placeholder: '-- Pilih Kabupaten/Kota --',
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('select[name="jenis_produksi"]').select2({
+                placeholder: '-- Semua Jenis --',
                 allowClear: true,
                 width: '100%'
             });

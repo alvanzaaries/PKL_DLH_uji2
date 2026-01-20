@@ -492,7 +492,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Tanggal <span class="required">*</span></label>
+                    <label class="form-label">Tanggal SK<span class="required">*</span></label>
                     <input 
                         type="date" 
                         name="tanggal" 
