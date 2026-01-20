@@ -44,7 +44,7 @@
         </thead>
         <tbody>
             <tr>
-                <td>Total File Rekonsiliasi</td>
+                <td>Total File Ter-Upload</td>
                 <td class="right">{{ number_format($totalFiles) }} Dokumen</td>
             </tr>
             <tr>

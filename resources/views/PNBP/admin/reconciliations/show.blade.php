@@ -422,8 +422,12 @@
                                 callbacks: {
                                     label: function(context) {
                                         let label = context.label || '';
-                                        if (label) label += ': ';
-                                        label += new Intl.NumberFormat('id-ID').format(context.raw);
+                                        if (label) {label += ': '};
+                                        label += new Intl.NumberFormat('id-ID', {
+                                            style: 'currency',
+                                            currency: 'IDR',
+                                            minimumFractionDigits: 0
+                                        }).format(context.raw);
                                         return label;
                                     }
                                 }
