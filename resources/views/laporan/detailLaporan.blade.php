@@ -246,9 +246,10 @@
                     </a>
                 @endif
                 
-                {{-- <button type="button" onclick="window.print()" class="btn btn-print">
-                    <i class="fas fa-print"></i> Cetak
-                </button> --}}
+                {{-- Export Button --}}
+                <a href="{{ route('laporan.detail.export', ['industri' => $industri_id ?? request('industri'), 'id' => $laporan_id ?? request('id')]) }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" class="btn btn-primary">
+                    <i class="fas fa-file-excel"></i> Ekspor Excel
+                </a>
             </div>
         </div>
 

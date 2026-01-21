@@ -55,6 +55,12 @@ Route::prefix('industri')->group(function () {
 // ===================================================================
 // LEGACY URLS (Redirect to new system prefixes)
 // ===================================================================
+Route::get('/public/dashboard', fn() => redirect()->route('public.dashboard'));
+Route::get('/industri-primer', fn() => redirect()->route('industri-primer.index'));
+Route::get('/industri-sekunder', fn() => redirect()->route('industri-sekunder.index'));
+Route::get('/tptkb', fn() => redirect()->route('tptkb.index'));
+Route::get('/perajin', fn() => redirect()->route('perajin.index'));
+Route::get('/industri-primer/{id}/dokumen', fn($id) => redirect()->route('industri-primer.download-dokumen', ['id' => $id]));
 Route::get('/public/dashboard', fn () => redirect()->route('public.dashboard'));
 Route::get('/industri-primer', fn () => redirect()->route('industri-primer.index'));
 Route::get('/industri-sekunder', fn () => redirect()->route('industri-sekunder.index'));
@@ -116,10 +122,10 @@ Route::prefix('pnbp')->group(function () {
 });
 
 // Legacy PNBP URLs
-Route::get('/dashboard', fn () => redirect()->route('dashboard.index'));
-Route::get('/user/upload', fn () => redirect()->route('user.upload'));
-Route::get('/user/history', fn () => redirect()->route('user.history'));
-Route::get('/user/dashboard', fn () => redirect()->route('user.dashboard'));
+Route::get('/dashboard', fn() => redirect()->route('dashboard.index'));
+Route::get('/user/upload', fn() => redirect()->route('user.upload'));
+Route::get('/user/history', fn() => redirect()->route('user.history'));
+Route::get('/user/dashboard', fn() => redirect()->route('user.dashboard'));
 
 // ===================================================================
 // INDUSTRI (SIDI-HUT) - Admin CRUD
@@ -164,7 +170,7 @@ Route::get('/laporan', [IndustriController::class, 'index'])->name('laporan.inde
 Route::prefix('laporan')->middleware(['auth', 'session.timeout', 'role:admin'])->group(function () {
 
     // Upload + proses pelaporan
-    Route::get('/upload', [LaporanController::class, 'showUploadForm'])->name('laporan.upload.form');
+    Route::get('/upload', [LaporanController::class, 'showUploadForm'])->name('laporan.upload.form');    Route::get('/upload/preview', [LaporanController::class, 'showPreview'])->name('laporan.preview.show');
     Route::post('/upload/preview', [LaporanController::class, 'preview'])->name('laporan.preview');
     Route::post('/upload/store', [LaporanController::class, 'store'])->name('laporan.store');
 
@@ -175,5 +181,6 @@ Route::prefix('laporan')->middleware(['auth', 'session.timeout', 'role:admin'])-
     // Per industri
     Route::get('/{industri}/upload', [LaporanController::class, 'showByIndustri'])->name('laporan.industri');
     Route::get('/{industri}/detail/{id}', [LaporanController::class, 'detailLaporan'])->name('laporan.detail');
+    Route::get('/{industri}/detail/{id}/export', [LaporanController::class, 'exportDetailLaporan'])->name('laporan.detail.export');
 });
 

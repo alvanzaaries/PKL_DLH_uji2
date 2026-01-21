@@ -348,6 +348,85 @@
                 gap: 1rem;
             }
         }
+
+        /* ... style yang sudah ada ... */
+
+        /* --- DOUGHNUT CHART STYLES --- */
+        .donut-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .donut-card {
+            background: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .donut-card:hover {
+            border-color: #228B22;
+            transform: translateY(-2px);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 140px;
+            width: 140px;
+            margin-bottom: 1rem;
+        }
+
+        .inner-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+            /* Agar tooltip chart tetap jalan */
+        }
+
+        .inner-percent {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #111827;
+            line-height: 1;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .inner-label {
+            font-size: 0.75rem;
+            color: #6B7280;
+            margin-top: 2px;
+        }
+
+        .donut-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 0.5rem;
+        }
+
+        .donut-status {
+            font-size: 0.75rem;
+            color: #228B22;
+            background-color: #F0FDF4;
+            padding: 2px 8px;
+            border-radius: 99px;
+            margin-top: 8px;
+            font-weight: 600;
+        }
     </style>
 
     <div class="content-card">
@@ -403,8 +482,37 @@
                 9 => 'September',
                 10 => 'Oktober',
                 11 => 'November',
-                12 => 'Desember'
+                12 => 'Desember',
             ];
+        @endphp
+
+        @php
+            // Hitung persentase pelaporan per jenis (tanpa end_user)
+            $countsByType = ['primer' => 0, 'sekunder' => 0, 'tpt_kb' => 0];
+            $reportedByType = ['primer' => 0, 'sekunder' => 0, 'tpt_kb' => 0];
+
+            if (isset($companies)) {
+                foreach ($companies as $c) {
+                    $t = $c->type ?? null;
+                    if (!in_array($t, ['primer', 'sekunder', 'tpt_kb'])) {
+                        continue;
+                    }
+                    $countsByType[$t]++;
+                    $statusThisMonth = $c->laporan[$bulanSekarang - 1] ?? null;
+                    if ($statusThisMonth == 'ok') {
+                        $reportedByType[$t]++;
+                    }
+                }
+            }
+
+            $percentPrimer =
+                $countsByType['primer'] > 0 ? round(($reportedByType['primer'] / $countsByType['primer']) * 100, 1) : 0;
+            $percentSekunder =
+                $countsByType['sekunder'] > 0
+                    ? round(($reportedByType['sekunder'] / $countsByType['sekunder']) * 100, 1)
+                    : 0;
+            $percentTptkb =
+                $countsByType['tpt_kb'] > 0 ? round(($reportedByType['tpt_kb'] / $countsByType['tpt_kb']) * 100, 1) : 0;
         @endphp
 
         <div class="stats-container">
@@ -437,6 +545,7 @@
             </div> --}}
         </div>
 
+
         {{-- CHART SECTION --}}
         <div style="padding: 1.5rem; border-bottom: 1px solid #E5E7EB;">
             <h3
@@ -448,6 +557,53 @@
             </div>
         </div>
 
+        {{-- DOUGHNUT CHART SECTION --}}
+        <div style="padding: 1.5rem; border-bottom: 1px solid #E5E7EB;">
+            <h3
+                style="font-size: 1rem; font-weight: 700; color: #374151; margin-bottom: 0.5rem; font-family: 'Inter', sans-serif;">
+                Kepatuhan per Jenis Industri
+            </h3>
+            <p style="font-size: 0.875rem; color: #6B7280; margin-bottom: 1.5rem;">
+                Persentase perusahaan yang sudah melapor bulan {{ $namaBulan[$bulanSekarang] ?? $bulanSekarang }}.
+            </p>
+
+            <div class="donut-grid">
+                <div class="donut-card">
+                    <div class="chart-wrapper">
+                        <canvas id="donutPrimer"></canvas>
+                        <div class="inner-text">
+                            <div class="inner-percent">{{ $percentPrimer }}%</div>
+                        </div>
+                    </div>
+                    <div class="donut-title">Primer</div>
+                    <div class="donut-status">{{ $reportedByType['primer'] }} / {{ $countsByType['primer'] }} Unit</div>
+                </div>
+
+                <div class="donut-card">
+                    <div class="chart-wrapper">
+                        <canvas id="donutSekunder"></canvas>
+                        <div class="inner-text">
+                            <div class="inner-percent">{{ $percentSekunder }}%</div>
+                        </div>
+                    </div>
+                    <div class="donut-title">Sekunder</div>
+                    <div class="donut-status">{{ $reportedByType['sekunder'] }} / {{ $countsByType['sekunder'] }} Unit
+                    </div>
+                </div>
+
+                <div class="donut-card">
+                    <div class="chart-wrapper">
+                        <canvas id="donutTptkb"></canvas>
+                        <div class="inner-text">
+                            <div class="inner-percent">{{ $percentTptkb }}%</div>
+                        </div>
+                    </div>
+                    <div class="donut-title">TPT-KB</div>
+                    <div class="donut-status">{{ $reportedByType['tpt_kb'] }} / {{ $countsByType['tpt_kb'] }} Unit</div>
+                </div>
+            </div>
+        </div>
+
         @php
             // Calculate monthly data for chart
             $monthlyCounts = array_fill(0, 12, 0); // Jan-Dec (0-11)
@@ -455,9 +611,9 @@
             if (isset($companies)) {
                 foreach ($companies as $company) {
                     // Loop through each month's status
-                    foreach ($company->laporan as $monthIndex => $status) {
-                        // Check if status is 'ok' (means at least one report exists/valid)
-                        if ($status == 'ok') {
+        foreach ($company->laporan as $monthIndex => $status) {
+            // Check if status is 'ok' (means at least one report exists/valid)
+            if ($status == 'ok') {
                             $monthlyCounts[$monthIndex]++;
                         }
                     }
@@ -478,8 +634,8 @@
                     <label class="filter-label" for="kabupaten">Wilayah Administrasi</label>
                     <select name="kabupaten" id="kabupaten" class="filter-input">
                         <option value=""> Seluruh Wilayah</option>
-                        @if(isset($kabupatens))
-                            @foreach($kabupatens as $kab)
+                        @if (isset($kabupatens))
+                            @foreach ($kabupatens as $kab)
                                 <option value="{{ $kab }}" {{ request('kabupaten') == $kab ? 'selected' : '' }}>
                                     {{ $kab }}
                                 </option>
@@ -495,8 +651,9 @@
                             $currentYear = date('Y');
                             $startYear = 2026; // Adjusted for realism
                         @endphp
-                        @for($year = $currentYear; $year >= $startYear; $year--)
-                            <option value="{{ $year }}" {{ (request('tahun', $currentYear) == $year) ? 'selected' : '' }}>
+                        @for ($year = $currentYear; $year >= $startYear; $year--)
+                            <option value="{{ $year }}"
+                                {{ request('tahun', $currentYear) == $year ? 'selected' : '' }}>
                                 {{ $year }}
                             </option>
                         @endfor
@@ -507,9 +664,10 @@
                     <label class="filter-label" for="jenis_laporan">Kategori Laporan</label>
                     <select name="jenis_laporan" id="jenis_laporan" class="filter-input">
                         <option value="">Semua Kategori</option>
-                        @if(isset($jenisLaporans))
-                            @foreach($jenisLaporans as $jenis)
-                                <option value="{{ $jenis }}" {{ request('jenis_laporan') == $jenis ? 'selected' : '' }}>
+                        @if (isset($jenisLaporans))
+                            @foreach ($jenisLaporans as $jenis)
+                                <option value="{{ $jenis }}"
+                                    {{ request('jenis_laporan') == $jenis ? 'selected' : '' }}>
                                     {{ $jenis }}
                                 </option>
                             @endforeach
@@ -530,20 +688,20 @@
         </div>
 
         <div class="table-container">
-            @if(isset($companies) && count($companies) > 0)
+            @if (isset($companies) && count($companies) > 0)
                 <table class="ledger-table">
                     <thead>
                         <tr>
                             <th class="col-center" style="width: 60px;">No</th>
                             <th style="min-width: 250px;">Identitas Perusahaan</th>
                             <th style="width: 180px;">Lokasi</th>
-                            @foreach(['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGS', 'SEP', 'OKT', 'NOV', 'DES'] as $month)
+                            @foreach (['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGS', 'SEP', 'OKT', 'NOV', 'DES'] as $month)
                                 <th class="col-month">{{ $month }}</th>
                             @endforeach
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($companies as $company)
+                        @foreach ($companies as $company)
                             <tr>
                                 <td class="col-center" style="color: #9CA3AF;">{{ $loop->iteration }}</td>
                                 <td>
@@ -578,9 +736,9 @@
                                 </td>
                                 <td class="meta-info">{{ $company->kabupaten }}</td>
 
-                                @foreach($company->laporan as $status)
+                                @foreach ($company->laporan as $status)
                                     <td class="status-cell">
-                                        @if($status == 'ok')
+                                        @if ($status == 'ok')
                                             <span class="status-icon st-ok" title="Diterima / Valid">
                                                 <i class="fas fa-check-circle"></i>
                                             </span>
@@ -618,7 +776,7 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            document.addEventListener('DOMContentLoaded', function() {
                 // Data from PHP
                 const monthlyCounts = @json($monthlyCounts);
                 const ctx = document.getElementById('laporanChart').getContext('2d');
@@ -631,7 +789,9 @@
                 new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov',
+                            'Des'
+                        ],
                         datasets: [{
                             label: 'Perusahaan Melapor',
                             data: monthlyCounts,
@@ -669,7 +829,7 @@
                                 cornerRadius: 4,
                                 displayColors: false,
                                 callbacks: {
-                                    label: function (context) {
+                                    label: function(context) {
                                         return context.parsed.y + ' Perusahaan';
                                     }
                                 }
@@ -713,6 +873,62 @@
                     }
                 });
 
+
+                // 3 DOUGHNUT CHARTS: Primer, Sekunder, TPT-KB
+                function makeDonutChart(canvasId, percent) {
+                    const ctx = document.getElementById(canvasId).getContext('2d');
+
+                    // Warna track (abu-abu) vs Warna isi (Hijau)
+                    // Jika 0%, tetap tampilkan abu-abu full
+                    const dataValues = [percent, 100 - percent];
+                    const bgColors = ['#228B22', '#F3F4F6']; // Forest Green & Cool Gray 100
+
+                    return new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Sudah Lapor', 'Belum Lapor'],
+                            datasets: [{
+                                data: dataValues,
+                                backgroundColor: bgColors,
+                                borderWidth: 0, // Hilangkan border putih agar terlihat flat & clean
+                                borderRadius: 20, // Membuat ujung bar melengkung (modern look)
+                                hoverBackgroundColor: ['#15803d', '#E5E7EB'], // Darker green on hover
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            cutout: '85%', // Membuat lingkaran lebih tipis
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    enabled: true,
+                                    backgroundColor: '#1F2937',
+                                    padding: 10,
+                                    cornerRadius: 4,
+                                    displayColors: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.label + ': ' + context.parsed + '%';
+                                        }
+                                    }
+                                }
+                            },
+                            animation: {
+                                animateScale: true,
+                                animateRotate: true
+                            }
+                        }
+                    });
+                }
+
+                makeDonutChart('donutPrimer', {{ $percentPrimer }});
+                makeDonutChart('donutSekunder', {{ $percentSekunder }});
+                makeDonutChart('donutTptkb', {{ $percentTptkb }});
+
+
                 // AJAX Search untuk perusahaan (Existing Logic)
                 let searchTimeout;
                 const searchInput = document.getElementById('searchCompany');
@@ -720,7 +936,7 @@
                 const emptyState = document.querySelector('.empty-state');
 
                 if (searchInput) {
-                    searchInput.addEventListener('input', function () {
+                    searchInput.addEventListener('input', function() {
                         clearTimeout(searchTimeout);
                         const searchTerm = this.value.trim().toLowerCase();
 

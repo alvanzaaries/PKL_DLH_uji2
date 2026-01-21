@@ -30,8 +30,8 @@ class LaporanDataService
                         'tanggal' => $this->parseDate($row[1]) ?? now(),
                         'asal_kayu' => $row[2] ?? '',
                         'jenis_kayu' => $row[3] ?? '',
-                        'jumlah_batang' => $row[4] ?? 0,
-                        'volume' => $row[5] ?? 0,
+                        'jumlah_batang' => $this->toFloat($row[4] ?? 0),
+                        'volume' => $this->toFloat($row[5] ?? 0),
                         'keterangan' => $row[6] ?? '',
                     ]);
                 }
@@ -43,10 +43,10 @@ class LaporanDataService
                     laporan_mutasi_kayu_bulat::create([
                         'laporan_id' => $laporan->id,
                         'jenis_kayu' => $row[0] ?? '',
-                        'persediaan_awal_volume' => $row[1] ?? 0,
-                        'penambahan_volume' => $row[2] ?? 0,
-                        'penggunaan_pengurangan_volume' => $row[3] ?? 0,
-                        'persediaan_akhir_volume' => $row[4] ?? 0,
+                        'persediaan_awal_volume' => $this->toFloat($row[1] ?? 0),
+                        'penambahan_volume' => $this->toFloat($row[2] ?? 0),
+                        'penggunaan_pengurangan_volume' => $this->toFloat($row[3] ?? 0),
+                        'persediaan_akhir_volume' => $this->toFloat($row[4] ?? 0),
                         'keterangan' => $row[5] ?? '',
                     ]);
                 }
@@ -61,8 +61,8 @@ class LaporanDataService
                         'tanggal' => $this->parseDate($row[1]) ?? now(),
                         'asal_kayu' => $row[2] ?? '',
                         'jenis_olahan' => $row[3] ?? '',
-                        'jumlah_keping' => $row[4] ?? 0,
-                        'volume' => $row[5] ?? 0,
+                        'jumlah_keping' => $this->toFloat($row[4] ?? 0),
+                        'volume' => $this->toFloat($row[5] ?? 0),
                         'keterangan' => $row[6] ?? '',
                     ]);
                 }
@@ -74,10 +74,10 @@ class LaporanDataService
                     laporan_mutasi_kayu_olahan::create([
                         'laporan_id' => $laporan->id,
                         'jenis_olahan' => $row[0] ?? '',
-                        'persediaan_awal_volume' => $row[1] ?? 0,
-                        'penambahan_volume' => $row[2] ?? 0,
-                        'penggunaan_pengurangan_volume' => $row[3] ?? 0,
-                        'persediaan_akhir_volume' => $row[4] ?? 0,
+                        'persediaan_awal_volume' => $this->toFloat($row[1] ?? 0),
+                        'penambahan_volume' => $this->toFloat($row[2] ?? 0),
+                        'penggunaan_pengurangan_volume' => $this->toFloat($row[3] ?? 0),
+                        'persediaan_akhir_volume' => $this->toFloat($row[4] ?? 0),
                         'keterangan' => $row[5] ?? '',
                     ]);
                 }
@@ -92,13 +92,42 @@ class LaporanDataService
                         'tanggal' => $this->parseDate($row[1]) ?? now(),
                         'tujuan_kirim' => $row[2] ?? '',
                         'jenis_olahan' => $row[3] ?? '',
-                        'jumlah_keping' => $row[4] ?? 0,
-                        'volume' => $row[5] ?? 0,
+                        'jumlah_keping' => $this->toFloat($row[4] ?? 0),
+                        'volume' => $this->toFloat($row[5] ?? 0),
                         'keterangan' => $row[6] ?? '',
                     ]);
                 }
                 break;
         }
+    }
+
+    /**
+     * Normalisasi nilai numeric yang mungkin mengandung pemisah ribuan atau koma desimal.
+     */
+    private function toFloat($value): float
+    {
+        if ($value === null || $value === '') {
+            return 0.0;
+        }
+
+        if (is_numeric($value)) {
+            return (float) $value;
+        }
+
+        $s = trim((string) $value);
+
+        // Jika ada koma dan titik sekaligus, anggap koma sebagai pemisah ribuan
+        if (strpos($s, ',') !== false && strpos($s, '.') !== false) {
+            $s = str_replace(',', '', $s);
+        } elseif (strpos($s, ',') !== false && strpos($s, '.') === false) {
+            // Jika hanya ada koma, kemungkinan koma adalah pemisah desimal lokal (e.g. 1234,56)
+            $s = str_replace('.', '', $s);
+            $s = str_replace(',', '.', $s);
+        } else {
+            $s = str_replace(',', '', $s);
+        }
+
+        return is_numeric($s) ? (float) $s : 0.0;
     }
 
     /**
@@ -182,7 +211,7 @@ class LaporanDataService
             $message .= "Berhasil mengupload $uploaded laporan. ";
         }
         if (count($skipped) > 0) {
-            $message .= count($skipped) . ' laporan dilewati karena sudah ada: ' . implode(', ', array_map(function($s) {
+            $message .= count($skipped) . ' laporan dilewati karena sudah ada: ' . implode(', ', array_map(function ($s) {
                 return '"' . $s . '"';
             }, $skipped)) . '. ';
         }
@@ -313,9 +342,9 @@ class LaporanDataService
     }
 
     /**
-     * Get detail laporan data dengan filter
+     * Get detail laporan data dengan filter, pagination, dan sorting
      */
-    public function getDetailLaporan($bulan, $tahun, $jenis, $filters = [])
+    public function getDetailLaporan($bulan, $tahun, $jenis, $filters = [], $perPage = 25, $sortBy = null, $sortDirection = 'asc')
     {
         $laporanQuery = Laporan::whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun);
@@ -334,16 +363,24 @@ class LaporanDataService
             case 'penerimaan_kayu_bulat':
                 $query = laporan_penerimaan_kayu_bulat::with(['laporan.industri'])
                     ->whereIn('laporan_id', $laporanIds);
-                
+
                 if (isset($filters['jenis_kayu'])) {
                     $query->where('jenis_kayu', $filters['jenis_kayu']);
                 }
                 if (isset($filters['asal_kayu'])) {
                     $query->where('asal_kayu', $filters['asal_kayu']);
                 }
-                
-                $items = $query->orderBy('tanggal')->get();
-                
+
+                // Apply sorting
+                $sortColumn = $sortBy ?? 'tanggal';
+                $validSortColumns = ['tanggal', 'nomor_dokumen', 'asal_kayu', 'jenis_kayu', 'jumlah_batang', 'volume'];
+                if (!in_array($sortColumn, $validSortColumns)) {
+                    $sortColumn = 'tanggal';
+                }
+                $query->orderBy($sortColumn, $sortDirection);
+
+                $items = ($perPage === 'all') ? $query->get() : $query->paginate($perPage)->withQueryString();
+
                 $filterOptions['jenis_kayu'] = laporan_penerimaan_kayu_bulat::whereIn('laporan_id', $laporanIds)
                     ->distinct()->pluck('jenis_kayu')->sort()->values();
                 $filterOptions['asal_kayu'] = laporan_penerimaan_kayu_bulat::whereIn('laporan_id', $laporanIds)
@@ -353,16 +390,24 @@ class LaporanDataService
             case 'penerimaan_kayu_olahan':
                 $query = laporan_penerimaan_kayu_olahan::with(['laporan.industri'])
                     ->whereIn('laporan_id', $laporanIds);
-                
+
                 if (isset($filters['jenis_olahan'])) {
                     $query->where('jenis_olahan', $filters['jenis_olahan']);
                 }
                 if (isset($filters['asal_kayu'])) {
                     $query->where('asal_kayu', $filters['asal_kayu']);
                 }
-                
-                $items = $query->orderBy('tanggal')->get();
-                
+
+                // Apply sorting
+                $sortColumn = $sortBy ?? 'tanggal';
+                $validSortColumns = ['tanggal', 'nomor_dokumen', 'asal_kayu', 'jenis_olahan', 'jumlah_keping', 'volume'];
+                if (!in_array($sortColumn, $validSortColumns)) {
+                    $sortColumn = 'tanggal';
+                }
+                $query->orderBy($sortColumn, $sortDirection);
+
+                $items = ($perPage === 'all') ? $query->get() : $query->paginate($perPage)->withQueryString();
+
                 $filterOptions['jenis_olahan'] = laporan_penerimaan_kayu_olahan::whereIn('laporan_id', $laporanIds)
                     ->distinct()->pluck('jenis_olahan')->sort()->values();
                 $filterOptions['asal_kayu'] = laporan_penerimaan_kayu_olahan::whereIn('laporan_id', $laporanIds)
@@ -372,13 +417,21 @@ class LaporanDataService
             case 'mutasi_kayu_bulat':
                 $query = laporan_mutasi_kayu_bulat::with(['laporan.industri'])
                     ->whereIn('laporan_id', $laporanIds);
-                
+
                 if (isset($filters['jenis_kayu'])) {
                     $query->where('jenis_kayu', $filters['jenis_kayu']);
                 }
-                
-                $items = $query->orderBy('jenis_kayu')->get();
-                
+
+                // Apply sorting
+                $sortColumn = $sortBy ?? 'jenis_kayu';
+                $validSortColumns = ['jenis_kayu', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume'];
+                if (!in_array($sortColumn, $validSortColumns)) {
+                    $sortColumn = 'jenis_kayu';
+                }
+                $query->orderBy($sortColumn, $sortDirection);
+
+                $items = ($perPage === 'all') ? $query->get() : $query->paginate($perPage)->withQueryString();
+
                 $filterOptions['jenis_kayu'] = laporan_mutasi_kayu_bulat::whereIn('laporan_id', $laporanIds)
                     ->distinct()->pluck('jenis_kayu')->sort()->values();
                 break;
@@ -386,13 +439,21 @@ class LaporanDataService
             case 'mutasi_kayu_olahan':
                 $query = laporan_mutasi_kayu_olahan::with(['laporan.industri'])
                     ->whereIn('laporan_id', $laporanIds);
-                
+
                 if (isset($filters['jenis_olahan'])) {
                     $query->where('jenis_olahan', $filters['jenis_olahan']);
                 }
-                
-                $items = $query->orderBy('jenis_olahan')->get();
-                
+
+                // Apply sorting
+                $sortColumn = $sortBy ?? 'jenis_olahan';
+                $validSortColumns = ['jenis_olahan', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume'];
+                if (!in_array($sortColumn, $validSortColumns)) {
+                    $sortColumn = 'jenis_olahan';
+                }
+                $query->orderBy($sortColumn, $sortDirection);
+
+                $items = ($perPage === 'all') ? $query->get() : $query->paginate($perPage)->withQueryString();
+
                 $filterOptions['jenis_olahan'] = laporan_mutasi_kayu_olahan::whereIn('laporan_id', $laporanIds)
                     ->distinct()->pluck('jenis_olahan')->sort()->values();
                 break;
@@ -400,7 +461,7 @@ class LaporanDataService
             case 'penjualan_kayu_olahan':
                 $query = laporan_penjualan_kayu_olahan::with(['laporan.industri'])
                     ->whereIn('laporan_id', $laporanIds);
-                
+
                 if (isset($filters['tujuan_kirim'])) {
                     $query->where('tujuan_kirim', $filters['tujuan_kirim']);
                 }
@@ -419,9 +480,17 @@ class LaporanDataService
                         $query->whereRaw('LOWER(keterangan) LIKE ?', ['%' . $val . '%']);
                     }
                 }
-                
-                $items = $query->orderBy('tanggal')->get();
-                
+
+                // Apply sorting
+                $sortColumn = $sortBy ?? 'tanggal';
+                $validSortColumns = ['tanggal', 'nomor_dokumen', 'tujuan_kirim', 'jenis_olahan', 'jumlah_keping', 'volume'];
+                if (!in_array($sortColumn, $validSortColumns)) {
+                    $sortColumn = 'tanggal';
+                }
+                $query->orderBy($sortColumn, $sortDirection);
+
+                $items = ($perPage === 'all') ? $query->get() : $query->paginate($perPage)->withQueryString();
+
                 $filterOptions['tujuan_kirim'] = laporan_penjualan_kayu_olahan::whereIn('laporan_id', $laporanIds)
                     ->distinct()->pluck('tujuan_kirim')->sort()->values();
                 $filterOptions['jenis_olahan'] = laporan_penjualan_kayu_olahan::whereIn('laporan_id', $laporanIds)
@@ -436,12 +505,111 @@ class LaporanDataService
     }
 
     /**
+     * Get detail laporan data untuk export (tanpa pagination)
+     */
+    public function getDetailLaporanForExport($bulan, $tahun, $jenis, $filters = [])
+    {
+        $laporanQuery = Laporan::whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun);
+
+        // Jika ada filter industri_id, batasi laporan hanya untuk industri tersebut
+        if (isset($filters['industri_id']) && $filters['industri_id']) {
+            $laporanQuery->where('industri_id', $filters['industri_id']);
+        }
+
+        $laporanIds = $laporanQuery->pluck('id');
+
+        $items = collect();
+
+        switch ($jenis) {
+            case 'penerimaan_kayu_bulat':
+                $query = laporan_penerimaan_kayu_bulat::with(['laporan.industri'])
+                    ->whereIn('laporan_id', $laporanIds);
+
+                if (isset($filters['jenis_kayu'])) {
+                    $query->where('jenis_kayu', $filters['jenis_kayu']);
+                }
+                if (isset($filters['asal_kayu'])) {
+                    $query->where('asal_kayu', $filters['asal_kayu']);
+                }
+
+                $items = $query->orderBy('tanggal')->get();
+                break;
+
+            case 'penerimaan_kayu_olahan':
+                $query = laporan_penerimaan_kayu_olahan::with(['laporan.industri'])
+                    ->whereIn('laporan_id', $laporanIds);
+
+                if (isset($filters['jenis_olahan'])) {
+                    $query->where('jenis_olahan', $filters['jenis_olahan']);
+                }
+                if (isset($filters['asal_kayu'])) {
+                    $query->where('asal_kayu', $filters['asal_kayu']);
+                }
+
+                $items = $query->orderBy('tanggal')->get();
+                break;
+
+            case 'mutasi_kayu_bulat':
+                $query = laporan_mutasi_kayu_bulat::with(['laporan.industri'])
+                    ->whereIn('laporan_id', $laporanIds);
+
+                if (isset($filters['jenis_kayu'])) {
+                    $query->where('jenis_kayu', $filters['jenis_kayu']);
+                }
+
+                $items = $query->orderBy('jenis_kayu')->get();
+                break;
+
+            case 'mutasi_kayu_olahan':
+                $query = laporan_mutasi_kayu_olahan::with(['laporan.industri'])
+                    ->whereIn('laporan_id', $laporanIds);
+
+                if (isset($filters['jenis_olahan'])) {
+                    $query->where('jenis_olahan', $filters['jenis_olahan']);
+                }
+
+                $items = $query->orderBy('jenis_olahan')->get();
+                break;
+
+            case 'penjualan_kayu_olahan':
+                $query = laporan_penjualan_kayu_olahan::with(['laporan.industri'])
+                    ->whereIn('laporan_id', $laporanIds);
+
+                if (isset($filters['tujuan_kirim'])) {
+                    $query->where('tujuan_kirim', $filters['tujuan_kirim']);
+                }
+                if (isset($filters['jenis_olahan'])) {
+                    $query->where('jenis_olahan', $filters['jenis_olahan']);
+                }
+                if (isset($filters['ekspor_impor'])) {
+                    // Case-insensitive matching: use LOWER(keterangan)
+                    if ($filters['ekspor_impor'] === 'ekspor') {
+                        $query->whereRaw('LOWER(keterangan) LIKE ?', ['%ekspor%']);
+                    } elseif ($filters['ekspor_impor'] === 'lokal') {
+                        // lokal => keterangan does NOT contain 'ekspor' (case-insensitive) or is null
+                        $query->whereRaw("(keterangan IS NULL OR LOWER(keterangan) NOT LIKE ?)", ['%ekspor%']);
+                    } else {
+                        $val = strtolower($filters['ekspor_impor']);
+                        $query->whereRaw('LOWER(keterangan) LIKE ?', ['%' . $val . '%']);
+                    }
+                }
+
+                $items = $query->orderBy('tanggal')->get();
+                break;
+        }
+
+        return $items;
+    }
+
+    /**
      * Parse tanggal dari berbagai format Excel ke format Y-m-d
      */
     private function parseDate($value): ?string
     {
-        if (empty($value)) return null;
-        
+        if (empty($value))
+            return null;
+
         // Jika sudah dalam format tanggal Excel (numeric)
         if (is_numeric($value)) {
             try {
@@ -451,7 +619,7 @@ class LaporanDataService
                 return null;
             }
         }
-        
+
         // Coba parse string tanggal
         $formats = ['Y-m-d', 'd/m/Y', 'd-m-Y', 'Y/m/d'];
         foreach ($formats as $format) {
@@ -460,7 +628,7 @@ class LaporanDataService
                 return $date->format('Y-m-d');
             }
         }
-        
+
         return null;
     }
 }
