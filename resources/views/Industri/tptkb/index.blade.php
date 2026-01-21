@@ -481,6 +481,26 @@
             background: #dc2626;
         }
 
+        .badge-status-aktif {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-status-nonaktif {
+            display: inline-block;
+            background: #ef4444;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
         /* Statistics Section */
         .statistics-section {
             display: grid;
@@ -774,6 +794,14 @@
                             @endphp
                         </select>
                     </div>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select name="status" class="filter-input">
+                            <option value="">-- Semua Status --</option>
+                            <option value="Aktif" {{ request('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                            <option value="Tidak Aktif" {{ request('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="filter-actions">
                     <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
@@ -825,6 +853,7 @@
                             <th>Sumber Bahan Baku</th>
                             <th>Daya Tampung Izin</th>
                             <th>Masa Berlaku</th>
+                            <th>Status Izin</th>
                             <th>Status</th>
                             <th>Aksi</th>
                         </tr>
@@ -845,6 +874,13 @@
                                     <span class="badge badge-success">✓ Aktif</span>
                                 @else
                                     <span class="badge badge-danger">✗ Kadaluarsa</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($item->industri->status == 'Aktif')
+                                    <span class="badge-status-aktif">Aktif</span>
+                                @else
+                                    <span class="badge-status-nonaktif">Tidak Aktif</span>
                                 @endif
                             </td>
                             <td>

@@ -36,6 +36,13 @@ class PerajinController extends Controller implements HasMiddleware
             $query->where('jenis_kerajinan', $request->jenis_kerajinan);
         }
 
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->where('status', $request->status);
+            });
+        }
+
         // Filter berdasarkan tahun dan bulan (dari kolom tanggal di tabel industries) dengan logika AND
         if ($request->filled('tahun')) {
             $query->whereHas('industri', function($q) use ($request) {
@@ -133,6 +140,7 @@ class PerajinController extends Controller implements HasMiddleware
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:50',
             'tanggal' => 'required|date',
+            'status' => 'required|in:Aktif,Tidak Aktif',
         ]);
 
         // Update industri base
@@ -144,6 +152,7 @@ class PerajinController extends Controller implements HasMiddleware
             'penanggungjawab' => $validated['penanggungjawab'],
             'kontak' => $validated['kontak'],
             'tanggal' => $validated['tanggal'],
+            'status' => $validated['status'],
         ]);
 
         return redirect()->route('perajin.index')

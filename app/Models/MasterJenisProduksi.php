@@ -37,8 +37,10 @@ class MasterJenisProduksi extends Model
      */
     public function scopeKategori($query, $kategori)
     {
-        return $query->where('kategori', $kategori)
-                    ->orWhere('kategori', 'both');
+        return $query->where(function($q) use ($kategori) {
+            $q->where('kategori', $kategori)
+              ->orWhere('kategori', 'both');
+        });
     }
 
     /**

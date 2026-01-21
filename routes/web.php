@@ -50,9 +50,6 @@ Route::prefix('industri')->group(function () {
     Route::get('/sekunder', [IndustriSekunderController::class, 'index'])->name('industri-sekunder.index');
     Route::get('/tptkb', [TptkbController::class, 'index'])->name('tptkb.index');
     Route::get('/perajin', [PerajinController::class, 'index'])->name('perajin.index');
-
-    // Public document download
-    Route::get('/primer/{id}/dokumen', [IndustriPrimerController::class, 'downloadDokumen'])->name('industri-primer.download-dokumen');
 });
 
 // ===================================================================
@@ -63,7 +60,6 @@ Route::get('/industri-primer', fn () => redirect()->route('industri-primer.index
 Route::get('/industri-sekunder', fn () => redirect()->route('industri-sekunder.index'));
 Route::get('/tptkb', fn () => redirect()->route('tptkb.index'));
 Route::get('/perajin', fn () => redirect()->route('perajin.index'));
-Route::get('/industri-primer/{id}/dokumen', fn ($id) => redirect()->route('industri-primer.download-dokumen', ['id' => $id]));
 
 // ===================================================================
 // AUTH ROUTES

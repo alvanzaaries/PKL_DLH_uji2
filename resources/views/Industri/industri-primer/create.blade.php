@@ -75,6 +75,7 @@
         border: 1px solid var(--border);
         border-radius: 8px;
         font-size: 14px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         transition: border-color 0.2s;
     }
 
@@ -370,6 +371,14 @@
 <script>
     const masterJenisProduksi = @json($masterJenisProduksi);
     let jenisProduksiCounter = 0;
+    let lainnyaId = null;
+
+    // Cari ID untuk opsi "Lainnya"
+    masterJenisProduksi.forEach(jp => {
+        if (jp.nama === 'Lainnya') {
+            lainnyaId = jp.id;
+        }
+    });
 
     function addJenisProduksi() {
         jenisProduksiCounter++;
@@ -393,7 +402,9 @@
             <div class="form-row">
                 <div class="form-group" style="margin-bottom: 0;">
                     <label class="form-label">Jenis Produksi</label>
-                    <select name="jenis_produksi[]" class="form-select" required>
+                    <select name="jenis_produksi[]" class="form-select jenis-select" 
+                            data-index="${jenisProduksiCounter}" 
+                            onchange="toggleCustomInput(${jenisProduksiCounter})" required>
                         ${optionsHTML}
                     </select>
                 </div>
@@ -403,8 +414,30 @@
                            placeholder="Contoh: 1000 m³/tahun" required>
                 </div>
             </div>
+            <div class="form-group custom-input-container" id="customInput_${jenisProduksiCounter}" style="margin-top: 12px; display: none;">
+                <label class="form-label">Sebutkan Jenis Produksi</label>
+                <input type="text" name="nama_custom[]" class="form-input" 
+                       placeholder="Masukkan jenis produksi..." 
+                       data-index="${jenisProduksiCounter}">
+                <div class="file-info" style="margin-top: 4px;">Isi kolom ini karena Anda memilih "Lainnya"</div>
+            </div>
         `;
         container.appendChild(item);
+    }
+
+    function toggleCustomInput(index) {
+        const select = document.querySelector(`.jenis-select[data-index="${index}"]`);
+        const customContainer = document.getElementById(`customInput_${index}`);
+        const customInput = customContainer.querySelector('input[name="nama_custom[]"]');
+        
+        if (select.value == lainnyaId) {
+            customContainer.style.display = 'block';
+            customInput.required = true;
+        } else {
+            customContainer.style.display = 'none';
+            customInput.required = false;
+            customInput.value = '';
+        }
     }
 
     function removeJenisProduksi(index) {

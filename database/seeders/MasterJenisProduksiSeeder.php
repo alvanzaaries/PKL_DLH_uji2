@@ -32,18 +32,19 @@ class MasterJenisProduksiSeeder extends Seeder
             ['nama' => 'Particle Board', 'kategori' => 'both', 'satuan' => 'm³/tahun', 'keterangan' => 'Industri particle board'],
             ['nama' => 'MDF (Medium Density Fiberboard)', 'kategori' => 'both', 'satuan' => 'm³/tahun', 'keterangan' => 'Industri MDF'],
             ['nama' => 'Pulp & Paper', 'kategori' => 'both', 'satuan' => 'ton/tahun', 'keterangan' => 'Industri pulp dan kertas'],
+            ['nama' => 'Lainnya', 'kategori' => 'both', 'satuan' => 'unit', 'keterangan' => 'Jenis produksi lainnya (isi manual)'],
         ];
 
         foreach ($jenisProduksi as $item) {
-            DB::table('master_jenis_produksi')->insert([
-                'nama' => $item['nama'],
-                'kategori' => $item['kategori'],
-                'satuan' => $item['satuan'],
-                'keterangan' => $item['keterangan'],
-                'aktif' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            \App\Models\MasterJenisProduksi::updateOrCreate(
+                ['nama' => $item['nama']], // Cari berdasarkan nama
+                [
+                    'kategori' => $item['kategori'],
+                    'satuan' => $item['satuan'],
+                    'keterangan' => $item['keterangan'],
+                    'aktif' => true,
+                ]
+            );
         }
     }
 }

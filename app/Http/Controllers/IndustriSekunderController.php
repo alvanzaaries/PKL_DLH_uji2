@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\IndustriSekunder;
+use App\Models\MasterJenisProduksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -26,8 +27,8 @@ class IndustriSekunderController extends Controller implements HasMiddleware
      */
     public function index(Request $request)
     {
-        // Query dengan join ke tabel industries (parent)
-        $query = IndustriSekunder::with('industri'); // Eager load relationship
+        // Query dengan join ke tabel industries (parent) dan eager load jenis produksi
+        $query = IndustriSekunder::with(['industri', 'jenisProduksi']);
 
         // Filter berdasarkan nama (dari tabel industries)
         if ($request->filled('nama')) {
@@ -43,32 +44,45 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             });
         }
 
-        // Filter berdasarkan kapasitas izin (dari tabel industri_sekunder)
-        // Karena kapasitas_izin sekarang VARCHAR, kita extract angka dan bandingkan dengan rentang
-        if ($request->filled('kapasitas')) {
-            $kapasitasRange = $request->kapasitas;
+        // Filter berdasarkan jenis produksi (dari relasi many-to-many)
+        // Support untuk filter berdasarkan ID master, custom name, atau semua "Lainnya"
+        if ($request->filled('jenis_produksi')) {
+            $filterValue = $request->jenis_produksi;
             
-            $query->where(function($q) use ($kapasitasRange) {
-                // Extract angka dari string kapasitas_izin menggunakan REGEXP atau CAST
-                // Untuk MySQL: CAST(REGEXP_SUBSTR(kapasitas_izin, '[0-9]+') AS UNSIGNED)
-                // Alternatif lebih portable: filter di PHP setelah query
+            // Cek apakah filter value adalah ID atau custom name
+            if (is_numeric($filterValue)) {
+                // Cek apakah ini adalah ID untuk "Lainnya"
+                $lainnyaRecord = MasterJenisProduksi::find($filterValue);
                 
-                if ($kapasitasRange == '0-1999') {
-                    // Cari data dengan angka 0-1999
-                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) BETWEEN 0 AND 1999");
-                } elseif ($kapasitasRange == '2000-5999') {
-                    // Cari data dengan angka 2000-5999
-                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) BETWEEN 2000 AND 5999");
-                } elseif ($kapasitasRange == '>= 6000') {
-                    // Cari data dengan angka >= 6000
-                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) >= 6000");
+                if ($lainnyaRecord && $lainnyaRecord->nama === 'Lainnya') {
+                    // Filter untuk semua yang punya custom name (tidak peduli value-nya)
+                    $query->whereHas('jenisProduksi', function($q) {
+                        $q->whereNotNull('industri_jenis_produksi.nama_custom');
+                    });
+                } else {
+                    // Filter by master ID biasa
+                    $query->whereHas('jenisProduksi', function($q) use ($filterValue) {
+                        $q->where('master_jenis_produksi.id', $filterValue);
+                    });
                 }
-            });
+            } else {
+                // Filter by specific custom name
+                $query->whereHas('jenisProduksi', function($q) use ($filterValue) {
+                    $q->where('industri_jenis_produksi.nama_custom', $filterValue);
+                });
+            }
         }
 
-        // Filter berdasarkan jenis produksi
-        if ($request->filled('jenis_produksi')) {
-            $query->where('jenis_produksi', $request->jenis_produksi);
+        // Filter berdasarkan pemberi izin
+        if ($request->filled('pemberi_izin')) {
+            $query->where('pemberi_izin', $request->pemberi_izin);
+        }
+
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->where('status', $request->status);
+            });
         }
 
         // Filter berdasarkan tahun dan bulan (dari kolom tanggal di tabel industries) dengan logika AND
@@ -84,41 +98,104 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             });
         }
 
-        // Ambil data dengan pagination
-        $industriSekunder = $query->latest()->paginate(10);
+        // Filter berdasarkan kapasitas izin (dari pivot table industri_jenis_produksi)
+        // Menggunakan logika OR: tampilkan perusahaan jika MINIMAL SATU jenis produksi memenuhi range
+        $kapasitasFilter = $request->filled('kapasitas') ? $request->kapasitas : null;
+
+        // Jika ada filter kapasitas, lakukan filtering di collection level dengan logika OR
+        if ($kapasitasFilter) {
+            $allFiltered = (clone $query)->latest()->get();
+
+            $filteredCollection = $allFiltered->filter(function($item) use ($kapasitasFilter) {
+                // Cek apakah ada minimal satu jenis produksi yang memenuhi range
+                foreach ($item->jenisProduksi as $jp) {
+                    $kapasitasStr = $jp->pivot->kapasitas_izin ?? '0';
+                    // Ekstrak angka dari string seperti "1500 m³/tahun" atau "2000"
+                    preg_match('/(\d+[\d\.,]*)/', $kapasitasStr, $matches);
+                    if (isset($matches[1])) {
+                        // Hapus titik/koma pemisah ribuan dan konversi ke integer
+                        $numericValue = (int)str_replace(['.', ','], '', $matches[1]);
+                        
+                        // Cek apakah kapasitas ini memenuhi range filter
+                        $matches_range = false;
+                        switch ($kapasitasFilter) {
+                            case '0-1999':
+                                $matches_range = $numericValue >= 0 && $numericValue <= 1999;
+                                break;
+                            case '2000-5999':
+                                $matches_range = $numericValue >= 2000 && $numericValue <= 5999;
+                                break;
+                            case '>=6000':
+                                $matches_range = $numericValue >= 6000;
+                                break;
+                        }
+                        
+                        // Jika ada satu jenis produksi yang memenuhi, return true (logika OR)
+                        if ($matches_range) {
+                            return true;
+                        }
+                    }
+                }
+                
+                // Tidak ada satupun jenis produksi yang memenuhi range
+                return false;
+            })->values();
+
+            // Manual pagination
+            $currentPage = \request()->get('page', 1);
+            $perPage = 10;
+            $currentItems = $filteredCollection->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+            $industriSekunder = new \Illuminate\Pagination\LengthAwarePaginator(
+                $currentItems,
+                $filteredCollection->count(),
+                $perPage,
+                $currentPage,
+                ['path' => url()->current(), 'query' => request()->query()]
+            );
+
+            // Untuk statistik, gunakan seluruh koleksi yang sudah difilter
+            $filteredData = $filteredCollection;
+        } else {
+            // Ambil data dengan pagination
+            $industriSekunder = $query->latest()->paginate(10);
+            $filteredData = (clone $query)->get();
+        }
 
         // Ambil daftar kabupaten Jawa Tengah dari API wilayah.id dengan cache
-        // ID Provinsi Jawa Tengah = 33
         $kabupatenList = Cache::remember('wilayah_jateng_kabupaten', 86400, function () {
             try {
                 $response = Http::timeout(10)->get('https://www.emsifa.com/api-wilayah-indonesia/api/regencies/33.json');
                 
                 if ($response->successful()) {
                     $data = $response->json();
-                    // Ambil hanya nama kabupaten/kota
                     return collect($data)->pluck('name')->sort()->values();
                 }
             } catch (\Exception $e) {
                 \Log::error('Failed to fetch wilayah data: ' . $e->getMessage());
             }
             
-            // Fallback ke data dari database jika API gagal
             return \App\Models\IndustriBase::select('kabupaten')
                 ->distinct()
                 ->orderBy('kabupaten')
                 ->pluck('kabupaten');
         });
 
-        // Ambil daftar jenis produksi
-        $jenisProduksiList = IndustriSekunder::select('jenis_produksi')
+        // Ambil daftar jenis produksi dari master
+        $jenisProduksiList = MasterJenisProduksi::aktif()
+            ->kategori('sekunder')
+            ->orderBy('nama')
+            ->get();
+        
+        // Ambil custom names yang unik dari pivot table untuk ditampilkan di filter
+        $customNames = \DB::table('industri_jenis_produksi')
+            ->where('industri_type', 'App\\Models\\IndustriSekunder')
+            ->whereNotNull('nama_custom')
             ->distinct()
-            ->whereNotNull('jenis_produksi')
-            ->where('jenis_produksi', '!=', '')
-            ->orderBy('jenis_produksi')
-            ->pluck('jenis_produksi');
-
-        // Data untuk visualisasi chart — gunakan DATA YANG SAMA dengan hasil filter
-        $filteredData = (clone $query)->get();
+            ->pluck('nama_custom')
+            ->filter()
+            ->sort()
+            ->values();
 
         // 1. Distribusi perusahaan per tahun (berdasarkan kolom tanggal di tabel industries)
         // Jika filter bulan aktif, tampilkan per bulan-tahun. Jika tidak, per tahun saja
@@ -138,27 +215,31 @@ class IndustriSekunderController extends Controller implements HasMiddleware
 
         // 3. Distribusi berdasarkan kapasitas izin
         $capacityStats = $filteredData->groupBy(function($item) {
-            $capacity = $item->kapasitas_izin;
-            
-            // Extract angka dari string (misal "1500 m³/tahun" -> 1500)
-            preg_match('/\d+/', $capacity, $matches);
-            $numericCapacity = isset($matches[0]) ? (int)$matches[0] : 0;
+            // Hitung total kapasitas dari semua jenis produksi
+            $totalCapacity = 0;
+            foreach ($item->jenisProduksi as $jp) {
+                $kapasitasStr = $jp->pivot->kapasitas_izin ?? '0';
+                preg_match('/\d+/', $kapasitasStr, $matches);
+                $numericCapacity = isset($matches[0]) ? (int)$matches[0] : 0;
+                $totalCapacity += $numericCapacity;
+            }
             
             // Kelompokkan berdasarkan rentang numerik
-            if ($numericCapacity >= 0 && $numericCapacity <= 1999) {
+            if ($totalCapacity >= 0 && $totalCapacity <= 1999) {
                 return '0-1999 m³/tahun';
-            } elseif ($numericCapacity >= 2000 && $numericCapacity <= 5999) {
+            } elseif ($totalCapacity >= 2000 && $totalCapacity <= 5999) {
                 return '2000-5999 m³/tahun';
-            } elseif ($numericCapacity >= 6000) {
+            } elseif ($totalCapacity >= 6000) {
                 return '>=6000 m³/tahun';
             }
             return 'Lainnya';
         })->map->count();
 
         return view('Industri.industri-sekunder.index', compact(
-            'industriSekunder', 
+            'industriSekunder',
             'kabupatenList',
             'jenisProduksiList',
+            'customNames',
             'yearStats',
             'locationStats',
             'capacityStats'
@@ -170,7 +251,12 @@ class IndustriSekunderController extends Controller implements HasMiddleware
      */
     public function create()
     {
-        return view('Industri.industri-sekunder.create');
+        $masterJenisProduksi = MasterJenisProduksi::aktif()
+            ->kategori('sekunder')
+            ->orderBy('nama')
+            ->get();
+            
+        return view('Industri.industri-sekunder.create', compact('masterJenisProduksi'));
     }
 
     /**
@@ -186,13 +272,17 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             'kabupaten' => 'required|string|max:255',
             'kontak' => 'required|string|max:255',
             'pemberi_izin' => 'required|string|max:255',
-            'jenis_produksi' => 'required|string|max:255',
-            'kapasitas_izin' => 'required|string|max:255',
+            'jenis_produksi' => 'required|array|min:1',
+            'jenis_produksi.*' => 'required|exists:master_jenis_produksi,id',
+            'kapasitas_izin' => 'required|array',
+            'kapasitas_izin.*' => 'required|string|max:255',
+            'nama_custom' => 'nullable|array',
+            'nama_custom.*' => 'nullable|string|max:255',
             'tanggal' => 'required|date',
             'nomor_izin' => 'required|string|max:255',
         ]);
 
-        // Step 1: Insert ke tabel industries (parent) dulu
+        // Step 1: Insert ke tabel industries (parent)
         $industri = \App\Models\IndustriBase::create([
             'nama' => $validated['nama'],
             'alamat' => $validated['alamat'],
@@ -204,15 +294,23 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             'type' => 'sekunder',
         ]);
 
-        // Step 2: Insert ke tabel industri_sekunder (child) dengan FK industri_id
-        IndustriSekunder::create([
-            'industri_id' => $industri->id, // FK ke parent
+        // Step 2: Insert ke tabel industri_sekunder (child)
+        $industriSekunder = IndustriSekunder::create([
+            'industri_id' => $industri->id,
             'pemberi_izin' => $validated['pemberi_izin'],
-            'jenis_produksi' => $validated['jenis_produksi'],
-            'kapasitas_izin' => $validated['kapasitas_izin'],
+            'kapasitas_izin' => $validated['kapasitas_izin'][0] ?? '0',
         ]);
 
-        // Redirect dengan pesan sukses
+        // Step 3: Attach jenis produksi ke tabel pivot
+        $jenisProduksiData = [];
+        foreach ($validated['jenis_produksi'] as $index => $jenisProduksiId) {
+            $jenisProduksiData[$jenisProduksiId] = [
+                'kapasitas_izin' => $validated['kapasitas_izin'][$index] ?? '0',
+                'nama_custom' => $validated['nama_custom'][$index] ?? null
+            ];
+        }
+        $industriSekunder->jenisProduksi()->attach($jenisProduksiData);
+
         return redirect()->route('industri-sekunder.index')
             ->with('success', 'Data industri sekunder berhasil ditambahkan!');
     }
@@ -222,9 +320,14 @@ class IndustriSekunderController extends Controller implements HasMiddleware
      */
     public function edit($id)
     {
-        $industriSekunder = IndustriSekunder::with('industri')->findOrFail($id);
+        $industriSekunder = IndustriSekunder::with(['industri', 'jenisProduksi'])->findOrFail($id);
         
-        return view('Industri.industri-sekunder.edit', compact('industriSekunder'));
+        $masterJenisProduksi = MasterJenisProduksi::aktif()
+            ->kategori('sekunder')
+            ->orderBy('nama')
+            ->get();
+        
+        return view('Industri.industri-sekunder.edit', compact('industriSekunder', 'masterJenisProduksi'));
     }
 
     /**
@@ -239,10 +342,15 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             'kabupaten' => 'required|string|max:255',
             'kontak' => 'required|string|max:255',
             'pemberi_izin' => 'required|string|max:255',
-            'jenis_produksi' => 'required|string|max:255',
-            'kapasitas_izin' => 'required|string|max:255',
+            'jenis_produksi' => 'required|array|min:1',
+            'jenis_produksi.*' => 'required|exists:master_jenis_produksi,id',
+            'kapasitas_izin' => 'required|array',
+            'kapasitas_izin.*' => 'required|string|max:255',
+            'nama_custom' => 'nullable|array',
+            'nama_custom.*' => 'nullable|string|max:255',
             'tanggal' => 'required|date',
             'nomor_izin' => 'required|string|max:255',
+            'status' => 'required|in:Aktif,Tidak Aktif',
         ]);
 
         // Find records
@@ -258,14 +366,23 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             'kontak' => $validated['kontak'],
             'nomor_izin' => $validated['nomor_izin'],
             'tanggal' => $validated['tanggal'],
+            'status' => $validated['status'],
         ]);
 
         // Update child table (industri_sekunder)
         $industriSekunder->update([
             'pemberi_izin' => $validated['pemberi_izin'],
-            'jenis_produksi' => $validated['jenis_produksi'],
-            'kapasitas_izin' => $validated['kapasitas_izin'],
         ]);
+
+        // Sync jenis produksi (update many-to-many relationship)
+        $jenisProduksiData = [];
+        foreach ($validated['jenis_produksi'] as $index => $jenisProduksiId) {
+            $jenisProduksiData[$jenisProduksiId] = [
+                'kapasitas_izin' => $validated['kapasitas_izin'][$index] ?? '0',
+                'nama_custom' => $validated['nama_custom'][$index] ?? null
+            ];
+        }
+        $industriSekunder->jenisProduksi()->sync($jenisProduksiData);
 
         return redirect()->route('industri-sekunder.index')
             ->with('success', 'Data industri sekunder berhasil diupdate!');

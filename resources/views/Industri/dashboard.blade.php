@@ -208,6 +208,16 @@
             font-weight: 500;
             text-transform: capitalize;
         }
+        
+        .badge-status-aktif {
+            background: #10b981;
+            color: white;
+        }
+        
+        .badge-status-nonaktif {
+            background: #ef4444;
+            color: white;
+        }
 
         .badge-primer { background-color: #dbeafe; color: #1e40af; }
         .badge-sekunder { background-color: #dcfce7; color: #166534; }
@@ -263,10 +273,15 @@
         <div class="table-container">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                 <h3 style="color: var(--primary); font-size: 18px; margin: 0;">Daftar Semua Industri</h3>
-                <form action="{{ route('industri.dashboard') }}" method="GET" style="display: flex; gap: 10px; max-width: 100%;">
+                <form action="{{ route('industri.dashboard') }}" method="GET" style="display: flex; gap: 10px; max-width: 100%; flex-wrap: wrap;">
                     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama / Lokasi..." style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px; width: 250px;">
+                    <select name="status" style="padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 14px;">
+                        <option value="">-- Semua Status --</option>
+                        <option value="Aktif" {{ request('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="Tidak Aktif" {{ request('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                    </select>
                     <button type="submit" style="background: var(--accent); color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500;">Cari</button>
-                    @if(request('search'))
+                    @if(request('search') || request('status'))
                         <a href="{{ route('industri.dashboard') }}" style="background: #e2e8f0; color: #475569; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500; display: flex; align-items: center;">Reset</a>
                     @endif
                 </form>
@@ -279,6 +294,7 @@
                             <th>Nama Industri</th>
                             <th>Jenis</th>
                             <th>Lokasi</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -307,10 +323,17 @@
                                 <span class="badge {{ $badge }}">{{ $label }}</span>
                             </td>
                             <td>{{ $item->kabupaten }}</td>
+                            <td>
+                                @if($item->status == 'Aktif')
+                                    <span class="badge-status-aktif">Aktif</span>
+                                @else
+                                    <span class="badge-status-nonaktif">Tidak Aktif</span>
+                                @endif
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="4" style="text-align: center; color: #94a3b8;">Tidak ada data industri ditemukan.</td>
+                            <td colspan="5" style="text-align: center; color: #94a3b8;">Tidak ada data industri ditemukan.</td>
                         </tr>
                         @endforelse
                     </tbody>
@@ -324,7 +347,7 @@
             </div>
             <div class="carousel-box">
                 <div class="slide-placeholder">
-                    [ Area Dokumentasi Visual & Galeri Industri ]
+                    [ Salam dari kami SIRANAAR (Sistemnya Rakan, Nadzif, dan Alvanzaar) ]
                 </div>
             </div>
         </section>

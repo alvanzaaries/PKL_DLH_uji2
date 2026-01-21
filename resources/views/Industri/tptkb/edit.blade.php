@@ -379,6 +379,15 @@
                         <div class="error-message">{{ $message }}</div>
                     @enderror
                 </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Status Industri <span class="required">*</span></label>
+                    <select name="status" class="form-select" required>
+                        <option value="Aktif" {{ old('status', $tptkb->industri->status) == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                        <option value="Tidak Aktif" {{ old('status', $tptkb->industri->status) == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                    </select>
+                    @error('status')<div class="error-message">{{ $message }}</div>@enderror
+                </div>
                 </div>
 
                 <div class="form-actions">

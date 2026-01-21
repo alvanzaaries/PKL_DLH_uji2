@@ -61,6 +61,13 @@ class TptkbController extends Controller implements HasMiddleware
             $query->where('sumber_bahan_baku', $request->sumber_bahan_baku);
         }
 
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->where('status', $request->status);
+            });
+        }
+
         // Filter berdasarkan tahun dan bulan (dari kolom tanggal di tabel industries) dengan logika AND
         if ($request->filled('tahun')) {
             $query->whereHas('industri', function($q) use ($request) {
@@ -203,6 +210,7 @@ class TptkbController extends Controller implements HasMiddleware
             'kapasitas_izin' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'masa_berlaku' => 'required|date',
+            'status' => 'required|in:Aktif,Tidak Aktif',
         ]);
 
         $tptkb = Tptkb::findOrFail($id);
@@ -216,6 +224,7 @@ class TptkbController extends Controller implements HasMiddleware
             'kontak' => $validated['kontak'],
             'nomor_izin' => $validated['nomor_izin'],
             'tanggal' => $validated['tanggal'],
+            'status' => $validated['status'],
         ]);
 
         // Update TPTKB

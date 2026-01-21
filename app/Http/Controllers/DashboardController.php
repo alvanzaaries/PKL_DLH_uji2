@@ -234,6 +234,10 @@ class DashboardController extends Controller
             });
         }
 
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
+
         $dataIndustri = $query->orderBy('type')->orderBy('nama')->get();
 
         return view('Industri.dashboard', compact('statistics', 'dataIndustri'));

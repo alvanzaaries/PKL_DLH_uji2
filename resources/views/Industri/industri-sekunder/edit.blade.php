@@ -4,387 +4,527 @@
 
 @push('styles')
 <style>
-        :root {
-            --primary: #0f172a;
-            --accent: #15803d;
-            --bg-body: #f8fafc;
-            --text-main: #334155;
-            --white: #ffffff;
-            --border: #e2e8f0;
-            --success: #16a34a;
-        }
+    .container {
+        max-width: 100%;
+        margin: 0;
+        padding: 20px 30px;
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    .page-header {
+        background: var(--white);
+        padding: 30px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        margin-bottom: 30px;
+    }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            line-height: 1.6;
-        }
+    .page-title {
+        font-size: 28px;
+        color: var(--primary);
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
 
-        .container {
-            max-width: 100%;
-            margin: 0 ;
-            padding: 20px 30px;
-        }
+    .page-subtitle {
+        color: #64748b;
+        font-size: 14px;
+    }
 
-        /* Navigation */
-        nav {
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
-            padding: 20px 0;
-            margin-bottom: 30px;
-        }
+    .alert {
+        padding: 16px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
 
-        .nav-content {
-            max-width: 100%;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .alert-success {
+        background: #dcfce7;
+        border: 1px solid #86efac;
+        color: #166534;
+    }
 
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    .alert-error {
+        background: #fee2e2;
+        border: 1px solid #fca5a5;
+        color: #991b1b;
+    }
 
-        .logo-text {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--primary);
-        }
+    .form-card {
+        background: var(--white);
+        padding: 40px;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
 
-        .back-link {
-            text-decoration: none;
-            color: var(--accent);
-            font-weight: 500;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: opacity 0.2s;
-        }
+    .form-group {
+        margin-bottom: 24px;
+    }
 
-        .back-link:hover {
-            opacity: 0.7;
-        }
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--primary);
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
 
-        /* Form Card */
-        .form-card {
-            background: var(--white);
-            padding: 35px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
+    .required {
+        color: #dc2626;
+    }
 
-        .form-header {
-            margin-bottom: 30px;
-        }
+    .form-input,
+    .form-textarea,
+    .form-select {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        transition: border-color 0.2s;
+    }
 
-        .form-title {
-            font-size: 26px;
-            color: var(--primary);
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
+    }
 
-        .form-subtitle {
-            color: #64748b;
-            font-size: 14px;
-        }
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
 
-        .form-group {
-            margin-bottom: 20px;
-        }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
 
-        .form-label {
-            display: block;
-            font-weight: 600;
-            font-size: 14px;
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
+    .jenis-produksi-container {
+        border: 2px dashed var(--border);
+        border-radius: 8px;
+        padding: 20px;
+        background: #f8fafc;
+    }
 
-        .required {
-            color: #dc2626;
-        }
+    .jenis-produksi-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
 
-        .form-input,
-        .form-textarea,
-        .form-select {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            transition: border-color 0.2s;
-        }
+    .jenis-produksi-header h4 {
+        color: var(--primary);
+        font-size: 16px;
+        font-weight: 600;
+    }
 
-        .form-input:focus,
-        .form-textarea:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
+    .jenis-produksi-item {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+    }
 
-        .form-textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
+    .jenis-produksi-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
 
+    .jenis-produksi-number {
+        background: var(--accent);
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 13px;
+    }
+
+    .btn-remove-item {
+        background: #fee2e2;
+        color: #dc2626;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .btn-remove-item:hover {
+        background: #fecaca;
+    }
+
+    .btn-add-jenis {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-add-jenis:hover {
+        background: #166534;
+    }
+
+    .current-file {
+        padding: 12px;
+        background: #f1f5f9;
+        border-radius: 6px;
+        margin-top: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .current-file a {
+        color: var(--accent);
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    .current-file a:hover {
+        text-decoration: underline;
+    }
+
+    .file-upload-wrapper {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 24px;
+        text-align: center;
+        background: #f8fafc;
+        cursor: pointer;
+    }
+
+    .file-upload-wrapper:hover {
+        border-color: var(--accent);
+        background: #f0fdf4;
+    }
+
+    .file-info {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 6px;
+    }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 13px;
+        margin-top: 6px;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background: var(--accent);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #166534;
+    }
+
+    .btn-secondary {
+        background: #f1f5f9;
+        color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+        background: #e2e8f0;
+    }
+
+    @media (max-width: 768px) {
         .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 1fr;
         }
-
-        .form-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 1px solid var(--border);
-        }
-
-        .btn {
-            padding: 12px 28px;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #166534;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
-        }
-
-        .btn-secondary {
-            background: #f1f5f9;
-            color: var(--text-main);
-        }
-
-        .btn-secondary:hover {
-            background: #e2e8f0;
-        }
-
-        .alert {
-            padding: 14px 18px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
-        }
-
-        .alert-error {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fca5a5;
-        }
-
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-
-            .form-card {
-                padding: 25px;
-            }
-        }
-    </style>
+    }
+</style>
 @endpush
 
 @section('content')
-    <div class="container">
-        <div class="form-card">
-            <div class="page-header" style="margin:0 0 20px 0; padding:18px 0;">
-                <h1 class="page-title" style="font-size:24px; margin:0;">Edit Industri Sekunder (PBUI)</h1>
-                <p class="page-subtitle" style="margin:6px 0 0 0;">Perbarui informasi perusahaan industri sekunder (PBUI)</p>
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Edit Data Industri Sekunder</h1>
+        <p class="page-subtitle">Perbarui informasi perusahaan industri sekunder (PBUI)</p>
+    </div>
+
+    @if(session('success'))
+        <div class="alert alert-success">✓ {{ session('success') }}</div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-error">
+            <strong>Terdapat kesalahan:</strong>
+            <ul style="margin: 8px 0 0 20px;">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <div class="form-card">
+        <form action="{{ route('industri-sekunder.update', $industriSekunder->id) }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
+
+            <div class="form-group">
+                <label class="form-label">Nama Industri <span class="required">*</span></label>
+                <input type="text" name="nama" class="form-input" value="{{ old('nama', $industriSekunder->industri->nama) }}" required>
+                @error('nama')<div class="error-message">{{ $message }}</div>@enderror
             </div>
 
-            @if(session('success'))
-                <div class="alert alert-success">
-                    ✓ {{ session('success') }}
-                </div>
-            @endif
+            <div class="form-group">
+                <label class="form-label">Alamat Lengkap <span class="required">*</span></label>
+                <textarea name="alamat" class="form-textarea" required>{{ old('alamat', $industriSekunder->industri->alamat) }}</textarea>
+                @error('alamat')<div class="error-message">{{ $message }}</div>@enderror
+            </div>
 
-            @if($errors->any())
-                <div class="alert alert-error">
-                    <strong>Terjadi kesalahan:</strong>
-                    <ul style="margin: 8px 0 0 20px;">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Penanggung Jawab/Direktur <span class="required">*</span></label>
+                    <input type="text" name="penanggungjawab" class="form-input" value="{{ old('penanggungjawab', $industriSekunder->industri->penanggungjawab) }}" required>
+                    @error('penanggungjawab')<div class="error-message">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Kabupaten/Kota <span class="required">*</span></label>
+                    <select name="kabupaten" class="form-select" id="kabupatenSelect" required>
+                        <option value="">-- Pilih Kabupaten/Kota --</option>
+                    </select>
+                    <div class="file-info">Memuat data wilayah...</div>
+                    @error('kabupaten')<div class="error-message">{{ $message }}</div>@enderror
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Kontak <span class="required">*</span></label>
+                    <input type="text" name="kontak" class="form-input" value="{{ old('kontak', $industriSekunder->industri->kontak) }}" required>
+                    @error('kontak')<div class="error-message">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Pemberi Izin <span class="required">*</span></label>
+                    <select name="pemberi_izin" class="form-select" required>
+                        <option value="">-- Pilih Pemberi Izin --</option>
+                        @foreach(['Menteri Kehutanan', 'BKPM', 'Gubernur', 'Bupati/Walikota'] as $pemberi)
+                            <option value="{{ $pemberi }}" {{ old('pemberi_izin', $industriSekunder->pemberi_izin) == $pemberi ? 'selected' : '' }}>{{ $pemberi }}</option>
                         @endforeach
-                    </ul>
+                    </select>
+                    @error('pemberi_izin')<div class="error-message">{{ $message }}</div>@enderror
                 </div>
-            @endif
+            </div>
 
-            <form action="{{ route('industri-sekunder.update', $industriSekunder->id) }}" method="POST">
-                @csrf
-                @method('PUT')
+            <div class="form-group">
+                <label class="form-label">Jenis Produksi & Kapasitas <span class="required">*</span></label>
+                <div class="jenis-produksi-container">
+                    <div class="jenis-produksi-header">
+                        <h4>Daftar Jenis Produksi</h4>
+                        <button type="button" class="btn-add-jenis" onclick="addJenisProduksi()">+ Tambah Jenis Produksi</button>
+                    </div>
+                    <div id="jenisProduksiList"></div>
+                </div>
+                @error('jenis_produksi')<div class="error-message">{{ $message }}</div>@enderror
+            </div>
 
-                <!-- Data Perusahaan -->
-                <h3 style="font-size: 18px; color: var(--primary); margin-bottom: 20px; padding-bottom: 6px;">
-                    Data Perusahaan
-                </h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Tanggal SK <span class="required">*</span></label>
+                    <input type="date" name="tanggal" class="form-input" value="{{ old('tanggal', $industriSekunder->industri->tanggal) }}" required>
+                    @error('tanggal')<div class="error-message">{{ $message }}</div>@enderror
+                </div>
 
                 <div class="form-group">
-                    <label class="form-label">Nama Perusahaan <span class="required">*</span></label>
-                    <input type="text" name="nama" class="form-input" value="{{ old('nama', $industriSekunder->industri->nama) }}" required>
+                    <label class="form-label">Nomor SK/NIB/SS <span class="required">*</span></label>
+                    <input type="text" name="nomor_izin" class="form-input" value="{{ old('nomor_izin', $industriSekunder->industri->nomor_izin) }}" required>
+                    @error('nomor_izin')<div class="error-message">{{ $message }}</div>@enderror
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label class="form-label">Alamat Lengkap <span class="required">*</span></label>
-                    <textarea name="alamat" class="form-textarea" required>{{ old('alamat', $industriSekunder->industri->alamat) }}</textarea>
-                </div>
+            <div class="form-group">
+                <label class="form-label">Status Industri <span class="required">*</span></label>
+                <select name="status" class="form-select" required>
+                    <option value="Aktif" {{ old('status', $industriSekunder->industri->status) == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                    <option value="Tidak Aktif" {{ old('status', $industriSekunder->industri->status) == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                </select>
+                @error('status')<div class="error-message">{{ $message }}</div>@enderror
+            </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Kabupaten/Kota <span class="required">*</span></label>
-                        <select name="kabupaten" id="kabupaten" class="form-select" required>
-                            <option value="">-- Pilih Kabupaten/Kota --</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Penanggung Jawab <span class="required">*</span></label>
-                        <input type="text" name="penanggungjawab" class="form-input" value="{{ old('penanggungjawab', $industriSekunder->industri->penanggungjawab) }}" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Kontak (Telepon/Email) <span class="required">*</span></label>
-                        <input type="text" name="kontak" class="form-input" value="{{ old('kontak', $industriSekunder->industri->kontak) }}" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Nomor SK <span class="required">*</span></label>
-                        <input type="text" name="nomor_izin" class="form-input" value="{{ old('nomor_izin', $industriSekunder->industri->nomor_izin) }}" required>
-                    </div>
-                </div>
-
-                <!-- Data Produksi -->
-                <h3 style="font-size: 18px; color: var(--primary); margin: 30px 0 20px; padding-bottom: 6px;">
-                    Data Produksi & Izin
-                </h3>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Pemberi Izin <span class="required">*</span></label>
-                        <select name="pemberi_izin" class="form-select" required>
-                            <option value="">-- Pilih Pemberi Izin --</option>
-                            <option value="Menteri Kehutanan" {{ old('pemberi_izin', $industriSekunder->pemberi_izin) == 'Menteri Kehutanan' ? 'selected' : '' }}>Menteri Kehutanan</option>
-                            <option value="BKPM" {{ old('pemberi_izin', $industriSekunder->pemberi_izin) == 'BKPM' ? 'selected' : '' }}>BKPM</option>
-                            <option value="Gubernur" {{ old('pemberi_izin', $industriSekunder->pemberi_izin) == 'Gubernur' ? 'selected' : '' }}>Gubernur</option>
-                            <option value="Bupati/Walikota" {{ old('pemberi_izin', $industriSekunder->pemberi_izin) == 'Bupati/Walikota' ? 'selected' : '' }}>Bupati/Walikota</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Jenis Produksi <span class="required">*</span></label>
-                        <input type="text" name="jenis_produksi" class="form-input" value="{{ old('jenis_produksi', $industriSekunder->jenis_produksi) }}" placeholder="Contoh: Plywood, Furniture" required>
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Kapasitas Izin <span class="required">*</span></label>
-                        <input type="text" name="kapasitas_izin" class="form-input" value="{{ old('kapasitas_izin', $industriSekunder->kapasitas_izin) }}" placeholder="Contoh: 5000 m³/tahun" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Tanggal SK <span class="required">*</span></label>
-                        <input type="date" name="tanggal" class="form-input" value="{{ old('tanggal', $industriSekunder->industri->tanggal) }}" required>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                        Simpan Perubahan
-                    </button>
-                    <a href="{{ route('industri-sekunder.index') }}" class="btn btn-secondary">
-                        Batal
-                    </a>
-                </div>
-            </form>
-        </div>
+            <div class="form-actions">
+                <a href="{{ route('industri-sekunder.index') }}" class="btn btn-secondary">Batal</a>
+                <button type="submit" class="btn btn-primary">Update Data</button>
+            </div>
+        </form>
     </div>
-@endsection
+</div>
 
 @push('scripts')
-    <script>
-        // Load kabupaten dari API wilayah.id
-        async function loadKabupaten() {
-            const kabupatenSelect = document.getElementById('kabupaten');
-            const currentKabupaten = "{{ old('kabupaten', $industriSekunder->industri->kabupaten) }}";
-            
-            try {
-                const response = await fetch('https://www.emsifa.com/api-wilayah-indonesia/api/regencies/33.json');
-                const data = await response.json();
-                
-                data.forEach(item => {
+<script>
+    const masterJenisProduksi = @json($masterJenisProduksi);
+    const existingJenisProduksi = @json($industriSekunder->jenisProduksi);
+    let jenisProduksiCounter = 0;
+    let lainnyaId = null;
+
+    // Cari ID untuk opsi "Lainnya"
+    masterJenisProduksi.forEach(jp => {
+        if (jp.nama === 'Lainnya') {
+            lainnyaId = jp.id;
+        }
+    });
+
+    function addJenisProduksi(selectedId = null, kapasitas = '', customName = '') {
+        jenisProduksiCounter++;
+        const container = document.getElementById('jenisProduksiList');
+        
+        let optionsHTML = '<option value="">-- Pilih Jenis Produksi --</option>';
+        masterJenisProduksi.forEach(jp => {
+            const selected = selectedId && jp.id == selectedId ? 'selected' : '';
+            optionsHTML += `<option value="${jp.id}" ${selected}>${jp.nama}</option>`;
+        });
+        
+        const showCustom = selectedId == lainnyaId ? 'block' : 'none';
+        const requiredCustom = selectedId == lainnyaId ? 'required' : '';
+        
+        const item = document.createElement('div');
+        item.className = 'jenis-produksi-item';
+        item.setAttribute('data-index', jenisProduksiCounter);
+        item.innerHTML = `
+            <div class="jenis-produksi-item-header">
+                <div class="jenis-produksi-number">${jenisProduksiCounter}</div>
+                <button type="button" class="btn-remove-item" onclick="removeJenisProduksi(${jenisProduksiCounter})">
+                    ✕ Hapus
+                </button>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Jenis Produksi</label>
+                    <select name="jenis_produksi[]" class="form-select jenis-select" 
+                            data-index="${jenisProduksiCounter}" 
+                            onchange="toggleCustomInput(${jenisProduksiCounter})" required>
+                        ${optionsHTML}
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label">Kapasitas Izin</label>
+                    <input type="text" name="kapasitas_izin[]" class="form-input" 
+                           placeholder="Contoh: 1000 m³/tahun" value="${kapasitas}" required>
+                </div>
+            </div>
+            <div class="form-group custom-input-container" id="customInput_${jenisProduksiCounter}" 
+                 style="margin-top: 12px; display: ${showCustom};">
+                <label class="form-label">Sebutkan Jenis Produksi</label>
+                <input type="text" name="nama_custom[]" class="form-input" 
+                       placeholder="Masukkan jenis produksi..." 
+                       value="${customName}"
+                       data-index="${jenisProduksiCounter}" ${requiredCustom}>
+                <div class="file-info" style="margin-top: 4px;">Isi kolom ini karena Anda memilih "Lainnya"</div>
+            </div>
+        `;
+        container.appendChild(item);
+    }
+
+    function toggleCustomInput(index) {
+        const select = document.querySelector(`.jenis-select[data-index="${index}"]`);
+        const customContainer = document.getElementById(`customInput_${index}`);
+        const customInput = customContainer.querySelector('input[name="nama_custom[]"]');
+        
+        if (select.value == lainnyaId) {
+            customContainer.style.display = 'block';
+            customInput.required = true;
+        } else {
+            customContainer.style.display = 'none';
+            customInput.required = false;
+            customInput.value = '';
+        }
+    }
+
+    function removeJenisProduksi(index) {
+        const item = document.querySelector(`.jenis-produksi-item[data-index="${index}"]`);
+        if (item) {
+            item.remove();
+            renumberItems();
+        }
+    }
+
+    function renumberItems() {
+        const items = document.querySelectorAll('.jenis-produksi-item');
+        items.forEach((item, idx) => {
+            const number = item.querySelector('.jenis-produksi-number');
+            if (number) number.textContent = idx + 1;
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load kabupaten
+        const kabupatenSelect = document.getElementById('kabupatenSelect');
+        const loadingInfo = kabupatenSelect.nextElementSibling;
+        const currentKabupaten = "{{ $industriSekunder->industri->kabupaten }}";
+        
+        fetch('https://www.emsifa.com/api-wilayah-indonesia/api/regencies/33.json')
+            .then(response => response.json())
+            .then(data => {
+                loadingInfo.textContent = 'Pilih kabupaten/kota di Jawa Tengah';
+                data.sort((a, b) => a.name.localeCompare(b.name));
+                data.forEach(kabupaten => {
                     const option = document.createElement('option');
-                    option.value = item.name;
-                    option.textContent = item.name;
-                    
-                    if (item.name === currentKabupaten) {
+                    option.value = kabupaten.name;
+                    option.textContent = kabupaten.name;
+                    if (kabupaten.name === currentKabupaten) {
                         option.selected = true;
                     }
-                    
                     kabupatenSelect.appendChild(option);
                 });
-            } catch (error) {
-                console.error('Error loading kabupaten:', error);
-                // Fallback: set current value
-                const option = document.createElement('option');
-                option.value = currentKabupaten;
-                option.textContent = currentKabupaten;
-                option.selected = true;
-                kabupatenSelect.appendChild(option);
-            }
-        }
-
-        // Load data saat halaman dibuka
-        loadKabupaten();
-
-        // Auto-hide success alerts
-        document.addEventListener('DOMContentLoaded', function() {
-            const successAlerts = document.querySelectorAll('.alert-success');
-            successAlerts.forEach(alert => {
-                setTimeout(() => {
-                    alert.style.transition = 'opacity 0.5s';
-                    alert.style.opacity = '0';
-                    setTimeout(() => alert.remove(), 500);
-                }, 5000);
+            })
+            .catch(() => {
+                loadingInfo.textContent = 'Gagal memuat data wilayah';
+                loadingInfo.style.color = '#dc2626';
             });
-        });
-    </script>
+
+        // Load existing jenis produksi
+        if (existingJenisProduksi && existingJenisProduksi.length > 0) {
+            existingJenisProduksi.forEach(jp => {
+                addJenisProduksi(jp.id, jp.pivot.kapasitas_izin, jp.pivot.nama_custom || '');
+            });
+        } else {
+            addJenisProduksi();
+        }
+    });
+</script>
 @endpush
+@endsection

@@ -487,6 +487,51 @@
             background: #dc2626;
         }
 
+        /* Badge Jenis Produksi */
+        .badge-jenis {
+            display: inline-block;
+            padding: 4px 10px;
+            margin: 2px;
+            background: linear-gradient(135deg, #15803d, #166534);
+            color: white;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-lainnya {
+            display: inline-block;
+            padding: 4px 10px;
+            margin: 2px;
+            background: linear-gradient(135deg, #d97706, #ea580c);
+            color: white;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-status-aktif {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-status-nonaktif {
+            display: inline-block;
+            background: #ef4444;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
         /* Select2 Custom Styling */
         .select2-container--default .select2-selection--single {
             height: 42px;
@@ -843,19 +888,38 @@
                         <select name="jenis_produksi" class="filter-input">
                             <option value="">-- Semua Jenis Produksi --</option>
                             @foreach($jenisProduksiList as $jp)
-                                <option value="{{ $jp }}" {{ request('jenis_produksi') == $jp ? 'selected' : '' }}>
-                                    {{ $jp }}
+                                <option value="{{ $jp->id }}" {{ request('jenis_produksi') == $jp->id ? 'selected' : '' }}>
+                                    {{ $jp->nama }}
                                 </option>
                             @endforeach
+                            @if($customNames->count() > 0)
+                                <optgroup label="──────────────">
+                                    @foreach($customNames as $customName)
+                                        <option value="{{ $customName }}" {{ request('jenis_produksi') == $customName ? 'selected' : '' }}>
+                                            {{ $customName }} (Custom)
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>Kapasitas Izin</label>
+                        <label>Kapasitas (m³/tahun)</label>
                         <select name="kapasitas" class="filter-input">
                             <option value="">-- Semua Kapasitas --</option>
-                            <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
-                            <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
-                            <option value=">= 6000" {{ request('kapasitas') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
+                            <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1.999 m³/tahun</option>
+                            <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2.000 - 5.999 m³/tahun</option>
+                            <option value=">=6000" {{ request('kapasitas') == '>=6000' ? 'selected' : '' }}>>= 6.000 m³/tahun</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Pemberi Izin</label>
+                        <select name="pemberi_izin" class="filter-input">
+                            <option value="">-- Semua Pemberi Izin --</option>
+                            <option value="Menteri Kehutanan" {{ request('pemberi_izin') == 'Menteri Kehutanan' ? 'selected' : '' }}>Menteri Kehutanan</option>
+                            <option value="BKPM" {{ request('pemberi_izin') == 'BKPM' ? 'selected' : '' }}>BKPM</option>
+                            <option value="Gubernur" {{ request('pemberi_izin') == 'Gubernur' ? 'selected' : '' }}>Gubernur</option>
+                            <option value="Bupati/Walikota" {{ request('pemberi_izin') == 'Bupati/Walikota' ? 'selected' : '' }}>Bupati/Walikota</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -886,6 +950,14 @@
                                     echo "<option value='$year' " . (request('tahun') == $year ? 'selected' : '') . ">$year</option>";
                                 }
                             @endphp
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select name="status" class="filter-input">
+                            <option value="">-- Semua Status --</option>
+                            <option value="Aktif" {{ request('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                            <option value="Tidak Aktif" {{ request('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
                         </select>
                     </div>
                 </div>
@@ -940,6 +1012,7 @@
                             <th>Jenis Produksi</th>
                             <th>Kapasitas Izin</th>
                             <th>Nomor SK</th>
+                            <th>Status</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -951,9 +1024,33 @@
                             <td>{{ $item->industri->tanggal ? \Carbon\Carbon::parse($item->industri->tanggal)->format('d/m/Y') : '-' }}</td>
                             <td>{{ $item->industri->kabupaten }}</td>
                             <td>{{ $item->industri->penanggungjawab }}</td>
-                            <td>{{ $item->jenis_produksi }}</td>
-                            <td>{{ $item->kapasitas_izin }}</td>
+                            <td>
+                                @foreach($item->jenisProduksi as $jp)
+                                    @php
+                                        $displayName = $jp->pivot->nama_custom ?: $jp->nama;
+                                        $badgeClass = $jp->pivot->nama_custom ? 'badge-lainnya' : 'badge-jenis';
+                                    @endphp
+                                    <span class="badge {{ $badgeClass }}">{{ $displayName }}</span>
+                                @endforeach
+                            </td>
+                            <td>
+                                @foreach($item->jenisProduksi as $jp)
+                                    @php
+                                        $displayName = $jp->pivot->nama_custom ?: $jp->nama;
+                                    @endphp
+                                    <div style="margin-bottom: 4px;">
+                                        <strong>{{ $displayName }}:</strong> {{ $jp->pivot->kapasitas_izin }}
+                                    </div>
+                                @endforeach
+                            </td>
                             <td>{{ $item->industri->nomor_izin }}</td>
+                            <td>
+                                @if($item->industri->status == 'Aktif')
+                                    <span class="badge-status-aktif">Aktif</span>
+                                @else
+                                    <span class="badge-status-nonaktif">Tidak Aktif</span>
+                                @endif
+                            </td>
                             <td>
                                 <div class="action-buttons">
                                     <button class="btn-action btn-view" onclick='showDetail(@json($item))'>Lihat</button>
@@ -973,7 +1070,7 @@
                 </table>
                 @else
                 <div class="empty-state">
-                    <div class="empty-state-icon">📂</div>
+                    <div style="font-size: 48px;">📂</div>
                     <div class="empty-state-text">Tidak ada data ditemukan</div>
                     <p style="font-size: 14px;">Silakan ubah filter atau tambah data baru</p>
                 </div>

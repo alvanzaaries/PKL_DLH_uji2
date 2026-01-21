@@ -40,7 +40,7 @@ class IndustriSekunder extends Model
             'industri_jenis_produksi',
             'industri_id',
             'jenis_produksi_id'
-        )->withPivot('kapasitas_izin')->withTimestamps();
+        )->withPivot('kapasitas_izin', 'nama_custom')->withTimestamps();
     }
 
     /**

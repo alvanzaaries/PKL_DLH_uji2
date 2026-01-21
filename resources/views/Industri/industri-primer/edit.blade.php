@@ -81,6 +81,7 @@
         border: 1px solid var(--border);
         border-radius: 8px;
         font-size: 14px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         transition: border-color 0.2s;
     }
 
@@ -377,10 +378,24 @@
             </div>
 
             <div class="form-group">
+                <label class="form-label">Status Industri <span class="required">*</span></label>
+                <select name="status" class="form-select" required>
+                    <option value="Aktif" {{ old('status', $industriPrimer->industri->status) == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                    <option value="Tidak Aktif" {{ old('status', $industriPrimer->industri->status) == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                </select>
+                @error('status')<div class="error-message">{{ $message }}</div>@enderror
+            </div>
+
+            <div class="form-group">
                 <label class="form-label">Upload Dokumen Izin (PDF)</label>
                 @if($industriPrimer->dokumen_izin)
-                    <div class="current-file">
-                        📄 <a href="/storage/{{ $industriPrimer->dokumen_izin }}" target="_blank">Lihat Dokumen Saat Ini</a>
+                    <div class="current-file" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            📄 <a href="/storage/{{ $industriPrimer->dokumen_izin }}" target="_blank">Lihat Dokumen Saat Ini</a>
+                        </div>
+                        <button type="button" onclick="confirmDeleteDokumen()" style="background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">
+                            ✕ Hapus Dokumen
+                        </button>
                     </div>
                 @endif
                 <div class="file-upload-wrapper" onclick="document.getElementById('dokumenInput').click()">
@@ -388,6 +403,7 @@
                     <div style="font-size: 14px; color: #475569;">Klik untuk {{ $industriPrimer->dokumen_izin ? 'ganti' : 'pilih' }} file PDF</div>
                     <div class="file-info">Format: PDF | Maksimal: 5 MB</div>
                     <input type="file" id="dokumenInput" name="dokumen_izin" accept=".pdf" style="display: none;">
+                    <input type="hidden" name="hapus_dokumen" id="hapusDokumenFlag" value="0">
                 </div>
                 @error('dokumen_izin')<div class="error-message">{{ $message }}</div>@enderror
             </div>
@@ -405,8 +421,16 @@
     const masterJenisProduksi = @json($masterJenisProduksi);
     const existingJenisProduksi = @json($industriPrimer->jenisProduksi);
     let jenisProduksiCounter = 0;
+    let lainnyaId = null;
 
-    function addJenisProduksi(selectedId = null, kapasitas = '') {
+    // Cari ID untuk opsi "Lainnya"
+    masterJenisProduksi.forEach(jp => {
+        if (jp.nama === 'Lainnya') {
+            lainnyaId = jp.id;
+        }
+    });
+
+    function addJenisProduksi(selectedId = null, kapasitas = '', customName = '') {
         jenisProduksiCounter++;
         const container = document.getElementById('jenisProduksiList');
         
@@ -415,6 +439,9 @@
             const selected = selectedId && jp.id == selectedId ? 'selected' : '';
             optionsHTML += `<option value="${jp.id}" ${selected}>${jp.nama}</option>`;
         });
+        
+        const showCustom = selectedId == lainnyaId ? 'block' : 'none';
+        const requiredCustom = selectedId == lainnyaId ? 'required' : '';
         
         const item = document.createElement('div');
         item.className = 'jenis-produksi-item';
@@ -429,7 +456,9 @@
             <div class="form-row">
                 <div class="form-group" style="margin-bottom: 0;">
                     <label class="form-label">Jenis Produksi</label>
-                    <select name="jenis_produksi[]" class="form-select" required>
+                    <select name="jenis_produksi[]" class="form-select jenis-select" 
+                            data-index="${jenisProduksiCounter}" 
+                            onchange="toggleCustomInput(${jenisProduksiCounter})" required>
                         ${optionsHTML}
                     </select>
                 </div>
@@ -439,8 +468,32 @@
                            placeholder="Contoh: 1000 m³/tahun" value="${kapasitas}" required>
                 </div>
             </div>
+            <div class="form-group custom-input-container" id="customInput_${jenisProduksiCounter}" 
+                 style="margin-top: 12px; display: ${showCustom};">
+                <label class="form-label">Sebutkan Jenis Produksi</label>
+                <input type="text" name="nama_custom[]" class="form-input" 
+                       placeholder="Masukkan jenis produksi..." 
+                       value="${customName}"
+                       data-index="${jenisProduksiCounter}" ${requiredCustom}>
+                <div class="file-info" style="margin-top: 4px;">Isi kolom ini karena Anda memilih "Lainnya"</div>
+            </div>
         `;
         container.appendChild(item);
+    }
+
+    function toggleCustomInput(index) {
+        const select = document.querySelector(`.jenis-select[data-index="${index}"]`);
+        const customContainer = document.getElementById(`customInput_${index}`);
+        const customInput = customContainer.querySelector('input[name="nama_custom[]"]');
+        
+        if (select.value == lainnyaId) {
+            customContainer.style.display = 'block';
+            customInput.required = true;
+        } else {
+            customContainer.style.display = 'none';
+            customInput.required = false;
+            customInput.value = '';
+        }
     }
 
     function removeJenisProduksi(index) {
@@ -488,12 +541,19 @@
         // Load existing jenis produksi
         if (existingJenisProduksi && existingJenisProduksi.length > 0) {
             existingJenisProduksi.forEach(jp => {
-                addJenisProduksi(jp.id, jp.pivot.kapasitas_izin);
+                addJenisProduksi(jp.id, jp.pivot.kapasitas_izin, jp.pivot.nama_custom || '');
             });
         } else {
             addJenisProduksi();
         }
     });
+
+    function confirmDeleteDokumen() {
+        if (confirm('Apakah Anda yakin ingin menghapus dokumen ini?')) {
+            document.getElementById('hapusDokumenFlag').value = '1';
+            document.querySelector('.current-file').innerHTML = '<div style="color: #dc2626; font-style: italic;">Dokumen akan dihapus saat Anda klik Update Data</div>';
+        }
+    }
 </script>
 @endpush
 @endsection

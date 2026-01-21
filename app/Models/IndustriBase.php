@@ -21,6 +21,7 @@ class IndustriBase extends Model
         'nomor_izin',
         'tanggal',
         'type',
+        'status',
     ];
 
     /**

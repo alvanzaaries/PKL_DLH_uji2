@@ -52,6 +52,8 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             'jenis_produksi.*' => 'required|exists:master_jenis_produksi,id',
             'kapasitas_izin' => 'required|array',
             'kapasitas_izin.*' => 'required|string|max:255',
+            'nama_custom' => 'nullable|array',
+            'nama_custom.*' => 'nullable|string|max:255',
             'tanggal' => 'required|date',
             'nomor_izin' => 'required|string|max:255',
             'dokumen_izin' => 'nullable|file|mimes:pdf|max:5120', // max 5MB
@@ -98,7 +100,8 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         $jenisProduksiData = [];
         foreach ($validated['jenis_produksi'] as $index => $jenisProduksiId) {
             $jenisProduksiData[$jenisProduksiId] = [
-                'kapasitas_izin' => $validated['kapasitas_izin'][$index] ?? '0'
+                'kapasitas_izin' => $validated['kapasitas_izin'][$index] ?? '0',
+                'nama_custom' => $validated['nama_custom'][$index] ?? null
             ];
         }
         $industriPrimer->jenisProduksi()->attach($jenisProduksiData);
@@ -131,20 +134,44 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         }
 
         // Filter berdasarkan jenis produksi (dari relasi many-to-many)
+        // Support untuk filter berdasarkan ID master, custom name, atau semua "Lainnya"
         if ($request->filled('jenis_produksi')) {
-            $query->whereHas('jenisProduksi', function($q) use ($request) {
-                $q->where('master_jenis_produksi.id', $request->jenis_produksi);
-            });
+            $filterValue = $request->jenis_produksi;
+            
+            // Cek apakah filter value adalah ID atau custom name
+            if (is_numeric($filterValue)) {
+                // Cek apakah ini adalah ID untuk "Lainnya"
+                $lainnyaRecord = MasterJenisProduksi::find($filterValue);
+                
+                if ($lainnyaRecord && $lainnyaRecord->nama === 'Lainnya') {
+                    // Filter untuk semua yang punya custom name (tidak peduli value-nya)
+                    $query->whereHas('jenisProduksi', function($q) {
+                        $q->whereNotNull('industri_jenis_produksi.nama_custom');
+                    });
+                } else {
+                    // Filter by master ID biasa
+                    $query->whereHas('jenisProduksi', function($q) use ($filterValue) {
+                        $q->where('master_jenis_produksi.id', $filterValue);
+                    });
+                }
+            } else {
+                // Filter by specific custom name
+                $query->whereHas('jenisProduksi', function($q) use ($filterValue) {
+                    $q->where('industri_jenis_produksi.nama_custom', $filterValue);
+                });
+            }
         }
 
-        // Filter berdasarkan kapasitas izin (dari tabel industri_primer)
-        // kapasitas_izin disimpan sebagai string (mis. "1500 m³/tahun") sehingga
-        // ekstraksi angka dengan fungsi SQL tidak portable (SQLite tidak mendukung REGEXP_REPLACE dll).
-        // Untuk kompatibilitas, jika filter kapasitas di-set, lakukan filtering di PHP setelah mengambil hasil.
-        $kapasitasFilter = null;
-        if ($request->filled('kapasitas')) {
-            $kapasitasFilter = $request->kapasitas;
-            // do NOT add SQL whereRaw here because it may not be supported on all drivers
+        // Filter berdasarkan pemberi izin
+        if ($request->filled('pemberi_izin')) {
+            $query->where('pemberi_izin', $request->pemberi_izin);
+        }
+
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->where('status', $request->status);
+            });
         }
 
         // Filter berdasarkan tahun dan bulan (dari kolom tanggal di tabel industries) dengan logika AND
@@ -160,23 +187,49 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             });
         }
 
-        // Jika ada filter kapasitas, ambil semua hasil (setelah filter lain) lalu lakukan filter kapasitas di PHP,
-        // kemudian paginasi manual agar kompatibel dengan SQLite dan driver lain.
+        // Filter berdasarkan kapasitas izin (dari pivot table industri_jenis_produksi)
+        // Menggunakan logika OR: tampilkan perusahaan jika MINIMAL SATU jenis produksi memenuhi range
+        // Contoh: Perusahaan punya Veneer 2500 dan Gergajian 4500
+        // - Filter < 3000 → muncul (karena Veneer 2500 memenuhi)
+        // - Filter 3000-5999 → muncul (karena Gergajian 4500 memenuhi)
+        $kapasitasFilter = $request->filled('kapasitas') ? $request->kapasitas : null;
+
+        // Jika ada filter kapasitas, lakukan filtering di collection level dengan logika OR
         if ($kapasitasFilter) {
             $allFiltered = (clone $query)->latest()->get();
 
             $filteredCollection = $allFiltered->filter(function($item) use ($kapasitasFilter) {
-                $capacity = $item->kapasitas_izin ?? '';
-                preg_match('/\d+/', $capacity, $matches);
-                $numericCapacity = isset($matches[0]) ? (int)$matches[0] : 0;
-
-                if ($kapasitasFilter == '0-1999') {
-                    return $numericCapacity >= 0 && $numericCapacity <= 1999;
-                } elseif ($kapasitasFilter == '2000-5999') {
-                    return $numericCapacity >= 2000 && $numericCapacity <= 5999;
-                } elseif ($kapasitasFilter == '>= 6000' || $kapasitasFilter == '>=6000') {
-                    return $numericCapacity >= 6000;
+                // Cek apakah ada minimal satu jenis produksi yang memenuhi range
+                foreach ($item->jenisProduksi as $jp) {
+                    $kapasitasStr = $jp->pivot->kapasitas_izin ?? '0';
+                    // Ekstrak angka dari string seperti "1500 m³/tahun" atau "2000"
+                    preg_match('/(\d+[\d\.,]*)/', $kapasitasStr, $matches);
+                    if (isset($matches[1])) {
+                        // Hapus titik/koma pemisah ribuan dan konversi ke integer
+                        $numericValue = (int)str_replace(['.', ','], '', $matches[1]);
+                        
+                        // Cek apakah kapasitas ini memenuhi range filter
+                        $matches_range = false;
+                        switch ($kapasitasFilter) {
+                            case '0-1999':
+                                $matches_range = $numericValue >= 0 && $numericValue <= 1999;
+                                break;
+                            case '2000-5999':
+                                $matches_range = $numericValue >= 2000 && $numericValue <= 5999;
+                                break;
+                            case '>=6000':
+                                $matches_range = $numericValue >= 6000;
+                                break;
+                        }
+                        
+                        // Jika ada satu jenis produksi yang memenuhi, return true (logika OR)
+                        if ($matches_range) {
+                            return true;
+                        }
+                    }
                 }
+                
+                // Tidak ada satupun jenis produksi yang memenuhi range
                 return false;
             })->values();
 
@@ -228,6 +281,16 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             ->kategori('primer')
             ->orderBy('nama')
             ->get();
+        
+        // Ambil custom names yang unik dari pivot table untuk ditampilkan di filter
+        $customNames = \DB::table('industri_jenis_produksi')
+            ->where('industri_type', 'App\\Models\\IndustriPrimer')
+            ->whereNotNull('nama_custom')
+            ->distinct()
+            ->pluck('nama_custom')
+            ->filter()
+            ->sort()
+            ->values();
             
         // Parse jenis produksi yang mengandung multiple values tidak diperlukan lagi
         // karena sudah menggunakan master table
@@ -272,9 +335,10 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         })->map->count();
 
         return view('Industri.industri-primer.index', compact(
-            'industriPrimer', 
+            'industriPrimer',
             'kabupatenList',
             'jenisProduksiList',
+            'customNames',
             'yearStats',
             'locationStats',
             'capacityStats'
@@ -312,17 +376,30 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             'jenis_produksi.*' => 'required|exists:master_jenis_produksi,id',
             'kapasitas_izin' => 'required|array',
             'kapasitas_izin.*' => 'required|string|max:255',
+            'nama_custom' => 'nullable|array',
+            'nama_custom.*' => 'nullable|string|max:255',
             'tanggal' => 'required|date',
             'nomor_izin' => 'required|string|max:255',
-            'dokumen_izin' => 'nullable|file|mimes:pdf|max:5120'
+            'status' => 'required|in:Aktif,Tidak Aktif',
+            'dokumen_izin' => 'nullable|file|mimes:pdf|max:5120',
+            'hapus_dokumen' => 'nullable|in:0,1'
         ]);
 
         // Find records
         $industriPrimer = IndustriPrimer::findOrFail($id);
         $industri = \App\Models\IndustriBase::findOrFail($industriPrimer->industri_id);
 
+        // Handle hapus dokumen jika user memilih untuk menghapus
+        if ($request->input('hapus_dokumen') == '1') {
+            // Hapus file fisik dari storage jika ada
+            if ($industriPrimer->dokumen_izin) {
+                Storage::disk('public')->delete($industriPrimer->dokumen_izin);
+            }
+            // Set ke null untuk update database
+            $validated['dokumen_izin'] = null;
+        }
         // Handle file upload jika ada file baru dengan penamaan terstruktur
-        if ($request->hasFile('dokumen_izin')) {
+        elseif ($request->hasFile('dokumen_izin')) {
             // Hapus file lama jika ada
             if ($industriPrimer->dokumen_izin) {
                 Storage::disk('public')->delete($industriPrimer->dokumen_izin);
@@ -352,6 +429,7 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             'kontak' => $validated['kontak'],
             'nomor_izin' => $validated['nomor_izin'],
             'tanggal' => $validated['tanggal'],
+            'status' => $validated['status'],
         ]);
 
         // Update child table (industri_primer)
@@ -360,7 +438,9 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             'kapasitas_izin' => $validated['kapasitas_izin'][0] ?? '0',
         ];
 
-        if (isset($validated['dokumen_izin'])) {
+        // Update dokumen_izin jika ada perubahan (upload baru atau hapus)
+        // Gunakan array_key_exists karena nilai bisa null (saat hapus dokumen)
+        if (array_key_exists('dokumen_izin', $validated)) {
             $updateData['dokumen_izin'] = $validated['dokumen_izin'];
         }
 
@@ -370,7 +450,8 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         $jenisProduksiData = [];
         foreach ($validated['jenis_produksi'] as $index => $jenisProduksiId) {
             $jenisProduksiData[$jenisProduksiId] = [
-                'kapasitas_izin' => $validated['kapasitas_izin'][$index] ?? '0'
+                'kapasitas_izin' => $validated['kapasitas_izin'][$index] ?? '0',
+                'nama_custom' => $validated['nama_custom'][$index] ?? null
             ];
         }
         $industriPrimer->jenisProduksi()->sync($jenisProduksiData);
@@ -401,12 +482,18 @@ class IndustriPrimerController extends Controller implements HasMiddleware
     }
 
     /**
-     * Download dokumen izin
+     * Download dokumen izin (Requires Authentication)
      */
     public function downloadDokumen($id)
     {
+        // Security: Require authentication to prevent information disclosure
+        if (!auth()->check()) {
+            abort(403, 'Akses ditolak. Dokumen ini memerlukan autentikasi.');
+        }
+
         $industriPrimer = IndustriPrimer::with('industri')->findOrFail($id);
         
+        // Check if document exists
         if (!$industriPrimer->dokumen_izin) {
             return redirect()->back()->with('error', 'Dokumen tidak ditemukan!');
         }

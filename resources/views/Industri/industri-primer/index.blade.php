@@ -92,7 +92,7 @@
 
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
             margin-bottom: 20px;
         }
@@ -279,6 +279,50 @@
 
         .btn-delete:hover {
             background: #dc2626;
+        }
+
+        .badge-jenis {
+            display: inline-block;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 2px;
+            box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-lainnya {
+            display: inline-block;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 2px;
+            box-shadow: 0 1px 3px rgba(249, 115, 22, 0.3);
+        }
+
+        .badge-status-aktif {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-status-nonaktif {
+            display: inline-block;
+            background: #ef4444;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
         }
 
         .btn-document {
@@ -663,19 +707,37 @@
                                     {{ $jenis->nama }}
                                 </option>
                             @endforeach
+                            @if($customNames->count() > 0)
+                                <optgroup label="─────────────">
+                                    @foreach($customNames as $customName)
+                                        <option value="{{ $customName }}" {{ request('jenis_produksi') == $customName ? 'selected' : '' }}>
+                                            {{ $customName }} (Custom)
+                                        </option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>Kapasitas Izin</label>
+                        <label>Kapasitas (m³/tahun)</label>
                         <select name="kapasitas" class="filter-input">
                             <option value="">-- Semua Kapasitas --</option>
-                            <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
-                            <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
-                            <option value=">= 6000" {{ request('kapasitas') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
+                            <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1.999 m³/tahun</option>
+                            <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2.000 - 5.999 m³/tahun</option>
+                            <option value=">=6000" {{ request('kapasitas') == '>=6000' ? 'selected' : '' }}>>= 6.000 m³/tahun</option>
                         </select>
                     </div>
-                    <!-- duplicate jenis_produksi filter removed -->
-                        <div class="filter-group">
+                    <div class="filter-group">
+                        <label>Pemberi Izin</label>
+                        <select name="pemberi_izin" class="filter-input">
+                            <option value="">-- Semua Pemberi Izin --</option>
+                            <option value="Menteri Kehutanan" {{ request('pemberi_izin') == 'Menteri Kehutanan' ? 'selected' : '' }}>Menteri Kehutanan</option>
+                            <option value="BKPM" {{ request('pemberi_izin') == 'BKPM' ? 'selected' : '' }}>BKPM</option>
+                            <option value="Gubernur" {{ request('pemberi_izin') == 'Gubernur' ? 'selected' : '' }}>Gubernur</option>
+                            <option value="Bupati/Walikota" {{ request('pemberi_izin') == 'Bupati/Walikota' ? 'selected' : '' }}>Bupati/Walikota</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
                         <label>Bulan</label>
                         <select name="bulan" class="filter-input">
                             <option value="">-- Semua Bulan --</option>
@@ -703,6 +765,14 @@
                                     echo "<option value='$year' " . (request('tahun') == $year ? 'selected' : '') . ">$year</option>";
                                 }
                             @endphp
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Status</label>
+                        <select name="status" class="filter-input">
+                            <option value="">-- Semua Status --</option>
+                            <option value="Aktif" {{ request('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                            <option value="Tidak Aktif" {{ request('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
                         </select>
                     </div>
                 </div>
@@ -751,12 +821,13 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Perusahaan</th>
-                            <th>Tanggal  SK</th>
+                            <th>Tanggal SK</th>
                             <th>Kabupaten/Kota</th>
                             <th>Penanggung Jawab</th>
                             <th>Jenis Produksi</th>
                             <th>Kapasitas Izin</th>
                             <th>Nomor SK</th>
+                            <th>Status</th>
                             <th>Aksi</th>
                         </tr>
                     </thead>
@@ -770,17 +841,29 @@
                             <td>{{ $item->industri->penanggungjawab }}</td>
                             <td>
                                 @foreach($item->jenisProduksi as $jp)
-                                    <span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin: 2px;">
-                                        {{ $jp->nama }}
-                                    </span>
+                                    @php
+                                        $displayName = $jp->pivot->nama_custom ?: $jp->nama;
+                                        $badgeClass = $jp->pivot->nama_custom ? 'badge-lainnya' : 'badge-jenis';
+                                    @endphp
+                                    <span class="badge {{ $badgeClass }}">{{ $displayName }}</span>
                                 @endforeach
                             </td>
                             <td>
                                 @foreach($item->jenisProduksi as $jp)
-                                    <div>{{ $jp->pivot->kapasitas_izin }}</div>
+                                    @php
+                                        $displayName = $jp->pivot->nama_custom ?: $jp->nama;
+                                    @endphp
+                                    <div>{{ $displayName }}: {{ $jp->pivot->kapasitas_izin }}</div>
                                 @endforeach
                             </td>
                             <td>{{ $item->industri->nomor_izin }}</td>
+                            <td>
+                                @if($item->industri->status == 'Aktif')
+                                    <span class="badge-status-aktif">Aktif</span>
+                                @else
+                                    <span class="badge-status-nonaktif">Tidak Aktif</span>
+                                @endif
+                            </td>
                             <td>
                                 <div class="action-buttons">
                                     <button class="btn-action btn-view" onclick='showDetail(@json($item))'>Lihat</button>
@@ -800,7 +883,7 @@
                 </table>
                 @else
                 <div class="empty-state">
-                    <div class="empty-state-icon">??</div>
+                    <div style="font-size: 48px;">📂</div>
                     <div class="empty-state-text">Tidak ada data ditemukan</div>
                     <p style="font-size: 14px;">Silakan ubah filter atau tambah data baru</p>
                 </div>
@@ -910,8 +993,10 @@
                 let kapasitasHTML = '';
                 
                 item.jenis_produksi.forEach((jp, index) => {
-                    jenisProduksiHTML += `<span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin: 2px 4px 2px 0;">${jp.nama}</span>`;
-                    kapasitasHTML += `<div style="padding: 2px 0;"><strong>${jp.nama}:</strong> ${jp.pivot.kapasitas_izin}</div>`;
+                    const displayName = jp.pivot.nama_custom || jp.nama;
+                    const badgeClass = jp.pivot.nama_custom ? 'badge-lainnya' : 'badge-jenis';
+                    jenisProduksiHTML += `<span class="${badgeClass}">${displayName}</span>`;
+                    kapasitasHTML += `<div style="padding: 2px 0;"><strong>${displayName}:</strong> ${jp.pivot.kapasitas_izin}</div>`;
                 });
                 
                 jenisProduksiElement.innerHTML = jenisProduksiHTML;
@@ -929,10 +1014,11 @@
                 document.getElementById('modal-tanggal').textContent = '-';
             }
 
-            // Handle dokumen izin
+            // Handle dokumen izin - Security: Same response whether document exists or not for unauthenticated users
             const dokumenElement = document.getElementById('modal-dokumen');
-            if (item.dokumen_izin) {
-                if (isLoggedIn) {
+            if (isLoggedIn) {
+                // Authenticated: Show actual status
+                if (item.dokumen_izin) {
                     dokumenElement.innerHTML = `
                         <a href="/storage/${item.dokumen_izin}" 
                            target="_blank" 
@@ -943,18 +1029,19 @@
                         </a>
                     `;
                 } else {
-                    const currentUrl = encodeURIComponent(window.location.href);
-                    const loginUrl = `{{ route('login') }}?from=${currentUrl}`;
-                    
-                    dokumenElement.innerHTML = `
-                        <a href="${loginUrl}" style="color: #64748b; text-decoration: none; font-style: italic; display: inline-flex; align-items: center; gap: 6px;">
-                            <i class="fas fa-lock"></i>
-                            <span>Klik login untuk melihatnya</span>
-                        </a>
-                    `;
+                    dokumenElement.textContent = '-';
                 }
             } else {
-                dokumenElement.innerHTML = '<span style="color: #94a3b8;">Tidak ada dokumen</span>';
+                // Unauthenticated: Always show locked message (prevents information disclosure)
+                const currentUrl = encodeURIComponent(window.location.href);
+                const loginUrl = `{{ route('login') }}?from=${currentUrl}`;
+                
+                dokumenElement.innerHTML = `
+                    <a href="${loginUrl}" style="color: #64748b; text-decoration: none; font-style: italic; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-lock"></i>
+                        <span>Klik login untuk melihatnya</span>
+                    </a>
+                `;
             }
 
             // Tampilkan modal
