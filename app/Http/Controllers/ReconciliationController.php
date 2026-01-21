@@ -251,7 +251,9 @@ class ReconciliationController extends Controller
             if (in_array($unit, ['m3', 'm^3', 'kbk'])) {
                 $volumeByCat['HASIL HUTAN KAYU'] += $vol;
             } elseif (in_array($unit, ['ton', 'kg'])) {
-                $volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $vol;
+                // If unit is kg, convert to ton (divide by 1000)
+                $addedVol = ($unit === 'kg') ? $vol / 1000 : $vol;
+                $volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $addedVol;
             } else {
                 $volumeByCat['HASIL HUTAN LAINNYA'] += $vol;
             }

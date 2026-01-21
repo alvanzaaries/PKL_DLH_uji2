@@ -81,7 +81,7 @@
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">Total Hasil Hutan Kayu</div>
                     <div class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
                         {{ number_format($volumeByCat['HASIL HUTAN KAYU'], 2, '.', ',') }}
-                        <span class="text-sm text-gray-400 font-normal">m&sup3;</span>
+                        <span class="text-sm text-gray-400 font-normal">M&sup3;</span>
                     </div>
                 </div>
                 @endif
@@ -92,7 +92,7 @@
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">Total HHBK</div>
                     <div class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
                         {{ number_format($volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'], 2, '.', ',') }}
-                        <span class="text-sm text-gray-400 font-normal">ton / kg</span>
+                        <span class="text-sm text-gray-400 font-normal">TON</span>
                     </div>
                 </div>
                 @endif
@@ -103,7 +103,7 @@
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">Total HH Lainnya</div>
                     <div class="text-2xl font-bold text-gray-900 dark:text-white mt-2">
                         {{ number_format($volumeByCat['HASIL HUTAN LAINNYA'], 2, '.', ',') }}
-                        <span class="text-sm text-gray-400 font-normal">unit</span>
+                        <span class="text-sm text-gray-400 font-normal"></span>
                     </div>
                 </div>
                 @endif

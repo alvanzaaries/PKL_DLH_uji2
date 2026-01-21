@@ -142,7 +142,9 @@ class DashboardController extends Controller
                 $volumeByCat['HASIL HUTAN KAYU'] += $vol;
                 $setorByCat['HASIL HUTAN KAYU'] += $setor;
             } elseif (in_array($unit, ['ton', 'kg'])) {
-                $volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $vol;
+                // If unit is kg, convert to ton (divide by 1000)
+                $addedVol = ($unit === 'kg') ? $vol / 1000 : $vol;
+                $volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $addedVol;
                 $setorByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $setor;
             } else {
                 $volumeByCat['HASIL HUTAN LAINNYA'] += $vol;
