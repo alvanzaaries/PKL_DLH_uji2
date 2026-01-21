@@ -67,7 +67,7 @@
 
             <a class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('reconciliations.*') ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700' }}" href="{{ route('reconciliations.index') }}">
                 <span class="material-icons-outlined mr-3 {{ request()->routeIs('reconciliations.*') ? '' : 'text-gray-400 group-hover:text-primary dark:text-gray-500 dark:group-hover:text-primary' }}">history</span>
-                Riwayat Rekonsiliasi
+                Arsip Rekonsiliasi
             </a>
 
             <a class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.settings.*') ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700' }}" href="{{ route('admin.settings.index') }}">
