@@ -816,12 +816,24 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                     <tr>
                                         <th class="col-center" style="width: 60px;">No</th>
                                         <th style="min-width: 200px;">Perusahaan</th>
-                                        <th style="width: 150px;">Nomor Dokumen</th>
-                                        <th style="width: 120px;">Tanggal</th>
-                                        <th style="width: 150px;">Asal Kayu</th>
-                                        <th style="width: 150px;">Jenis Kayu</th>
-                                        <th class="col-right" style="width: 120px;">Jumlah Batang</th>
-                                        <th class="col-right" style="width: 120px;">Volume (m³)</th>
+                                        <th style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'nomor_dokumen', 'label' => 'Nomor Dokumen'])
+                                        </th>
+                                        <th style="width: 120px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'tanggal', 'label' => 'Tanggal'])
+                                        </th>
+                                        <th style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'asal_kayu', 'label' => 'Asal Kayu'])
+                                        </th>
+                                        <th style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'jenis_kayu', 'label' => 'Jenis Kayu'])
+                                        </th>
+                                        <th class="col-right" style="width: 120px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'jumlah_batang', 'label' => 'Jumlah Batang'])
+                                        </th>
+                                        <th class="col-right" style="width: 120px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'volume', 'label' => 'Volume (m³)'])
+                                        </th>
                                         <th style="min-width: 150px;">Keterangan</th>
                                     </tr>
                                 </thead>
@@ -831,7 +843,17 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                             <td class="col-center" style="color: #9CA3AF;">{{ $index + 1 }}</td>
                                             <td>
                                                 <div class="company-name">{{ $item->laporan->industri->nama ?? '-' }}</div>
-                                                <div class="meta-info">{{ $item->laporan->industri->nomor_izin ?? '' }}</div>
+                                                @php
+                                                    $indType = optional($item->laporan->industri)->type ?? '';
+                                                    $indTypeLabel = match($indType) {
+                                                        'primer' => 'Industri Primer',
+                                                        'sekunder' => 'Industri Sekunder',
+                                                        'tpt_kb' => 'TPT-KB',
+                                                        'end_user' => 'End User / Perajin',
+                                                        default => $indType,
+                                                    };
+                                                @endphp
+                                                <div class="meta-info">{{ $indTypeLabel }}</div>
                                             </td>
                                             <td>{{ $item->nomor_dokumen }}</td>
                                             <td>{{ date('d/m/Y', strtotime($item->tanggal)) }}</td>
@@ -856,12 +878,24 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                     <tr>
                                         <th class="col-center" style="width: 60px;">No</th>
                                         <th style="min-width: 200px;">Perusahaan</th>
-                                        <th style="width: 150px;">Nomor Dokumen</th>
-                                        <th style="width: 120px;">Tanggal</th>
-                                        <th style="width: 150px;">Asal Kayu</th>
-                                        <th style="width: 150px;">Jenis Olahan</th>
-                                        <th class="col-right" style="width: 120px;">Jumlah Keping</th>
-                                        <th class="col-right" style="width: 120px;">Volume (m³)</th>
+                                        <th style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'nomor_dokumen', 'label' => 'Nomor Dokumen'])
+                                        </th>
+                                        <th style="width: 120px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'tanggal', 'label' => 'Tanggal'])
+                                        </th>
+                                        <th style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'asal_kayu', 'label' => 'Asal Kayu'])
+                                        </th>
+                                        <th style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'jenis_olahan', 'label' => 'Jenis Olahan'])
+                                        </th>
+                                        <th class="col-right" style="width: 120px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'jumlah_keping', 'label' => 'Jumlah Keping'])
+                                        </th>
+                                        <th class="col-right" style="width: 120px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'volume', 'label' => 'Volume (m³)'])
+                                        </th>
                                         <th style="min-width: 150px;">Keterangan</th>
                                     </tr>
                                 </thead>
@@ -896,11 +930,21 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                     <tr>
                                         <th class="col-center" style="width: 60px;">No</th>
                                         <th style="min-width: 200px;">Perusahaan</th>
-                                        <th style="width: 150px;">Jenis Kayu</th>
-                                        <th class="col-right" style="width: 150px;">Persediaan Awal (m³)</th>
-                                        <th class="col-right" style="width: 150px;">Penambahan (m³)</th>
-                                        <th class="col-right" style="width: 150px;">Penggunaan (m³)</th>
-                                        <th class="col-right" style="width: 150px;">Persediaan Akhir (m³)</th>
+                                        <th style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'jenis_kayu', 'label' => 'Jenis Kayu'])
+                                        </th>
+                                        <th class="col-right" style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'persediaan_awal_volume', 'label' => 'Persediaan Awal (m³)'])
+                                        </th>
+                                        <th class="col-right" style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'penambahan_volume', 'label' => 'Penambahan (m³)'])
+                                        </th>
+                                        <th class="col-right" style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'penggunaan_pengurangan_volume', 'label' => 'Penggunaan (m³)'])
+                                        </th>
+                                        <th class="col-right" style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'persediaan_akhir_volume', 'label' => 'Persediaan Akhir (m³)'])
+                                        </th>
                                         <th style="min-width: 150px;">Keterangan</th>
                                     </tr>
                                 </thead>
@@ -938,11 +982,21 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                     <tr>
                                         <th class="col-center" style="width: 60px;">No</th>
                                         <th style="min-width: 200px;">Perusahaan</th>
-                                        <th style="width: 150px;">Jenis Olahan</th>
-                                        <th class="col-right" style="width: 150px;">Persediaan Awal (m³)</th>
-                                        <th class="col-right" style="width: 150px;">Penambahan (m³)</th>
-                                        <th class="col-right" style="width: 150px;">Penggunaan (m³)</th>
-                                        <th class="col-right" style="width: 150px;">Persediaan Akhir (m³)</th>
+                                        <th style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'jenis_olahan', 'label' => 'Jenis Olahan'])
+                                        </th>
+                                        <th class="col-right" style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'persediaan_awal_volume', 'label' => 'Persediaan Awal (m³)'])
+                                        </th>
+                                        <th class="col-right" style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'penambahan_volume', 'label' => 'Penambahan (m³)'])
+                                        </th>
+                                        <th class="col-right" style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'penggunaan_pengurangan_volume', 'label' => 'Penggunaan (m³)'])
+                                        </th>
+                                        <th class="col-right" style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'persediaan_akhir_volume', 'label' => 'Persediaan Akhir (m³)'])
+                                        </th>
                                         <th style="min-width: 150px;">Keterangan</th>
                                     </tr>
                                 </thead>
@@ -981,12 +1035,24 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                     <tr>
                                         <th class="col-center" style="width: 60px;">No</th>
                                         <th style="min-width: 200px;">Perusahaan</th>
-                                        <th style="width: 150px;">Nomor Dokumen</th>
-                                        <th style="width: 120px;">Tanggal</th>
-                                        <th style="width: 150px;">Tujuan Kirim</th>
-                                        <th style="width: 150px;">Jenis Olahan</th>
-                                        <th class="col-right" style="width: 120px;">Jumlah Keping</th>
-                                        <th class="col-right" style="width: 120px;">Volume (m³)</th>
+                                        <th style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'nomor_dokumen', 'label' => 'Nomor Dokumen'])
+                                        </th>
+                                        <th style="width: 120px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'tanggal', 'label' => 'Tanggal'])
+                                        </th>
+                                        <th style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'tujuan_kirim', 'label' => 'Tujuan Kirim'])
+                                        </th>
+                                        <th style="width: 150px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'jenis_olahan', 'label' => 'Jenis Olahan'])
+                                        </th>
+                                        <th class="col-right" style="width: 120px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'jumlah_keping', 'label' => 'Jumlah Keping'])
+                                        </th>
+                                        <th class="col-right" style="width: 120px;">
+                                            @include('laporan.partials.sortable-header', ['column' => 'volume', 'label' => 'Volume (m³)'])
+                                        </th>
                                         <th style="min-width: 150px;">Keterangan</th>
                                     </tr>
                                 </thead>
