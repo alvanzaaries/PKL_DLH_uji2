@@ -21,6 +21,11 @@
         <div class="p-8">
             <p class="mb-6 text-gray-600 dark:text-gray-400">
                 Silakan unggah file Excel hasil rekonsiliasi. Pastikan file memiliki format yang sesuai sebelum diunggah.
+                <br>
+                <a href="{{ asset('template/PNBP/Format Kertas Kerja Rekon PSDH Triwulan.xlsx') }}" download class="text-primary hover:underline font-medium inline-flex items-center mt-2">
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Download Template Excel
+                </a>
             </p>
 
             {{-- Error Alert --}}
