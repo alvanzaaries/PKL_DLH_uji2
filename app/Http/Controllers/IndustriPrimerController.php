@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\IndustriPrimer;
+use App\Models\MasterJenisProduksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
@@ -26,7 +27,12 @@ class IndustriPrimerController extends Controller implements HasMiddleware
      */
     public function create()
     {
-        return view('Industri.industri-primer.create');
+        $masterJenisProduksi = MasterJenisProduksi::aktif()
+            ->kategori('primer')
+            ->orderBy('nama')
+            ->get();
+            
+        return view('Industri.industri-primer.create', compact('masterJenisProduksi'));
     }
 
     /**
@@ -42,18 +48,14 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             'kabupaten' => 'required|string|max:255',
             'kontak' => 'required|string|max:255',
             'pemberi_izin' => 'required|string|max:255',
-            'jenis_produksi' => 'required|string|max:255',
-            'jenis_produksi_lainnya' => 'nullable|string|max:255',
-            'kapasitas_izin' => 'required|string|max:255',
+            'jenis_produksi' => 'required|array|min:1',
+            'jenis_produksi.*' => 'required|exists:master_jenis_produksi,id',
+            'kapasitas_izin' => 'required|array',
+            'kapasitas_izin.*' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'nomor_izin' => 'required|string|max:255',
             'dokumen_izin' => 'nullable|file|mimes:pdf|max:5120', // max 5MB
         ]);
-
-        // Jika jenis produksi adalah Lainnya, gunakan input manual
-        if ($validated['jenis_produksi'] === 'Lainnya' && $request->filled('jenis_produksi_lainnya')) {
-            $validated['jenis_produksi'] = $validated['jenis_produksi_lainnya'];
-        }
 
         // Upload dokumen izin jika ada dengan penamaan terstruktur
         if ($request->hasFile('dokumen_izin')) {
@@ -85,13 +87,21 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         ]);
 
         // Step 2: Insert ke tabel industri_primer (child) dengan FK industri_id
-        IndustriPrimer::create([
+        $industriPrimer = IndustriPrimer::create([
             'industri_id' => $industri->id, // FK ke parent
             'pemberi_izin' => $validated['pemberi_izin'],
-            'jenis_produksi' => $validated['jenis_produksi'],
-            'kapasitas_izin' => $validated['kapasitas_izin'],
+            'kapasitas_izin' => $validated['kapasitas_izin'][0] ?? '0', // Kapasitas default (bisa diupdate nanti)
             'dokumen_izin' => $validated['dokumen_izin'] ?? null,
         ]);
+
+        // Step 3: Attach jenis produksi ke tabel pivot dengan kapasitas masing-masing
+        $jenisProduksiData = [];
+        foreach ($validated['jenis_produksi'] as $index => $jenisProduksiId) {
+            $jenisProduksiData[$jenisProduksiId] = [
+                'kapasitas_izin' => $validated['kapasitas_izin'][$index] ?? '0'
+            ];
+        }
+        $industriPrimer->jenisProduksi()->attach($jenisProduksiData);
 
         // Redirect dengan pesan sukses
         return redirect()->route('industri-primer.index')
@@ -103,8 +113,8 @@ class IndustriPrimerController extends Controller implements HasMiddleware
      */
     public function index(Request $request)
     {
-        // Query dengan join ke tabel industries (parent)
-        $query = IndustriPrimer::with('industri'); // Eager load relationship
+        // Query dengan join ke tabel industries (parent) dan eager load jenis produksi
+        $query = IndustriPrimer::with(['industri', 'jenisProduksi']);
 
         // Filter berdasarkan nama (dari tabel industries)
         if ($request->filled('nama')) {
@@ -120,11 +130,11 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             });
         }
 
-        // Filter berdasarkan jenis produksi (dari tabel industri_primer)
-        // Gunakan LIKE untuk partial matching agar bisa menemukan data 
-        // walaupun jenis_produksi berisi beberapa nilai (misal: "olahan, papan, dan gergajian")
+        // Filter berdasarkan jenis produksi (dari relasi many-to-many)
         if ($request->filled('jenis_produksi')) {
-            $query->where('jenis_produksi', 'like', '%' . $request->jenis_produksi . '%');
+            $query->whereHas('jenisProduksi', function($q) use ($request) {
+                $q->where('master_jenis_produksi.id', $request->jenis_produksi);
+            });
         }
 
         // Filter berdasarkan kapasitas izin (dari tabel industri_primer)
@@ -213,25 +223,14 @@ class IndustriPrimerController extends Controller implements HasMiddleware
                 ->pluck('kabupaten');
         });
 
-        // Ambil daftar jenis produksi yang sudah terdaftar di database
-        $jenisProduksiList = IndustriPrimer::distinct()
-            ->orderBy('jenis_produksi')
-            ->pluck('jenis_produksi')
-            ->filter() // Remove null values
-            ->values();
+        // Ambil daftar jenis produksi dari master_jenis_produksi untuk filter dropdown
+        $jenisProduksiList = MasterJenisProduksi::aktif()
+            ->kategori('primer')
+            ->orderBy('nama')
+            ->get();
             
-        // Parse jenis produksi yang mengandung multiple values (misal: "olahan, papan, gergajian")
-        // Split by comma dan ambil unique values
-        $jenisProduksiUnique = collect();
-        foreach ($jenisProduksiList as $jenis) {
-            $split = array_map('trim', explode(',', $jenis));
-            foreach ($split as $item) {
-                if (!empty($item)) {
-                    $jenisProduksiUnique->push($item);
-                }
-            }
-        }
-        $jenisProduksiList = $jenisProduksiUnique->unique()->sort()->values();
+        // Parse jenis produksi yang mengandung multiple values tidak diperlukan lagi
+        // karena sudah menggunakan master table
 
         // Data untuk visualisasi chart — gunakan DATA YANG SAMA dengan hasil filter
         // Ambil semua record dari query yang sudah diberi filter (clone agar paginate tetap bekerja)
@@ -287,9 +286,14 @@ class IndustriPrimerController extends Controller implements HasMiddleware
      */
     public function edit($id)
     {
-        $industriPrimer = IndustriPrimer::with('industri')->findOrFail($id);
+        $industriPrimer = IndustriPrimer::with(['industri', 'jenisProduksi'])->findOrFail($id);
         
-        return view('Industri.industri-primer.edit', compact('industriPrimer'));
+        $masterJenisProduksi = MasterJenisProduksi::aktif()
+            ->kategori('primer')
+            ->orderBy('nama')
+            ->get();
+        
+        return view('Industri.industri-primer.edit', compact('industriPrimer', 'masterJenisProduksi'));
     }
 
     /**
@@ -304,18 +308,14 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             'kabupaten' => 'required|string|max:255',
             'kontak' => 'required|string|max:255',
             'pemberi_izin' => 'required|string|max:255',
-            'jenis_produksi' => 'required|string|max:255',
-            'jenis_produksi_lainnya' => 'nullable|string|max:255',
-            'kapasitas_izin' => 'required|string|max:255',
+            'jenis_produksi' => 'required|array|min:1',
+            'jenis_produksi.*' => 'required|exists:master_jenis_produksi,id',
+            'kapasitas_izin' => 'required|array',
+            'kapasitas_izin.*' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'nomor_izin' => 'required|string|max:255',
             'dokumen_izin' => 'nullable|file|mimes:pdf|max:5120'
         ]);
-
-        // Jika jenis produksi adalah Lainnya, gunakan input manual
-        if ($validated['jenis_produksi'] === 'Lainnya' && $request->filled('jenis_produksi_lainnya')) {
-            $validated['jenis_produksi'] = $validated['jenis_produksi_lainnya'];
-        }
 
         // Find records
         $industriPrimer = IndustriPrimer::findOrFail($id);
@@ -357,8 +357,7 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         // Update child table (industri_primer)
         $updateData = [
             'pemberi_izin' => $validated['pemberi_izin'],
-            'jenis_produksi' => $validated['jenis_produksi'],
-            'kapasitas_izin' => $validated['kapasitas_izin'],
+            'kapasitas_izin' => $validated['kapasitas_izin'][0] ?? '0',
         ];
 
         if (isset($validated['dokumen_izin'])) {
@@ -366,6 +365,15 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         }
 
         $industriPrimer->update($updateData);
+
+        // Sync jenis produksi dengan kapasitas masing-masing
+        $jenisProduksiData = [];
+        foreach ($validated['jenis_produksi'] as $index => $jenisProduksiId) {
+            $jenisProduksiData[$jenisProduksiId] = [
+                'kapasitas_izin' => $validated['kapasitas_izin'][$index] ?? '0'
+            ];
+        }
+        $industriPrimer->jenisProduksi()->sync($jenisProduksiData);
 
         return redirect()->route('industri-primer.index')
             ->with('success', 'Data industri primer berhasil diupdate!');

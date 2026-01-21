@@ -659,8 +659,8 @@
                         <select name="jenis_produksi" class="filter-input">
                             <option value="">-- Semua Jenis --</option>
                             @foreach($jenisProduksiList as $jenis)
-                                <option value="{{ $jenis }}" {{ request('jenis_produksi') == $jenis ? 'selected' : '' }}>
-                                    {{ $jenis }}
+                                <option value="{{ $jenis->id }}" {{ request('jenis_produksi') == $jenis->id ? 'selected' : '' }}>
+                                    {{ $jenis->nama }}
                                 </option>
                             @endforeach
                         </select>
@@ -768,8 +768,18 @@
                             <td>{{ $item->industri->tanggal ? \Carbon\Carbon::parse($item->industri->tanggal)->format('d/m/Y') : '-' }}</td>
                             <td>{{ $item->industri->kabupaten }}</td>
                             <td>{{ $item->industri->penanggungjawab }}</td>
-                            <td>{{ $item->jenis_produksi }}</td>
-                            <td>{{ $item->kapasitas_izin }}</td>
+                            <td>
+                                @foreach($item->jenisProduksi as $jp)
+                                    <span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin: 2px;">
+                                        {{ $jp->nama }}
+                                    </span>
+                                @endforeach
+                            </td>
+                            <td>
+                                @foreach($item->jenisProduksi as $jp)
+                                    <div>{{ $jp->pivot->kapasitas_izin }}</div>
+                                @endforeach
+                            </td>
                             <td>{{ $item->industri->nomor_izin }}</td>
                             <td>
                                 <div class="action-buttons">
@@ -890,8 +900,27 @@
             document.getElementById('modal-penanggungjawab').textContent = item.industri.penanggungjawab;
             document.getElementById('modal-kontak').textContent = item.industri.kontak;
             document.getElementById('modal-pemberi-izin').textContent = item.pemberi_izin;
-            document.getElementById('modal-jenis-produksi').textContent = item.jenis_produksi;
-            document.getElementById('modal-kapasitas').textContent = item.kapasitas_izin;
+            
+            // Tampilkan multiple jenis produksi dengan kapasitas
+            const jenisProduksiElement = document.getElementById('modal-jenis-produksi');
+            const kapasitasElement = document.getElementById('modal-kapasitas');
+            
+            if (item.jenis_produksi && item.jenis_produksi.length > 0) {
+                let jenisProduksiHTML = '';
+                let kapasitasHTML = '';
+                
+                item.jenis_produksi.forEach((jp, index) => {
+                    jenisProduksiHTML += `<span style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin: 2px 4px 2px 0;">${jp.nama}</span>`;
+                    kapasitasHTML += `<div style="padding: 2px 0;"><strong>${jp.nama}:</strong> ${jp.pivot.kapasitas_izin}</div>`;
+                });
+                
+                jenisProduksiElement.innerHTML = jenisProduksiHTML;
+                kapasitasElement.innerHTML = kapasitasHTML;
+            } else {
+                jenisProduksiElement.textContent = '-';
+                kapasitasElement.textContent = '-';
+            }
+            
             // Tanggal (from parent industri)
             if(item.industri && item.industri.tanggal) {
                 const t = new Date(item.industri.tanggal);

@@ -18,7 +18,6 @@ class IndustriPrimer extends Model
     protected $fillable = [
         'industri_id',
         'pemberi_izin',
-        'jenis_produksi',
         'kapasitas_izin',
         'pelaporan',
         'dokumen_izin'
@@ -34,6 +33,20 @@ class IndustriPrimer extends Model
     }
 
     /**
+     * Relationship polymorphic many-to-many ke master jenis produksi
+     */
+    public function jenisProduksi()
+    {
+        return $this->morphToMany(
+            MasterJenisProduksi::class,
+            'industri',
+            'industri_jenis_produksi',
+            'industri_id',
+            'jenis_produksi_id'
+        )->withPivot('kapasitas_izin')->withTimestamps();
+    }
+
+    /**
      * Scope untuk filter berdasarkan kapasitas izin
      */
     public function scopeByKapasitas($query, $kapasitas)
@@ -46,7 +59,10 @@ class IndustriPrimer extends Model
      */
     public function scopeByJenisProduksi($query, $jenisProduksi)
     {
-        return $query->where('jenis_produksi', $jenisProduksi);
+        return $query->whereHas('jenisProduksi', function($q) use ($jenisProduksi) {
+            $q->where('master_jenis_produksi.id', $jenisProduksi)
+              ->orWhere('master_jenis_produksi.nama', $jenisProduksi);
+        });
     }
 
     /**

@@ -18,7 +18,6 @@ class IndustriSekunder extends Model
     protected $fillable = [
         'industri_id',
         'pemberi_izin',
-        'jenis_produksi',
         'kapasitas_izin',
     ];
 
@@ -28,6 +27,20 @@ class IndustriSekunder extends Model
     public function industri()
     {
         return $this->belongsTo(IndustriBase::class, 'industri_id');
+    }
+
+    /**
+     * Relationship polymorphic many-to-many ke master jenis produksi
+     */
+    public function jenisProduksi()
+    {
+        return $this->morphToMany(
+            MasterJenisProduksi::class,
+            'industri',
+            'industri_jenis_produksi',
+            'industri_id',
+            'jenis_produksi_id'
+        )->withPivot('kapasitas_izin')->withTimestamps();
     }
 
     /**
