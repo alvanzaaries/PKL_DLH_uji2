@@ -252,6 +252,16 @@
                     </select>
                 </div>
 
+                <div class="filter-group">
+                    <label class="filter-label" for="status_industri">Status Industri</label>
+                    <select name="status_industri" id="status_industri" class="filter-input">
+                        <option value="aktif" {{ request('status_industri', 'aktif') == 'aktif' ? 'selected' : '' }}>Hanya
+                            Aktif</option>
+                        <option value="semua" {{ request('status_industri') == 'semua' ? 'selected' : '' }}>Semua Industri
+                        </option>
+                    </select>
+                </div>
+
                 <div class="filter-actions" style="margin-left: auto; display: flex; gap: 8px;">
                     <a href="{{ route('laporan.index') }}" class="btn btn-secondary">
                         <i class="fas fa-undo-alt"></i> Reset
