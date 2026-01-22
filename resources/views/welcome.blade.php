@@ -152,28 +152,28 @@
 
             <div
                 class="group relative bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full">
-                <div class="h-1.5 bg-gradient-to-r from-green-500 to-emerald-700"></div>
+                <div class="h-1.5 bg-gradient-to-r from-[#72C55E] to-[#599C48]"></div>
                 <div class="p-4 flex flex-col items-center text-center flex-grow">
                     <div class="w-12 h-12 mb-3 relative group-hover:scale-110 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-green-100 dark:bg-green-900/30 rounded-full animate-pulse">
+                        <div class="absolute inset-0 bg-[#72C55E]/20 dark:bg-[#72C55E]/30 rounded-full animate-pulse">
                         </div>
                         <a href="{{ route('industri.dashboard') }}" target="_blank"
-                            class="relative w-full h-full rounded-full border-2 border-white dark:border-gray-700 shadow bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                            class="relative w-full h-full rounded-full border-2 border-white dark:border-gray-700 shadow bg-gradient-to-br from-[#72C55E] to-[#599C48] flex items-center justify-center">
                             <span class="material-icons text-white text-2xl">storage</span>
                         </a>
                     </div>
 
                     <h2
-                        class="text-lg font-extrabold text-gray-900 dark:text-white mb-1 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">
+                        class="text-lg font-extrabold text-gray-900 dark:text-white mb-1 group-hover:text-[#457838] dark:group-hover:text-[#8ADB76] transition-colors">
                         DATABASE INDUSTRI </h2>
                     <h3
-                        class="text-[11px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider mb-2 border-b border-green-100 dark:border-green-800 pb-1">
+                        class="text-[11px] font-bold text-[#5EA44D] dark:text-[#72C55E] uppercase tracking-wider mb-2 border-b border-[#72C55E]/30 dark:border-[#72C55E]/30 pb-1">
                         Database Industri Kehutanan </h3>
                     <p class="text-gray-600 dark:text-gray-400 mb-4 text-xs leading-snug line-clamp-3">Layanan digital untuk
                         menambahkan, memantau database keaktifan industri kehutanan di Jawa Tengah secara real-time.</p>
 
                     <div class="mt-auto w-full">
-                        <a class="inline-flex items-center justify-center w-full bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-green-200 dark:border-green-800"
+                        <a class="inline-flex items-center justify-center w-full bg-[#72C55E]/10 hover:bg-[#72C55E]/20 dark:bg-[#72C55E]/20 dark:hover:bg-[#72C55E]/30 text-[#457838] dark:text-[#A8E699] font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-[#72C55E]/40 dark:border-[#72C55E]/40"
                             href="{{ route('industri.dashboard') }}" target="_blank">
                             <span>Akses Aplikasi</span>
                             <span
