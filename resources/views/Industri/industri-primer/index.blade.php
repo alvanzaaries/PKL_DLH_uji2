@@ -673,9 +673,11 @@
                 <p class="page-subtitle">Daftar perusahaan industri primer pengolahan hasil hutan</p>
             </div>
             @auth
+            @if(auth()->user()->role === 'admin')
             <a href="{{ route('industri-primer.create') }}" class="btn btn-primary">
                 <span>+</span> Tambah Data Baru
             </a>
+            @endif
             @endauth
         </div>
 
@@ -868,12 +870,14 @@
                                 <div class="action-buttons">
                                     <button class="btn-action btn-view" onclick='showDetail(@json($item))'>Lihat</button>
                                     @auth
+                                    @if(auth()->user()->role === 'admin')
                                     <a href="{{ route('industri-primer.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
                                     <form action="{{ route('industri-primer.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('{{ $item->industri->nama }}')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-action btn-delete">Hapus</button>
                                     </form>
+                                    @endif
                                     @endauth
                                 </div>
                             </td>
@@ -973,6 +977,7 @@
 
     <script>
         const isLoggedIn = @json(auth()->check());
+        const isAdmin = @json(auth()->check() && auth()->user()->role === 'admin');
 
         function showDetail(item) {
             // Populate modal dengan data
@@ -1016,8 +1021,8 @@
 
             // Handle dokumen izin - Security: Same response whether document exists or not for unauthenticated users
             const dokumenElement = document.getElementById('modal-dokumen');
-            if (isLoggedIn) {
-                // Authenticated: Show actual status
+            if (isAdmin) {
+                // Admin: Show download link if document exists
                 if (item.dokumen_izin) {
                     dokumenElement.innerHTML = `
                         <a href="/storage/${item.dokumen_izin}" 
@@ -1032,16 +1037,8 @@
                     dokumenElement.textContent = '-';
                 }
             } else {
-                // Unauthenticated: Always show locked message (prevents information disclosure)
-                const currentUrl = encodeURIComponent(window.location.href);
-                const loginUrl = `{{ route('login') }}?from=${currentUrl}`;
-                
-                dokumenElement.innerHTML = `
-                    <a href="${loginUrl}" style="color: #64748b; text-decoration: none; font-style: italic; display: inline-flex; align-items: center; gap: 6px;">
-                        <i class="fas fa-lock"></i>
-                        <span>Klik login untuk melihatnya</span>
-                    </a>
-                `;
+                // Non-admin (including unauthenticated): Always show "-" (prevents information disclosure)
+                dokumenElement.textContent = '-';
             }
 
             // Tampilkan modal

@@ -55,17 +55,11 @@ Route::prefix('industri')->group(function () {
 // ===================================================================
 // LEGACY URLS (Redirect to new system prefixes)
 // ===================================================================
-Route::get('/public/dashboard', fn() => redirect()->route('public.dashboard'));
+Route::get('/public/dashboard', fn() => redirect()->route('industri.dashboard'));
 Route::get('/industri-primer', fn() => redirect()->route('industri-primer.index'));
 Route::get('/industri-sekunder', fn() => redirect()->route('industri-sekunder.index'));
 Route::get('/tptkb', fn() => redirect()->route('tptkb.index'));
 Route::get('/perajin', fn() => redirect()->route('perajin.index'));
-Route::get('/industri-primer/{id}/dokumen', fn($id) => redirect()->route('industri-primer.download-dokumen', ['id' => $id]));
-Route::get('/public/dashboard', fn () => redirect()->route('public.dashboard'));
-Route::get('/industri-primer', fn () => redirect()->route('industri-primer.index'));
-Route::get('/industri-sekunder', fn () => redirect()->route('industri-sekunder.index'));
-Route::get('/tptkb', fn () => redirect()->route('tptkb.index'));
-Route::get('/perajin', fn () => redirect()->route('perajin.index'));
 
 // ===================================================================
 // AUTH ROUTES
@@ -137,6 +131,7 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
     Route::get('/primer/{id}/edit', [IndustriPrimerController::class, 'edit'])->name('industri-primer.edit');
     Route::put('/primer/{id}', [IndustriPrimerController::class, 'update'])->name('industri-primer.update');
     Route::delete('/primer/{id}', [IndustriPrimerController::class, 'destroy'])->name('industri-primer.destroy');
+    Route::get('/primer/{id}/dokumen', [IndustriPrimerController::class, 'downloadDokumen'])->name('industri-primer.download-dokumen');
 
     // Industri Sekunder - CRUD
     Route::get('/sekunder/create', [IndustriSekunderController::class, 'create'])->name('industri-sekunder.create');

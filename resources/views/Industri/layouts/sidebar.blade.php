@@ -215,7 +215,7 @@
     <div class="sidebar">
         <div class="sidebar-header">
             <div class="sidebar-logo">
-                <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah">
+                <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah" onerror="this.src='{{ asset('img/logoDLHK.png') }}'">
             </div>
             <div class="sidebar-text">
                 <p class="sidebar-text-top">Pemerintah Provinsi Jawa Tengah</p>

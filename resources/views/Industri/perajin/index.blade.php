@@ -651,9 +651,11 @@
                     <p class="page-subtitle">Daftar Perajin dan Pengguna Akhir</p>
                 </div>
                 @auth
+                @if(auth()->user()->role === 'admin')
                 <a href="{{ route('perajin.create') }}" class="btn btn-primary">
                     + Tambah Data Baru
                 </a>
+                @endif
                 @endauth
             </div>
 
@@ -783,12 +785,14 @@
                                             <div class="action-buttons">
                                                 <button class="btn-action btn-view" onclick='showDetail(@json($item))'><i class="fas fa-info-circle"></i> Lihat</button>
                                                 @auth
+                                                @if(auth()->user()->role === 'admin')
                                                 <a href="{{ route('perajin.edit', $item) }}" class="btn-action btn-edit"><i class="fas fa-pen"></i> Edit</a>
                                                 <form action="{{ route('perajin.destroy', $item) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn-action btn-delete"><i class="fas fa-times"></i> Hapus</button>
                                                 </form>
+                                                @endif
                                                 @endauth
                                             </div>
                                         </td>

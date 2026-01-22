@@ -720,9 +720,11 @@
                 <p class="page-subtitle">Daftar Tempat Penampungan Tebangan Kayu Bulat</p>
             </div>
             @auth
+            @if(auth()->user()->role === 'admin')
             <a href="{{ route('tptkb.create') }}" class="btn btn-primary">
                 <span>+</span> Tambah Data Baru
             </a>
+            @endif
             @endauth
         </div>
 
@@ -887,12 +889,14 @@
                                 <div class="action-buttons">
                                     <button class="btn-action btn-view" onclick='showDetail(@json($item), {{ $item->isMasaBerlakuAktif() ? 'true' : 'false' }})'>Lihat</button>
                                     @auth
+                                    @if(auth()->user()->role === 'admin')
                                     <a href="{{ route('tptkb.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
                                     <form action="{{ route('tptkb.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-action btn-delete">Hapus</button>
                                     </form>
+                                    @endif
                                     @endauth
                                 </div>
                             </td>

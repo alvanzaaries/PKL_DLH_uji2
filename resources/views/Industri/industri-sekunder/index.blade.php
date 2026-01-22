@@ -858,9 +858,11 @@
                 <p class="page-subtitle">Daftar perusahaan industri sekunder pengolahan hasil hutan</p>
             </div>
             @auth
+            @if(auth()->user()->role === 'admin')
             <a href="{{ route('industri-sekunder.create') }}" class="btn btn-primary">
                 <span>+</span> Tambah Data Baru
             </a>
+            @endif
             @endauth
         </div>
 
@@ -1055,12 +1057,14 @@
                                 <div class="action-buttons">
                                     <button class="btn-action btn-view" onclick='showDetail(@json($item))'>Lihat</button>
                                     @auth
+                                    @if(auth()->user()->role === 'admin')
                                     <a href="{{ route('industri-sekunder.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
                                     <form action="{{ route('industri-sekunder.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('{{ $item->industri->nama }}')">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-action btn-delete">Hapus</button>
                                     </form>
+                                    @endif
                                     @endauth
                                 </div>
                             </td>
