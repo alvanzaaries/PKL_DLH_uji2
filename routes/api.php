@@ -15,9 +15,12 @@ use App\Http\Controllers\Api\ApiLaporanController;
 |
 */
 
-// Public API endpoint untuk upload laporan
-// Authentication bisa ditambahkan nanti (sanctum, passport, atau custom token)
-Route::post('/laporan/upload', [ApiLaporanController::class, 'upload']);
+// Protected API endpoint untuk upload laporan
+// Requires API key authentication via X-API-Key header
+// Rate limited to 60 requests per minute
+Route::middleware(['api.key', 'throttle:60,1'])->group(function () {
+    Route::post('/laporan/upload', [ApiLaporanController::class, 'upload']);
+});
 
 // Health check endpoint
 Route::get('/health', function () {

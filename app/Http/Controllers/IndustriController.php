@@ -17,24 +17,31 @@ class IndustriController extends Controller
     public function index()
     {
         $months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-        
+
         // Ambil filter dari request
         $tahun = request('tahun', date('Y')); // Tahun dari filter atau tahun saat ini
         $kabupatenKota = request('kabupaten'); // Filter kabupaten/kota
         $jenisLaporan = request('jenis_laporan'); // Filter jenis laporan
-        
-        $bulanSekarang = (int)date('n'); // Bulan saat ini (1-12)
-        $tahunSekarang = (int)date('Y'); // Tahun saat ini
-        
+        $statusIndustri = request('status_industri', 'aktif'); // Default: hanya industri aktif
+
+        $bulanSekarang = (int) date('n'); // Bulan saat ini (1-12)
+        $tahunSekarang = (int) date('Y'); // Tahun saat ini
+
         // Query dengan filter, exclude industri end_user
         $query = Industri::query();
-        $query->where(function($q) {
+        $query->where(function ($q) {
             $q->whereNull('type')->orWhereNotIn('type', ['end_user']);
         });
+
+        // Filter berdasarkan status industri (default: hanya aktif)
+        if ($statusIndustri !== 'semua') {
+            $query->where('status', $statusIndustri);
+        }
+
         if ($kabupatenKota) {
             $query->where('kabupaten', $kabupatenKota);
         }
-        $companies = $query->get()->map(function($industri) use ($tahun, $bulanSekarang, $tahunSekarang, $jenisLaporan) {
+        $companies = $query->get()->map(function ($industri) use ($tahun, $bulanSekarang, $tahunSekarang, $jenisLaporan) {
             $laporanPerBulan = [];
             for ($bulan = 1; $bulan <= 12; $bulan++) {
                 $laporanQuery = $industri->laporan()
@@ -52,7 +59,7 @@ class IndustriController extends Controller
                     $laporanPerBulan[] = 'wait';
                 }
             }
-            return (object)[
+            return (object) [
                 'id' => $industri->id,
                 'nomor_izin' => $industri->nomor_izin,
                 'nama' => $industri->nama,
@@ -67,7 +74,8 @@ class IndustriController extends Controller
         $reportedByType = ['primer' => 0, 'sekunder' => 0, 'tpt_kb' => 0];
         foreach ($companies as $c) {
             $t = $c->type ?? null;
-            if (!in_array($t, ['primer', 'sekunder', 'tpt_kb'])) continue;
+            if (!in_array($t, ['primer', 'sekunder', 'tpt_kb']))
+                continue;
             $countsByType[$t]++;
             $statusThisMonth = $c->laporan[$bulanSekarang - 1] ?? null;
             if ($statusThisMonth == 'ok') {
@@ -77,13 +85,13 @@ class IndustriController extends Controller
         $percentPrimer = $countsByType['primer'] > 0 ? round(($reportedByType['primer'] / $countsByType['primer']) * 100, 1) : 0;
         $percentSekunder = $countsByType['sekunder'] > 0 ? round(($reportedByType['sekunder'] / $countsByType['sekunder']) * 100, 1) : 0;
         $percentTptkb = $countsByType['tpt_kb'] > 0 ? round(($reportedByType['tpt_kb'] / $countsByType['tpt_kb']) * 100, 1) : 0;
-        
+
         // Ambil semua kabupaten/kota untuk dropdown filter
         $kabupatens = Industri::distinct()
             ->orderBy('kabupaten')
             ->pluck('kabupaten')
             ->filter();
-        
+
         // Ambil semua jenis laporan dari constant (best practice: single source of truth)
         $jenisLaporans = Laporan::getJenisLaporan();
 
@@ -113,7 +121,8 @@ class IndustriController extends Controller
             'reportedByType',
             'percentPrimer',
             'percentSekunder',
-            'percentTptkb'
+            'percentTptkb',
+            'statusIndustri'
         ));
     }
 

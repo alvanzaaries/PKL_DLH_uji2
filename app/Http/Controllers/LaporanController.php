@@ -132,13 +132,13 @@ class LaporanController extends Controller
             }
         }
 
-        // Build displayErrors: replace 'Baris N' with per-page number when the source row N is on this page
+        // Build displayErrors: enhance error messages to show both Excel row and data row numbers
         $displayErrors = [];
-        // map source_row => on-page index (1-based)
+        // map source_row => continuous data row number (1-based) for ALL rows, not just current page
         $sourceToDisplay = [];
-        foreach ($currentItems as $idx => $item) {
+        foreach ($allRows as $idx => $item) {
             if (is_array($item) && isset($item['source_row'])) {
-                $sourceToDisplay[(int) $item['source_row']] = $idx + 1; // per-page index
+                $sourceToDisplay[(int) $item['source_row']] = $idx + 1; // continuous numbering from all data
             }
         }
 
@@ -147,7 +147,8 @@ class LaporanController extends Controller
                 $src = (int) $m[1];
                 if (isset($sourceToDisplay[$src])) {
                     $disp = $sourceToDisplay[$src];
-                    $displayErrors[] = preg_replace('/Baris\s+' . $src . ':/i', 'Baris ' . $disp . ':', $err);
+                    // Show both Excel row and data row: "Baris Excel 16 (Data #1): ..."
+                    $displayErrors[] = preg_replace('/Baris\s+' . $src . ':/i', 'Baris Excel ' . $src . ' (Data #' . $disp . '):', $err);
                     continue;
                 }
             }
@@ -389,8 +390,14 @@ class LaporanController extends Controller
                 'path_laporan' => '',
             ]);
 
+            // Normalisasi rows agar konsisten (flat array) sebelum dikirim ke service
+            // Meskipun service sudah handle, ini best practice untuk memastikan data bersih
+            $cleanedRows = array_map(function ($item) {
+                return isset($item['cells']) ? $item['cells'] : $item;
+            }, $dataRows);
+
             // Simpan detail berdasarkan jenis laporan menggunakan service (gunakan edited data jika ada)
-            $this->dataService->saveDetailData($laporan, $request->jenis_laporan, $dataRows);
+            $this->dataService->saveDetailData($laporan, $request->jenis_laporan, $cleanedRows);
 
             DB::commit();
 

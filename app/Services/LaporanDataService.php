@@ -23,7 +23,10 @@ class LaporanDataService
         switch ($jenisLaporan) {
             case 'Laporan Penerimaan Kayu Bulat':
                 // Kolom: Nomor Dokumen | Tanggal | Asal Kayu | Jenis Kayu | Jumlah Batang | Volume | Keterangan
-                foreach ($rows as $row) {
+                foreach ($rows as $item) {
+                    // Handle both wrapped format (['cells' => [...]]) and flat format ([...])
+                    $row = isset($item['cells']) ? $item['cells'] : $item;
+
                     laporan_penerimaan_kayu_bulat::create([
                         'laporan_id' => $laporan->id,
                         'nomor_dokumen' => $row[0] ?? '',
@@ -39,7 +42,9 @@ class LaporanDataService
 
             case 'Laporan Mutasi Kayu Bulat (LMKB)':
                 // Kolom: Jenis Kayu | Persediaan Awal | Penambahan | Penggunaan | Persediaan Akhir | Keterangan
-                foreach ($rows as $row) {
+                foreach ($rows as $item) {
+                    $row = isset($item['cells']) ? $item['cells'] : $item;
+
                     laporan_mutasi_kayu_bulat::create([
                         'laporan_id' => $laporan->id,
                         'jenis_kayu' => $row[0] ?? '',
@@ -54,7 +59,9 @@ class LaporanDataService
 
             case 'Laporan Penerimaan Kayu Olahan':
                 // Kolom: Nomor Dokumen | Tanggal | Asal Kayu | Jenis Olahan | Jumlah Keping | Volume | Keterangan
-                foreach ($rows as $row) {
+                foreach ($rows as $item) {
+                    $row = isset($item['cells']) ? $item['cells'] : $item;
+
                     laporan_penerimaan_kayu_olahan::create([
                         'laporan_id' => $laporan->id,
                         'nomor_dokumen' => $row[0] ?? '',
@@ -70,7 +77,9 @@ class LaporanDataService
 
             case 'Laporan Mutasi Kayu Olahan (LMKO)':
                 // Kolom: Jenis Olahan | Persediaan Awal | Penambahan | Penggunaan | Persediaan Akhir | Keterangan
-                foreach ($rows as $row) {
+                foreach ($rows as $item) {
+                    $row = isset($item['cells']) ? $item['cells'] : $item;
+
                     laporan_mutasi_kayu_olahan::create([
                         'laporan_id' => $laporan->id,
                         'jenis_olahan' => $row[0] ?? '',
@@ -85,7 +94,9 @@ class LaporanDataService
 
             case 'Laporan Penjualan Kayu Olahan':
                 // Kolom: Nomor Dokumen | Tanggal | Tujuan Kirim | Jenis Olahan | Jumlah Keping | Volume | Keterangan
-                foreach ($rows as $row) {
+                foreach ($rows as $item) {
+                    $row = isset($item['cells']) ? $item['cells'] : $item;
+
                     laporan_penjualan_kayu_olahan::create([
                         'laporan_id' => $laporan->id,
                         'nomor_dokumen' => $row[0] ?? '',
