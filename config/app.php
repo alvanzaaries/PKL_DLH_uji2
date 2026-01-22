@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Internal API Key
+    |--------------------------------------------------------------------------
+    |
+    | This key is used to authenticate internal API requests (e.g., from
+    | Python scripts). Set this to a secure random string in your .env file.
+    |
+    */
+
+    'internal_api_key' => env('INTERNAL_API_KEY'),
+
 ];

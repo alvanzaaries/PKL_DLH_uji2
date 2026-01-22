@@ -20,6 +20,9 @@ from typing import Dict, List, Optional
 API_BASE_URL = "http://localhost:8000/api"  # Sesuaikan dengan URL server Anda
 UPLOAD_ENDPOINT = f"{API_BASE_URL}/laporan/upload"
 
+# API Key untuk autentikasi (harus sama dengan INTERNAL_API_KEY di .env)
+API_KEY = "dlhk_internal_api_key_2024_secure_random_string"
+
 # Jenis laporan yang tersedia
 JENIS_LAPORAN = [
     "Laporan Penerimaan Kayu Bulat",
@@ -75,12 +78,17 @@ def upload_laporan(
         'jenis_laporan': jenis_laporan
     }
     
+    # Prepare headers with API key
+    headers = {
+        'X-API-Key': API_KEY
+    }
+    
     # Prepare file
     with open(file_path, 'rb') as f:
         files = {'file_excel': (os.path.basename(file_path), f, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')}
         
         try:
-            response = requests.post(UPLOAD_ENDPOINT, data=data, files=files, timeout=60)
+            response = requests.post(UPLOAD_ENDPOINT, data=data, files=files, headers=headers, timeout=60)
             
             # Parse JSON response
             try:

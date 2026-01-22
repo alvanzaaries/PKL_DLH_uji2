@@ -166,7 +166,7 @@
                         @endphp
                         <tr data-row-index="{{ $rowOffset + $rowIndex }}" @if($rowHasErrors)
                         style="background:#FEF2F2;border-left:4px solid #FCA5A5;" @endif>
-                            <td style="font-weight:700;">{{ $rowIndex + 1 }}</td>
+                            <td style="font-weight:700;">{{ $rowOffset + $rowIndex + 1 }}</td>
                             @foreach($cells as $cellIndex => $cell)
                                 @if($cellIndex < $headerCount)
                                     <td contenteditable="true" data-cell-index="{{ $cellIndex }}">{{ $cell ?? '' }}</td>

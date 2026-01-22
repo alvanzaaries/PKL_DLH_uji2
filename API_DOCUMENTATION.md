@@ -1,5 +1,20 @@
 # API Laporan Upload - Documentation
 
+## Authentication
+
+**All API endpoints require authentication using an API key.**
+
+Include the API key in the request header:
+```
+X-API-Key: your-api-key-here
+```
+
+The API key must match the `INTERNAL_API_KEY` configured in the server's `.env` file.
+
+## Rate Limiting
+
+API endpoints are rate limited to **60 requests per minute** per IP address.
+
 ## Base URL
 ```
 http://localhost:8000/api
@@ -12,7 +27,17 @@ Upload file Excel laporan dengan validasi otomatis.
 
 **Endpoint:** `POST /laporan/upload`
 
+**Authentication:** Required (X-API-Key header)
+
+**Rate Limit:** 60 requests/minute
+
 **Content-Type:** `multipart/form-data`
+
+#### Request Headers
+
+| Header | Required | Description |
+|--------|----------|-------------|
+| `X-API-Key` | Yes | API key untuk autentikasi |
 
 #### Request Parameters
 
@@ -50,18 +75,34 @@ Upload file Excel laporan dengan validasi otomatis.
 
 #### Error Responses
 
+**Unauthorized (401)**
+```json
+{
+  "success": false,
+  "message": "Invalid or missing API key. Please provide a valid X-API-Key header.",
+  "error_code": "UNAUTHORIZED"
+}
+```
+
 **Validation Error (422 Unprocessable Entity)**
 ```json
 {
   "success": false,
   "message": "File Excel memiliki error validasi. Mohon perbaiki file dan upload ulang.",
   "errors": [
-    "Baris 15: Jumlah Batang tidak boleh kosong",
-    "Baris 16: Volume harus berupa angka"
+    "Baris Excel 16 (Data #1): Jumlah Batang tidak boleh kosong",
+    "Baris Excel 17 (Data #2): Volume harus berupa angka"
   ],
   "total_rows": 200,
   "valid_rows": 198,
   "error_code": "VALIDATION_ERROR"
+}
+```
+
+**Rate Limit Exceeded (429)**
+```json
+{
+  "message": "Too Many Attempts."
 }
 ```
 
@@ -101,6 +142,7 @@ Cek status API server.
 ### cURL
 ```bash
 curl -X POST http://localhost:8000/api/laporan/upload \
+  -H "X-API-Key: dlhk_internal_api_key_2024_secure_random_string" \
   -F "file_excel=@laporan_januari_2024.xlsx" \
   -F "industri_id=1" \
   -F "bulan=1" \
@@ -114,6 +156,10 @@ import requests
 
 url = "http://localhost:8000/api/laporan/upload"
 
+headers = {
+    'X-API-Key': 'dlhk_internal_api_key_2024_secure_random_string'
+}
+
 files = {
     'file_excel': ('laporan.xlsx', open('laporan.xlsx', 'rb'), 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 }
@@ -125,26 +171,34 @@ data = {
     'jenis_laporan': 'Laporan Penerimaan Kayu Bulat'
 }
 
-response = requests.post(url, files=files, data=data)
+response = requests.post(url, files=files, data=data, headers=headers)
 print(response.json())
 ```
 
 ### Python (Bulk Upload Script)
 Gunakan script `bulk_upload_laporan.py` yang sudah disediakan:
 
+1. Edit konfigurasi API key di dalam file (baris 24):
 ```python
-python bulk_upload_laporan.py
+API_KEY = "your-api-key-here"  # Harus sama dengan INTERNAL_API_KEY di .env
 ```
 
-Edit konfigurasi di dalam file untuk menyesuaikan dengan file-file yang akan diupload.
+2. Edit konfigurasi upload di bagian `if __name__ == "__main__":`
+
+3. Jalankan script:
+```bash
+python bulk_upload_laporan.py
+```
 
 ## Error Codes
 
 | Code | Description |
 |------|-------------|
+| `UNAUTHORIZED` | API key tidak valid atau tidak ada |
 | `VALIDATION_ERROR` | File Excel memiliki error validasi |
 | `DUPLICATE_LAPORAN` | Laporan untuk periode yang sama sudah ada |
 | `SERVER_ERROR` | Kesalahan server internal |
+| `SERVER_MISCONFIGURATION` | API key tidak dikonfigurasi di server |
 | `FILE_NOT_FOUND` | File tidak ditemukan (Python client) |
 | `INVALID_JENIS` | Jenis laporan tidak valid (Python client) |
 | `TIMEOUT` | Request timeout (Python client) |
@@ -172,10 +226,35 @@ Sistem otomatis mencegah duplicate berdasarkan:
 
 Satu industri hanya bisa upload satu laporan per jenis per bulan.
 
+## Security
+
+### API Key Management
+
+1. **Generate Secure Key**: Gunakan random string yang kuat untuk production
+   ```bash
+   # Generate random string (Linux/Mac)
+   openssl rand -base64 32
+   
+   # Generate random string (Windows PowerShell)
+   -join ((65..90) + (97..122) + (48..57) | Get-Random -Count 32 | % {[char]$_})
+   ```
+
+2. **Update .env**: Set `INTERNAL_API_KEY` di file `.env`
+
+3. **Update Python Script**: Set `API_KEY` di `bulk_upload_laporan.py`
+
+4. **Keep Secret**: Jangan commit API key ke git repository
+
+### Rate Limiting
+
+- Default: 60 requests per minute per IP
+- Dapat diubah di `routes/api.php`
+
 ## Future Enhancements
 
-- [ ] Token-based authentication (Laravel Sanctum)
-- [ ] Rate limiting
+- [x] API key authentication
+- [x] Rate limiting
+- [ ] IP whitelist (optional, untuk keamanan tambahan)
 - [ ] Batch upload endpoint (multiple files in one request)
 - [ ] Webhook untuk notifikasi hasil upload
 - [ ] Download template via API
