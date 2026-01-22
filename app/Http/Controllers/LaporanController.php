@@ -74,7 +74,8 @@ class LaporanController extends Controller
                     'tahun' => $request->tahun,
                     'jenis_laporan' => $jenisLaporan,
                 ],
-                'redirect_after_save' => url()->previous() // Simpan URL sebelumnya
+                'redirect_after_save' => url()->previous(), // Simpan URL sebelumnya
+                'is_fresh_upload' => true, // Flag untuk clear localStorage di view
             ]);
 
             // Redirect to GET preview which will read preview data from session and paginate
@@ -106,8 +107,10 @@ class LaporanController extends Controller
 
         $perPage = (int) $request->input('per_page', 10);
         $page = (int) $request->input('page', 1);
-        if ($perPage <= 0) $perPage = 10;
-        if ($page <= 0) $page = 1;
+        if ($perPage <= 0)
+            $perPage = 10;
+        if ($page <= 0)
+            $page = 1;
 
         $offset = ($page - 1) * $perPage;
         $currentItems = array_slice($allRows, $offset, $perPage);
@@ -135,7 +138,7 @@ class LaporanController extends Controller
         $sourceToDisplay = [];
         foreach ($currentItems as $idx => $item) {
             if (is_array($item) && isset($item['source_row'])) {
-                $sourceToDisplay[(int)$item['source_row']] = $idx + 1; // per-page index
+                $sourceToDisplay[(int) $item['source_row']] = $idx + 1; // per-page index
             }
         }
 
@@ -151,6 +154,10 @@ class LaporanController extends Controller
             $displayErrors[] = $err;
         }
 
+        // Check if this is a fresh upload (consume the flag)
+        $isFreshUpload = session('is_fresh_upload', false);
+        session()->forget('is_fresh_upload');
+
         return view('laporan/previewLaporan', [
             'data' => $previewData,
             'metadata' => $metadata,
@@ -158,6 +165,7 @@ class LaporanController extends Controller
             'errorsByRow' => $errorsByRow,
             'generalErrors' => $generalErrors,
             'displayErrors' => $displayErrors,
+            'isFreshUpload' => $isFreshUpload,
         ]);
     }
 
@@ -291,7 +299,7 @@ class LaporanController extends Controller
 
         // Jika preview sebelumnya mengandung error dan user tidak mengirim edited_data,
         // jangan coba simpan langsung — minta user melakukan revalidasi.
-        if (!empty($previewData['errors']) && (! $request->has('edited_data') || empty($request->edited_data))) {
+        if (!empty($previewData['errors']) && (!$request->has('edited_data') || empty($request->edited_data))) {
             return redirect()->route('laporan.preview.show')
                 ->with('warning', 'Masih ada error validasi. Silakan perbaiki data di tabel lalu tekan "Perbaiki & Validasi Ulang".');
         }
@@ -457,40 +465,6 @@ class LaporanController extends Controller
     public function destroy(Laporan $laporan)
     {
         //
-    }
-
-    /**
-     * Store multiple laporan sekaligus dari form upload di halaman industri
-     */
-    public function storeMultiple(Request $request)
-    {
-        $request->validate([
-            'industri_id' => 'required|exists:industri,id',
-            'bulan' => 'required|integer|between:1,12',
-            'tahun' => 'required|integer|min:2020',
-        ]);
-
-        try {
-            DB::beginTransaction();
-
-            $result = $this->dataService->storeMultipleLaporan($request, $this->validationService);
-
-            DB::commit();
-
-            if ($result['uploaded'] > 0) {
-                return redirect()->route('laporan.industri', $request->industri_id)
-                    ->with('success', $result['message']);
-            } else {
-                return redirect()->route('laporan.industri', $request->industri_id)
-                    ->with('warning', $result['message']);
-            }
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('storeMultipleLaporan failed', ['exception' => $e, 'industri_id' => $request->industri_id ?? null]);
-            return redirect()->route('laporan.industri', $request->industri_id)
-                ->with('error', 'Gagal mengupload laporan. Silakan coba lagi atau hubungi administrator.');
-        }
     }
 
     /**

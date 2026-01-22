@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -210,6 +211,7 @@
         @stack('styles')
     </style>
 </head>
+
 <body>
     <!-- Sidebar Navigation -->
     <div class="sidebar">
@@ -223,50 +225,56 @@
             </div>
         </div>
         <div class="sidebar-menu">
-            <a href="{{ route('industri.dashboard') }}" class="menu-item {{ request()->routeIs('industri.dashboard') ? 'active' : '' }}">
+            <a href="{{ route('industri.dashboard') }}"
+                class="menu-item {{ request()->routeIs('industri.dashboard') ? 'active' : '' }}">
                 <i class="fas fa-th-large menu-icon"></i>
                 <span class="menu-text">Beranda</span>
             </a>
-            
-            <a href="{{ route('industri-primer.index') }}" class="menu-item {{ request()->routeIs('industri-primer.*') ? 'active' : '' }}">
+
+            <a href="{{ route('industri-primer.index') }}"
+                class="menu-item {{ request()->routeIs('industri-primer.*') ? 'active' : '' }}">
                 <i class="fas fa-industry menu-icon"></i>
                 <span class="menu-text">Industri Primer</span>
             </a>
-            
-            <a href="{{ route('industri-sekunder.index') }}" class="menu-item {{ request()->routeIs('industri-sekunder.*') ? 'active' : '' }}">
+
+            <a href="{{ route('industri-sekunder.index') }}"
+                class="menu-item {{ request()->routeIs('industri-sekunder.*') ? 'active' : '' }}">
                 <i class="fas fa-microchip menu-icon"></i>
                 <span class="menu-text">Industri Sekunder</span>
             </a>
-            
+
             <a href="{{ route('tptkb.index') }}" class="menu-item {{ request()->routeIs('tptkb.*') ? 'active' : '' }}">
                 <i class="fas fa-map-marked-alt menu-icon"></i>
                 <span class="menu-text">TPTKB</span>
             </a>
-            
-            <a href="{{ route('perajin.index') }}" class="menu-item {{ request()->routeIs('perajin.*') ? 'active' : '' }}">
+
+            <a href="{{ route('perajin.index') }}"
+                class="menu-item {{ request()->routeIs('perajin.*') ? 'active' : '' }}">
                 <i class="fas fa-tools menu-icon"></i>
                 <span class="menu-text">Perajin</span>
             </a>
-            
+
             <div style="margin-top: 30px; padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
                 @guest
-                <a href="{{ route('login', ['from' => url()->current()]) }}" class="menu-item" style="background: rgba(76, 175, 80, 0.2); border-radius: 8px; justify-content: center;">
-                    <i class="fas fa-sign-in-alt menu-icon"></i>
-                    <span class="menu-text" style="font-weight: 600;">Login Admin</span>
-                </a>
+                    <a href="{{ route('login', ['from' => url()->current()]) }}" class="menu-item"
+                        style="background: rgba(76, 175, 80, 0.2); border-radius: 8px; justify-content: center;">
+                        <i class="fas fa-sign-in-alt menu-icon"></i>
+                        <span class="menu-text" style="font-weight: 600;">Login Admin</span>
+                    </a>
                 @else
-                <div style="color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; text-align: center;">
-                    <i class="fas fa-user-circle" style="font-size: 36px; margin-bottom: 8px;"></i>
-                    <div style="font-size: 13px; font-weight: 600;">{{ Auth::user()->name }}</div>
-                    <div style="font-size: 11px; opacity: 0.7;">{{ Auth::user()->email }}</div>
-                </div>
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="menu-item" style="width: 100%; background: rgba(239, 68, 68, 0.2); border: none; cursor: pointer; border-radius: 8px; justify-content: center;">
-                        <i class="fas fa-sign-out-alt menu-icon"></i>
-                        <span class="menu-text" style="font-weight: 600;">Logout</span>
-                    </button>
-                </form>
+                    <div style="color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; text-align: center;">
+                        <i class="fas fa-user-circle" style="font-size: 36px; margin-bottom: 8px;"></i>
+                        <div style="font-size: 13px; font-weight: 600;">{{ Auth::user()->name }}</div>
+                        <div style="font-size: 11px; opacity: 0.7;">{{ Auth::user()->email }}</div>
+                    </div>
+                    <form action="{{ route('logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="menu-item"
+                            style="width: 100%; background: rgba(239, 68, 68, 0.2); border: none; cursor: pointer; border-radius: 8px; justify-content: center;">
+                            <i class="fas fa-sign-out-alt menu-icon"></i>
+                            <span class="menu-text" style="font-weight: 600;">Logout</span>
+                        </button>
+                    </form>
                 @endguest
             </div>
         </div>
@@ -282,44 +290,47 @@
                 </div>
                 <div style="display: flex; align-items: center; gap: 20px;">
                     @auth
-                    <div class="user-info">
-                        <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
-                        <span style="font-size: 14px; font-weight: 500;">{{ Auth::user()->name }}</span>
-                    </div>
+                        <div class="user-info">
+                            <div class="user-avatar">{{ strtoupper(substr(Auth::user()->name, 0, 1)) }}</div>
+                            <span style="font-size: 14px; font-weight: 500;">{{ Auth::user()->name }}</span>
+                        </div>
                     @else
-                    <a href="{{ route('login', ['from' => url()->current()]) }}" style="padding: 8px 20px; background: var(--accent); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: all 0.2s;">
-                        <i class="fas fa-sign-in-alt"></i> Portal Login
-                    </a>
+                        <a href="{{ route('login', ['from' => url()->current()]) }}"
+                            style="padding: 8px 20px; background: var(--accent); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 14px; transition: all 0.2s;">
+                            <i class="fas fa-sign-in-alt"></i> Portal Login
+                        </a>
                     @endauth
                 </div>
             </div>
-            
+
             <!-- Alert Messages -->
             @if(session('success'))
-            <div class="alert alert-success" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
-                <span style="font-size: 20px;">✓</span>
-                <span>{{ session('success') }}</span>
-            </div>
+                <div class="alert alert-success"
+                    style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
+                    <span style="font-size: 20px;">✓</span>
+                    <span>{{ session('success') }}</span>
+                </div>
             @endif
 
             @if(session('error'))
-            <div class="alert alert-error" style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
-                <span style="font-size: 20px;">⚠</span>
-                <span>{{ session('error') }}</span>
-            </div>
+                <div class="alert alert-error"
+                    style="margin: 0; border-radius: 0; border-left: none; border-right: none; border-top: none;">
+                    <span style="font-size: 20px;">⚠</span>
+                    <span>{{ session('error') }}</span>
+                </div>
             @endif
         </nav>
 
         <script>
             // Auto-hide alerts after 1.5 seconds
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 const alerts = document.querySelectorAll('.alert');
                 if (alerts.length > 0) {
-                    setTimeout(function() {
-                        alerts.forEach(function(alert) {
+                    setTimeout(function () {
+                        alerts.forEach(function (alert) {
                             alert.style.transition = 'opacity 0.3s ease';
                             alert.style.opacity = '0';
-                            setTimeout(function() {
+                            setTimeout(function () {
                                 alert.remove();
                             }, 300);
                         });
@@ -328,9 +339,51 @@
             });
         </script>
 
-        @yield('content')
+        <div style="flex: 1;">
+            @yield('content')
+        </div>
+
+        <!-- Footer -->
+        <footer style="background: #ffffff; border-top: 1px solid #e2e8f0; padding: 16px 24px; margin-top: auto;">
+            <div
+                style="max-width: 1400px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div
+                        style="width: 32px; height: 32px; border-radius: 50%; background: #ecfdf5; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-leaf" style="color: #059669; font-size: 14px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size: 14px; font-weight: 600; color: #1e293b;">Dinas Lingkungan Hidup &
+                            Kehutanan</div>
+                        <div style="font-size: 12px; color: #64748b;">© {{ date('Y') }} DLHK Provinsi Jawa Tengah</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #64748b;">
+                        <span
+                            style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; animation: pulse 2s infinite;"></span>
+                        <span>Sistem Berjalan Normal</span>
+                    </div>
+                    <span style="font-size: 12px; color: #94a3b8;">v1.0.0</span>
+                </div>
+            </div>
+        </footer>
+        <style>
+            @keyframes pulse {
+
+                0%,
+                100% {
+                    opacity: 1;
+                }
+
+                50% {
+                    opacity: 0.5;
+                }
+            }
+        </style>
     </div>
 
     @stack('scripts')
 </body>
+
 </html>

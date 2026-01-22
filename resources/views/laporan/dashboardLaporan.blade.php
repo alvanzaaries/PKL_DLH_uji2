@@ -509,8 +509,8 @@
                 $countsByType['primer'] > 0 ? round(($reportedByType['primer'] / $countsByType['primer']) * 100, 1) : 0;
             $percentSekunder =
                 $countsByType['sekunder'] > 0
-                    ? round(($reportedByType['sekunder'] / $countsByType['sekunder']) * 100, 1)
-                    : 0;
+                ? round(($reportedByType['sekunder'] / $countsByType['sekunder']) * 100, 1)
+                : 0;
             $percentTptkb =
                 $countsByType['tpt_kb'] > 0 ? round(($reportedByType['tpt_kb'] / $countsByType['tpt_kb']) * 100, 1) : 0;
         @endphp
@@ -611,9 +611,9 @@
             if (isset($companies)) {
                 foreach ($companies as $company) {
                     // Loop through each month's status
-        foreach ($company->laporan as $monthIndex => $status) {
-            // Check if status is 'ok' (means at least one report exists/valid)
-            if ($status == 'ok') {
+                    foreach ($company->laporan as $monthIndex => $status) {
+                        // Check if status is 'ok' (means at least one report exists/valid)
+                        if ($status == 'ok') {
                             $monthlyCounts[$monthIndex]++;
                         }
                     }
@@ -652,8 +652,7 @@
                             $startYear = 2026; // Adjusted for realism
                         @endphp
                         @for ($year = $currentYear; $year >= $startYear; $year--)
-                            <option value="{{ $year }}"
-                                {{ request('tahun', $currentYear) == $year ? 'selected' : '' }}>
+                            <option value="{{ $year }}" {{ request('tahun', $currentYear) == $year ? 'selected' : '' }}>
                                 {{ $year }}
                             </option>
                         @endfor
@@ -666,8 +665,7 @@
                         <option value="">Semua Kategori</option>
                         @if (isset($jenisLaporans))
                             @foreach ($jenisLaporans as $jenis)
-                                <option value="{{ $jenis }}"
-                                    {{ request('jenis_laporan') == $jenis ? 'selected' : '' }}>
+                                <option value="{{ $jenis }}" {{ request('jenis_laporan') == $jenis ? 'selected' : '' }}>
                                     {{ $jenis }}
                                 </option>
                             @endforeach
@@ -776,7 +774,7 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('DOMContentLoaded', function () {
                 // Data from PHP
                 const monthlyCounts = @json($monthlyCounts);
                 const ctx = document.getElementById('laporanChart').getContext('2d');
@@ -829,7 +827,7 @@
                                 cornerRadius: 4,
                                 displayColors: false,
                                 callbacks: {
-                                    label: function(context) {
+                                    label: function (context) {
                                         return context.parsed.y + ' Perusahaan';
                                     }
                                 }
@@ -910,7 +908,7 @@
                                     cornerRadius: 4,
                                     displayColors: false,
                                     callbacks: {
-                                        label: function(context) {
+                                        label: function (context) {
                                             return context.label + ': ' + context.parsed + '%';
                                         }
                                     }
@@ -936,7 +934,7 @@
                 const emptyState = document.querySelector('.empty-state');
 
                 if (searchInput) {
-                    searchInput.addEventListener('input', function() {
+                    searchInput.addEventListener('input', function () {
                         clearTimeout(searchTimeout);
                         const searchTerm = this.value.trim().toLowerCase();
 
