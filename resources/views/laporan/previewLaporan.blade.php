@@ -355,41 +355,43 @@
             </div>
         </div>
 
-    <!-- Warning Message (for revalidation) -->
-    <!-- Warning Message (for revalidation) -->
-    @php $warningMsg = session('warning') ?? ($warning ?? null); @endphp
-    @if($warningMsg)
-        <div style="background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 1rem 1.5rem; margin: 0 1.5rem 1.5rem 1.5rem;">
-            <div style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: #92400E; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
-                <i class="fas fa-exclamation-circle"></i>
-                Perhatian
+        <!-- Warning Message (for revalidation) -->
+        <!-- Warning Message (for revalidation) -->
+        @php $warningMsg = session('warning') ?? ($warning ?? null); @endphp
+        @if($warningMsg)
+            <div
+                style="background: #FEF3C7; border-left: 4px solid #F59E0B; padding: 1rem 1.5rem; margin: 0 1.5rem 1.5rem 1.5rem;">
+                <div
+                    style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: #92400E; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Perhatian
+                </div>
+                <p style="font-size: 0.8125rem; color: #78350F; margin: 0;">
+                    {{ $warningMsg }}
+                </p>
             </div>
-            <p style="font-size: 0.8125rem; color: #78350F; margin: 0;">
-                {{ $warningMsg }}
-            </p>
-        </div>
-    @endif
+        @endif
 
-    <!-- Error Messages (top-level) -->
-    @php $topList = $displayErrors ?? ($data['errors'] ?? []); @endphp
-    @if(!empty($topList))
-        <div class="error-alert">
-            <div class="error-header">
-                <i class="fas fa-exclamation-triangle"></i>
-                Ditemukan Error Validasi
+        <!-- Error Messages (top-level) -->
+        @php $topList = $displayErrors ?? ($data['errors'] ?? []); @endphp
+        @if(!empty($topList))
+            <div class="error-alert">
+                <div class="error-header">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Ditemukan Error Validasi
+                </div>
+                <ul class="error-list">
+                    @foreach($topList as $error)
+                        <li class="error-item">
+                            <span class="error-bullet">●</span>
+                            <span>{{ $error }}</span>
+                        </li>
+                    @endforeach
+                </ul>
             </div>
-            <ul class="error-list">
-                @foreach($topList as $error)
-                    <li class="error-item">
-                        <span class="error-bullet">●</span>
-                        <span>{{ $error }}</span>
-                    </li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+        @endif
 
-    <!-- Edit Mode Notice -->
+        <!-- Edit Mode Notice -->
         <div class="edit-mode-notice">
             <i class="fas fa-edit edit-mode-icon"></i>
             <div>
@@ -400,12 +402,35 @@
 
         <!-- Preview Table -->
         <div class="preview-table-container">
+            @php
+                // Mapping satuan berdasarkan nama header
+                $unitMapping = [
+                    'Volume' => 'm³',
+                    'Jumlah Batang' => 'Batang',
+                    'Jumlah Keping' => 'Kpg',
+                    'Persediaan Awal' => 'm³',
+                    'Penambahan' => 'm³',
+                    'Penggunaan/Pengurangan' => 'm³',
+                    'Persediaan Akhir' => 'm³',
+                ];
+            @endphp
             <table class="preview-table" id="previewTable">
                 <thead>
                     <tr>
-                        <th>Baris</th>
+                        <th>
+                            <div>Baris</div>
+                            <div style="font-size: 0.6rem; font-weight: 500; color: #9CA3AF; margin-top: 2px;">-</div>
+                        </th>
                         @foreach($data['headers'] ?? [] as $header)
-                            <th>{{ $header }}</th>
+                            <th>
+                                <div>{{ $header }}</div>
+                                @if(isset($unitMapping[$header]))
+                                    <div style="font-size: 0.6rem; font-weight: 500; color: #059669; margin-top: 2px;">
+                                        ({{ $unitMapping[$header] }})</div>
+                                @else
+                                    <div style="font-size: 0.6rem; font-weight: 500; color: #9CA3AF; margin-top: 2px;">-</div>
+                                @endif
+                            </th>
                         @endforeach
                     </tr>
                 </thead>
@@ -443,7 +468,8 @@
 
                             $rowHasErrors = isset($errorsByRow[$sourceRow]);
                         @endphp
-                        <tr data-row-index="{{ $rowOffset + $rowIndex }}" @if($rowHasErrors) style="background:#FEF2F2;border-left:4px solid #FCA5A5;" @endif>
+                        <tr data-row-index="{{ $rowOffset + $rowIndex }}" @if($rowHasErrors)
+                        style="background:#FEF2F2;border-left:4px solid #FCA5A5;" @endif>
                             <td style="font-weight:700;">{{ $rowIndex + 1 }}</td>
                             @foreach($cells as $cellIndex => $cell)
                                 @if($cellIndex < $headerCount)
@@ -501,19 +527,20 @@
 
             <!-- Hidden input untuk menyimpan edited data -->
             <input type="hidden" name="edited_data" id="editedDataInput">
-                @php
-                    $plainRows = [];
-                    foreach ($data['rows'] ?? [] as $r) {
-                        if (is_array($r) && array_key_exists('cells', $r)) {
-                            $plainRows[] = $r['cells'];
-                        } else {
-                            $plainRows[] = $r;
-                        }
+            @php
+                $plainRows = [];
+                foreach ($data['rows'] ?? [] as $r) {
+                    if (is_array($r) && array_key_exists('cells', $r)) {
+                        $plainRows[] = $r['cells'];
+                    } else {
+                        $plainRows[] = $r;
                     }
-                @endphp
+                }
+            @endphp
 
             <div class="action-footer">
-                <a href="{{ route('laporan.industri', $metadata['industri_id']) }}" class="btn-action btn-secondary">
+                <a href="{{ route('laporan.industri', $metadata['industri_id']) }}" class="btn-action btn-secondary"
+                    id="btnKembali">
                     <i class="fas fa-arrow-left"></i>
                     <span>Kembali</span>
                 </a>
@@ -536,32 +563,38 @@
         // masterRows: full dataset as array of arrays
         var masterRows = @json($plainRows);
 
-        // restore persisted edits if present
-        try {
-            var stored = localStorage.getItem('preview_master_rows');
-            if (stored) {
-                var parsed = JSON.parse(stored);
-                if (Array.isArray(parsed)) masterRows = parsed;
-            }
-        } catch (e) {}
+        // Check if this is a fresh upload - if so, clear localStorage first
+        var isFreshUpload = @json($isFreshUpload ?? false);
+        if (isFreshUpload) {
+            try { localStorage.removeItem('preview_master_rows'); } catch (e) { }
+        } else {
+            // Only restore persisted edits if NOT a fresh upload
+            try {
+                var stored = localStorage.getItem('preview_master_rows');
+                if (stored) {
+                    var parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) masterRows = parsed;
+                }
+            } catch (e) { }
+        }
 
         // whether the server indicated initial errors on this preview
         var initialHasErrors = @json(!empty($data['errors']));
 
         function persistMasterRows() {
-            try { localStorage.setItem('preview_master_rows', JSON.stringify(masterRows)); } catch (e) {}
+            try { localStorage.setItem('preview_master_rows', JSON.stringify(masterRows)); } catch (e) { }
         }
 
         function renderCurrentPage() {
             var table = document.getElementById('previewTable');
             if (!table) return;
             var trs = table.querySelectorAll('tbody tr');
-            trs.forEach(function(tr) {
+            trs.forEach(function (tr) {
                 var cells = tr.querySelectorAll('td[contenteditable]');
                 if (!cells || cells.length === 0) return;
                 var idx = parseInt(tr.getAttribute('data-row-index'));
                 if (!isNaN(idx) && masterRows[idx]) {
-                    cells.forEach(function(c, ci) { c.textContent = masterRows[idx][ci] ?? ''; });
+                    cells.forEach(function (c, ci) { c.textContent = masterRows[idx][ci] ?? ''; });
                 }
             });
         }
@@ -569,30 +602,30 @@
         function attachCellListeners() {
             var table = document.getElementById('previewTable');
             if (!table) return;
-            table.querySelectorAll('td[contenteditable]').forEach(function(cell) {
-                cell.addEventListener('keydown', function(e) {
+            table.querySelectorAll('td[contenteditable]').forEach(function (cell) {
+                cell.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter') { e.preventDefault(); var next = this.nextElementSibling; if (next && next.hasAttribute('contenteditable')) next.focus(); }
                 });
-                cell.addEventListener('paste', function(e) { e.preventDefault(); var text = (e.clipboardData||window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, text); });
-                cell.addEventListener('input', function() {
-                    var tr = this.parentElement; var idx = parseInt(tr.getAttribute('data-row-index')); if (isNaN(idx)) return; var cells = tr.querySelectorAll('td[contenteditable]'); masterRows[idx] = masterRows[idx] || []; cells.forEach(function(c, ci){ masterRows[idx][ci] = c.textContent.trim(); }); persistMasterRows();
+                cell.addEventListener('paste', function (e) { e.preventDefault(); var text = (e.clipboardData || window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, text); });
+                cell.addEventListener('input', function () {
+                    var tr = this.parentElement; var idx = parseInt(tr.getAttribute('data-row-index')); if (isNaN(idx)) return; var cells = tr.querySelectorAll('td[contenteditable]'); masterRows[idx] = masterRows[idx] || []; cells.forEach(function (c, ci) { masterRows[idx][ci] = c.textContent.trim(); }); persistMasterRows();
                 });
             });
         }
 
         // On submit, send full masterRows and set revalidate flag if initial preview had errors
-        document.getElementById('previewForm').addEventListener('submit', function(e) {
+        document.getElementById('previewForm').addEventListener('submit', function (e) {
             // copy visible page edits into masterRows
             var table = document.getElementById('previewTable');
             if (table) {
                 var trs = table.querySelectorAll('tbody tr');
-                trs.forEach(function(tr) {
+                trs.forEach(function (tr) {
                     var cells = tr.querySelectorAll('td[contenteditable]');
                     if (!cells || cells.length === 0) return;
                     var idx = parseInt(tr.getAttribute('data-row-index'));
                     if (isNaN(idx)) return;
                     masterRows[idx] = masterRows[idx] || [];
-                    cells.forEach(function(c, ci){ masterRows[idx][ci] = c.textContent.trim(); });
+                    cells.forEach(function (c, ci) { masterRows[idx][ci] = c.textContent.trim(); });
                 });
             }
 
@@ -600,13 +633,13 @@
             document.getElementById('revalidateOnlyInput').value = initialHasErrors ? '1' : '0';
         });
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             renderCurrentPage();
             attachCellListeners();
 
             var revalidationOk = @json(session('revalidation_ok', false));
             if (revalidationOk) {
-                try { localStorage.removeItem('preview_master_rows'); } catch (e) {}
+                try { localStorage.removeItem('preview_master_rows'); } catch (e) { }
                 // update button text
                 var submitBtn = document.querySelector('.action-footer .btn-primary');
                 if (submitBtn) submitBtn.innerHTML = '<i class="fas fa-save"></i> <span>Konfirmasi &amp; Simpan</span>';
@@ -614,7 +647,15 @@
 
             var saveOk = @json(session('save_ok', false));
             if (saveOk) {
-                try { localStorage.removeItem('preview_master_rows'); } catch (e) {}
+                try { localStorage.removeItem('preview_master_rows'); } catch (e) { }
+            }
+
+            // Clear localStorage when user clicks "Kembali" button
+            var btnKembali = document.getElementById('btnKembali');
+            if (btnKembali) {
+                btnKembali.addEventListener('click', function () {
+                    try { localStorage.removeItem('preview_master_rows'); } catch (e) { }
+                });
             }
         });
     </script>

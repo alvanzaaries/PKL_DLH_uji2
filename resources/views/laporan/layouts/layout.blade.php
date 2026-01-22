@@ -29,7 +29,7 @@
             --text-dark: #111827;
         }
 
-        body { 
+        body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-dark);
@@ -68,7 +68,7 @@
             font-weight: 700;
             font-size: 1.1rem;
             margin-left: 12px;
-            margin-top: 10px; /* turun sedikit */
+            margin-top: 10px;
             line-height: 1.1;
             letter-spacing: -0.01em;
         }
@@ -134,8 +134,10 @@
 
         /* --- PERUBAHAN UTAMA: ACTIVE STATE --- */
         .nav-link.active {
-            background-color: #FFFFFF; /* Putih Solid */
-            color: #1A4030; /* Teks Hijau Gelap (Sesuai warna sidebar) */
+            background-color: #FFFFFF;
+            /* Putih Solid */
+            color: #1A4030;
+            /* Teks Hijau Gelap (Sesuai warna sidebar) */
             font-weight: 700;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
@@ -151,7 +153,7 @@
         /* Icon Active berubah menjadi hijau juga */
         .nav-link.active .nav-icon {
             transform: scale(1.1);
-            color: #1A4030; 
+            color: #1A4030;
         }
 
         .sidebar-footer {
@@ -183,6 +185,7 @@
             display: flex;
             flex-direction: column;
         }
+
         .topbar {
             height: var(--header-height);
             background: var(--bg-surface);
@@ -195,15 +198,18 @@
             top: 0;
             z-index: 40;
         }
+
         .page-title {
             font-size: 1.125rem;
             font-weight: 700;
             color: var(--text-dark);
         }
+
         .page-content {
             padding: 2rem;
             max-width: 1400px;
         }
+
         /* Alert Styles */
         .alert-institutional {
             border-left-width: 4px;
@@ -212,29 +218,61 @@
             display: flex;
             align-items: flex-start;
         }
+
         .alert-success-inst {
             background-color: #F1FDF4;
             border-color: #1A4030;
         }
-        .alert-success-inst .icon { color: #1A4030; }
-        .alert-success-inst .title { color: #1A4030; font-weight: 700; font-size: 0.9rem; }
-        .alert-success-inst .text { color: #166534; font-size: 0.875rem; margin-top: 0.25rem;}
+
+        .alert-success-inst .icon {
+            color: #1A4030;
+        }
+
+        .alert-success-inst .title {
+            color: #1A4030;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .alert-success-inst .text {
+            color: #166534;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
 
         .sidebar-overlay {
-            display: none; 
-            position: fixed; inset: 0; 
-            background: rgba(0,0,0,0.5); 
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
             z-index: 45;
             backdrop-filter: blur(1px);
         }
 
         @media (max-width: 768px) {
-            .app-sidebar { transform: translateX(-100%); }
-            .app-sidebar.show { transform: translateX(0); }
-            .app-main { margin-left: 0; }
-            .sidebar-overlay.show { display: block; }
-            .topbar { padding: 0 1rem; }
-            .page-content { padding: 1rem; }
+            .app-sidebar {
+                transform: translateX(-100%);
+            }
+
+            .app-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .app-main {
+                margin-left: 0;
+            }
+
+            .sidebar-overlay.show {
+                display: block;
+            }
+
+            .topbar {
+                padding: 0 1rem;
+            }
+
+            .page-content {
+                padding: 1rem;
+            }
         }
     </style>
 
@@ -251,7 +289,7 @@
                 <img src="{{ asset('logo jateng.webp') }}" alt="Logo Jawa Tengah"
                     style="width: 42px; height: 42px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
             </div>
-            <div class="brand-text">    
+            <div class="brand-text">
                 <div style="color:#fbbf24">PELAPORAN PUHH</div>
                 <small>DLHK PROVINSI JAWA TENGAH</small>
             </div>
@@ -306,7 +344,8 @@
                     </div>
                 </a>
                 <div style="margin-top:0.75rem;">
-                    <a href="{{ route('template.download') }}" class="btn btn-export" style="display:flex; align-items:center; gap:8px; width:100%; justify-content:center;">
+                    <a href="{{ route('template.download') }}" class="btn btn-export"
+                        style="display:flex; align-items:center; gap:8px; width:100%; justify-content:center;">
                         <i class="fas fa-file-download"></i>
                         <span>Download Template</span>
                     </a>
@@ -352,7 +391,7 @@
                     <span class="text-sm font-bold text-gray-800">{{ now()->translatedFormat('d F Y') }}</span>
                 </div>
                 <div class="h-6 w-px bg-gray-200 hidden sm:block"></div>
-                {{--   --}}
+                {{-- --}}
             </div>
         </header>
 
@@ -361,7 +400,7 @@
                 <div class="mb-6 alert-institutional alert-success-inst shadow-sm">
                     <i class="fas fa-check-circle icon mt-0.5 mr-3"></i>
                     <div>
-                        <h3 class="title">Berhasil  </h3>
+                        <h3 class="title">Berhasil </h3>
                         <p class="text">{{ session('success') }}</p>
                     </div>
                 </div>
@@ -369,6 +408,29 @@
 
             @yield('content')
         </div>
+
+        <!-- Footer -->
+        <footer class="mt-auto border-t border-gray-200 bg-white px-6 py-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-3 max-w-[1400px]">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center">
+                        <i class="fas fa-leaf text-emerald-600 text-sm"></i>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-semibold text-gray-800">Dinas Lingkungan Hidup & Kehutanan</span>
+                        <span class="text-xs text-gray-500">© {{ date('Y') }} DLHK Provinsi Jawa Tengah</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-2 text-xs text-gray-500">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span>Sistem Berjalan Normal</span>
+                    </div>
+                    <!-- <div class="hidden md:block h-4 w-px bg-gray-200"></div> -->
+                    <!-- <span class="hidden md:block text-xs text-gray-400">v1.0.0</span> -->
+                </div>
+            </div>
+        </footer>
     </main>
 
     <script>

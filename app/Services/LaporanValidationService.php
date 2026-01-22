@@ -9,8 +9,8 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 class LaporanValidationService
 {
     // Sheet layout constants (0-based indexes)
-    private const SHEET_HEADER_ROW = 14; // header is on Excel row 7
-    private const SHEET_DATA_START = 15; // data starts on Excel row 8
+    private const SHEET_HEADER_ROW = 14; // header is on Excel row 15
+    private const SHEET_DATA_START = 15; // data starts on Excel row 16
     /**
      * Baca dan validasi Excel berdasarkan jenis laporan
      */
@@ -115,8 +115,7 @@ class LaporanValidationService
 
             // Validasi Jumlah Batang (kolom 4) - wajib, harus angka
             if (trim((string) ($row[4] ?? '')) === '') {
-                $rowError
-                s[] = "Baris {$rowNumber}: Jumlah Batang tidak boleh kosong";
+                $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang tidak boleh kosong";
             } else {
                 $jumlahBatang = $this->parseExcelNumber($row[4]);
                 if ($jumlahBatang === null) {
