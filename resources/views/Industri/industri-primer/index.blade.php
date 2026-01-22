@@ -4,6 +4,7 @@
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ asset('css/filter-collapse.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
         /* Prevent sidebar overlap */
@@ -81,87 +82,8 @@
             box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
         }
 
-        /* Filter Section */
-        .filter-card {
-            background: var(--white);
-            padding: 25px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            margin-bottom: 25px;
-        }
-
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .filter-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 6px;
-        }
-
-        .filter-input {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: 'Segoe UI', Arial, sans-serif;
-            transition: border-color 0.2s;
-        }
-
-        .filter-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-filter {
-            background: var(--accent);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-filter:hover {
-            background: #166534;
-        }
-
-        .btn-reset {
-            background: #f1f5f9;
-            color: var(--text-main);
-            padding: 10px 20px;
-            border-radius: 6px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-reset:hover {
-            background: #e2e8f0;
-        }
-
+        /* Filter Section - Extended from filter-collapse.css */
+        
         /* Table */
         .table-card {
             background: var(--white);
@@ -683,124 +605,169 @@
 
         <!-- Filter Section -->
         <div class="filter-card">
-            <form method="GET" action="{{ route('industri-primer.index') }}">
-                <div class="filter-grid">
-                    <div class="filter-group">
-                        <label>Nama Perusahaan</label>
-                        <input type="text" name="nama" class="filter-input" placeholder="Cari nama perusahaan..." value="{{ request('nama') }}">
-                    </div>
-                    <div class="filter-group">
-                        <label>Kabupaten/Kota</label>
-                        <select name="kabupaten" class="filter-input">
-                            <option value="">-- Pilih Kabupaten/Kota --</option>
-                            @foreach($kabupatenList as $kabupaten)
-                                <option value="{{ $kabupaten }}" {{ request('kabupaten') == $kabupaten ? 'selected' : '' }}>
-                                    {{ $kabupaten }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Jenis Produksi</label>
-                        <select name="jenis_produksi" class="filter-input">
-                            <option value="">-- Semua Jenis --</option>
-                            @foreach($jenisProduksiList as $jenis)
-                                <option value="{{ $jenis->id }}" {{ request('jenis_produksi') == $jenis->id ? 'selected' : '' }}>
-                                    {{ $jenis->nama }}
-                                </option>
-                            @endforeach
-                            @if($customNames->count() > 0)
-                                <optgroup label="─────────────">
-                                    @foreach($customNames as $customName)
-                                        <option value="{{ $customName }}" {{ request('jenis_produksi') == $customName ? 'selected' : '' }}>
-                                            {{ $customName }} (Custom)
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                            @endif
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Kapasitas (m³/tahun)</label>
-                        <select name="kapasitas" class="filter-input">
-                            <option value="">-- Semua Kapasitas --</option>
-                            <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1.999 m³/tahun</option>
-                            <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2.000 - 5.999 m³/tahun</option>
-                            <option value=">=6000" {{ request('kapasitas') == '>=6000' ? 'selected' : '' }}>>= 6.000 m³/tahun</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Pemberi Izin</label>
-                        <select name="pemberi_izin" class="filter-input">
-                            <option value="">-- Semua Pemberi Izin --</option>
-                            <option value="Menteri Kehutanan" {{ request('pemberi_izin') == 'Menteri Kehutanan' ? 'selected' : '' }}>Menteri Kehutanan</option>
-                            <option value="BKPM" {{ request('pemberi_izin') == 'BKPM' ? 'selected' : '' }}>BKPM</option>
-                            <option value="Gubernur" {{ request('pemberi_izin') == 'Gubernur' ? 'selected' : '' }}>Gubernur</option>
-                            <option value="Bupati/Walikota" {{ request('pemberi_izin') == 'Bupati/Walikota' ? 'selected' : '' }}>Bupati/Walikota</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Bulan</label>
-                        <select name="bulan" class="filter-input">
-                            <option value="">-- Semua Bulan --</option>
-                            <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
-                            <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
-                            <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
-                            <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
-                            <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
-                            <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
-                            <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
-                            <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
-                            <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
-                            <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
-                            <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
-                            <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Tahun</label>
-                        <select name="tahun" class="filter-input">
-                            <option value="">-- Semua Tahun --</option>
-                            @php
-                                $currentYear = \Carbon\Carbon::now('Asia/Jakarta')->format('Y');
-                                for ($year = $currentYear; $year >= 2020; $year--) {
-                                    echo "<option value='$year' " . (request('tahun') == $year ? 'selected' : '') . ">$year</option>";
-                                }
-                            @endphp
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Status</label>
-                        <select name="status" class="filter-input">
-                            <option value="">-- Semua Status --</option>
-                            <option value="Aktif" {{ request('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="Tidak Aktif" {{ request('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
-                        </select>
-                    </div>
+            <div class="filter-header" onclick="toggleFilter()">
+                <div class="filter-header-title">
+                    <i class="fas fa-filter"></i>
+                    <span>Filter Pencarian</span>
+                    <span style="font-size: 12px; color: #64748b; font-weight: normal;" id="activeFilterCount"></span>
                 </div>
-                <div class="filter-actions">
-                    <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
-                    <a href="{{ route('industri-primer.index') }}" class="btn-reset">↻ Reset Filter</a>
-                </div>
-            </form>
+                <i class="fas fa-chevron-down filter-header-icon" id="filterIcon"></i>
+            </div>
+            <div class="filter-body" id="filterBody">
+                <form method="GET" action="{{ route('industri-primer.index') }}">
+                    <!-- Quick Search -->
+                    <div class="filter-search-bar">
+                        <label style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-search" style="color: var(--accent);"></i> 
+                            <span>Pencarian Cepat</span>
+                        </label>
+                        <input type="text" name="nama" class="filter-input" placeholder="Ketik nama perusahaan untuk mencari..." value="{{ request('nama') }}">
+                    </div>
+
+                    <!-- Lokasi Section -->
+                    <div class="filter-section-title">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Lokasi</span>
+                    </div>
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label>Kabupaten/Kota</label>
+                            <select name="kabupaten" class="filter-input">
+                                <option value="">-- Pilih Kabupaten/Kota --</option>
+                                @foreach($kabupatenList as $kabupaten)
+                                    <option value="{{ $kabupaten }}" {{ request('kabupaten') == $kabupaten ? 'selected' : '' }}>
+                                        {{ $kabupaten }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Produksi Section -->
+                    <div class="filter-section-title">
+                        <i class="fas fa-industry"></i>
+                        <span>Informasi Produksi</span>
+                    </div>
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label>Jenis Produksi</label>
+                            <select name="jenis_produksi" class="filter-input">
+                                <option value="">-- Semua Jenis --</option>
+                                @foreach($jenisProduksiList as $jenis)
+                                    <option value="{{ $jenis->id }}" {{ request('jenis_produksi') == $jenis->id ? 'selected' : '' }}>
+                                        {{ $jenis->nama }}
+                                    </option>
+                                @endforeach
+                                @if($customNames->count() > 0)
+                                    <optgroup label="─────────────">
+                                        @foreach($customNames as $customName)
+                                            <option value="{{ $customName }}" {{ request('jenis_produksi') == $customName ? 'selected' : '' }}>
+                                                {{ $customName }} (Custom)
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endif
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Kapasitas (m³/tahun)</label>
+                            <select name="kapasitas" class="filter-input">
+                                <option value="">-- Semua Kapasitas --</option>
+                                <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1.999 m³/tahun</option>
+                                <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2.000 - 5.999 m³/tahun</option>
+                                <option value=">=6000" {{ request('kapasitas') == '>=6000' ? 'selected' : '' }}>>= 6.000 m³/tahun</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Perizinan Section -->
+                    <div class="filter-section-title">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Informasi Perizinan</span>
+                    </div>
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label>Pemberi Izin</label>
+                            <select name="pemberi_izin" class="filter-input">
+                                <option value="">-- Semua Pemberi Izin --</option>
+                                <option value="Menteri Kehutanan" {{ request('pemberi_izin') == 'Menteri Kehutanan' ? 'selected' : '' }}>Menteri Kehutanan</option>
+                                <option value="BKPM" {{ request('pemberi_izin') == 'BKPM' ? 'selected' : '' }}>BKPM</option>
+                                <option value="Gubernur" {{ request('pemberi_izin') == 'Gubernur' ? 'selected' : '' }}>Gubernur</option>
+                                <option value="Bupati/Walikota" {{ request('pemberi_izin') == 'Bupati/Walikota' ? 'selected' : '' }}>Bupati/Walikota</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Status</label>
+                            <select name="status" class="filter-input">
+                                <option value="">-- Semua Status --</option>
+                                <option value="Aktif" {{ request('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                                <option value="Tidak Aktif" {{ request('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Waktu Section -->
+                    <div class="filter-section-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Periode Waktu</span>
+                    </div>
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label>Bulan</label>
+                            <select name="bulan" class="filter-input">
+                                <option value="">-- Semua Bulan --</option>
+                                <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
+                                <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
+                                <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
+                                <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
+                                <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
+                                <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
+                                <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
+                                <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
+                                <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
+                                <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
+                                <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
+                                <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Tahun</label>
+                            <select name="tahun" class="filter-input">
+                                <option value="">-- Semua Tahun --</option>
+                                @php
+                                    $currentYear = \Carbon\Carbon::now('Asia/Jakarta')->format('Y');
+                                    for ($year = $currentYear; $year >= 2020; $year--) {
+                                        echo "<option value='$year' " . (request('tahun') == $year ? 'selected' : '') . ">$year</option>";
+                                    }
+                                @endphp
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
+                        <a href="{{ route('industri-primer.index') }}" class="btn-reset"><i class="fas fa-redo"></i> Reset Filter</a>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Statistics Section -->
         <div class="statistics-section">
             <div class="stat-card">
-                <h3>📊 Sebaran Per Tahun</h3>
+                <h3><i class="fas fa-chart-line" style="color: var(--accent); margin-right: 8px;"></i>Sebaran Per Tahun</h3>
                 <div class="chart-container">
                     <canvas id="chartTahun"></canvas>
                 </div>
             </div>
             <div class="stat-card">
-                <h3>🗺️ Sebaran Kabupaten/Kota</h3>
+                <h3><i class="fas fa-map-marked-alt" style="color: var(--accent); margin-right: 8px;"></i>Sebaran Kabupaten/Kota</h3>
                 <div class="chart-container">
                     <canvas id="chartKabupaten"></canvas>
                 </div>
             </div>
             <div class="stat-card">
-                <h3>📦 Sebaran Kapasitas Izin</h3>
+                <h3><i class="fas fa-chart-pie" style="color: var(--accent); margin-right: 8px;"></i>Sebaran Kapasitas Izin</h3>
                 <div class="chart-container">
                     <canvas id="chartKapasitas"></canvas>
                 </div>
@@ -974,6 +941,7 @@
     <!-- Select2 JS -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{{ asset('js/filter-collapse.js') }}"></script>
 
     <script>
         const isLoggedIn = @json(auth()->check());

@@ -4,6 +4,7 @@
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="{{ asset('css/filter-collapse.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
         /* Prevent sidebar overlap */
@@ -276,79 +277,7 @@
             border: 1px solid #6ee7b7;
         }
 
-        .filter-card {
-            background: var(--white);
-            padding: 25px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            margin-bottom: 25px;
-        }
-
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .filter-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 6px;
-        }
-
-        .filter-input {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .filter-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-filter {
-            background: var(--accent);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 6px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-filter:hover {
-            background: #166534;
-        }
-
-        .btn-reset {
-            background: #f1f5f9;
-            color: var(--text-main);
-            padding: 10px 20px;
-            border-radius: 6px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-reset:hover {
-            background: #e2e8f0;
-        }
+        /* Filter Section - Extended from filter-collapse.css */
 
         .table-card {
             background: var(--white);
@@ -660,10 +589,19 @@
             </div>
 
             <div class="filter-card">
-                <form method="GET" action="{{ route('perajin.index') }}">
-                    <div class="filter-grid">
-                        <div class="filter-group">
-                            <label>Nama Pemilik</label>
+                <div class="filter-header" onclick="toggleFilter()">
+                    <div class="filter-header-title">
+                        <i class="fas fa-filter"></i>
+                        <span>Filter Pencarian</span>
+                        <span style="font-size: 12px; color: #64748b; font-weight: normal;" id="activeFilterCount"></span>
+                    </div>
+                    <i class="fas fa-chevron-down filter-header-icon" id="filterIcon"></i>
+                </div>
+                <div class="filter-body" id="filterBody">
+                    <form method="GET" action="{{ route('perajin.index') }}">
+                        <div class="filter-grid">
+                            <div class="filter-group">
+                                <label>Nama Pemilik</label>
                             <input type="text" name="search" class="filter-input" placeholder="Cari nama atau nomor SK" value="{{ request('search') }}">
                         </div>
                         <div class="filter-group">
@@ -721,18 +659,19 @@
                         <a href="{{ route('perajin.index') }}" class="btn-reset">↻ Reset Filter</a>
                     </div>
                 </form>
+                </div>
             </div>
 
             <!-- Statistics Section -->
             <div class="statistics-section">
                 <div class="stat-card">
-                    <h3>📊 Sebaran Per Tahun</h3>
+                    <h3><i class="fas fa-chart-line" style="color: var(--accent); margin-right: 8px;"></i>Sebaran Per Tahun</h3>
                     <div class="chart-container">
                         <canvas id="chartTahun"></canvas>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <h3>🗺️ Sebaran Kabupaten/Kota</h3>
+                    <h3><i class="fas fa-map-marked-alt" style="color: var(--accent); margin-right: 8px;"></i>Sebaran Kabupaten/Kota</h3>
                     <div class="chart-container">
                         <canvas id="chartKabupaten"></canvas>
                     </div>
@@ -868,6 +807,7 @@
 @endsection
 
 @push('scripts')
+    <script src="{{ asset('js/filter-collapse.js') }}"></script>
     <script>
         function showDetail(item) {
             document.getElementById('modal-nama').textContent = item.industri.nama;
