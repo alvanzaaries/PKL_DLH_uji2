@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (rawLabels.length > 0) {
                 const ctx = canvas.getContext('2d');
+                const legendContainer = document.getElementById('wilayahLegend');
 
                 // Dynamic Colors Generation
                 const dynamicColors = rawLabels.map((_, i) => {
@@ -27,8 +28,42 @@ document.addEventListener('DOMContentLoaded', function () {
                     return `hsl(${hue}, 65%, 55%)`;
                 });
 
-                new Chart(ctx, {
+                const isDark = document.documentElement.classList.contains('dark');
+                const legendTextColor = isDark ? '#e5e7eb' : '#374151';
+                const tooltipBg = isDark ? '#111827' : '#ffffff';
+                const tooltipBorder = isDark ? '#374151' : '#e5e7eb';
+                const totalValue = rawData.reduce((sum, v) => sum + (Number(v) || 0), 0);
+
+                const percentageLabels = {
+                    id: 'percentageLabels',
+                    afterDatasetsDraw(chart) {
+                        const { ctx } = chart;
+                        const meta = chart.getDatasetMeta(0);
+                        if (!meta || !meta.data) return;
+
+                        ctx.save();
+                        ctx.font = '13px sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = isDark ? '#f9fafb' : '#111827';
+
+                        meta.data.forEach((arc, i) => {
+                            const value = Number(rawData[i]) || 0;
+                            if (!value || !totalValue) return;
+                            const percentage = (value / totalValue) * 100;
+                            if (percentage < 2) return;
+
+                            const pos = arc.tooltipPosition();
+                            ctx.fillText(`${percentage.toFixed(1)}%`, pos.x, pos.y);
+                        });
+
+                        ctx.restore();
+                    }
+                };
+
+                const chartInstance = new Chart(ctx, {
                     type: 'doughnut',
+                    plugins: [percentageLabels],
                     data: {
                         labels: rawLabels,
                         datasets: [{
@@ -43,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         maintainAspectRatio: false,
                         plugins: {
                             legend: {
-                                display: true,
+                                display: false,
                                 position: 'right',
                                 labels: {
                                     boxWidth: 10,
@@ -70,6 +105,11 @@ document.addEventListener('DOMContentLoaded', function () {
                                 }
                             },
                             tooltip: {
+                                backgroundColor: tooltipBg,
+                                borderColor: tooltipBorder,
+                                borderWidth: 1,
+                                titleColor: legendTextColor,
+                                bodyColor: legendTextColor,
                                 callbacks: {
                                     label: function(context) {
                                         let label = context.label || '';
@@ -89,6 +129,36 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
                 });
+
+                const renderLegend = () => {
+                    if (!legendContainer) return;
+                    legendContainer.innerHTML = '';
+
+                    const darkMode = document.documentElement.classList.contains('dark');
+                    const textClass = darkMode ? 'text-gray-200' : 'text-gray-700';
+
+                    rawLabels.forEach((label, i) => {
+                        if (i > 9) return;
+                        const item = document.createElement('div');
+                        item.className = `flex items-center gap-2 text-xs ${textClass} transition-transform duration-200 hover:translate-x-1`;
+
+                        const dot = document.createElement('span');
+                        dot.className = 'inline-block w-2 h-2 rounded-full';
+                        dot.style.backgroundColor = dynamicColors[i];
+
+                        const text = document.createElement('span');
+                        text.textContent = label;
+
+                        item.appendChild(dot);
+                        item.appendChild(text);
+                        legendContainer.appendChild(item);
+                    });
+                };
+
+                renderLegend();
+
+                const observer = new MutationObserver(() => renderLegend());
+                observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
             }
         } catch (e) {
             console.error("Error parsing chart data or initializing chart:", e);

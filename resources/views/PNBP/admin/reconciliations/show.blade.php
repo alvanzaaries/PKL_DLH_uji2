@@ -271,6 +271,7 @@
                                     data-labels="{{ json_encode($statsWilayah->pluck('label')) }}" 
                                     data-values="{{ json_encode($statsWilayah->pluck('total_nilai')) }}"></canvas>
                             </div>
+                            <div id="wilayahLegend" class="mt-4 space-y-2"></div>
                         @else
                             <div class="flex items-center justify-center h-full text-gray-500 text-sm py-10">
                                 Tidak ada data wilayah.
