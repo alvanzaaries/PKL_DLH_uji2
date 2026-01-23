@@ -92,7 +92,6 @@ class ApiLaporanController extends Controller
                     'industri_id' => $validated['industri_id'],
                     'jenis_laporan' => $validated['jenis_laporan'],
                     'tanggal' => $tanggal,
-                    'path_laporan' => '',
                 ]);
 
                 // Unwrap rows dari struktur ['cells' => ..., 'source_row' => ...] menjadi array sederhana

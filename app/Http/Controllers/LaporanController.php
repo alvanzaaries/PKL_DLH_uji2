@@ -387,7 +387,6 @@ class LaporanController extends Controller
                 'industri_id' => $request->industri_id,
                 'jenis_laporan' => $request->jenis_laporan,
                 'tanggal' => $tanggal,
-                'path_laporan' => '',
             ]);
 
             // Normalisasi rows agar konsisten (flat array) sebelum dikirim ke service
@@ -515,6 +514,9 @@ class LaporanController extends Controller
         // Get detail data menggunakan service dengan filter tambahan jika ada, pagination, dan sorting
         $detailData = $this->dataService->getDetailLaporan($bulan, $tahun, $jenis, $filters, $perPage, $sortBy, $sortDirection);
 
+        // Get ALL items (non-paginated) for stat cards to show total across all pages
+        $allItems = $this->dataService->getDetailLaporanForExport($bulan, $tahun, $jenis, $filters);
+
         // Determine earliest year from Laporan.tanggal to populate the year dropdown in the view.
         // Fallback to 2020 if there are no records or parsing fails.
         $firstDate = Laporan::orderBy('tanggal', 'asc')->value('tanggal');
@@ -533,6 +535,7 @@ class LaporanController extends Controller
             'jenis' => $jenis,
             'jenisLabel' => $jenisOptions[$jenis],
             'items' => $detailData['items'],
+            'allItems' => $allItems,  // For stat cards - total across all pages
             'filterOptions' => $detailData['filterOptions'],
             'earliestYear' => $earliestYear,
             'perPage' => $perPage,
@@ -1611,6 +1614,10 @@ class LaporanController extends Controller
 
     /**
      * Parse angka dengan format Excel (koma untuk ribuan, titik untuk desimal)
+     * Format yang diterima:
+     * - Koma (,) hanya sebagai pemisah ribuan
+     * - Titik (.) hanya sebagai pemisah desimal
+     * - Format valid: 1,234.56 atau 1234.56 atau 1,234 atau 1234
      */
     private function parseNumber($value)
     {
@@ -1618,15 +1625,81 @@ class LaporanController extends Controller
             return null;
         }
 
+        // Jika sudah numeric (tanpa format string), langsung return
         if (is_numeric($value)) {
             return (float) $value;
         }
 
-        $stringValue = trim((string) $value);
-        $normalized = str_replace(',', '', $stringValue);
+        $s = trim((string) $value);
 
-        if (is_numeric($normalized)) {
-            return (float) $normalized;
+        // Jika ada koma DAN titik, validasi posisi:
+        // Titik harus di belakang koma (format US: 1,234.56)
+        if (strpos($s, ',') !== false && strpos($s, '.') !== false) {
+            $lastComma = strrpos($s, ',');
+            $lastDot = strrpos($s, '.');
+
+            if ($lastDot > $lastComma) {
+                // Format valid: 1,234.56 -> Hapus koma (ribuan)
+                $s = str_replace(',', '', $s);
+            } else {
+                // Format tidak valid: 1.234,56 (format Indonesia tidak diterima)
+                return null;
+            }
+        }
+        // Jika HANYA ada Koma (1,234 atau 3,85)
+        elseif (strpos($s, ',') !== false) {
+            // Validasi: koma hanya valid sebagai pemisah ribuan
+            // Pemisah ribuan harus diikuti oleh tepat 3 digit
+
+            // Split by comma dan cek pola
+            $parts = explode(',', $s);
+            $isValidThousandsSeparator = true;
+
+            if (count($parts) >= 2) {
+                $lastPart = array_pop($parts);
+
+                // Bagian terakhir harus tepat 3 digit untuk valid thousand separator
+                if (strlen($lastPart) !== 3) {
+                    // Jika bukan 3 digit, kemungkinan ini format desimal Indonesia (3,85)
+                    return null; // Reject format Indonesia
+                }
+
+                // Cek bagian-bagian sebelumnya
+                foreach ($parts as $i => $part) {
+                    if ($i === 0) {
+                        // Bagian pertama bisa 1-3 digit
+                        if (strlen($part) < 1 || strlen($part) > 3 || !ctype_digit($part)) {
+                            $isValidThousandsSeparator = false;
+                            break;
+                        }
+                    } else {
+                        // Bagian tengah harus tepat 3 digit
+                        if (strlen($part) !== 3 || !ctype_digit($part)) {
+                            $isValidThousandsSeparator = false;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                $isValidThousandsSeparator = false;
+            }
+
+            if ($isValidThousandsSeparator) {
+                // Valid thousand separator, hapus koma
+                $s = str_replace(',', '', $s);
+            } else {
+                // Format tidak valid (kemungkinan format desimal Indonesia)
+                return null;
+            }
+        }
+        // Jika HANYA ada Titik (1.5 atau 1.234)
+        // Titik dianggap desimal (format valid)
+
+        // Bersihkan karakter non-numeric lain (misal spasi, Rp, dll) selain titik dan minus
+        $s = preg_replace('/[^0-9\.\-]/', '', $s);
+
+        if (is_numeric($s)) {
+            return (float) $s;
         }
 
         return null;
