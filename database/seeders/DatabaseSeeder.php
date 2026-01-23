@@ -26,6 +26,15 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        User::updateOrCreate(
+            ['email' => 'admin@dlhk.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('admin123'),
+                'role' => 'admin',
+            ]
+        );
+
         // Regular users (from HEAD)
         $users = [
             ['name' => 'User 1', 'email' => 'user1@sipjateng.test'],
@@ -44,10 +53,6 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // Call UserSeeder from Incoming if it exists (for additional data)
-        if (class_exists(\Database\Seeders\UserSeeder::class)) {
-            $this->call(\Database\Seeders\UserSeeder::class);
-        }
         // Call KphSeeder from Incoming if it exists (for additional data)
         if (class_exists(\Database\Seeders\KphSeeder::class)) {
             $this->call(\Database\Seeders\KphSeeder::class);

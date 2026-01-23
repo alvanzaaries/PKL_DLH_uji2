@@ -60,7 +60,7 @@
                             <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">{{ optional($user->created_at)->format('d/m/Y H:i') }}</td>
                             <td class="px-6 py-4 text-sm text-right space-x-2 whitespace-nowrap">
                                 <a href="{{ route('admin.users.edit', $user->id) }}" class="text-green-600 hover:text-green-900">Edit</a>
-                                <form action="{{ route('admin.users.reset-password', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Reset password untuk user ini? Password baru akan ditampilkan di notifikasi.');">
+                                <form action="{{ route('admin.users.reset-password', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Reset password untuk user ini?');">
                                     @csrf
                                     <button type="submit" class="text-red-600 hover:text-red-900">Reset Password</button>
                                 </form>

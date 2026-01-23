@@ -75,7 +75,7 @@ class UserManagementController extends Controller
 
     public function resetPassword(Request $request, User $user)
     {
-        $generated = Str::random(12);
+        $generated = 'password';
         $user->password = Hash::make($generated);
         $user->save();
 
