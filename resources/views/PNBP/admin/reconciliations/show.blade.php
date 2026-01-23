@@ -128,15 +128,19 @@
             </div>
 
             {{-- Edit Summary Overrides (Manual Override) --}}
-            <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 mb-6 p-6">
-                <h3 class="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+            <div id="manualOverrideCard" class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 mb-6 p-6">
+                <div id="manualOverrideHeader" class="flex items-center justify-between mb-4 cursor-pointer select-none" role="button" aria-expanded="false" aria-controls="manualOverrideContent">
+                    <h3 class="font-bold text-gray-800 dark:text-white flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Edit Ringkasan (Manual Override)
-                </h3>
+                    </h3>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Klik untuk buka/tutup</span>
+                </div>
                 
-                <form action="{{ route('reconciliations.summary-overrides', $reconciliation->id) }}" method="POST">
+                <div id="manualOverrideContent" class="hidden">
+                    <form action="{{ route('reconciliations.summary-overrides', $reconciliation->id) }}" method="POST">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         
@@ -195,11 +199,12 @@
                             Simpan Perubahan
                         </button>
                     </div>
-                </form>
+                    </form>
+                </div>
             </div>
 
             {{-- 3 KOLOM: Rekap Jenis, Rekap Bank, & Sebaran Wilayah (Chart) --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 {{-- 1. Rekap Jenis --}}
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 lg:col-span-1">
@@ -264,14 +269,16 @@
                     </div>
                     
                     {{-- Container Chart --}}
-                    <div class="p-4 flex-1 flex flex-col justify-center items-center">
+                    <div class="p-4 flex-1">
                         @if(count($statsWilayah ?? []) > 0)
-                            <div class="relative w-full h-64">
-                                <canvas id="wilayahChart" 
-                                    data-labels="{{ json_encode($statsWilayah->pluck('label')) }}" 
-                                    data-values="{{ json_encode($statsWilayah->pluck('total_nilai')) }}"></canvas>
+                            <div class="flex flex-col md:flex-row items-center md:items-start gap-4">
+                                <div class="relative w-full md:w-2/3 h-64">
+                                    <canvas id="wilayahChart" 
+                                        data-labels="{{ json_encode($statsWilayah->pluck('label')) }}" 
+                                        data-values="{{ json_encode($statsWilayah->pluck('total_nilai')) }}"></canvas>
+                                </div>
+                                <div id="wilayahLegend" class="w-full md:w-1/3 space-y-2"></div>
                             </div>
-                            <div id="wilayahLegend" class="mt-4 space-y-2"></div>
                         @else
                             <div class="flex items-center justify-center h-full text-gray-500 text-sm py-10">
                                 Tidak ada data wilayah.
@@ -374,6 +381,22 @@
         </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.getElementById('manualOverrideCard');
+            const header = document.getElementById('manualOverrideHeader');
+            const content = document.getElementById('manualOverrideContent');
+
+            if (!card || !header || !content) return;
+
+            card.addEventListener('click', (event) => {
+                if (event.target.closest('#manualOverrideContent')) return;
+                const isHidden = content.classList.contains('hidden');
+                content.classList.toggle('hidden');
+                header.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+            });
+        });
+    </script>
     <!-- External JS for Chart & Interactivity -->
     <script src="{{ asset('js/pnbp/admin/reconciliations/show.js') }}"></script>
 @endsection
