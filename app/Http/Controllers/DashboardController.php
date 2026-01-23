@@ -152,6 +152,40 @@ class DashboardController extends Controller
             }
         }
 
+        // 6b. Apply Manual Overrides for LHP Totals
+        // Logic: Total = (Sum of ALL Details) - (Sum of Details belonging to Overridden Recons) + (Sum of Override Values)
+        $matchingReconIds = $reconQuery->pluck('id');
+        $overrides = \App\Models\ReconciliationSummaryOverride::whereIn('reconciliation_id', $matchingReconIds)
+            ->where('metric', 'total_nilai_lhp')
+            ->whereNull('satuan')
+            ->get();
+
+        if ($overrides->isNotEmpty()) {
+            $overriddenReconIds = $overrides->pluck('reconciliation_id');
+            $originalLhpSum = ReconciliationDetail::whereIn('reconciliation_id', $overriddenReconIds)->sum('lhp_nilai');
+            $overrideSum = $overrides->sum('value');
+            
+            // Adjust the financial total (ensure we have a value to start with)
+            if ($financials) {
+                $financials->total_lhp = ($financials->total_lhp - $originalLhpSum) + $overrideSum;
+            }
+        }
+
+        $setorOverrides = \App\Models\ReconciliationSummaryOverride::whereIn('reconciliation_id', $matchingReconIds)
+            ->where('metric', 'total_nilai_setor')
+            ->whereNull('satuan')
+            ->get();
+
+        if ($setorOverrides->isNotEmpty()) {
+            $overriddenReconIds = $setorOverrides->pluck('reconciliation_id');
+            $originalSetorSum = ReconciliationDetail::whereIn('reconciliation_id', $overriddenReconIds)->sum('setor_nilai');
+            $overrideSetorSum = $setorOverrides->sum('value');
+
+            if ($financials) {
+                $financials->total_setor = ($financials->total_setor - $originalSetorSum) + $overrideSetorSum;
+            }
+        }
+
         // 7. Filter Data Options (Dropdowns)
         $availableYears = Reconciliation::select('year')->distinct()->orderByDesc('year')->pluck('year');
         $availableQuarters = Reconciliation::select('quarter')->distinct()->orderBy('quarter')->pluck('quarter');

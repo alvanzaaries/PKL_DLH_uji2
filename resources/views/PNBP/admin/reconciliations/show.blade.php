@@ -122,7 +122,7 @@
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Nilai Setor</div>
                     <div class="text-2xl font-bold text-green-600 dark:text-green-500 mt-2">
                         <span class="text-sm text-gray-500 font-normal">Rp</span>
-                        {{ number_format(($baseTotalNilaiSetor ?? 0), 0, '.', ',') }}
+                        {{ number_format(($totalNilaiSetorFinal ?? $baseTotalNilaiSetor ?? 0), 0, '.', ',') }}
                     </div>
                 </div>
             </div>
@@ -151,6 +151,26 @@
                                     value="{{ number_format($totalNilaiLhpFinal, 0, '.', ',') }}"
                                     class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5"
                                     placeholder="0">
+                                    @if(isset($baseTotalNilaiLhp, $totalNilaiLhpFinal) && $totalNilaiLhpFinal != $baseTotalNilaiLhp)
+                                        <p class="text-xs text-yellow-600 mt-1">*Nilai manual (Asli: {{ number_format($baseTotalNilaiLhp ?? 0, 0, '.', ',') }})</p>
+                                    @endif
+                            </div>
+                        </div>
+
+                        {{-- Override Total Nilai Setor --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Nilai Setor (Rp)</label>
+                            <div class="relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm">Rp</span>
+                                </div>
+                                <input type="text" name="total_nilai_setor" 
+                                    value="{{ number_format($totalNilaiSetorFinal ?? ($baseTotalNilaiSetor ?? 0), 0, '.', ',') }}"
+                                    class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5"
+                                    placeholder="0">
+                                    @if(isset($baseTotalNilaiSetor, $totalNilaiSetorFinal) && $totalNilaiSetorFinal != $baseTotalNilaiSetor)
+                                        <p class="text-xs text-yellow-600 mt-1">*Nilai manual (Asli: {{ number_format($baseTotalNilaiSetor ?? 0, 0, '.', ',') }})</p>
+                                    @endif
                             </div>
                         </div>
 
@@ -247,7 +267,9 @@
                     <div class="p-4 flex-1 flex flex-col justify-center items-center">
                         @if(count($statsWilayah ?? []) > 0)
                             <div class="relative w-full h-64">
-                                <canvas id="wilayahChart"></canvas>
+                                <canvas id="wilayahChart" 
+                                    data-labels="{{ json_encode($statsWilayah->pluck('label')) }}" 
+                                    data-values="{{ json_encode($statsWilayah->pluck('total_nilai')) }}"></canvas>
                             </div>
                         @else
                             <div class="flex items-center justify-center h-full text-gray-500 text-sm py-10">
@@ -351,94 +373,6 @@
         </div>
     </div>
 
-    <script>
-        document.getElementById('resetBtn')?.addEventListener('click', function(){
-            const f = document.getElementById('filterForm');
-            if(!f) return;
-            f.querySelector('input[name="search"]').value = '';
-            f.submit();
-        });
-
-        // Render wilayah chart (PIE CHART - DOUGHNUT)
-        @if(count($statsWilayah ?? []) > 0)
-            (function(){
-                const rawLabels = {!! json_encode($statsWilayah->pluck('label')) !!};
-                const rawData = {!! json_encode($statsWilayah->pluck('total_nilai')) !!};
-
-                const canvas = document.getElementById('wilayahChart');
-                if (!canvas) return;
-                
-                const ctx = canvas.getContext('2d');
-
-                // --- FUNGSI GENERATE WARNA DINAMIS ---\
-                const dynamicColors = rawLabels.map((_, i) => {
-                    const hue = (i * 137.508) % 360; 
-                    return `hsl(${hue}, 65%, 55%)`;
-                });
-
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: rawLabels,
-                        datasets: [{
-                            data: rawData,
-                            backgroundColor: dynamicColors, 
-                            borderWidth: 1,
-                            borderColor: '#ffffff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'right',
-                                labels: {
-                                    boxWidth: 10,
-                                    font: { size: 10 },
-                                    generateLabels: function(chart) {
-                                        const data = chart.data;
-                                        if (data.labels.length && data.datasets.length) {
-                                            return data.labels.map((label, i) => {
-                                                if (i > 9) return null; 
-                                                const meta = chart.getDatasetMeta(0);
-                                                const style = meta.controller.getStyle(i);
-                                                return {
-                                                    text: label,
-                                                    fillStyle: style.backgroundColor,
-                                                    strokeStyle: style.borderColor,
-                                                    lineWidth: style.borderWidth,
-                                                    hidden: isNaN(data.datasets[0].data[i]) || meta.data[i].hidden,
-                                                    index: i
-                                                };
-                                            }).filter(item => item !== null);
-                                        }
-                                        return [];
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.label || '';
-                                        if (label) {label += ': '};
-                                        label += new Intl.NumberFormat('id-ID', {
-                                            style: 'currency',
-                                            currency: 'IDR',
-                                            minimumFractionDigits: 0
-                                        }).format(context.raw);
-                                        return label;
-                                    }
-                                }
-                            }
-                        },
-                        layout: {
-                            padding: 0
-                        }
-                    }
-                });
-            })();
-        @endif
-    </script>
+    <!-- External JS for Chart & Interactivity -->
+    <script src="{{ asset('js/pnbp/admin/reconciliations/show.js') }}"></script>
 @endsection

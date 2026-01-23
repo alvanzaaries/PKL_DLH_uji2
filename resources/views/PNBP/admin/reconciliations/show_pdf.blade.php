@@ -4,24 +4,7 @@
     <meta charset="UTF-8">
     <title>Export Rekonsiliasi - {{ $reconciliation->kph ?? 'PNBP' }}</title>
     <style>
-        body { font-family: Helvetica, Arial, sans-serif; color: #111827; font-size: 10px; line-height: 1.3; }
-        h1 { font-size: 14px; margin: 0 0 5px; font-weight: bold; text-align: center; text-transform: uppercase; }
-        h2 { font-size: 11px; margin: 15px 0 6px; font-weight: bold; border-bottom: 2px solid #4b5563; padding-bottom: 4px; text-transform: uppercase; }
-        h3 { font-size: 10px; margin: 12px 0 4px; font-weight: bold; color: #374151; }
-        .muted { color: #6b7280; font-size: 9px; margin-bottom: 4px; }
-        
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        th, td { border: 1px solid #9ca3af; padding: 4px 6px; text-align: left; vertical-align: top; }
-        th { background-color: #f3f4f6; font-weight: bold; text-transform: uppercase; font-size: 9px; }
-        
-        .right { text-align: right; }
-        .center { text-align: center; }
-        .total-row { background-color: #e5e7eb; font-weight: bold; }
-        .page-break { page-break-after: always; }
-        
-        /* Helper for header info */
-        .info-header { text-align: center; margin-bottom: 25px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }
-        .info-header p { margin: 2px 0; font-size: 10px; }
+        {{ file_get_contents(public_path('css/pnbp/pdf-style.css')) }}
     </style>
 </head>
 <body>
@@ -69,8 +52,8 @@
             <tr class="total-row">
                 <td>GRAND TOTAL</td>
                 <td class="right">{{ number_format($grandVol, 2, '.', ',') }}</td>
-                <td class="right">Rp {{ number_format($grandLhp, 0, '.', ',') }}</td>
-                <td class="right">Rp {{ number_format($grandSetor, 0, '.', ',') }}</td>
+                <td class="right">Rp {{ number_format($totalNilaiLhpOverride ?? $grandLhp, 0, '.', ',') }}</td>
+                <td class="right">Rp {{ number_format($totalNilaiSetorOverride ?? $grandSetor, 0, '.', ',') }}</td>
             </tr>
         </tbody>
     </table>

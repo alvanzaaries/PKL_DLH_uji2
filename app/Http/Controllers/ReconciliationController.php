@@ -98,6 +98,19 @@ class ReconciliationController extends Controller
         @ini_set('memory_limit', '2048M');
         @set_time_limit(300);
 
+        // Fetch Overrides (Manual Override)
+        $override = \App\Models\ReconciliationSummaryOverride::where('reconciliation_id', $reconciliation->id)
+            ->where('metric', 'total_nilai_lhp')
+            ->whereNull('satuan')
+            ->first();
+        $totalNilaiLhpOverride = $override ? (float) $override->value : null;
+
+        $setorOverride = \App\Models\ReconciliationSummaryOverride::where('reconciliation_id', $reconciliation->id)
+            ->where('metric', 'total_nilai_setor')
+            ->whereNull('satuan')
+            ->first();
+        $totalNilaiSetorOverride = $setorOverride ? (float) $setorOverride->value : null;
+
         // Fetch ALL details (removed pagination)
         $query = $this->buildDetailsQuery($request, $reconciliation);
         $details = $query->get();
@@ -152,6 +165,9 @@ class ReconciliationController extends Controller
             [
                 'reconciliation' => $reconciliation,
                 'groupedData' => $groupedData,
+                'totalNilaiLhpOverride' => $totalNilaiLhpOverride,
+                'totalNilaiLhpOverride' => $totalNilaiLhpOverride,
+                'totalNilaiSetorOverride' => $totalNilaiSetorOverride,
                 'pageInfo' => [
                     'total_rows' => $details->count(),
                     'generated_at' => now()->format('d/m/Y H:i'),
@@ -287,6 +303,8 @@ class ReconciliationController extends Controller
         $nilaiOverride = $overrides->get(strtolower('total_nilai_lhp|'));
         $totalNilaiLhpFinal = $nilaiOverride ? (float) $nilaiOverride->value : $baseTotalNilaiLhp;
         $baseTotalNilaiSetor = (float) ReconciliationDetail::where('reconciliation_id', $reconciliation->id)->sum('setor_nilai');
+        $setorOverride = $overrides->get(strtolower('total_nilai_setor|'));
+        $totalNilaiSetorFinal = $setorOverride ? (float) $setorOverride->value : $baseTotalNilaiSetor;
 
         return compact(
             'totalPerSatuan',
@@ -297,7 +315,8 @@ class ReconciliationController extends Controller
             'statsBank',
             'totalNilaiLhpFinal',
             'baseTotalNilaiLhp',
-            'baseTotalNilaiSetor'
+            'baseTotalNilaiSetor',
+            'totalNilaiSetorFinal'
         );
     }
 
@@ -593,6 +612,7 @@ class ReconciliationController extends Controller
     {
         $data = $request->validate([
             'total_nilai_lhp' => 'nullable|string',
+            'total_nilai_setor' => 'nullable|string',
             'total_volume' => 'nullable|array',
             'total_volume.*' => 'nullable|string',
         ]);
@@ -619,6 +639,17 @@ class ReconciliationController extends Controller
             ReconciliationSummaryOverride::updateOrCreate(
                 ['reconciliation_id' => $reconciliation->id, 'metric' => 'total_nilai_lhp', 'satuan' => null],
                 ['value' => $this->parseRupiah($nilaiRaw)]
+            );
+        }
+
+        $setorRaw = trim((string) ($data['total_nilai_setor'] ?? ''));
+        if ($setorRaw === '') {
+            ReconciliationSummaryOverride::where('reconciliation_id', $reconciliation->id)
+                ->where('metric', 'total_nilai_setor')->whereNull('satuan')->delete();
+        } else {
+            ReconciliationSummaryOverride::updateOrCreate(
+                ['reconciliation_id' => $reconciliation->id, 'metric' => 'total_nilai_setor', 'satuan' => null],
+                ['value' => $this->parseRupiah($setorRaw)]
             );
         }
         return back()->with('success', 'Ringkasan total berhasil diperbarui.');

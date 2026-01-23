@@ -7,28 +7,7 @@
     <title>@yield('title', 'Admin Dashboard - Pelaporan PNBP')</title>
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#0d9488",
-                        primary_hover: "#0f766e",
-                        "background-light": "#f3f4f6",
-                        "background-dark": "#111827",
-                        "surface-light": "#ffffff",
-                        "surface-dark": "#1f2937",
-                    },
-                    fontFamily: {
-                        display: ["Inter", "sans-serif"],
-                        body: ["Inter", "sans-serif"],
-                    },
-                    borderRadius: { DEFAULT: "0.5rem" },
-                },
-            },
-        };
-    </script>
+    <script src="{{ asset('js/pnbp/tailwind-config.js') }}"></script>
 
     <link rel="icon" type="image/png" href="{{ asset('img/Logo Provinsi Jawa Tengah.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
@@ -36,33 +15,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .dark ::-webkit-scrollbar-thumb {
-            background: #4b5563;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-    </style>
+    <link href="{{ asset('css/pnbp/admin-layout.css') }}" rel="stylesheet">
 </head>
 @php
     $authUser = auth()->user();
