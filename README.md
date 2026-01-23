@@ -1,12 +1,12 @@
 
-# SISUDAH — Sistem Informasi PNBP Industri & Laporan 📌
+# Sistem Informasi PNBP, Industri, dan Laporan 📌
 
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![License](https://img.shields.io/badge/license-Internal-lightgrey)
 ![Tech Stack](https://img.shields.io/badge/stack-Laravel%20%7C%20MySQL%20%7C%20Vite-orange)
 
-SISUDAH adalah aplikasi internal untuk pengelolaan data PNBP industri, validasi, dan pelaporan secara terstruktur. Fokusnya adalah memastikan alur data masuk–proses–laporan berjalan konsisten, auditable, dan mudah ditelusuri.
+SISTEM adalah aplikasi internal untuk pengelolaan data PNBP industri, validasi, dan pelaporan secara terstruktur. Fokusnya adalah memastikan alur data masuk–proses–laporan berjalan konsisten, auditable, dan mudah ditelusuri.
 
 Dengan modul industri dan laporan yang terintegrasi, tim operasional dapat mempercepat proses administrasi, menjaga kualitas data, serta menghasilkan laporan periodik yang siap ditinjau.
 
@@ -95,14 +95,14 @@ Gunakan variabel lingkungan berikut (sesuaikan dengan environment Anda):
 
 | Variabel | Contoh Nilai | Keterangan |
 | --- | --- | --- |
-| APP_NAME | SISUDAH | Nama aplikasi |
+| APP_NAME | SISTEM | Nama aplikasi |
 | APP_ENV | local | Environment |
 | APP_URL | http://localhost:8000 | Base URL |
 | APP_TIMEZONE | Asia/Jakarta | Zona waktu |
 | DB_CONNECTION | mysql | Driver database |
 | DB_HOST | 127.0.0.1 | Host database |
 | DB_PORT | 3306 | Port database |
-| DB_DATABASE | sisudah | Nama database |
+| DB_DATABASE | ...... | Nama database |
 | DB_USERNAME | root | Username database |
 | DB_PASSWORD | ******** | Password database |
 | FILESYSTEM_DISK | public | Storage disk |
