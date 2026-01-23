@@ -1,145 +1,132 @@
-# Pelaporan PNBP (Rekonsiliasi PNBP + Visualisasi Data Industri)
 
-Aplikasi web gabungan:
-- **Admin/Internal (HEAD)**: Upload & analisis data rekonsiliasi (Excel) per periode (Tahun/Triwulan) dengan pemisahan akses Admin/User.
-- **Public/Visualisasi (Incoming)**: Dashboard publik untuk data industri kehutanan (Primer, Sekunder, TPTKB, Perajin).
+# SISUDAH — Sistem Informasi PNBP Industri & Laporan 📌
 
-## Fitur Utama
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
+![License](https://img.shields.io/badge/license-Internal-lightgrey)
+![Tech Stack](https://img.shields.io/badge/stack-Laravel%20%7C%20MySQL%20%7C%20Vite-orange)
 
-### Modul Admin (Rekonsiliasi)
-- **RBAC (Admin vs User)**
-	- Admin: dashboard statistik, kelola user, lihat semua upload, detail data, download file.
-	- User: upload data, lihat riwayat upload miliknya.
-- **Upload Excel** dengan UI drag & drop + spinner.
-- **KPH saat upload** (wajib) dan **filter KPH** di dashboard admin.
-- **Dashboard Admin** dengan filter:
-	- Tahun
-	- Triwulan spesifik, atau **Akumulasi "Sampai Dengan Triwulan"**
-	- KPH
-- **Detail Rekonsiliasi**: ringkasan Nilai LHP, Billing, Setor, total setor, selisih (LHP − Setor), dan rekap per jenis/wilayah/bank.
+SISUDAH adalah aplikasi internal untuk pengelolaan data PNBP industri, validasi, dan pelaporan secara terstruktur. Fokusnya adalah memastikan alur data masuk–proses–laporan berjalan konsisten, auditable, dan mudah ditelusuri.
 
-### Modul Publik (Visualisasi)
-- **Dashboard Publik** statistik industri (tanpa login).
-- **Data Industri Primer** (PBPHH).
-- **Data Industri Sekunder** (PBUI).
-- **Data TPTKB**.
-- **Data Perajin**.
-- **Laporan & Rekap** (dengan auth).
+Dengan modul industri dan laporan yang terintegrasi, tim operasional dapat mempercepat proses administrasi, menjaga kualitas data, serta menghasilkan laporan periodik yang siap ditinjau.
 
-## Tech Stack
+## Fitur Utama 🚀
 
-- Laravel 12
-- PHP ^8.2
-- Vite + Tailwind
-- PhpSpreadsheet (parsing Excel)
-- Default DB: SQLite (bisa diganti MySQL/PostgreSQL)
-- Timezone: **Asia/Jakarta (UTC+7)**
+- Manajemen data industri (primer/sekunder)
+- Pengelolaan laporan penerimaan, mutasi, dan penjualan
+- Validasi dan rekonsiliasi data
+- Upload berkas pendukung dan tracking status
+- Export laporan (format standar internal)
 
-## Prasyarat
+## Teknologi yang Digunakan ⚙️
 
-- PHP 8.2+ (ext umum Laravel + ext yang dibutuhkan PhpSpreadsheet)
-- Composer
-- Node.js + npm
+| Kategori | Teknologi |
+| --- | --- |
+| Bahasa | PHP, JavaScript |
+| Framework | Laravel |
+| Database | MySQL / MariaDB |
+| Frontend Tooling | Vite |
+| Dependency Manager | Composer, npm |
+| Testing | PHPUnit |
 
-## Setup Cepat
+## Struktur Folder Project 📂
 
-### 1) Install dependency
-
-```bash
-composer install
-npm install
+```
+SISTEM/
+├─ app/
+│  ├─ Http/
+│  ├─ Models/
+│  ├─ Providers/
+│  └─ Services/
+├─ bootstrap/
+├─ config/
+├─ database/
+├─ public/
+├─ resources/
+├─ routes/
+├─ storage/
+├─ tests/
+├─ vendor/
+├─ package.json
+├─ composer.json
+└─ README.md
 ```
 
-### 2) Konfigurasi env
+## Cara Instalasi & Menjalankan Project 🧪
 
-```bash
-copy .env.example .env
-php artisan key:generate
-```
+1. Pastikan PHP, Composer, Node.js, dan MySQL sudah terpasang.
+2. Install dependency backend:
+	```bash
+	composer install
+	```
+3. Install dependency frontend:
+	```bash
+	npm install
+	```
+4. Atur variabel lingkungan (lihat bagian Konfigurasi).
+5. Generate application key:
+	```bash
+	php artisan key:generate
+	```
+6. Migrasi dan seeding database:
+	```bash
+	php artisan migrate --seed
+	```
+7. Jalankan aplikasi:
+	```bash
+	php artisan serve
+	```
+8. (Opsional) Jalankan asset bundler:
+	```bash
+	npm run dev
+	```
 
-Pastikan env minimal:
-- `APP_URL=http://localhost:8000`
-- `APP_TIMEZONE=Asia/Jakarta`
+## Cara Penggunaan 📌
 
-### 3) Database
+1. Login ke aplikasi menggunakan kredensial internal.
+2. Pilih modul **Industri** untuk kelola data pelaku usaha.
+3. Masuk ke modul **PNBP & Laporan** untuk input, upload, dan validasi.
+4. Jalankan rekonsiliasi bila dibutuhkan.
+5. Ekspor laporan periodik sesuai kebutuhan.
 
-#### Opsi A (default): SQLite
+## Konfigurasi ⚙️
 
-```bash
-type nul > database\database.sqlite
-```
+Gunakan variabel lingkungan berikut (sesuaikan dengan environment Anda):
 
-`.env`:
-```
-DB_CONNECTION=sqlite
-DB_DATABASE=database/database.sqlite
-```
+| Variabel | Contoh Nilai | Keterangan |
+| --- | --- | --- |
+| APP_NAME | SISUDAH | Nama aplikasi |
+| APP_ENV | local | Environment |
+| APP_URL | http://localhost:8000 | Base URL |
+| APP_TIMEZONE | Asia/Jakarta | Zona waktu |
+| DB_CONNECTION | mysql | Driver database |
+| DB_HOST | 127.0.0.1 | Host database |
+| DB_PORT | 3306 | Port database |
+| DB_DATABASE | sisudah | Nama database |
+| DB_USERNAME | root | Username database |
+| DB_PASSWORD | ******** | Password database |
+| FILESYSTEM_DISK | public | Storage disk |
+| QUEUE_CONNECTION | database | Queue driver |
 
-#### Opsi B: MySQL
+## Screenshot / Preview 🖼️
 
-`.env`:
-```
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=sip_jateng
-DB_USERNAME=root
-DB_PASSWORD=
-```
+> _Placeholder: tambahkan screenshot dashboard, modul industri, dan laporan di sini._
 
-Lalu jalankan:
-```bash
-php artisan migrate
-php artisan db:seed
-```
+## Kontribusi 🤝
 
-### 4) Jalankan aplikasi
+- Gunakan branch fitur dengan penamaan yang jelas.
+- Pastikan perubahan teruji sebelum merge.
+- Tulis deskripsi singkat dan alasan perubahan pada PR.
 
-```bash
-npm run dev
-php artisan serve
-```
+## Lisensi 📄
 
-## Akun Default (Seeder)
+Proprietary — digunakan untuk kebutuhan internal.
 
-| Role  | Email                   | Password |
-|-------|-------------------------|----------|
-| Admin | admin@sipjateng.test      | password |
-| User  | user1@sipjateng.test      | password |
-| User  | user2@sipjateng.test      | password |
-| User  | user3@sipjateng.test      | password |
+## Catatan Tambahan 📌
 
-## URL Penting
-
-### Admin/Internal
-- Beranda: `/`
-- Login: `/login`
-- Admin Dashboard: `/dashboard`
-- User Upload: `/user/upload`
-- User Riwayat: `/user/history`
-
-### Public/Visualisasi
-- Dashboard Publik: `/public/dashboard`
-- Industri Primer: `/industri-primer`
-- Industri Sekunder: `/industri-sekunder`
-- TPTKB: `/tptkb`
-- Perajin: `/perajin`
-- Laporan: `/laporan`
-
-## Format Excel (Upload Rekonsiliasi)
-
-Parser membaca data per sheet dan **mengabaikan sheet yang judulnya mengandung "REKAP"**.
-
-Mapping kolom utama (format fixed):
-- `C` = No LHP
-- `D` = Tgl LHP
-- `E` = Jenis HH
-- `F` = Volume
-- `G` = Satuan
-- `H` = Nilai LHP (Rp)
-- `I` = No Billing
-- `J` = Tgl Billing
-- `K` = Nilai Billing
-- `L` = No NTPN/Setor
-- `M` = Tgl Setor
-- `N` = Nilai Setor
+- Best practice: lakukan backup database sebelum migrasi besar.
+- Limitation sementara: proses export besar bisa memerlukan waktu lebih lama.
+- Roadmap singkat:
+  - Penambahan audit trail yang lebih detail
+  - Notifikasi otomatis untuk status laporan
+  - Optimasi performa pada modul rekonsiliasi
