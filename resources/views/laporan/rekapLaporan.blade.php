@@ -61,9 +61,6 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                         <i class="fas fa-file-excel"></i> Ekspor Excel
                     </a>
                 @endif
-                {{-- <button type="button" onclick="window.print()" class="btn btn-export">
-                <i class="fas fa-print"></i> Cetak
-            </button> --}}
             </div>
         </div>
 
@@ -137,7 +134,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                 {{-- CARD UMUM --}}
                 <div class="stat-card">
                     <div class="stat-label">Total Data</div>
-                    <div class="stat-value">{{ $items->count() }}</div>
+                    <div class="stat-value">{{ $allItems->count() }}</div>
                     <div class="stat-subtitle">Entri laporan</div>
                 </div>
 
@@ -149,7 +146,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                         <div class="stat-card">
                             <div class="stat-label">Total Volume</div>
                             <div class="stat-value" style="color:#059669;">
-                                {{ number_format($items->sum('volume'), 2) }}
+                                {{ number_format($allItems->sum('volume'), 2) }}
                             </div>
                             <div class="stat-subtitle">m³</div>
                         </div>
@@ -157,7 +154,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                         <div class="stat-card">
                             <div class="stat-label">Total Batang</div>
                             <div class="stat-value" style="color:#D97706;">
-                                {{ number_format($items->sum('jumlah_batang')) }}
+                                {{ number_format($allItems->sum('jumlah_batang')) }}
                             </div>
                             <div class="stat-subtitle">Batang</div>
                         </div>
@@ -171,7 +168,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                         <div class="stat-card">
                             <div class="stat-label">Total Volume</div>
                             <div class="stat-value" style="color:#059669;">
-                                {{ number_format($items->sum('volume'), 2) }}
+                                {{ number_format($allItems->sum('volume'), 2) }}
                             </div>
                             <div class="stat-subtitle">m³</div>
                         </div>
@@ -179,7 +176,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                         <div class="stat-card">
                             <div class="stat-label">Total Keping</div>
                             <div class="stat-value" style="color:#D97706;">
-                                {{ number_format($items->sum('jumlah_keping')) }}
+                                {{ number_format($allItems->sum('jumlah_keping')) }}
                             </div>
                             <div class="stat-subtitle">Keping</div>
                         </div>
@@ -193,7 +190,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                         <div class="stat-card">
                             <div class="stat-label">Persediaan Awal</div>
                             <div class="stat-value">
-                                {{ number_format($items->sum('persediaan_awal_volume'), 2) }}
+                                {{ number_format($allItems->sum('persediaan_awal_volume'), 2) }}
                             </div>
                             <div class="stat-subtitle">m³</div>
                         </div>
@@ -201,7 +198,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                         <div class="stat-card">
                             <div class="stat-label">Persediaan Akhir</div>
                             <div class="stat-value">
-                                {{ number_format($items->sum('persediaan_akhir_volume'), 2) }}
+                                {{ number_format($allItems->sum('persediaan_akhir_volume'), 2) }}
                             </div>
                             <div class="stat-subtitle">m³</div>
                         </div>
@@ -212,7 +209,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                 <div class="stat-card">
                     <div class="stat-label">Jumlah Perusahaan</div>
                     <div class="stat-value" style="color:#2563EB;">
-                        {{ $items->groupBy(fn($i) => optional($i->laporan)->industri_id)->count() }}
+                        {{ $allItems->groupBy(fn($i) => optional($i->laporan)->industri_id)->count() }}
                     </div>
                     <div class="stat-subtitle">Yang melapor</div>
                 </div>
@@ -225,6 +222,19 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
         <div class="table-container">
             @if ($filtersApplied)
                 @if (isset($items) && $items->count() > 0)
+                    {{-- Pagination Info --}}
+                    @if($items instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                        <div style="padding: 1rem 1.5rem; background: #F9FAFB; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="font-size: 0.875rem; color: #6B7280;">
+                                Menampilkan <strong>{{ $items->firstItem() }}</strong> - <strong>{{ $items->lastItem() }}</strong> 
+                                dari <strong>{{ $items->total() }}</strong> data
+                            </div>
+                            <div style="font-size: 0.875rem; color: #6B7280;">
+                                <strong>{{ $items->groupBy(fn($i) => optional($i->laporan)->industri_id)->count() }}</strong> perusahaan pada halaman ini
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Filter Detail (Jenis Kayu, Asal Kayu, dll) -->
                     <div class="filter-ribbon mb-4">
                         <form method="GET" action="{{ route('laporan.rekap') }}" style="display: contents;">
@@ -391,7 +401,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                 <tbody>
                                     @foreach ($items as $index => $item)
                                         <tr>
-                                            <td class="col-center" style="color: #9CA3AF;">{{ $index + 1 }}</td>
+                                            <td class="col-center" style="color: #9CA3AF;">{{ $items->firstItem() + $index }}</td>
                                             <td>
                                                 <div class="company-name">{{ $item->laporan->industri->nama ?? '-' }}</div>
                                                 @php
@@ -416,9 +426,9 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                         </tr>
                                     @endforeach
                                     <tr class="total-row">
-                                        <td colspan="6" class="col-right" style="padding-right: 2rem;">TOTAL:</td>
-                                        <td class="col-right">{{ number_format($items->sum('jumlah_batang')) }}</td>
-                                        <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                                        <td colspan="6" class="col-right" style="padding-right: 2rem; font-weight: 700;">TOTAL KESELURUHAN:</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('jumlah_batang')) }}</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('volume'), 2) }}</td>
                                         <td></td>
                                     </tr>
                                 </tbody>
@@ -453,7 +463,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                 <tbody>
                                     @foreach ($items as $index => $item)
                                         <tr>
-                                            <td class="col-center" style="color: #9CA3AF;">{{ $index + 1 }}</td>
+                                            <td class="col-center" style="color: #9CA3AF;">{{ $items->firstItem() + $index }}</td>
                                             <td>
                                                 <div class="company-name">{{ $item->laporan->industri->nama ?? '-' }}</div>
                                                 <div class="meta-info">{{ $item->laporan->industri->nomor_izin ?? '' }}</div>
@@ -468,9 +478,9 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                         </tr>
                                     @endforeach
                                     <tr class="total-row">
-                                        <td colspan="6" class="col-right" style="padding-right: 2rem;">TOTAL:</td>
-                                        <td class="col-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
-                                        <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                                        <td colspan="6" class="col-right" style="padding-right: 2rem; font-weight: 700;">TOTAL KESELURUHAN:</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('jumlah_keping')) }}</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('volume'), 2) }}</td>
                                         <td></td>
                                     </tr>
                                 </tbody>
@@ -502,7 +512,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                 <tbody>
                                     @foreach ($items as $index => $item)
                                         <tr>
-                                            <td class="col-center" style="color: #9CA3AF;">{{ $index + 1 }}</td>
+                                            <td class="col-center" style="color: #9CA3AF;">{{ $items->firstItem() + $index }}</td>
                                             <td>
                                                 <div class="company-name">{{ $item->laporan->industri->nama ?? '-' }}</div>
                                                 <div class="meta-info">{{ $item->laporan->industri->nomor_izin ?? '' }}</div>
@@ -517,12 +527,12 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                         </tr>
                                     @endforeach
                                     <tr class="total-row">
-                                        <td colspan="3" class="col-right" style="padding-right: 2rem;">TOTAL:</td>
-                                        <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
-                                        <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
-                                        <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}
+                                        <td colspan="3" class="col-right" style="padding-right: 2rem; font-weight: 700;">TOTAL KESELURUHAN:</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('persediaan_awal_volume'), 2) }}</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('penambahan_volume'), 2) }}</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('penggunaan_pengurangan_volume'), 2) }}
                                         </td>
-                                        <td class="col-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('persediaan_akhir_volume'), 2) }}</td>
                                         <td></td>
                                     </tr>
                                 </tbody>
@@ -554,7 +564,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                 <tbody>
                                     @foreach ($items as $index => $item)
                                         <tr>
-                                            <td class="col-center" style="color: #9CA3AF;">{{ $index + 1 }}</td>
+                                            <td class="col-center" style="color: #9CA3AF;">{{ $items->firstItem() + $index }}</td>
                                             <td>
                                                 <div class="company-name">{{ $item->laporan->industri->nama ?? '-' }}</div>
                                                 <div class="meta-info">{{ $item->laporan->industri->nomor_izin ?? '' }}</div>
@@ -569,13 +579,13 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                         </tr>
                                     @endforeach
                                     <tr class="total-row">
-                                        <td colspan="3" class="col-right" style="padding-right: 2rem;">TOTAL:</td>
-                                        <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
-                                        <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
-                                        <td class="col-right">
-                                            {{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}
+                                        <td colspan="3" class="col-right" style="padding-right: 2rem; font-weight: 700;">TOTAL KESELURUHAN:</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('persediaan_awal_volume'), 2) }}</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('penambahan_volume'), 2) }}</td>
+                                        <td class="col-right" style="font-weight: 700;">
+                                            {{ number_format($allItems->sum('penggunaan_pengurangan_volume'), 2) }}
                                         </td>
-                                        <td class="col-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('persediaan_akhir_volume'), 2) }}</td>
                                         <td></td>
                                     </tr>
                                 </tbody>
@@ -610,7 +620,7 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                 <tbody>
                                     @foreach ($items as $index => $item)
                                         <tr>
-                                            <td class="col-center" style="color: #9CA3AF;">{{ $index + 1 }}</td>
+                                            <td class="col-center" style="color: #9CA3AF;">{{ $items->firstItem() + $index }}</td>
                                             <td>
                                                 <div class="company-name">{{ $item->laporan->industri->nama ?? '-' }}</div>
                                                 <div class="meta-info">{{ $item->laporan->industri->nomor_izin ?? '' }}</div>
@@ -625,15 +635,22 @@ $periodeLabel = $filtersApplied ? ($namaBulan[$bulan] ?? $bulan) . ' ' . $tahun 
                                         </tr>
                                     @endforeach
                                     <tr class="total-row">
-                                        <td colspan="6" class="col-right" style="padding-right: 2rem;">TOTAL:</td>
-                                        <td class="col-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
-                                        <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                                        <td colspan="6" class="col-right" style="padding-right: 2rem; font-weight: 700;">TOTAL KESELURUHAN:</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('jumlah_keping')) }}</td>
+                                        <td class="col-right" style="font-weight: 700;">{{ number_format($allItems->sum('volume'), 2) }}</td>
                                         <td></td>
                                     </tr>
                                 </tbody>
                             @break
                         @endswitch
                     </table>
+
+                    {{-- Pagination Links --}}
+                    @if($items instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                        <div style="padding: 1.5rem; border-top: 1px solid #E5E7EB;">
+                            {{ $items->appends(request()->query())->links() }}
+                        </div>
+                    @endif
                 @else
                     <div class="empty-state">
                         <div style="margin-bottom: 1rem; color: #D1D5DB;">

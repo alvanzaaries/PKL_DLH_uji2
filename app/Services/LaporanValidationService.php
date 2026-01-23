@@ -119,7 +119,7 @@ class LaporanValidationService
             } else {
                 $jumlahBatang = $this->parseExcelNumber($row[4]);
                 if ($jumlahBatang === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang harus berupa angka (gunakan format: 1,234 atau 1234)";
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234 atau 1234)";
                 } elseif ($jumlahBatang < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang tidak boleh negatif";
                 }
@@ -131,7 +131,7 @@ class LaporanValidationService
             } else {
                 $volume = $this->parseExcelNumber($row[5]);
                 if ($volume === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (gunakan format: 1,234.56 atau 1234.56)";
+                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
                 } elseif ($volume < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh negatif";
                 }
@@ -192,7 +192,7 @@ class LaporanValidationService
             } else {
                 $persediaanAwal = $this->parseExcelNumber($row[1]);
                 if ($persediaanAwal === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal harus berupa angka (gunakan format: 1,234.56 atau 1234.56)";
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
                 } elseif ($persediaanAwal < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh negatif";
                 }
@@ -203,7 +203,7 @@ class LaporanValidationService
             } else {
                 $penambahan = $this->parseExcelNumber($row[2]);
                 if ($penambahan === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka (gunakan format: 1,234.56 atau 1234.56)";
+                    $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
                 } elseif ($penambahan < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh negatif";
                 }
@@ -214,7 +214,7 @@ class LaporanValidationService
             } else {
                 $penggunaan = $this->parseExcelNumber($row[3]);
                 if ($penggunaan === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka (gunakan format: 1,234.56 atau 1234.56)";
+                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
                 } elseif ($penggunaan < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh negatif";
                 }
@@ -225,7 +225,7 @@ class LaporanValidationService
             } else {
                 $persediaanAkhir = $this->parseExcelNumber($row[4]);
                 if ($persediaanAkhir === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka (gunakan format: 1,234.56 atau 1234.56)";
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
                 } elseif ($persediaanAkhir < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh negatif";
                 }
@@ -322,7 +322,7 @@ class LaporanValidationService
             } else {
                 $jumlahKeping = $this->parseExcelNumber($row[4]);
                 if ($jumlahKeping === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka (gunakan format: 1,234 atau 1234)";
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234 atau 1234)";
                 } elseif ($jumlahKeping < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh negatif";
                 }
@@ -333,7 +333,7 @@ class LaporanValidationService
             } else {
                 $volume = $this->parseExcelNumber($row[5]);
                 if ($volume === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (gunakan format: 1,234.56 atau 1234.56)";
+                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
                 } elseif ($volume < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh negatif";
                 }
@@ -403,7 +403,7 @@ class LaporanValidationService
             } else {
                 $persediaanAwal = $this->parseExcelNumber($row[1]);
                 if ($persediaanAwal === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal harus berupa angka (gunakan format: 1,234.56 atau 1234.56)";
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
                 } elseif ($persediaanAwal < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh negatif";
                 }
@@ -414,7 +414,7 @@ class LaporanValidationService
             } else {
                 $penambahan = $this->parseExcelNumber($row[2]);
                 if ($penambahan === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka (gunakan format: 1,234.56 atau 1234.56)";
+                    $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
                 } elseif ($penambahan < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh negatif";
                 }
@@ -425,7 +425,7 @@ class LaporanValidationService
             } else {
                 $penggunaan = $this->parseExcelNumber($row[3]);
                 if ($penggunaan === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka (gunakan format: 1,234.56 atau 1234.56)";
+                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
                 } elseif ($penggunaan < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh negatif";
                 }
@@ -436,7 +436,7 @@ class LaporanValidationService
             } else {
                 $persediaanAkhir = $this->parseExcelNumber($row[4]);
                 if ($persediaanAkhir === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka (gunakan format: 1,234.56 atau 1234.56)";
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
                 } elseif ($persediaanAkhir < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh negatif";
                 }
@@ -524,7 +524,7 @@ class LaporanValidationService
             } else {
                 $jumlahKeping = $this->parseExcelNumber($row[4]);
                 if ($jumlahKeping === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka (gunakan format: 1,234 atau 1234)";
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234 atau 1234)";
                 } elseif ($jumlahKeping < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh negatif";
                 }
@@ -535,7 +535,7 @@ class LaporanValidationService
             } else {
                 $volume = $this->parseExcelNumber($row[5]);
                 if ($volume === null) {
-                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (gunakan format: 1,234.56 atau 1234.56)";
+                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
                 } elseif ($volume < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh negatif";
                 }
@@ -561,8 +561,9 @@ class LaporanValidationService
     }
 
     /**
-     * Helper: Parse angka dari format Excel (dengan koma sebagai pemisah ribuan dan titik sebagai desimal)
-     * Contoh: "1,234.56" -> 1234.56
+     * Helper: Parse angka dari format Excel
+     * Format: Titik (.) untuk desimal, Koma (,) untuk ribuan
+     * Contoh valid: 1,234.56 atau 1234.56 atau 2.27 atau 2,000
      */
     private function parseExcelNumber($value)
     {
@@ -570,21 +571,91 @@ class LaporanValidationService
             return null;
         }
 
-        // Jika sudah numeric (tanpa format), langsung return
+        // Jika sudah numeric (tanpa format string), langsung return
+        // Excel sering mengirim float 1.5 secara langsung
         if (is_numeric($value)) {
             return (float) $value;
         }
 
-        // Konversi ke string untuk proses
-        $stringValue = trim((string) $value);
+        $s = trim((string) $value);
 
-        // Hapus koma (pemisah ribuan) dan konversi ke float
-        // Format Excel: 1,234.56 atau 1,234 atau 1234.56
-        $normalized = str_replace(',', '', $stringValue);
+        // Format yang diterima:
+        // - Koma (,) hanya sebagai pemisah ribuan
+        // - Titik (.) hanya sebagai pemisah desimal
+        // - Format valid: 1,234.56 atau 1234.56 atau 1,234 atau 1234
+        
+        // Jika ada koma DAN titik, validasi posisi:
+        // Titik harus di belakang koma (format US: 1,234.56)
+        if (strpos($s, ',') !== false && strpos($s, '.') !== false) {
+            $lastComma = strrpos($s, ',');
+            $lastDot = strrpos($s, '.');
 
-        // Cek apakah hasil normalisasi adalah angka valid
-        if (is_numeric($normalized)) {
-            return (float) $normalized;
+            if ($lastDot > $lastComma) {
+                // Format valid: 1,234.56 -> Hapus koma (ribuan)
+                $s = str_replace(',', '', $s);
+            } else {
+                // Format tidak valid: 1.234,56 (format Indonesia tidak diterima)
+                return null;
+            }
+        }
+        // Jika HANYA ada Koma (1,234 atau 3,85)
+        elseif (strpos($s, ',') !== false) {
+            // Validasi: koma hanya valid sebagai pemisah ribuan
+            // Pemisah ribuan harus diikuti oleh tepat 3 digit (atau pola ribuan yang benar)
+            // Format valid: 1,234 atau 1,234,567 atau 12,345
+            // Format invalid: 3,85 atau 1,2 atau 12,3456 (ini format desimal Indonesia)
+            
+            // Split by comma dan cek pola
+            $parts = explode(',', $s);
+            $isValidThousandsSeparator = true;
+            
+            // Semua bagian kecuali yang terakhir harus 1-3 digit (bagian pertama) atau tepat 3 digit
+            // Bagian terakhir harus tepat 3 digit untuk thousand separator yang valid
+            if (count($parts) >= 2) {
+                $lastPart = array_pop($parts);
+                
+                // Bagian terakhir harus tepat 3 digit untuk valid thousand separator
+                if (strlen($lastPart) !== 3) {
+                    // Jika bukan 3 digit, kemungkinan ini format desimal Indonesia (3,85)
+                    return null; // Reject format Indonesia
+                }
+                
+                // Cek bagian-bagian sebelumnya
+                foreach ($parts as $i => $part) {
+                    if ($i === 0) {
+                        // Bagian pertama bisa 1-3 digit
+                        if (strlen($part) < 1 || strlen($part) > 3 || !ctype_digit($part)) {
+                            $isValidThousandsSeparator = false;
+                            break;
+                        }
+                    } else {
+                        // Bagian tengah harus tepat 3 digit
+                        if (strlen($part) !== 3 || !ctype_digit($part)) {
+                            $isValidThousandsSeparator = false;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                $isValidThousandsSeparator = false;
+            }
+            
+            if ($isValidThousandsSeparator) {
+                // Valid thousand separator, hapus koma
+                $s = str_replace(',', '', $s);
+            } else {
+                // Format tidak valid (kemungkinan format desimal Indonesia)
+                return null;
+            }
+        }
+        // Jika HANYA ada Titik (1.5 atau 1.234)
+        // Titik dianggap desimal (format valid)
+        
+        // Bersihkan karakter non-numeric lain (misal spasi, Rp, dll) selain titik dan minus
+        $s = preg_replace('/[^0-9\.\-]/', '', $s);
+
+        if (is_numeric($s)) {
+            return (float) $s;
         }
 
         return null;
@@ -614,7 +685,8 @@ class LaporanValidationService
         // If ISO-like year first (YYYY-MM-DD or YYYY/MM/DD)
         if (preg_match('/^\d{4}[\-\/]\d{1,2}[\-\/]\d{1,2}$/', $s)) {
             $d = \DateTime::createFromFormat('Y-m-d', str_replace('/', '-', $s));
-            if ($d !== false) return $d->format('Y-m-d');
+            if ($d !== false)
+                return $d->format('Y-m-d');
         }
 
         // Split by common separators
@@ -635,12 +707,18 @@ class LaporanValidationService
                 // - Else if second part > 12 -> treat as month/day swap (m/d/y) but unlikely
                 // - Else both <=12 -> ambiguous -> default to d/m/Y (local format)
                 if ($p0 > 12) {
-                    $day = $p0; $month = $p1; $year = $p2;
+                    $day = $p0;
+                    $month = $p1;
+                    $year = $p2;
                 } elseif ($p1 > 12) {
-                    $day = $p1; $month = $p0; $year = $p2;
+                    $day = $p1;
+                    $month = $p0;
+                    $year = $p2;
                 } else {
                     // Ambiguous - default to day/month/year
-                    $day = $p0; $month = $p1; $year = $p2;
+                    $day = $p0;
+                    $month = $p1;
+                    $year = $p2;
                 }
 
                 if (checkdate($month, $day, $year)) {
