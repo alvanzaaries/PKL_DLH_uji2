@@ -35,6 +35,7 @@ class Industri extends Model
         'kontak',
         'nomor_izin',
         'type',
+        'status',
     ];
 
     /**
@@ -96,7 +97,7 @@ class Industri extends Model
     /**
      * Relationship ke Laporan (one-to-many)
      */
-    
+
     public function laporan()
     {
         return $this->hasMany(Laporan::class);

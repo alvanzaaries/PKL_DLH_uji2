@@ -210,13 +210,13 @@
         }
         
         .badge-status-aktif {
-            background: #10b981;
-            color: white;
+            background: transparent;
+            color: green;
         }
         
         .badge-status-nonaktif {
-            background: #ef4444;
-            color: white;
+            background: transparent;
+            color: red;
         }
 
         .badge-primer { background-color: #dbeafe; color: #1e40af; }

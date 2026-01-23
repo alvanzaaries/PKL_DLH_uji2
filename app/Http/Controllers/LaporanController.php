@@ -390,8 +390,14 @@ class LaporanController extends Controller
                 'path_laporan' => '',
             ]);
 
+            // Normalisasi rows agar konsisten (flat array) sebelum dikirim ke service
+            // Meskipun service sudah handle, ini best practice untuk memastikan data bersih
+            $cleanedRows = array_map(function ($item) {
+                return isset($item['cells']) ? $item['cells'] : $item;
+            }, $dataRows);
+
             // Simpan detail berdasarkan jenis laporan menggunakan service (gunakan edited data jika ada)
-            $this->dataService->saveDetailData($laporan, $request->jenis_laporan, $dataRows);
+            $this->dataService->saveDetailData($laporan, $request->jenis_laporan, $cleanedRows);
 
             DB::commit();
 

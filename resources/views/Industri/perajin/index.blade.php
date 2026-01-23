@@ -7,210 +7,12 @@
 <link rel="stylesheet" href="{{ asset('css/filter-collapse.css') }}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-        /* Prevent sidebar overlap */
-        body {
-            overflow-x: hidden;
-        }
-
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            width: 260px;
-            height: 100vh;
-            z-index: 1000;
-        }
-
-        .main-wrapper {
-            margin-left: 260px;
-            width: calc(100% - 260px);
-        }
-
-        :root {
-            --primary: #0f172a;
-            --accent: #15803d;
-            --bg-body: #f8fafc;
-            --text-main: #334155;
-            --white: #ffffff;
-            --border: #e2e8f0;
-            --success: #16a34a;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            line-height: 1.6;
-            display: flex;
-            margin: 0;
-            overflow-x: hidden;
-        }
-
-        .sidebar {
-            width: 260px;
-            background: linear-gradient(180deg, rgb(26, 64, 48) 0%, #0f2a22 100%);
-            min-height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            padding: 20px 0;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-            overflow-y: auto;
-            z-index: 1000;
-        }
-
-        .sidebar-header {
-            padding: 15px 12px 20px;
-            background: transparent;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .sidebar-logo {
-            width: 48px;
-            height: 48px;
-            flex-shrink: 0;
-        }
-
-        .sidebar-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            display: block;
-        }
-
-        .sidebar-text {
-            flex: 1;
-            line-height: 1.3;
-        }
-
-        .sidebar-text-top {
-            font-size: 9px;
-            font-weight: 600;
-            color: #fbbf24;
-            text-transform: uppercase;
-            margin: 0 0 2px 0;
-            letter-spacing: 0.3px;
-        }
-
-        .sidebar-text-bottom {
-            font-size: 10px;
-            font-weight: 700;
-            color: #86efac;
-            text-transform: uppercase;
-            margin: 0;
-            letter-spacing: 0.2px;
-            line-height: 1.2;
-        }
-
-        .sidebar-menu {
-            padding: 20px 0;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 14px 24px;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            transition: all 0.3s;
-            font-size: 14px;
-            font-weight: 500;
-            border-left: 3px solid transparent;
-        }
-
-        .menu-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left-color: #4CAF50;
-        }
-
-        .menu-item.active {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border-left-color: #4CAF50;
-        }
-
-        .menu-icon {
-            width: 20px;
-            margin-right: 12px;
-            font-size: 16px;
-        }
-
-        .main-wrapper {
-            margin-left: 260px;
-            flex: 1;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            width: calc(100% - 260px);
-            position: relative;
-        }
-
+        /* Component Styles */
         .container {
             max-width: 1400px;
             width: 100%;
             margin: 0 auto;
             padding: 20px;
-        }
-
-        nav {
-            background: var(--white);
-            border-bottom: 1px solid var(--border);
-            padding: 20px 0;
-            margin-bottom: 30px;
-            width: 100%;
-        }
-
-        .nav-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-text {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            background: #f8fafc;
-            border-radius: 8px;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            background: var(--accent);
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 14px;
         }
 
         .page-header {
@@ -259,22 +61,6 @@
             background: #166534;
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
-        }
-
-        .alert {
-            padding: 14px 18px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .alert-success {
-            background: #d1fae5;
-            color: #065f46;
-            border: 1px solid #6ee7b7;
         }
 
         /* Filter Section - Extended from filter-collapse.css */
@@ -752,7 +538,7 @@
                 </div>
             </div>
         </div>
-    </div>
+
 
     <!-- Modal Detail -->
     <div id="detailModal" class="modal">
@@ -890,9 +676,9 @@
             new Chart(ctxTahun, {
                 type: 'doughnut',
                 data: {
-                    labels: {!! json_encode($yearStats->keys()) !!},
+                    labels: {!! json_encode($tahunStats->keys()) !!},
                     datasets: [{
-                        data: {!! json_encode($yearStats->values()) !!},
+                        data: {!! json_encode($tahunStats->values()) !!},
                         backgroundColor: [
                             '#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6', '#a855f7',
                             '#9333ea', '#a78bfa', '#c4b5fd', '#ddd6fe', '#ede9fe'
@@ -924,9 +710,9 @@
             new Chart(ctxKabupaten, {
                 type: 'doughnut',
                 data: {
-                    labels: {!! json_encode($locationStats->keys()) !!},
+                    labels: {!! json_encode($kabupatenStats->keys()) !!},
                     datasets: [{
-                        data: {!! json_encode($locationStats->values()) !!},
+                        data: {!! json_encode($kabupatenStats->values()) !!},
                         backgroundColor: [
                             '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a',
                             '#60a5fa', '#93c5fd', '#bfdbfe', '#dbeafe', '#eff6ff',

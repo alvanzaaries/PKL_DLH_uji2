@@ -615,21 +615,11 @@
             </div>
             <div class="filter-body" id="filterBody">
                 <form method="GET" action="{{ route('industri-primer.index') }}">
-                    <!-- Quick Search -->
-                    <div class="filter-search-bar">
-                        <label style="font-weight: 600; color: var(--primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-                            <i class="fas fa-search" style="color: var(--accent);"></i> 
-                            <span>Pencarian Cepat</span>
-                        </label>
-                        <input type="text" name="nama" class="filter-input" placeholder="Ketik nama perusahaan untuk mencari..." value="{{ request('nama') }}">
-                    </div>
-
-                    <!-- Lokasi Section -->
-                    <div class="filter-section-title">
-                        <i class="fas fa-map-marker-alt"></i>
-                        <span>Lokasi</span>
-                    </div>
                     <div class="filter-grid">
+                        <div class="filter-group">
+                            <label>Nama Perusahaan</label>
+                            <input type="text" name="nama" class="filter-input" placeholder="Cari nama perusahaan..." value="{{ request('nama') }}">
+                        </div>
                         <div class="filter-group">
                             <label>Kabupaten/Kota</label>
                             <select name="kabupaten" class="filter-input">
@@ -641,25 +631,17 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
-
-                    <!-- Produksi Section -->
-                    <div class="filter-section-title">
-                        <i class="fas fa-industry"></i>
-                        <span>Informasi Produksi</span>
-                    </div>
-                    <div class="filter-grid">
                         <div class="filter-group">
                             <label>Jenis Produksi</label>
                             <select name="jenis_produksi" class="filter-input">
-                                <option value="">-- Semua Jenis --</option>
+                                <option value="">-- Semua Jenis Produksi --</option>
                                 @foreach($jenisProduksiList as $jenis)
                                     <option value="{{ $jenis->id }}" {{ request('jenis_produksi') == $jenis->id ? 'selected' : '' }}>
                                         {{ $jenis->nama }}
                                     </option>
                                 @endforeach
                                 @if($customNames->count() > 0)
-                                    <optgroup label="─────────────">
+                                    <optgroup label="──────────────">
                                         @foreach($customNames as $customName)
                                             <option value="{{ $customName }}" {{ request('jenis_produksi') == $customName ? 'selected' : '' }}>
                                                 {{ $customName }} (Custom)
@@ -678,14 +660,6 @@
                                 <option value=">=6000" {{ request('kapasitas') == '>=6000' ? 'selected' : '' }}>>= 6.000 m³/tahun</option>
                             </select>
                         </div>
-                    </div>
-
-                    <!-- Perizinan Section -->
-                    <div class="filter-section-title">
-                        <i class="fas fa-file-alt"></i>
-                        <span>Informasi Perizinan</span>
-                    </div>
-                    <div class="filter-grid">
                         <div class="filter-group">
                             <label>Pemberi Izin</label>
                             <select name="pemberi_izin" class="filter-input">
@@ -696,22 +670,6 @@
                                 <option value="Bupati/Walikota" {{ request('pemberi_izin') == 'Bupati/Walikota' ? 'selected' : '' }}>Bupati/Walikota</option>
                             </select>
                         </div>
-                        <div class="filter-group">
-                            <label>Status</label>
-                            <select name="status" class="filter-input">
-                                <option value="">-- Semua Status --</option>
-                                <option value="Aktif" {{ request('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                                <option value="Tidak Aktif" {{ request('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <!-- Waktu Section -->
-                    <div class="filter-section-title">
-                        <i class="fas fa-calendar-alt"></i>
-                        <span>Periode Waktu</span>
-                    </div>
-                    <div class="filter-grid">
                         <div class="filter-group">
                             <label>Bulan</label>
                             <select name="bulan" class="filter-input">
@@ -742,11 +700,18 @@
                                 @endphp
                             </select>
                         </div>
+                        <div class="filter-group">
+                            <label>Status</label>
+                            <select name="status" class="filter-input">
+                                <option value="">-- Semua Status --</option>
+                                <option value="Aktif" {{ request('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                                <option value="Tidak Aktif" {{ request('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                            </select>
+                        </div>
                     </div>
-
                     <div class="filter-actions">
                         <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
-                        <a href="{{ route('industri-primer.index') }}" class="btn-reset"><i class="fas fa-redo"></i> Reset Filter</a>
+                        <a href="{{ route('industri-primer.index') }}" class="btn-reset">↻ Reset Filter</a>
                     </div>
                 </form>
             </div>
