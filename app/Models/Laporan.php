@@ -16,6 +16,7 @@ class Laporan extends Model
         'industri_id',
         'jenis_laporan',
         'tanggal',
+        'path_laporan',
     ];
 
     // Definisi jenis laporan yang tersedia (single source of truth)

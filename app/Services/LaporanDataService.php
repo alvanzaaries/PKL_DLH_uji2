@@ -45,7 +45,8 @@ class LaporanDataService
                 foreach ($rows as $item) {
                     $row = isset($item['cells']) ? $item['cells'] : $item;
 
-                    laporan_mutasi_kayu_bulat::create([
+                    // Debug logging untuk melihat data sebelum insert
+                    $dataToInsert = [
                         'laporan_id' => $laporan->id,
                         'jenis_kayu' => $row[0] ?? '',
                         'persediaan_awal_volume' => $this->toFloat($row[1] ?? 0),
@@ -53,7 +54,23 @@ class LaporanDataService
                         'penggunaan_pengurangan_volume' => $this->toFloat($row[3] ?? 0),
                         'persediaan_akhir_volume' => $this->toFloat($row[4] ?? 0),
                         'keterangan' => $row[5] ?? '',
+                    ];
+
+                    Log::debug('Attempting to insert laporan_mutasi_kayu_bulat', [
+                        'data' => $dataToInsert,
+                        'raw_row' => $row,
                     ]);
+
+                    try {
+                        laporan_mutasi_kayu_bulat::create($dataToInsert);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to insert laporan_mutasi_kayu_bulat row', [
+                            'exception' => $e->getMessage(),
+                            'data' => $dataToInsert,
+                            'raw_row' => $row,
+                        ]);
+                        throw $e; // Re-throw untuk ditangkap di controller
+                    }
                 }
                 break;
 
