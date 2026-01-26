@@ -112,7 +112,7 @@
         </div>
 
         <!-- Footer -->
-        <footer
+        <!-- <footer
             class="border-t border-gray-200 dark:border-gray-700 bg-surface-light dark:bg-surface-dark px-6 py-4 mt-auto">
             <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
@@ -135,7 +135,7 @@
                     <span class="hidden md:block text-xs text-gray-400 dark:text-gray-500">v1.0.0</span>
                 </div>
             </div>
-        </footer>
+        </footer> -->
     </main>
 
     <script>

@@ -296,7 +296,9 @@
                                         <a href="{{ route('laporan.industri', $company->id) }}" class="company-name">
                                             {{ $company->nama }}
                                         </a>
-                                        <span class="meta-info">No Izin : {{ $company->nomor_izin ?? 'N/A' }}</span>
+                                        @auth
+                                            <span class="meta-info">No Izin : {{ $company->nomor_izin ?? 'N/A' }}</span>
+                                        @endauth
                                         @php
                                             $typeLabel = 'N/A';
                                             if (isset($company->type)) {

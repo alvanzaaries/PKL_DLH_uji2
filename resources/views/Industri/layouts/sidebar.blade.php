@@ -345,7 +345,7 @@
         </div>
 
         <!-- Footer -->
-        <footer style="background: #ffffff; border-top: 1px solid #e2e8f0; padding: 16px 24px; margin-top: auto;">
+        <!-- <footer style="background: #ffffff; border-top: 1px solid #e2e8f0; padding: 16px 24px; margin-top: auto;">
             <div
                 style="max-width: 1400px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -368,7 +368,7 @@
                     <span style="font-size: 12px; color: #94a3b8;">v1.0.0</span>
                 </div>
             </div>
-        </footer>
+        </footer> -->
         <style>
             @keyframes pulse {
 
