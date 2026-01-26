@@ -61,7 +61,7 @@
         </div>
     </main>
 
-    <!-- Footer
+    <!-- Footer -->
     <footer class="bg-white mt-auto border-t border-gray-200">
         <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row items-center justify-between gap-3">
@@ -88,7 +88,7 @@
                 </div>
             </div>
         </div>
-    </footer> -->
+    </footer>
 </body>
 
 </html>
