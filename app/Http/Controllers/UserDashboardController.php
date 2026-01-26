@@ -38,13 +38,17 @@ class UserDashboardController extends Controller
             ->withSum('details as total_setor_nilai', 'setor_nilai')
             ->get();
 
+        $totalLhpNilai = (float) $reconciliations->sum(fn ($r) => (float) ($r->total_lhp_nilai ?? 0));
+        $totalSetorNilai = (float) $reconciliations->sum(fn ($r) => (float) ($r->total_setor_nilai ?? 0));
+
         $totals = [
             'total_upload' => $reconciliations->count(),
             'total_baris' => (int) $reconciliations->sum('details_count'),
             'total_volume' => (float) $reconciliations->sum(fn ($r) => (float) ($r->total_volume ?? 0)),
-            'total_lhp_nilai' => (float) $reconciliations->sum(fn ($r) => (float) ($r->total_lhp_nilai ?? 0)),
+            'total_lhp_nilai' => $totalLhpNilai,
             'total_billing_nilai' => (float) $reconciliations->sum(fn ($r) => (float) ($r->total_billing_nilai ?? 0)),
-            'total_setor_nilai' => (float) $reconciliations->sum(fn ($r) => (float) ($r->total_setor_nilai ?? 0)),
+            'total_setor_nilai' => $totalSetorNilai,
+            'total_selisih_lhp_setor' => $totalLhpNilai - $totalSetorNilai,
         ];
 
         $detailQuery = DB::table('reconciliation_details')

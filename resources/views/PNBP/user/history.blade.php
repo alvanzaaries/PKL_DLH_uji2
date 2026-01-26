@@ -13,14 +13,22 @@
             </div>
         </div>
 
-        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="rounded-lg border border-gray-200 p-4">
-                <div class="text-xs text-gray-500">Total Laporan</div>
+                <div class="text-xs text-gray-500">Jumlah Laporan</div>
                 <div class="mt-1 text-2xl font-semibold text-gray-900">{{ $totals['total_upload'] ?? 0 }}</div>
             </div>
             <div class="rounded-lg border border-gray-200 p-4">
-                <div class="text-xs text-gray-500">Total Nilai Setor</div>
+                <div class="text-xs text-gray-500">Total Nilai Setoran</div>
                 <div class="mt-1 text-2xl font-semibold text-gray-900">Rp {{ number_format($totals['total_setor_nilai'] ?? 0, 0, ',', '.') }}</div>
+            </div>
+            <div class="rounded-lg border border-gray-200 p-4">
+                <div class="text-xs text-gray-500">Total Nilai LHP</div>
+                <div class="mt-1 text-2xl font-semibold text-gray-900">Rp {{ number_format($totals['total_lhp_nilai'] ?? 0, 0, ',', '.') }}</div>
+            </div>
+            <div class="rounded-lg border border-gray-200 p-4">
+                <div class="text-xs text-gray-500">Selisih LHP dengan Setoran</div>
+                <div class="mt-1 text-2xl font-semibold text-gray-900">Rp {{ number_format($totals['total_selisih_lhp_setor'] ?? 0, 0, ',', '.') }}</div>
             </div>
         </div>
 
