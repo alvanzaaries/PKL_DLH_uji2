@@ -57,5 +57,11 @@ class DatabaseSeeder extends Seeder
         if (class_exists(\Database\Seeders\KphSeeder::class)) {
             $this->call(\Database\Seeders\KphSeeder::class);
         }
+
+        // call master jenisproduksi
+
+        $this->call(\Database\Seeders\MasterJenisProduksiSeeder::class);
     }
+
+
 }
