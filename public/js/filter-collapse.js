@@ -7,7 +7,7 @@
 function toggleFilter() {
     const filterBody = document.getElementById('filterBody');
     const filterIcon = document.getElementById('filterIcon');
-    
+
     if (filterBody && filterIcon) {
         filterBody.classList.toggle('show');
         filterIcon.classList.toggle('collapsed');
@@ -18,16 +18,16 @@ function toggleFilter() {
 function updateActiveFilterCount(filterParams = []) {
     const params = new URLSearchParams(window.location.search);
     let count = 0;
-    
+
     // Default filter parameters if not provided
     const defaultFilterParams = [
-        'nama', 'search', 'kabupaten', 'jenis_produksi', 
+        'nama', 'search', 'kabupaten', 'jenis_produksi',
         'kapasitas', 'pemberi_izin', 'sumber_bahan_baku',
         'bulan', 'tahun', 'status'
     ];
-    
+
     const paramsToCheck = filterParams.length > 0 ? filterParams : defaultFilterParams;
-    
+
     paramsToCheck.forEach(param => {
         if (params.get(param)) count++;
     });
@@ -45,6 +45,29 @@ function updateActiveFilterCount(filterParams = []) {
 }
 
 // Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     updateActiveFilterCount();
+
+    // Add hover functionality to filter card
+    const filterCard = document.querySelector('.filter-card');
+    const filterBody = document.getElementById('filterBody');
+    const filterIcon = document.getElementById('filterIcon');
+
+    if (filterCard && filterBody && filterIcon) {
+        // Expand filter when mouse enters the filter card
+        filterCard.addEventListener('mouseenter', function () {
+            if (!filterBody.classList.contains('show')) {
+                filterBody.classList.add('show');
+                filterIcon.classList.remove('collapsed');
+            }
+        });
+
+        // Collapse filter when mouse leaves the filter card
+        filterCard.addEventListener('mouseleave', function () {
+            if (filterBody.classList.contains('show')) {
+                filterBody.classList.remove('show');
+                filterIcon.classList.add('collapsed');
+            }
+        });
+    }
 });

@@ -452,7 +452,7 @@
 
                     <div class="form-group">
                         <label class="form-label">
-                            Tanggal <span class="required">*</span>
+                            Tanggal SK <span class="required">*</span>
                         </label>
                         <input 
                             type="date" 

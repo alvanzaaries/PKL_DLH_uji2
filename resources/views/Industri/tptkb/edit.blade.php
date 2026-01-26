@@ -388,7 +388,6 @@
                     </select>
                     @error('status')<div class="error-message">{{ $message }}</div>@enderror
                 </div>
-                </div>
 
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">

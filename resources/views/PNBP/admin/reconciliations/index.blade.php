@@ -1,5 +1,7 @@
 @extends('PNBP.layouts.admin')
 
+\\
+
 @section('title', 'Arsip Rekonsiliasi - Admin')
 @section('header', 'Arsip Rekonsiliasi')
 @section('subheader', 'Daftar semua proses rekonsiliasi yang telah diunggah ke dalam sistem.')
