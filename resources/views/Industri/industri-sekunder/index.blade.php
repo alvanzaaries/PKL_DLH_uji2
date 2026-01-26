@@ -436,21 +436,21 @@
 
         .badge-status-aktif {
             display: inline-block;
-            background: #10b981;
-            color: white;
+            background: transparent;
+            color: green;
             padding: 4px 10px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
         }
 
         .badge-status-nonaktif {
             display: inline-block;
-            background: #ef4444;
-            color: white;
+            background: transparent;
+            color: red;
             padding: 4px 10px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
         }
 

@@ -305,6 +305,8 @@
 
         .table-container {
             overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid #e0e0e0;
         }
 
         table {
@@ -413,21 +415,21 @@
 
         .badge-status-aktif {
             display: inline-block;
-            background: #10b981;
-            color: white;
+            background: transparent;
+            color: green;
             padding: 4px 10px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
         }
 
         .badge-status-nonaktif {
             display: inline-block;
-            background: #ef4444;
-            color: white;
+            background: transparent;
+            color: red;
             padding: 4px 10px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
         }
 
@@ -496,7 +498,8 @@
             z-index: 1000;
             left: 0;
             top: 0;
-            width: 100%;
+            width: 100%
+;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
@@ -557,36 +560,71 @@
 
         .modal-body {
             padding: 30px;
+            background-color: #f8fafc;
         }
 
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+        /* Table Detail Style - Spek Kantoran */
+        .table-detail {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
         }
 
-        .detail-item {
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 12px;
+        .table-detail tr:first-child td {
+            border-top: none;
         }
 
-        .detail-label {
-            font-size: 12px;
-            font-weight: 600;
+        .table-detail td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .table-detail tr:last-child td {
+            border-bottom: none;
+        }
+
+        .detail-label-col {
+            width: 35%;
+            background-color: #f8fafc;
             color: #64748b;
+            font-weight: 600;
             text-transform: uppercase;
+            font-size: 11px !important;
             letter-spacing: 0.5px;
-            margin-bottom: 6px;
+            border-right: 1px solid #f1f5f9;
         }
 
-        .detail-value {
-            font-size: 15px;
-            color: var(--primary);
+        .detail-value-col {
+            width: 65%;
+            color: #334155;
             font-weight: 500;
         }
 
-        .detail-item-full {
-            grid-column: 1 / -1;
+        .detail-section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 12px 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .detail-section-title::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 2px;
         }
 
         @media (max-width: 1024px) {
@@ -672,78 +710,78 @@
                     <div class="filter-grid">
                         <div class="filter-group">
                             <label>Nama Perusahaan</label>
-                        <input type="text" name="nama" class="filter-input" placeholder="Cari nama..." value="{{ request('nama') }}">
+                            <input type="text" name="nama" class="filter-input" placeholder="Cari nama perusahaan..." value="{{ request('nama') }}">
+                        </div>
+                        <div class="filter-group">
+                            <label>Kabupaten/Kota</label>   
+                            <select name="kabupaten" class="filter-input">
+                                <option value="">-- Pilih Kabupaten/Kota --</option>
+                                @foreach($kabupatenList as $kabupaten)
+                                    <option value="{{ $kabupaten }}" {{ request('kabupaten') == $kabupaten ? 'selected' : '' }}>
+                                        {{ $kabupaten }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Sumber Bahan Baku</label>
+                            <select name="sumber_bahan_baku" class="filter-input">
+                                <option value="">-- Semua Sumber --</option>
+                                @foreach($sumberBahanBakuList as $value => $label)
+                                    <option value="{{ $value }}" {{ request('sumber_bahan_baku') == $value ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Daya Tampung Izin</label>
+                            <select name="kapasitas" class="filter-input">
+                                <option value="">-- Semua Daya Tampung --</option>
+                                <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1.999 m³/tahun</option>
+                                <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2.000 - 5.999 m³/tahun</option>
+                                <option value=">= 6000" {{ request('kapasitas') == '>= 6000' ? 'selected' : '' }}>>= 6.000 m³/tahun</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Bulan</label>
+                            <select name="bulan" class="filter-input">
+                                <option value="">-- Semua Bulan --</option>
+                                <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
+                                <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
+                                <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
+                                <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
+                                <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
+                                <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
+                                <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
+                                <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
+                                <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
+                                <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
+                                <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
+                                <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Tahun</label>
+                            <select name="tahun" class="filter-input">
+                                <option value="">-- Semua Tahun --</option>
+                                @php
+                                    $currentYear = \Carbon\Carbon::now('Asia/Jakarta')->format('Y');
+                                    for ($year = $currentYear; $year >= 2020; $year--) {
+                                        echo "<option value='$year' " . (request('tahun') == $year ? 'selected' : '') . ">$year</option>";
+                                    }
+                                @endphp
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Status</label>
+                            <select name="status" class="filter-input">
+                                <option value="">-- Semua Status --</option>
+                                <option value="Aktif" {{ request('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
+                                <option value="Tidak Aktif" {{ request('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <label>Kabupaten/Kota</label>
-                        <select name="kabupaten" class="filter-input">
-                            <option value="">-- Pilih Kabupaten/Kota --</option>
-                            @foreach($kabupatenList as $kabupaten)
-                                <option value="{{ $kabupaten }}" {{ request('kabupaten') == $kabupaten ? 'selected' : '' }}>
-                                    {{ $kabupaten }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Sumber Bahan Baku</label>
-                        <select name="sumber_bahan_baku" class="filter-input">
-                            <option value="">-- Semua Sumber --</option>
-                            @foreach($sumberBahanBakuList as $value => $label)
-                                <option value="{{ $value }}" {{ request('sumber_bahan_baku') == $value ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Daya Tampung Izin</label>
-                        <select name="kapasitas" class="filter-input">
-                            <option value="">-- Semua Daya Tampung --</option>
-                            <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1999 m³/tahun</option>
-                            <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2000 - 5999 m³/tahun</option>
-                            <option value=">= 6000" {{ request('kapasitas') == '>= 6000' ? 'selected' : '' }}>>= 6000 m³/tahun</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Bulan</label>
-                        <select name="bulan" class="filter-input">
-                            <option value="">-- Semua Bulan --</option>
-                            <option value="1" {{ request('bulan') == '1' ? 'selected' : '' }}>Januari</option>
-                            <option value="2" {{ request('bulan') == '2' ? 'selected' : '' }}>Februari</option>
-                            <option value="3" {{ request('bulan') == '3' ? 'selected' : '' }}>Maret</option>
-                            <option value="4" {{ request('bulan') == '4' ? 'selected' : '' }}>April</option>
-                            <option value="5" {{ request('bulan') == '5' ? 'selected' : '' }}>Mei</option>
-                            <option value="6" {{ request('bulan') == '6' ? 'selected' : '' }}>Juni</option>
-                            <option value="7" {{ request('bulan') == '7' ? 'selected' : '' }}>Juli</option>
-                            <option value="8" {{ request('bulan') == '8' ? 'selected' : '' }}>Agustus</option>
-                            <option value="9" {{ request('bulan') == '9' ? 'selected' : '' }}>September</option>
-                            <option value="10" {{ request('bulan') == '10' ? 'selected' : '' }}>Oktober</option>
-                            <option value="11" {{ request('bulan') == '11' ? 'selected' : '' }}>November</option>
-                            <option value="12" {{ request('bulan') == '12' ? 'selected' : '' }}>Desember</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Tahun</label>
-                        <select name="tahun" class="filter-input">
-                            <option value="">-- Semua Tahun --</option>
-                            @php
-                                $currentYear = \Carbon\Carbon::now('Asia/Jakarta')->format('Y');
-                                for ($year = $currentYear; $year >= 2020; $year--) {
-                                    echo "<option value='$year' " . (request('tahun') == $year ? 'selected' : '') . ">$year</option>";
-                                }
-                            @endphp
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>Status</label>
-                        <select name="status" class="filter-input">
-                            <option value="">-- Semua Status --</option>
-                            <option value="Aktif" {{ request('status') == 'Aktif' ? 'selected' : '' }}>Aktif</option>
-                            <option value="Tidak Aktif" {{ request('status') == 'Tidak Aktif' ? 'selected' : '' }}>Tidak Aktif</option>
-                        </select>
-                    </div>
-                </div>
                 <div class="filter-actions">
                     <button type="submit" class="btn-filter"><i class="fas fa-search"></i> Cari Data</button>
                     <a href="{{ route('tptkb.index') }}" class="btn-reset">↻ Reset Filter</a>

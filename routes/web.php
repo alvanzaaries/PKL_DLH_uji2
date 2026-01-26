@@ -132,6 +132,7 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
     Route::put('/primer/{id}', [IndustriPrimerController::class, 'update'])->name('industri-primer.update');
     Route::delete('/primer/{id}', [IndustriPrimerController::class, 'destroy'])->name('industri-primer.destroy');
     Route::get('/primer/{id}/dokumen', [IndustriPrimerController::class, 'downloadDokumen'])->name('industri-primer.download-dokumen');
+    Route::get('/primer/{id}/view-dokumen', [IndustriPrimerController::class, 'viewDokumen'])->name('industri-primer.view-dokumen');
 
     // Industri Sekunder - CRUD
     Route::get('/sekunder/create', [IndustriSekunderController::class, 'create'])->name('industri-sekunder.create');

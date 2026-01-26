@@ -341,7 +341,7 @@
             </div>
         </div>
 
-        <section>
+        <!-- <section>
             <div class="section-header">
                 <h2 style="font-size: 20px; color: var(--primary);">Dokumentasi Kegiatan Industri</h2>
             </div>
@@ -350,7 +350,7 @@
                     [ Salam dari kami SIRANAAR (Sistemnya Rakan, Nadzif, dan Alvanzaar) ]
                 </div>
             </div>
-        </section>
+        </section> -->
 
     </main>
 @endsection     

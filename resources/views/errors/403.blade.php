@@ -174,7 +174,7 @@
         </div>
     </main>
 
-    <!-- Footer -->
+    Footer
     <footer class="w-full border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-6">
         <div class="mx-auto max-w-6xl flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex flex-col items-center md:items-start gap-1">

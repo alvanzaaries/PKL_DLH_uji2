@@ -18,8 +18,38 @@ class TptkbController extends Controller implements HasMiddleware
             ]),
         ];
     }
+
+    /**
+     * Auto-update status menjadi "Tidak Aktif" jika masa berlaku sudah kadaluarsa
+     */
+    private function updateExpiredStatus()
+    {
+        $today = \Carbon\Carbon::now('Asia/Jakarta')->startOfDay();
+        
+        // Ambil semua TPTKB yang masa berlakunya sudah lewat dan statusnya masih Aktif
+        $expiredTptkb = Tptkb::with('industri')
+            ->where('masa_berlaku', '<', $today)
+            ->whereHas('industri', function($q) {
+                $q->where('status', 'Aktif');
+            })
+            ->get();
+
+        // Update status menjadi "Tidak Aktif"
+        foreach ($expiredTptkb as $tptkb) {
+            $tptkb->industri->update(['status' => 'Tidak Aktif']);
+        }
+
+        // Log jumlah yang diupdate jika ada
+        if ($expiredTptkb->count() > 0) {
+            \Log::info("Auto-updated {$expiredTptkb->count()} expired TPTKB to 'Tidak Aktif' status");
+        }
+    }
+
     public function index(Request $request)
     {
+        // Auto-update status berdasarkan masa berlaku izin
+        $this->updateExpiredStatus();
+
         $query = Tptkb::with('industri');
 
         // Filter
@@ -32,27 +62,6 @@ class TptkbController extends Controller implements HasMiddleware
         if ($request->filled('kabupaten')) {
             $query->whereHas('industri', function($q) use ($request) {
                 $q->where('kabupaten', $request->kabupaten);
-            });
-        }
-
-        // Filter berdasarkan kapasitas izin
-        // Karena kapasitas_izin sekarang VARCHAR, kita extract angka dan bandingkan dengan rentang
-        if ($request->filled('kapasitas')) {
-            $kapasitasRange = $request->kapasitas;
-            
-            $query->where(function($q) use ($kapasitasRange) {
-                // Extract angka dari string kapasitas_izin menggunakan REGEXP
-                
-                if ($kapasitasRange == '0-1999') {
-                    // Cari data dengan angka 0-1999
-                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) BETWEEN 0 AND 1999");
-                } elseif ($kapasitasRange == '2000-5999') {
-                    // Cari data dengan angka 2000-5999
-                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) BETWEEN 2000 AND 5999");
-                } elseif ($kapasitasRange == '>= 6000') {
-                    // Cari data dengan angka >= 6000
-                    $q->whereRaw("CAST(REGEXP_REPLACE(kapasitas_izin, '[^0-9]', '') AS UNSIGNED) >= 6000");
-                }
             });
         }
 
@@ -81,7 +90,60 @@ class TptkbController extends Controller implements HasMiddleware
             });
         }
 
-        $tptkb = $query->latest()->paginate(10);
+        // Filter berdasarkan kapasitas izin
+        // Menggunakan logika yang sama dengan IndustriSekunderController
+        $kapasitasFilter = $request->filled('kapasitas') ? $request->kapasitas : null;
+
+        // Jika ada filter kapasitas, lakukan filtering di collection level
+        if ($kapasitasFilter) {
+            $allFiltered = (clone $query)->latest()->get();
+
+            $filteredCollection = $allFiltered->filter(function($item) use ($kapasitasFilter) {
+                // Ekstrak angka dari kapasitas_izin
+                $kapasitasStr = $item->kapasitas_izin ?? '0';
+                // Ekstrak angka dari string seperti "1500 m³/tahun" atau "2000"
+                preg_match('/(\d+[\d\.,]*)/', $kapasitasStr, $matches);
+                if (isset($matches[1])) {
+                    // Hapus titik/koma pemisah ribuan dan konversi ke integer
+                    $numericValue = (int)str_replace(['.', ','], '', $matches[1]);
+                    
+                    // Cek apakah kapasitas ini memenuhi range filter
+                    $matches_range = false;
+                    switch ($kapasitasFilter) {
+                        case '0-1999':
+                            $matches_range = $numericValue >= 0 && $numericValue <= 1999;
+                            break;
+                        case '2000-5999':
+                            $matches_range = $numericValue >= 2000 && $numericValue <= 5999;
+                            break;
+                        case '>=6000':
+                            $matches_range = $numericValue >= 6000;
+                            break;
+                    }
+                    
+                    return $matches_range;
+                }
+                
+                // Tidak ada kapasitas yang valid
+                return false;
+            })->values();
+
+            // Paginate the filtered collection manually
+            $perPage = 10;
+            $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage('page');
+            $currentPageItems = $filteredCollection->slice(($currentPage - 1) * $perPage, $perPage)->values();
+            
+            $tptkb = new \Illuminate\Pagination\LengthAwarePaginator(
+                $currentPageItems,
+                $filteredCollection->count(),
+                $perPage,
+                $currentPage,
+                ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+            );
+        } else {
+            // Tidak ada filter kapasitas, gunakan pagination biasa
+            $tptkb = $query->latest()->paginate(10);
+        }
 
         // Get list kabupaten untuk filter dropdown
         $kabupatenList = IndustriBase::whereHas('tptkb')
@@ -166,6 +228,11 @@ class TptkbController extends Controller implements HasMiddleware
             'masa_berlaku' => 'required|date',
         ]);
 
+        // Cek apakah masa berlaku sudah kadaluarsa
+        $today = \Carbon\Carbon::now('Asia/Jakarta')->startOfDay();
+        $masaBerlaku = \Carbon\Carbon::parse($validated['masa_berlaku'])->startOfDay();
+        $status = $masaBerlaku->lt($today) ? 'Tidak Aktif' : 'Aktif';
+
         // Create Industri
         $industri = IndustriBase::create([
             'nama' => $validated['nama'],
@@ -176,6 +243,7 @@ class TptkbController extends Controller implements HasMiddleware
             'nomor_izin' => $validated['nomor_izin'],
             'tanggal' => $validated['tanggal'],
             'type' => 'tpt_kb',
+            'status' => $status, // Set status otomatis berdasarkan masa berlaku
         ]);
 
         // Create TPTKB
@@ -187,7 +255,12 @@ class TptkbController extends Controller implements HasMiddleware
             'masa_berlaku' => $validated['masa_berlaku'],
         ]);
 
-        return redirect()->route('tptkb.index')->with('success', 'Data TPT-KB berhasil ditambahkan!');
+        $message = 'Data TPT-KB berhasil ditambahkan!';
+        if ($status === 'Tidak Aktif') {
+            $message .= ' Status diset "Tidak Aktif" karena masa berlaku sudah kadaluarsa.';
+        }
+
+        return redirect()->route('tptkb.index')->with('success', $message);
     }
 
     public function edit($id)
@@ -215,6 +288,18 @@ class TptkbController extends Controller implements HasMiddleware
 
         $tptkb = Tptkb::findOrFail($id);
 
+        // Cek apakah masa berlaku sudah kadaluarsa
+        // Jika sudah kadaluarsa, override status menjadi "Tidak Aktif" meskipun user pilih "Aktif"
+        $today = \Carbon\Carbon::now('Asia/Jakarta')->startOfDay();
+        $masaBerlaku = \Carbon\Carbon::parse($validated['masa_berlaku'])->startOfDay();
+        
+        if ($masaBerlaku->lt($today)) {
+            $validated['status'] = 'Tidak Aktif';
+            $statusOverridden = true;
+        } else {
+            $statusOverridden = false;
+        }
+
         // Update Industri
         $tptkb->industri->update([
             'nama' => $validated['nama'],
@@ -235,7 +320,12 @@ class TptkbController extends Controller implements HasMiddleware
             'masa_berlaku' => $validated['masa_berlaku'],
         ]);
 
-        return redirect()->route('tptkb.index')->with('success', 'Data TPT-KB berhasil diperbarui!');
+        $message = 'Data TPT-KB berhasil diperbarui!';
+        if ($statusOverridden) {
+            $message .= ' Status otomatis diubah menjadi "Tidak Aktif" karena masa berlaku sudah kadaluarsa.';
+        }
+
+        return redirect()->route('tptkb.index')->with('success', $message);
     }
 
     public function destroy($id)

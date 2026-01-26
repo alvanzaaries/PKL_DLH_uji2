@@ -390,8 +390,23 @@
                 <label class="form-label">Upload Dokumen Izin (PDF)</label>
                 @if($industriPrimer->dokumen_izin)
                     <div class="current-file" style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            📄 <a href="/storage/{{ $industriPrimer->dokumen_izin }}" target="_blank">Lihat Dokumen Saat Ini</a>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <a href="{{ route('industri-primer.view-dokumen', $industriPrimer->id) }}" 
+                               target="_blank"
+                               style="color: #15803d; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; padding: 8px 16px; background: #f0fdf4; border-radius: 6px; border: 1px solid #bbf7d0; transition: all 0.2s;"
+                               onmouseover="this.style.background='#dcfce7'"
+                               onmouseout="this.style.background='#f0fdf4'">
+                                <i class="fas fa-eye" style="color: #15803d;"></i>
+                                <span>Lihat Dokumen</span>
+                                <i class="fas fa-external-link-alt" style="font-size: 12px;"></i>
+                            </a>
+                            <a href="{{ route('industri-primer.download-dokumen', $industriPrimer->id) }}" 
+                               style="color: #dc2626; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; padding: 8px 16px; background: #fef2f2; border-radius: 6px; border: 1px solid #fecaca; transition: all 0.2s;"
+                               onmouseover="this.style.background='#fee2e2'"
+                               onmouseout="this.style.background='#fef2f2'">
+                                <i class="fas fa-download" style="color: #dc2626;"></i>
+                                <span>Download PDF</span>
+                            </a>
                         </div>
                         <button type="button" onclick="confirmDeleteDokumen()" style="background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">
                             ✕ Hapus Dokumen
@@ -551,9 +566,82 @@
     function confirmDeleteDokumen() {
         if (confirm('Apakah Anda yakin ingin menghapus dokumen ini?')) {
             document.getElementById('hapusDokumenFlag').value = '1';
-            document.querySelector('.current-file').innerHTML = '<div style="color: #dc2626; font-style: italic;">Dokumen akan dihapus saat Anda klik Update Data</div>';
+            const currentFileDiv = document.querySelector('.current-file');
+            if (currentFileDiv) {
+                currentFileDiv.innerHTML = '<div style="color: #dc2626; font-style: italic;">Dokumen akan dihapus saat Anda klik Update Data</div>';
+            }
         }
     }
+
+    // Event listener untuk menampilkan preview file baru yang dipilih
+    document.getElementById('dokumenInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Validasi file
+            if (file.type !== 'application/pdf') {
+                alert('File harus berformat PDF!');
+                e.target.value = '';
+                return;
+            }
+            
+            if (file.size > 5 * 1024 * 1024) { // 5MB
+                alert('Ukuran file maksimal 5 MB!');
+                e.target.value = '';
+                return;
+            }
+
+            // Sembunyikan file lama jika ada
+            const currentFileDiv = document.querySelector('.current-file');
+            if (currentFileDiv) {
+                currentFileDiv.style.display = 'none';
+            }
+
+            // Reset flag hapus dokumen
+            document.getElementById('hapusDokumenFlag').value = '0';
+
+            // Tampilkan preview file baru
+            const uploadWrapper = document.querySelector('.file-upload-wrapper');
+            const existingPreview = document.getElementById('newFilePreview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+
+            const previewDiv = document.createElement('div');
+            previewDiv.id = 'newFilePreview';
+            previewDiv.style.cssText = 'margin-top: 12px; padding: 12px; background: #dcfce7; border: 1px solid #86efac; border-radius: 6px; display: flex; justify-content: space-between; align-items: center;';
+            previewDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-file-pdf" style="color: #dc2626; font-size: 20px;"></i>
+                    <div>
+                        <div style="font-weight: 600; color: #166534;">${file.name}</div>
+                        <div style="font-size: 12px; color: #15803d;">${(file.size / 1024).toFixed(2)} KB - File baru akan diupload</div>
+                    </div>
+                </div>
+                <button type="button" onclick="cancelNewFile()" style="background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 500;">
+                    ✕ Batal
+                </button>
+            `;
+            uploadWrapper.parentNode.insertBefore(previewDiv, uploadWrapper.nextSibling);
+        }
+    });
+
+    // Fungsi untuk membatalkan file baru yang dipilih
+    window.cancelNewFile = function() {
+        const fileInput = document.getElementById('dokumenInput');
+        fileInput.value = '';
+        
+        const preview = document.getElementById('newFilePreview');
+        if (preview) {
+            preview.remove();
+        }
+
+        // Tampilkan kembali file lama jika ada
+        const currentFileDiv = document.querySelector('.current-file');
+        if (currentFileDiv) {
+            currentFileDiv.style.display = 'flex';
+        }
+    }
+
 </script>
 @endpush
 @endsection

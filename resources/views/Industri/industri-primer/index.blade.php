@@ -229,21 +229,21 @@
 
         .badge-status-aktif {
             display: inline-block;
-            background: #10b981;
-            color: white;
+            background: transparent;
+            color: green;
             padding: 4px 10px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
         }
 
         .badge-status-nonaktif {
             display: inline-block;
-            background: #ef4444;
-            color: white;
+            background: transparent;
+            color: red;
             padding: 4px 10px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
         }
 
@@ -955,16 +955,30 @@
             // Handle dokumen izin - Security: Same response whether document exists or not for unauthenticated users
             const dokumenElement = document.getElementById('modal-dokumen');
             if (isAdmin) {
-                // Admin: Show download link if document exists
+                // Admin: Show view and download links if document exists
                 if (item.dokumen_izin) {
+                    const viewUrl = `/industri/primer/${item.id}/view-dokumen`;
+                    const downloadUrl = `/industri/primer/${item.id}/dokumen`;
+                    
                     dokumenElement.innerHTML = `
-                        <a href="/storage/${item.dokumen_izin}" 
-                           target="_blank" 
-                           style="color: #15803d; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500;">
-                            <i class="fas fa-file-pdf" style="color: #dc2626;"></i>
-                            <span>Download Dokumen Izin</span>
-                            <i class="fas fa-external-link-alt" style="font-size: 12px;"></i>
-                        </a>
+                        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                            <a href="${viewUrl}" 
+                               target="_blank" 
+                               style="color: #15803d; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; padding: 8px 16px; background: #f0fdf4; border-radius: 6px; border: 1px solid #bbf7d0; transition: all 0.2s;"
+                               onmouseover="this.style.background='#dcfce7'"
+                               onmouseout="this.style.background='#f0fdf4'">
+                                <i class="fas fa-eye" style="color: #15803d;"></i>
+                                <span>Lihat Dokumen</span>
+                                <i class="fas fa-external-link-alt" style="font-size: 12px;"></i>
+                            </a>
+                            <a href="${downloadUrl}" 
+                               style="color: #dc2626; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; padding: 8px 16px; background: #fef2f2; border-radius: 6px; border: 1px solid #fecaca; transition: all 0.2s;"
+                               onmouseover="this.style.background='#fee2e2'"
+                               onmouseout="this.style.background='#fef2f2'">
+                                <i class="fas fa-download" style="color: #dc2626;"></i>
+                                <span>Download PDF</span>
+                            </a>
+                        </div>
                     `;
                 } else {
                     dokumenElement.textContent = '-';

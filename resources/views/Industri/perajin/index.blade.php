@@ -183,21 +183,21 @@
 
         .badge-status-aktif {
             display: inline-block;
-            background: #10b981;
-            color: white;
+            background: transparent;
+            color: green;
             padding: 4px 10px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
         }
 
         .badge-status-nonaktif {
             display: inline-block;
-            background: #ef4444;
-            color: white;
+            background: transparent;
+            color: red;
             padding: 4px 10px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 500;
         }
 
@@ -323,36 +323,71 @@
 
         .modal-body {
             padding: 30px;
+            background-color: #f8fafc;
         }
 
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+        /* Table Detail Style - Spek Kantoran */
+        .table-detail {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
         }
 
-        .detail-item {
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 12px;
+        .table-detail tr:first-child td {
+            border-top: none;
         }
 
-        .detail-label {
-            font-size: 12px;
-            font-weight: 600;
+        .table-detail td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        .table-detail tr:last-child td {
+            border-bottom: none;
+        }
+
+        .detail-label-col {
+            width: 35%;
+            background-color: #f8fafc;
             color: #64748b;
+            font-weight: 600;
             text-transform: uppercase;
+            font-size: 11px !important;
             letter-spacing: 0.5px;
-            margin-bottom: 6px;
+            border-right: 1px solid #f1f5f9;
         }
 
-        .detail-value {
-            font-size: 15px;
-            color: var(--primary);
+        .detail-value-col {
+            width: 65%;
+            color: #334155;
             font-weight: 500;
         }
 
-        .detail-item-full {
-            grid-column: 1 / -1;
+        .detail-section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 0 0 12px 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .detail-section-title::before {
+            content: '';
+            display: block;
+            width: 4px;
+            height: 16px;
+            background: var(--accent);
+            border-radius: 2px;
         }
     </style>
 @endpush
@@ -508,14 +543,14 @@
                                         </td>
                                         <td>
                                             <div class="action-buttons">
-                                                <button class="btn-action btn-view" onclick='showDetail(@json($item))'><i class="fas fa-info-circle"></i> Lihat</button>
+                                                <button class="btn-action btn-view" onclick='showDetail(@json($item))'>Lihat</button>
                                                 @auth
                                                 @if(auth()->user()->role === 'admin')
-                                                <a href="{{ route('perajin.edit', $item) }}" class="btn-action btn-edit"><i class="fas fa-pen"></i> Edit</a>
+                                                <a href="{{ route('perajin.edit', $item) }}" class="btn-action btn-edit">Edit</a>
                                                 <form action="{{ route('perajin.destroy', $item) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn-action btn-delete"><i class="fas fa-times"></i> Hapus</button>
+                                                    <button type="submit" class="btn-action btn-delete">Hapus</button>
                                                 </form>
                                                 @endif
                                                 @endauth

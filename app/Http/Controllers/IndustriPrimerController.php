@@ -456,8 +456,19 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         }
         $industriPrimer->jenisProduksi()->sync($jenisProduksiData);
 
+        // Buat pesan sukses yang informatif
+        $successMessage = 'Data industri primer berhasil diupdate!';
+        
+        // Tambahkan info dokumen jika ada perubahan
+        if ($request->input('hapus_dokumen') == '1') {
+            $successMessage .= ' Dokumen izin telah dihapus.';
+        } elseif ($request->hasFile('dokumen_izin')) {
+            $successMessage .= ' Dokumen izin baru telah diupload.';
+        }
+
         return redirect()->route('industri-primer.index')
-            ->with('success', 'Data industri primer berhasil diupdate!');
+            ->with('success', $successMessage)
+            ->with('updated_id', $id); // Kirim ID yang diupdate untuk highlight
     }
 
     /**
@@ -479,6 +490,54 @@ class IndustriPrimerController extends Controller implements HasMiddleware
 
         return redirect()->route('industri-primer.index')
             ->with('success', "Perusahaan \"$namaPerusahaan\" berhasil dihapus!");
+    }
+
+    /**
+     * View dokumen izin inline di browser (Requires Admin Authentication)
+     */
+    public function viewDokumen($id)
+    {
+        // Security: Require admin authentication to prevent information disclosure
+        if (!auth()->check() || auth()->user()->role !== 'admin') {
+            abort(403, 'Akses ditolak. Hanya admin yang dapat melihat dokumen.');
+        }
+
+        $industriPrimer = IndustriPrimer::with('industri')->findOrFail($id);
+        
+        // Check if document exists
+        if (!$industriPrimer->dokumen_izin) {
+            abort(404, 'Dokumen tidak ditemukan!');
+        }
+
+        $disk = Storage::disk('public');
+        $relativePath = $industriPrimer->dokumen_izin;
+
+        // Cek keberadaan file pada disk 'public'
+        if ($disk->exists($relativePath)) {
+            try {
+                // Return file dengan header inline agar bisa dibuka di browser
+                return response()->file($disk->path($relativePath), [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . basename($relativePath) . '"'
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Storage view failed: ' . $e->getMessage());
+                abort(500, 'Gagal membuka file.');
+            }
+        }
+
+        // Fallback: cek langsung di storage/app/public
+        $fullPath = storage_path('app/public/' . $relativePath);
+        if (file_exists($fullPath)) {
+            \Log::warning("File exists at storage path but not via Storage disk: {$fullPath}");
+            return response()->file($fullPath, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . basename($relativePath) . '"'
+            ]);
+        }
+
+        \Log::warning('File not found for view: ' . $relativePath);
+        abort(404, 'File tidak ditemukan di server!');
     }
 
     /**
