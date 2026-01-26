@@ -40,11 +40,11 @@
         </div>
     </div>
 
-    {{-- 3. Manajemen KPH (Master Data) --}}
-    {{-- 3. Manajemen KPH (Master Data) --}}
+    {{-- 3. Manajemen KPH (Data Master) --}}
+    {{-- 3. Manajemen KPH (Data Master) --}}
     <div class="col-span-1 md:col-span-2 bg-white dark:bg-surface-dark shadow-md rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
         
-        {{-- Header & Toolbar --}}
+        {{-- Header & Alat --}}
         <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
@@ -57,7 +57,7 @@
             </div>
 
             <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                {{-- Search Input --}}
+                {{-- Input Pencarian --}}
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <span class="material-icons-outlined text-gray-400 text-sm">search</span>
@@ -65,7 +65,8 @@
                     <input type="text" id="searchKph" class="block w-full sm:w-64 pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary sm:text-sm transition duration-150 ease-in-out" placeholder="Cari nama KPH...">
                 </div>
 
-                {{-- Add Button --}}
+                {{-- Tombol Tambah --}}
+                {{-- Buka modal tambah KPH. --}}
                 <button type="button" onclick="openKphModal()" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary_hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-sm transition-all hover:shadow-md">
                     <span class="material-icons-outlined text-sm mr-2">add</span>
                     Tambah KPH
@@ -95,6 +96,7 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <!-- Konfirmasi sebelum menghapus KPH. -->
                                 <form action="{{ route('admin.settings.kph.destroy', $kph->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus {{ $kph->nama }}?');" class="inline-block">
                                     @csrf
                                     @method('DELETE')
@@ -114,7 +116,7 @@
                             </td>
                         </tr>
                     @endforelse
-                    {{-- Row Search Not Found (Hidden by default) --}}
+                    {{-- Baris hasil kosong (disembunyikan secara default) --}}
                     <tr id="noResultRow" class="hidden">
                         <td colspan="2" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 text-sm">
                             Tidak ditemukan KPH dengan nama tersebut.
@@ -124,7 +126,7 @@
             </table>
         </div>
         
-        {{-- Footer/Pagination hint (Optional) --}}
+        {{-- Catatan footer/pagination (opsional) --}}
         <div class="bg-gray-50 dark:bg-gray-800/50 px-6 py-3 border-t border-gray-200 dark:border-gray-700">
             <p class="text-xs text-gray-500 dark:text-gray-400">
                 Menampilkan seluruh data KPH aktif.
@@ -135,7 +137,8 @@
     {{-- MODAL TAMBAH KPH --}}
     <div id="kphModal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            {{-- Backdrop --}}
+            {{-- Latar modal --}}
+            <!-- Klik backdrop untuk menutup modal. -->
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeKphModal()"></div>
 
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
@@ -167,6 +170,7 @@
                         <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary_hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary sm:ml-3 sm:w-auto sm:text-sm">
                             Simpan
                         </button>
+                        <!-- Menutup modal tanpa menyimpan. -->
                         <button type="button" onclick="closeKphModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                             Batal
                         </button>
@@ -176,61 +180,8 @@
         </div>
     </div>
 
-    {{-- Script JavaScript untuk Search & Modal --}}
-    <script>
-        // --- 1. SEARCH FUNCTIONALITY ---
-        const searchInput = document.getElementById('searchKph');
-        const table = document.getElementById('kphTable');
-        const noResultRow = document.getElementById('noResultRow');
-
-        searchInput.addEventListener('keyup', function() {
-            const filter = searchInput.value.toLowerCase();
-            const rows = table.getElementsByTagName('tr');
-            let hasVisibleRow = false;
-
-            // Loop rows (mulai index 1 karena index 0 adalah header)
-            for (let i = 1; i < rows.length; i++) {
-                // Skip row "noResultRow" atau "empty state" bawaan
-                if (rows[i].id === 'noResultRow' || rows[i].cells.length < 2) continue;
-
-                const nameCell = rows[i].querySelector('.kph-name');
-                if (nameCell) {
-                    const txtValue = nameCell.textContent || nameCell.innerText;
-                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
-                        rows[i].style.display = "";
-                        hasVisibleRow = true;
-                    } else {
-                        rows[i].style.display = "none";
-                    }
-                }
-            }
-
-            // Show/Hide "Tidak ditemukan" message
-            if (!hasVisibleRow && filter !== '') {
-                noResultRow.classList.remove('hidden');
-            } else {
-                noResultRow.classList.add('hidden');
-            }
-        });
-
-        // --- 2. MODAL FUNCTIONALITY ---
-        function openKphModal() {
-            document.getElementById('kphModal').classList.remove('hidden');
-            document.getElementById('nama').focus(); // Auto focus ke input
-        }
-
-        function closeKphModal() {
-            document.getElementById('kphModal').classList.add('hidden');
-        }
-
-        // Close modal on ESC key
-        document.onkeydown = function(evt) {
-            evt = evt || window.event;
-            if (evt.keyCode == 27) {
-                closeKphModal();
-            }
-        };
-    </script>
+    {{-- Script JavaScript untuk pencarian dan modal --}}
+    <script src="{{ asset('js/pnbp/admin/settings/index.js') }}"></script>
 
 </div>
 @endsection

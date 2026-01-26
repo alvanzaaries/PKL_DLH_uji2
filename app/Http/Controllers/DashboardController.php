@@ -7,8 +7,6 @@ use App\Models\ReconciliationDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
-
-// Models from Incoming (for public dashboard)
 use App\Models\Industri;
 use App\Models\IndustriPrimer;
 use App\Models\IndustriSekunder;
@@ -18,7 +16,7 @@ use App\Models\Perajin;
 class DashboardController extends Controller
 {
     /**
-     * Admin Dashboard (from HEAD) - Reconciliation analytics
+    * Menampilkan dashboard admin PNBP beserta ringkasan analitik.
      */
     public function index(Request $request)
     {
@@ -28,7 +26,7 @@ class DashboardController extends Controller
     }
 
     /**
-     * Export filtered PNBP dashboard statistics to PDF.
+        * Mengekspor statistik dashboard PNBP ke PDF sesuai filter.
      */
     public function exportPdf(Request $request)
     {
@@ -46,21 +44,24 @@ class DashboardController extends Controller
         return $pdf->download('pnbp.' . now()->format('Ymd_His') . '.pdf');
     }
 
+    /**
+     * Menyusun data dashboard berdasarkan filter permintaan.
+     */
     private function buildDashboardData(Request $request): array
     {
-        // 1. Filter Parameters
+        // 1. Parameter filter
         $year = $request->input('year');
         $quarter = $request->input('quarter');
         $sampaiQuarter = $request->input('sampai_quarter');
         $kph = trim((string) $request->input('kph', ''));
         $wilayah = trim((string) $request->input('wilayah', ''));
 
-        // 2. Base Queries
+        // 2. Query dasar
         $reconQuery = Reconciliation::query();
         $detailQuery = ReconciliationDetail::query()
             ->join('reconciliations', 'reconciliation_details.reconciliation_id', '=', 'reconciliations.id');
 
-        // 3. Apply Filters
+        // 3. Terapkan filter
         if ($year) {
             $reconQuery->where('year', $year);
             $detailQuery->where('reconciliations.year', $year);
@@ -82,12 +83,12 @@ class DashboardController extends Controller
             $reconQuery->where('quarter', $quarter);
             $detailQuery->where('reconciliations.quarter', $quarter);
         } elseif ($sampaiQuarter) {
-            // "Sampai dengan quarter" means: TW 1 + TW 2 + ... + selected TW (for that year)
+            // "Sampai dengan triwulan" berarti TW 1 s.d. TW terpilih pada tahun yang sama.
             $reconQuery->whereBetween('quarter', [1, $sampaiQuarter]);
             $detailQuery->whereBetween('reconciliations.quarter', [1, $sampaiQuarter]);
         }
 
-        // 4. Aggregations (Infographics)
+        // 4. Agregasi (infografik)
         $totalFiles = $reconQuery->count();
 
         $financials = $detailQuery->clone()->select(
@@ -114,8 +115,8 @@ class DashboardController extends Controller
             ->groupBy('jenis_sdh')
             ->get();
 
-        // 6. Calculate Volume by Category (Kayu, HHBK, Lainnya)
-        // Grouping logic matching ReconciliationController
+        // 6. Hitung volume per kategori (Kayu, HHBK, Lainnya)
+        // Logika pengelompokan mengikuti ReconciliationController.
         $volumeByCat = [
             'HASIL HUTAN KAYU' => 0,
             'HASIL HUTAN BUKAN KAYU (HHBK)' => 0,
@@ -127,7 +128,7 @@ class DashboardController extends Controller
             'HASIL HUTAN LAINNYA' => 0, 
         ];
 
-        // We need to fetch data grouped by Satuan to apply the categorization logic
+        // Ambil data per satuan untuk menerapkan logika kategori.
         $statsSatuan = $detailQuery->clone()
             ->select('satuan', DB::raw('SUM(volume) as total_vol'), DB::raw('SUM(setor_nilai) as total_setor'))
             ->groupBy('satuan')
@@ -142,7 +143,7 @@ class DashboardController extends Controller
                 $volumeByCat['HASIL HUTAN KAYU'] += $vol;
                 $setorByCat['HASIL HUTAN KAYU'] += $setor;
             } elseif (in_array($unit, ['ton', 'kg'])) {
-                // If unit is kg, convert to ton (divide by 1000)
+                // Jika satuan kg, konversi ke ton (dibagi 1000).
                 $addedVol = ($unit === 'kg') ? $vol / 1000 : $vol;
                 $volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $addedVol;
                 $setorByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $setor;
@@ -152,7 +153,41 @@ class DashboardController extends Controller
             }
         }
 
-        // 7. Filter Data Options (Dropdowns)
+        // 6b. Terapkan override manual untuk total LHP
+        // Rumus: Total = (Jumlah semua detail) - (Jumlah detail yang dioverride) + (Jumlah nilai override)
+        $matchingReconIds = $reconQuery->pluck('id');
+        $overrides = \App\Models\ReconciliationSummaryOverride::whereIn('reconciliation_id', $matchingReconIds)
+            ->where('metric', 'total_nilai_lhp')
+            ->whereNull('satuan')
+            ->get();
+
+        if ($overrides->isNotEmpty()) {
+            $overriddenReconIds = $overrides->pluck('reconciliation_id');
+            $originalLhpSum = ReconciliationDetail::whereIn('reconciliation_id', $overriddenReconIds)->sum('lhp_nilai');
+            $overrideSum = $overrides->sum('value');
+            
+            // Sesuaikan total finansial (pastikan nilainya ada).
+            if ($financials) {
+                $financials->total_lhp = ($financials->total_lhp - $originalLhpSum) + $overrideSum;
+            }
+        }
+
+        $setorOverrides = \App\Models\ReconciliationSummaryOverride::whereIn('reconciliation_id', $matchingReconIds)
+            ->where('metric', 'total_nilai_setor')
+            ->whereNull('satuan')
+            ->get();
+
+        if ($setorOverrides->isNotEmpty()) {
+            $overriddenReconIds = $setorOverrides->pluck('reconciliation_id');
+            $originalSetorSum = ReconciliationDetail::whereIn('reconciliation_id', $overriddenReconIds)->sum('setor_nilai');
+            $overrideSetorSum = $setorOverrides->sum('value');
+
+            if ($financials) {
+                $financials->total_setor = ($financials->total_setor - $originalSetorSum) + $overrideSetorSum;
+            }
+        }
+
+        // 7. Opsi data filter (dropdown)
         $availableYears = Reconciliation::select('year')->distinct()->orderByDesc('year')->pluck('year');
         $availableQuarters = Reconciliation::select('quarter')->distinct()->orderBy('quarter')->pluck('quarter');
         $availableKph = Reconciliation::select('kph')
@@ -184,6 +219,9 @@ class DashboardController extends Controller
         );
     }
 
+    /**
+     * Menyusun label ringkas untuk filter dashboard.
+     */
     private function buildDashboardFilterLabel(Request $request): string
     {
         $parts = [];
@@ -210,11 +248,11 @@ class DashboardController extends Controller
     }
 
     /**
-     * Public Dashboard (from Incoming) - Industry statistics for public viewing
+     * Menampilkan dashboard publik untuk statistik industri.
      */
     public function publicIndex(Request $request)
     {
-        // Hitung data real dari database dengan TPT structure
+        // Hitung data real dari database dengan struktur TPT.
         $statistics = [
             'primer_pbphh' => IndustriPrimer::count(),
             'sekunder_pbui' => IndustriSekunder::count(),
@@ -222,10 +260,10 @@ class DashboardController extends Controller
             'perajin' => Perajin::count(),
         ];
 
-        // Total keseluruhan industri
+        // Total keseluruhan industri.
         $statistics['total_industri'] = array_sum($statistics);
 
-        // Ambil data untuk tabel dengan filter pencarian
+        // Ambil data untuk tabel dengan filter pencarian.
         $query = Industri::query();
 
         if ($request->filled('search')) {

@@ -73,7 +73,7 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto space-y-6">
 
-            {{-- Summary Cards --}}
+            {{-- Kartu Ringkasan --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {{-- Kategori: Kayu --}}
                 @if(($volumeByCat['HASIL HUTAN KAYU'] ?? 0) > 0)
@@ -122,21 +122,25 @@
                     <div class="text-gray-500 dark:text-gray-400 text-sm font-medium">Total Nilai Setor</div>
                     <div class="text-2xl font-bold text-green-600 dark:text-green-500 mt-2">
                         <span class="text-sm text-gray-500 font-normal">Rp</span>
-                        {{ number_format(($baseTotalNilaiSetor ?? 0), 0, '.', ',') }}
+                        {{ number_format(($totalNilaiSetorFinal ?? $baseTotalNilaiSetor ?? 0), 0, '.', ',') }}
                     </div>
                 </div>
             </div>
 
-            {{-- Edit Summary Overrides (Manual Override) --}}
-            <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 mb-6 p-6">
-                <h3 class="font-bold text-gray-800 dark:text-white mb-4 flex items-center">
+            {{-- Edit Ringkasan Override (Manual Override) --}}
+            <div id="manualOverrideCard" class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 mb-6 p-6">
+                <div id="manualOverrideHeader" class="flex items-center justify-between mb-4 cursor-pointer select-none" role="button" aria-expanded="false" aria-controls="manualOverrideContent">
+                    <h3 class="font-bold text-gray-800 dark:text-white flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
                     Edit Ringkasan (Manual Override)
-                </h3>
+                    </h3>
+                    <span class="text-xs text-gray-500 dark:text-gray-400">Klik untuk buka/tutup</span>
+                </div>
                 
-                <form action="{{ route('reconciliations.summary-overrides', $reconciliation->id) }}" method="POST">
+                <div id="manualOverrideContent" class="hidden">
+                    <form action="{{ route('reconciliations.summary-overrides', $reconciliation->id) }}" method="POST">
                     @csrf
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         
@@ -151,6 +155,26 @@
                                     value="{{ number_format($totalNilaiLhpFinal, 0, '.', ',') }}"
                                     class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5"
                                     placeholder="0">
+                                    @if(isset($baseTotalNilaiLhp, $totalNilaiLhpFinal) && $totalNilaiLhpFinal != $baseTotalNilaiLhp)
+                                        <p class="text-xs text-yellow-600 mt-1">*Nilai manual (Asli: {{ number_format($baseTotalNilaiLhp ?? 0, 0, '.', ',') }})</p>
+                                    @endif
+                            </div>
+                        </div>
+
+                        {{-- Override Total Nilai Setor --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Nilai Setor (Rp)</label>
+                            <div class="relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm">Rp</span>
+                                </div>
+                                <input type="text" name="total_nilai_setor" 
+                                    value="{{ number_format($totalNilaiSetorFinal ?? ($baseTotalNilaiSetor ?? 0), 0, '.', ',') }}"
+                                    class="bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white text-sm rounded-lg focus:ring-primary focus:border-primary block w-full pl-10 p-2.5"
+                                    placeholder="0">
+                                    @if(isset($baseTotalNilaiSetor, $totalNilaiSetorFinal) && $totalNilaiSetorFinal != $baseTotalNilaiSetor)
+                                        <p class="text-xs text-yellow-600 mt-1">*Nilai manual (Asli: {{ number_format($baseTotalNilaiSetor ?? 0, 0, '.', ',') }})</p>
+                                    @endif
                             </div>
                         </div>
 
@@ -175,11 +199,12 @@
                             Simpan Perubahan
                         </button>
                     </div>
-                </form>
+                    </form>
+                </div>
             </div>
 
             {{-- 3 KOLOM: Rekap Jenis, Rekap Bank, & Sebaran Wilayah (Chart) --}}
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 {{-- 1. Rekap Jenis --}}
                 <div class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 lg:col-span-1">
@@ -244,10 +269,15 @@
                     </div>
                     
                     {{-- Container Chart --}}
-                    <div class="p-4 flex-1 flex flex-col justify-center items-center">
+                    <div class="p-4 flex-1">
                         @if(count($statsWilayah ?? []) > 0)
-                            <div class="relative w-full h-64">
-                                <canvas id="wilayahChart"></canvas>
+                            <div class="flex flex-col md:flex-row items-center md:items-start gap-4">
+                                <div class="relative w-full md:w-2/3 h-64">
+                                    <canvas id="wilayahChart" 
+                                        data-labels="{{ json_encode($statsWilayah->pluck('label')) }}" 
+                                        data-values="{{ json_encode($statsWilayah->pluck('total_nilai')) }}"></canvas>
+                                </div>
+                                <div id="wilayahLegend" class="w-full md:w-1/3 space-y-2"></div>
                             </div>
                         @else
                             <div class="flex items-center justify-center h-full text-gray-500 text-sm py-10">
@@ -313,7 +343,7 @@
                                 @forelse($details as $detail)
                                     <tr class="bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-700">
                                         {{-- No & Wilayah --}}
-                                        <td class="px-3 py-2 sticky left-0 bg-white dark:bg-surface-dark font-medium text-center shadow-sm border-r dark:border-gray-700 text-gray-500 dark:text-gray-400">{{ $detail->no_urut ?? '-' }}</td>
+                                        <td class="px-3 py-2 sticky left-0 bg-white dark:bg-surface-dark font-medium text-center shadow-sm border-r dark:border-gray-700 text-gray-500 dark:text-gray-400">{{ ($details->firstItem() ?? 1) + $loop->index }}</td>
                                         <td class="px-3 py-2 font-medium text-gray-900 dark:text-gray-200 whitespace-nowrap">{{ $detail->wilayah }}</td>
 
                                         {{-- Data LHP --}}
@@ -352,93 +382,23 @@
     </div>
 
     <script>
-        document.getElementById('resetBtn')?.addEventListener('click', function(){
-            const f = document.getElementById('filterForm');
-            if(!f) return;
-            f.querySelector('input[name="search"]').value = '';
-            f.submit();
+        // Menyiapkan toggle panel override saat DOM siap.
+        document.addEventListener('DOMContentLoaded', () => {
+            const card = document.getElementById('manualOverrideCard');
+            const header = document.getElementById('manualOverrideHeader');
+            const content = document.getElementById('manualOverrideContent');
+
+            if (!card || !header || !content) return;
+
+            // Toggle panel saat kartu diklik, kecuali klik di dalam konten.
+            card.addEventListener('click', (event) => {
+                if (event.target.closest('#manualOverrideContent')) return;
+                const isHidden = content.classList.contains('hidden');
+                content.classList.toggle('hidden');
+                header.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+            });
         });
-
-        // Render wilayah chart (PIE CHART - DOUGHNUT)
-        @if(count($statsWilayah ?? []) > 0)
-            (function(){
-                const rawLabels = {!! json_encode($statsWilayah->pluck('label')) !!};
-                const rawData = {!! json_encode($statsWilayah->pluck('total_nilai')) !!};
-
-                const canvas = document.getElementById('wilayahChart');
-                if (!canvas) return;
-                
-                const ctx = canvas.getContext('2d');
-
-                // --- FUNGSI GENERATE WARNA DINAMIS ---\
-                const dynamicColors = rawLabels.map((_, i) => {
-                    const hue = (i * 137.508) % 360; 
-                    return `hsl(${hue}, 65%, 55%)`;
-                });
-
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: rawLabels,
-                        datasets: [{
-                            data: rawData,
-                            backgroundColor: dynamicColors, 
-                            borderWidth: 1,
-                            borderColor: '#ffffff'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'right',
-                                labels: {
-                                    boxWidth: 10,
-                                    font: { size: 10 },
-                                    generateLabels: function(chart) {
-                                        const data = chart.data;
-                                        if (data.labels.length && data.datasets.length) {
-                                            return data.labels.map((label, i) => {
-                                                if (i > 9) return null; 
-                                                const meta = chart.getDatasetMeta(0);
-                                                const style = meta.controller.getStyle(i);
-                                                return {
-                                                    text: label,
-                                                    fillStyle: style.backgroundColor,
-                                                    strokeStyle: style.borderColor,
-                                                    lineWidth: style.borderWidth,
-                                                    hidden: isNaN(data.datasets[0].data[i]) || meta.data[i].hidden,
-                                                    index: i
-                                                };
-                                            }).filter(item => item !== null);
-                                        }
-                                        return [];
-                                    }
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function(context) {
-                                        let label = context.label || '';
-                                        if (label) {label += ': '};
-                                        label += new Intl.NumberFormat('id-ID', {
-                                            style: 'currency',
-                                            currency: 'IDR',
-                                            minimumFractionDigits: 0
-                                        }).format(context.raw);
-                                        return label;
-                                    }
-                                }
-                            }
-                        },
-                        layout: {
-                            padding: 0
-                        }
-                    }
-                });
-            })();
-        @endif
     </script>
+    <!-- JS eksternal untuk chart dan interaksi -->
+    <script src="{{ asset('js/pnbp/admin/reconciliations/show.js') }}"></script>
 @endsection

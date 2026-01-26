@@ -8,6 +8,9 @@ use App\Models\User;
 
 class SettingsPNBPController extends Controller
 {
+    /**
+     * Menampilkan halaman pengaturan PNBP dan daftar KPH.
+     */
     public function index()
     {
         $kphs = Kph::orderBy('nama')->get();
@@ -15,6 +18,9 @@ class SettingsPNBPController extends Controller
         return view('PNBP.admin.settings.index', compact('kphs', 'usersCount'));
     }
 
+    /**
+     * Menyimpan data KPH baru dari form pengaturan.
+     */
     public function storeKph(Request $request)
     {
         $request->validate([
@@ -26,6 +32,9 @@ class SettingsPNBPController extends Controller
         return back()->with('success', 'KPH berhasil ditambahkan.');
     }
 
+    /**
+     * Menghapus data KPH yang dipilih.
+     */
     public function destroyKph(Kph $kph)
     {
         $kph->delete();

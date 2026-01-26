@@ -5,10 +5,10 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto">
-    {{-- Card Container --}}
+    {{-- Kontainer Kartu --}}
     <div class="bg-white dark:bg-surface-dark shadow-lg rounded-lg overflow-hidden border border-gray-100 dark:border-gray-700">
         
-        {{-- Header Card --}}
+        {{-- Header Kartu --}}
         <div class="bg-primary px-6 py-4">
             <h2 class="text-xl font-bold text-white flex items-center">
                 <svg class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -28,7 +28,7 @@
                 </a>
             </p>
 
-            {{-- Error Alert --}}
+            {{-- Notifikasi Error --}}
             @if ($errors->any())
                 <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-300 p-4 mb-6" role="alert">
                     <p class="font-bold">Terjadi Kesalahan</p>
@@ -75,11 +75,11 @@
                     </div>
                 </div>
 
-                {{-- Upload Area --}}
+                {{-- Area Upload --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">File Excel (.xlsx, .xls, .csv)</label>
                     
-                    {{-- REMOVED: class "transition" --}}
+                    {{-- DIHAPUS: kelas "transition" --}}
                     <div id="drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md hover:bg-gray-50 dark:hover:bg-gray-800/50 relative cursor-pointer bg-white dark:bg-gray-800">
                         
                         {{-- Empty State --}}
@@ -97,7 +97,7 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400">Excel hingga 2MB</p>
                         </div>
 
-                        {{-- File Selected State --}}
+                        {{-- Status File Terpilih --}}
                         <div id="file-info" class="hidden text-center w-full">
                             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mb-3">
                                 <svg class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,7 +107,7 @@
                             <h3 class="text-sm font-medium text-gray-900 dark:text-white" id="selected-filename">filename.xlsx</h3>
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-1" id="selected-filesize">0 KB</p>
                             
-                            {{-- REMOVED: class "transition-colors" --}}
+                            {{-- DIHAPUS: kelas "transition-colors" --}}
                             <button type="button" id="remove-file" class="mt-3 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                                 Ganti File
                             </button>
@@ -115,109 +115,16 @@
                     </div>
                 </div>
 
-                <script>
-                    const dropZone = document.getElementById('drop-zone');
-                    const fileInput = document.getElementById('file-upload');
-                    const emptyState = document.getElementById('empty-state');
-                    const fileInfo = document.getElementById('file-info');
-                    const filenameDisplay = document.getElementById('selected-filename');
-                    const filesizeDisplay = document.getElementById('selected-filesize');
-                    const removeBtn = document.getElementById('remove-file');
+                <script src="{{ asset('js/pnbp/admin/reconciliations/create.js') }}"></script>
 
-                    // Classes untuk state aktif/sukses (Tema Primary)
-                    const activeClasses = ['border-primary', 'bg-primary/5', 'dark:bg-primary/10'];
-                    const defaultBorder = ['border-gray-300', 'dark:border-gray-600'];
-
-                    function updateUI(file) {
-                        if (file) {
-                            emptyState.classList.add('hidden');
-                            fileInfo.classList.remove('hidden');
-                            filenameDisplay.textContent = file.name;
-                            filesizeDisplay.textContent = (file.size / 1024).toFixed(2) + ' KB';
-                            
-                            dropZone.classList.add(...activeClasses);
-                            dropZone.classList.remove(...defaultBorder);
-                        } else {
-                            resetUI();
-                        }
-                    }
-
-                    function resetUI() {
-                        fileInput.value = '';
-                        emptyState.classList.remove('hidden');
-                        fileInfo.classList.add('hidden');
-                        
-                        dropZone.classList.remove(...activeClasses);
-                        dropZone.classList.add(...defaultBorder);
-                    }
-
-                    fileInput.addEventListener('change', function(e) {
-                        if (this.files.length > 0) {
-                            updateUI(this.files[0]);
-                        }
-                    });
-
-                    removeBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        resetUI();
-                    });
-
-                    dropZone.addEventListener('click', function(e) {
-                        if (e.target && (e.target.id === 'remove-file' || (e.target.closest && e.target.closest('#remove-file')))) {
-                            return;
-                        }
-                        fileInput.click();
-                    });
-
-                    // Drag and Drop Events
-                    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                        dropZone.addEventListener(eventName, preventDefaults, false);
-                    });
-
-                    function preventDefaults(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-
-                    ['dragenter', 'dragover'].forEach(eventName => {
-                        dropZone.addEventListener(eventName, highlight, false);
-                    });
-
-                    ['dragleave', 'drop'].forEach(eventName => {
-                        dropZone.addEventListener(eventName, unhighlight, false);
-                    });
-
-                    function highlight(e) {
-                        dropZone.classList.add(...activeClasses);
-                    }
-
-                    function unhighlight(e) {
-                        if (fileInput.files.length === 0) {
-                            dropZone.classList.remove(...activeClasses);
-                        }
-                    }
-
-                    dropZone.addEventListener('drop', handleDrop, false);
-
-                    function handleDrop(e) {
-                        const dt = e.dataTransfer;
-                        const files = dt.files;
-                        if (files.length > 0) {
-                            fileInput.files = files;
-                            updateUI(files[0]);
-                        }
-                    }
-                </script>
-
-                {{-- Action Buttons --}}
+                {{-- Tombol Aksi --}}
                 <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100 dark:border-gray-700">
-                    {{-- REMOVED: class "transition-colors" --}}
+                    {{-- DIHAPUS: kelas "transition-colors" --}}
                     <a href="{{ route('reconciliations.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                         Batal
                     </a>
                     
-                    {{-- REMOVED: class "transition-colors" --}}
+                    {{-- DIHAPUS: kelas "transition-colors" --}}
                     <button id="uploadBtn" type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary_hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
                         <svg id="uploadSpinner" class="hidden animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -227,24 +134,6 @@
                     </button>
                 </div>
             </form>
-
-            <script>
-                (function () {
-                    const form = document.getElementById('uploadForm');
-                    const btn = document.getElementById('uploadBtn');
-                    const spinner = document.getElementById('uploadSpinner');
-                    const text = document.getElementById('uploadBtnText');
-                    if (!form || !btn || !spinner || !text) return;
-
-                    form.addEventListener('submit', function () {
-                        btn.disabled = true;
-                        btn.classList.add('opacity-70', 'pointer-events-none');
-                        spinner.classList.remove('hidden');
-                        text.textContent = 'Mengupload…';
-                        form.setAttribute('aria-busy', 'true');
-                    });
-                })();
-            </script>
         </div>
     </div>
 </div>

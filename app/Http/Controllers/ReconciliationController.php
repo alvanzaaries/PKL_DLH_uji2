@@ -14,8 +14,7 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
-use App\Models\Kph; // Add this import
+use App\Models\Kph;
 
 class ReconciliationController extends Controller
 {
@@ -23,6 +22,9 @@ class ReconciliationController extends Controller
     // FITUR UTAMA
     // =========================================================================
 
+    /**
+     * Mengunduh file rekonsiliasi asli.
+     */
     public function downloadFile(Reconciliation $reconciliation)
     {
         $file = ReconciliationFile::where('reconciliation_id', $reconciliation->id)->latest()->first();
@@ -34,6 +36,9 @@ class ReconciliationController extends Controller
             ->header('Content-Disposition', 'attachment; filename="' . $file->original_filename . '"');
     }
 
+    /**
+     * Menampilkan daftar rekonsiliasi dengan filter.
+     */
     public function index(Request $request)
     {
         $query = Reconciliation::query()->with('uploader')->latest();
@@ -70,6 +75,9 @@ class ReconciliationController extends Controller
         return view('PNBP.admin.reconciliations.index', compact('reconciliations', 'availableYears'));
     }
 
+    /**
+     * Menampilkan form unggah rekonsiliasi untuk admin.
+     */
     public function create()
     {
         $kphOptions = Kph::orderBy('nama')->pluck('nama');
@@ -77,6 +85,9 @@ class ReconciliationController extends Controller
         return view('PNBP.admin.reconciliations.create', compact('kphOptions'));
     }
 
+    /**
+     * Menampilkan detail rekonsiliasi beserta statistik.
+     */
     public function show(Request $request, Reconciliation $reconciliation)
     {
         $query = $this->buildDetailsQuery($request, $reconciliation);
@@ -91,18 +102,31 @@ class ReconciliationController extends Controller
     }
 
     /**
-     * Export reconciliation detail + statistics to PDF for printing.
+     * Mengekspor detail rekonsiliasi dan statistik ke PDF.
      */
     public function exportPdf(Request $request, Reconciliation $reconciliation)
     {
         @ini_set('memory_limit', '2048M');
         @set_time_limit(300);
 
-        // Fetch ALL details (removed pagination)
+        // Ambil data override (override manual).
+        $override = \App\Models\ReconciliationSummaryOverride::where('reconciliation_id', $reconciliation->id)
+            ->where('metric', 'total_nilai_lhp')
+            ->whereNull('satuan')
+            ->first();
+        $totalNilaiLhpOverride = $override ? (float) $override->value : null;
+
+        $setorOverride = \App\Models\ReconciliationSummaryOverride::where('reconciliation_id', $reconciliation->id)
+            ->where('metric', 'total_nilai_setor')
+            ->whereNull('satuan')
+            ->first();
+        $totalNilaiSetorOverride = $setorOverride ? (float) $setorOverride->value : null;
+
+        // Ambil semua detail (tanpa pagination).
         $query = $this->buildDetailsQuery($request, $reconciliation);
         $details = $query->get();
 
-        // 1. Grouping Logic
+        // 1. Logika pengelompokan
         $groupedData = [
             'HASIL HUTAN KAYU' => [
                 'details' => collect(),
@@ -134,24 +158,26 @@ class ReconciliationController extends Controller
                 $category = 'HASIL HUTAN BUKAN KAYU (HHBK)';
             }
 
-            // Assign to group
+            // Masukkan ke kelompok
             $groupedData[$category]['details']->push($d);
 
-            // Accumulate totals
+            // Akumulasi total
             $groupedData[$category]['total_volume'] += (float) $d->volume;
             $groupedData[$category]['total_lhp'] += (float) $d->lhp_nilai;
             $groupedData[$category]['total_setor'] += (float) $d->setor_nilai;
         }
 
-        // Stats aren't strictly needed for the main table provided by user, 
-        // but might be useful if the template still uses them. 
-        // We'll keep passing them just in case transparency is needed.
+        // Statistik tidak wajib untuk tabel utama, tetapi tetap dikirim
+        // jika template masih memakainya.
         $stats = $this->buildReconciliationStats($reconciliation);
 
         $pdf = Pdf::loadView('PNBP.admin.reconciliations.show_pdf', array_merge(
             [
                 'reconciliation' => $reconciliation,
                 'groupedData' => $groupedData,
+                'totalNilaiLhpOverride' => $totalNilaiLhpOverride,
+                'totalNilaiLhpOverride' => $totalNilaiLhpOverride,
+                'totalNilaiSetorOverride' => $totalNilaiSetorOverride,
                 'pageInfo' => [
                     'total_rows' => $details->count(),
                     'generated_at' => now()->format('d/m/Y H:i'),
@@ -160,7 +186,7 @@ class ReconciliationController extends Controller
             $stats
         ))->setPaper('a4', 'portrait')
           ->setOptions([
-              'isRemoteEnabled' => false, // Performance
+              'isRemoteEnabled' => false, // Performa
               'defaultFont' => 'Helvetica',
               'isHtml5ParserEnabled' => true,
           ]);
@@ -174,12 +200,18 @@ class ReconciliationController extends Controller
         return $pdf->download('pnbp.' . $kphSlug . '.triwulan' . $quarter . '.' . $year . '.pdf');
     }
 
+    /**
+     * Menghapus data rekonsiliasi.
+     */
     public function destroy(Reconciliation $reconciliation)
     {
         $reconciliation->delete();
         return back()->with('success', 'Data dihapus');
     }
 
+    /**
+     * Menyusun query detail rekonsiliasi sesuai filter dan sorting.
+     */
     private function buildDetailsQuery(Request $request, Reconciliation $reconciliation)
     {
         $query = ReconciliationDetail::where('reconciliation_id', $reconciliation->id);
@@ -207,6 +239,9 @@ class ReconciliationController extends Controller
         return $query;
     }
 
+    /**
+     * Menyusun statistik ringkasan untuk rekonsiliasi.
+     */
     private function buildReconciliationStats(Reconciliation $reconciliation): array
     {
         $totalPerSatuan = ReconciliationDetail::where('reconciliation_id', $reconciliation->id)
@@ -246,12 +281,12 @@ class ReconciliationController extends Controller
 
         foreach ($totalPerSatuan as $row) {
             $unit = strtolower(trim((string)$row->satuan));
-            $vol = (float) ($row->total_volume_final ?? 0); // Use final value (after override)
+            $vol = (float) ($row->total_volume_final ?? 0); // Gunakan nilai final (setelah override)
 
             if (in_array($unit, ['m3', 'm^3', 'kbk'])) {
                 $volumeByCat['HASIL HUTAN KAYU'] += $vol;
             } elseif (in_array($unit, ['ton', 'kg'])) {
-                // If unit is kg, convert to ton (divide by 1000)
+                // Jika satuan kg, konversi ke ton (dibagi 1000).
                 $addedVol = ($unit === 'kg') ? $vol / 1000 : $vol;
                 $volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] += $addedVol;
             } else {
@@ -259,7 +294,7 @@ class ReconciliationController extends Controller
             }
         }
 
-        // Group Setor (total setor nilai) by Category
+        // Kelompokkan setor (total nilai setor) per kategori
         $setorByCat = [
             'HASIL HUTAN KAYU' => 0,
             'HASIL HUTAN BUKAN KAYU (HHBK)' => 0,
@@ -287,6 +322,8 @@ class ReconciliationController extends Controller
         $nilaiOverride = $overrides->get(strtolower('total_nilai_lhp|'));
         $totalNilaiLhpFinal = $nilaiOverride ? (float) $nilaiOverride->value : $baseTotalNilaiLhp;
         $baseTotalNilaiSetor = (float) ReconciliationDetail::where('reconciliation_id', $reconciliation->id)->sum('setor_nilai');
+        $setorOverride = $overrides->get(strtolower('total_nilai_setor|'));
+        $totalNilaiSetorFinal = $setorOverride ? (float) $setorOverride->value : $baseTotalNilaiSetor;
 
         return compact(
             'totalPerSatuan',
@@ -297,13 +334,17 @@ class ReconciliationController extends Controller
             'statsBank',
             'totalNilaiLhpFinal',
             'baseTotalNilaiLhp',
-            'baseTotalNilaiSetor'
+            'baseTotalNilaiSetor',
+            'totalNilaiSetorFinal'
         );
     }
 
     // =========================================================================
-    // STORE: FIXED FORMAT PARSER
+    // SIMPAN: PARSER FORMAT TETAP
     // =========================================================================
+    /**
+     * Menyimpan upload rekonsiliasi dan memproses file.
+     */
     public function store(Request $request)
     {
         ini_set('memory_limit', '1024M');
@@ -341,10 +382,10 @@ class ReconciliationController extends Controller
         try {
             $spreadsheet = IOFactory::load($file->getPathname());
             
-            // Loop semua sheet untuk mengakomodir jika ada multiple sheet wilayah
+            // Loop semua sheet untuk mengakomodir jika ada beberapa sheet wilayah.
             $count = 0;
             foreach ($spreadsheet->getAllSheets() as $sheet) {
-                // Abaikan sheet rekap
+                // Abaikan sheet rekap.
                 if (str_contains(strtoupper($sheet->getTitle()), 'REKAP')) continue;
 
                 $rows = $sheet->toArray(null, true, true, true);
@@ -371,24 +412,27 @@ class ReconciliationController extends Controller
     }
 
     // =========================================================================
-    // PARSER LOGIC
+    // LOGIKA PARSER
     // =========================================================================
+    /**
+     * Mem-parsing format tetap dari sheet Excel menjadi detail rekonsiliasi.
+     */
     private function parseFixedFormat(array $rows, Reconciliation $recon, string $sheetName): int
     {
-        // Start Row Data (Asumsi Header 7-9, Data mulai 10)
+        // Baris awal data (asumsi header 7-9, data mulai 10).
         $startIndex = 10;
         
         $activeWilayah = null;
         $activeBulan = null;
         $count = 0;
 
-        // Backup wilayah dari nama sheet
+        // Ambil wilayah dari nama sheet jika tersedia.
         if (!preg_match('/SHEET/i', $sheetName)) {
             $activeWilayah = strtoupper($sheetName);
         }
 
         foreach ($rows as $rowIndex => $row) {
-            // Cek Header di baris-baris awal untuk update Wilayah
+            // Cek header awal untuk memperbarui wilayah.
             if ($rowIndex < $startIndex) {
                 $rowText = strtoupper(implode(' ', $row));
                 if (preg_match('/^\s*?(KABUPATEN|KOTA)\s+[A-Z\s]+/', $rowText, $m)) {
@@ -397,18 +441,18 @@ class ReconciliationController extends Controller
                 continue;
             }
 
-            // Skip baris kosong
+            // Lewati baris kosong.
             if (trim(($row['A']??'').($row['E']??'').($row['F']??'')) === '') continue;
 
             $colA = trim($row['A'] ?? ''); // No
             $colB = trim($row['B'] ?? ''); // Uraian
 
-            // Deteksi Bulan di kolom B
+            // Deteksi bulan di kolom B.
             if ($bulan = $this->detectBulan($colB)) {
                 $activeBulan = $bulan;
             }
 
-            // --- MAPPING KOLOM FIXED (NEW REQUEST) ---
+            // --- PEMETAAN KOLOM FORMAT TETAP ---
             // C = No LHP
             // D = Tgl LHP
             // E = JENIS HH
@@ -418,7 +462,7 @@ class ReconciliationController extends Controller
             
             $colJenis = trim($row['E'] ?? ''); 
             
-            // Skip Header/Junk
+            // Lewati header/junk.
             if ($colJenis === '' || preg_match('/(JENIS|URAIAN|NO|VOLUME|HH|REKAP|JUMLAH|TOTAL)/i', $colJenis)) continue;
             if ($this->isJunkRow($colJenis) || $this->isJunkRow($colB)) continue;
 
@@ -431,10 +475,10 @@ class ReconciliationController extends Controller
 
             if ($volume <= 0 && $rupiah <= 0) continue;
 
-            // Bersihkan Satuan (Default "-" jika kosong)
+            // Bersihkan satuan (default "-" jika kosong).
             if ($colSat === '') $colSat = '-';
 
-            // --- MAPPING KOLOM BILLING & SETOR (GESER KIRI) ---
+            // --- PEMETAAN KOLOM BILLING & SETOR (GESER KIRI) ---
             // I = No Billing
             // J = Tgl Billing
             // K = Nilai Billing
@@ -454,11 +498,11 @@ class ReconciliationController extends Controller
             $setorNtb  = trim($row['O'] ?? '');
             $setorRp   = $row['P'] ?? '';
 
-            // LHP Info (C=Nomor, D=Tanggal)
+            // Info LHP (C=Nomor, D=Tanggal).
             $lhpNo  = trim($row['C'] ?? '');
             $lhpTgl = $row['D'] ?? '';
 
-            // Skip jika LHP No kosong untuk menghindari redundansi
+            // Lewati jika nomor LHP kosong untuk menghindari redundansi.
             if ($lhpNo === '' || $lhpNo === '-') continue;
 
             $this->saveDetail($recon, $activeWilayah, $activeBulan, $colA, $colJenis, $volume, $colSat, $rupiah, $row, 
@@ -473,9 +517,12 @@ class ReconciliationController extends Controller
     }
 
     // =========================================================================
-    // HELPER FUNCTIONS
+    // FUNGSI BANTUAN
     // =========================================================================
     
+    /**
+     * Menyimpan detail rekonsiliasi dan fakta turunan.
+     */
     private function saveDetail($recon, $wilayah, $bulan, $no, $jenis, $vol, $sat, $lhpNilai, $rawData, 
                                 $lhpNo, $lhpTgl, $billNo, $billTgl, $billNilai, 
                                 $setorTgl, $setorBank, $setorNtpn, $setorNtb, $setorNilai)
@@ -510,6 +557,9 @@ class ReconciliationController extends Controller
         ]);
     }
 
+    /**
+     * Membersihkan nama jenis hasil hutan agar konsisten.
+     */
     private function cleanJenisHH(string $jenis): string
     {
         $clean = strtoupper($jenis);
@@ -518,12 +568,18 @@ class ReconciliationController extends Controller
         return trim($clean);
     }
 
+    /**
+     * Mengecek apakah baris termasuk rekap/total.
+     */
     private function isJunkRow(string $text): bool
     {
         $text = strtoupper($text);
         return preg_match('/(JUMLAH|TOTAL|REKAP|GRAND|SUB\s*TOTAL)/', $text);
     }
 
+    /**
+     * Mendeteksi nama bulan dari teks kolom.
+     */
     private function detectBulan(string $text): ?string
     {
         $text = strtoupper($text);
@@ -533,6 +589,9 @@ class ReconciliationController extends Controller
         return null;
     }
 
+    /**
+     * Mengonversi nilai volume menjadi angka.
+     */
     private function parseVolume($val) {
         if ($val === '') return 0;
         if (strpos($val, ',') !== false && strpos($val, '.') !== false) {
@@ -542,25 +601,37 @@ class ReconciliationController extends Controller
         return (float) preg_replace('/[^0-9\.-]/', '', $c);
     }
 
+    /**
+     * Mengonversi string rupiah menjadi angka.
+     */
     private function parseRupiah($val) {
         if ($val === '') return 0;
         $c = preg_replace('/[^0-9,]/', '', $val);
         return (float) str_replace(',', '', $c);
     }
 
+    /**
+     * Mengonversi nilai tanggal dari Excel/string ke format Y-m-d.
+     */
     private function parseDate($val) {
         if (empty($val) || $val == '-' || $val == '0') return null;
         try { if (is_numeric($val)) return Date::excelToDateTimeObject($val)->format('Y-m-d');
         return Carbon::parse($val)->format('Y-m-d'); } catch (\Exception $e) { return null; }
     }
 
+    /**
+     * Memetakan teks ke master data melalui tabel alias.
+     */
     private function mapAlias($t, $v) {
         if (!$v) return null; $v = strtolower(trim($v)); $v = preg_replace('/[^a-z0-9\s]/', '', $v);
         $a = MappingAlias::where('type', $t)->whereRaw('? LIKE CONCAT("%", alias, "%")', [$v])->first();
         return $a?->master_id;
     }
 
-    // Fitur Raw Excel & Overrides tetap dipertahankan
+    // Fitur raw Excel dan override tetap dipertahankan.
+    /**
+     * Menampilkan pratinjau raw Excel dalam format HTML.
+     */
     public function rawExcel(Reconciliation $reconciliation)
     {
         $file = ReconciliationFile::where('reconciliation_id', $reconciliation->id)->latest()->first();
@@ -589,10 +660,14 @@ class ReconciliationController extends Controller
         return view('PNBP.admin.reconciliations.raw', ['reconciliation' => $reconciliation, 'rawHtml' => $body]);
     }
 
+    /**
+     * Memperbarui nilai override ringkasan (LHP, setor, dan volume).
+     */
     public function updateSummaryOverrides(Request $request, Reconciliation $reconciliation)
     {
         $data = $request->validate([
             'total_nilai_lhp' => 'nullable|string',
+            'total_nilai_setor' => 'nullable|string',
             'total_volume' => 'nullable|array',
             'total_volume.*' => 'nullable|string',
         ]);
@@ -619,6 +694,17 @@ class ReconciliationController extends Controller
             ReconciliationSummaryOverride::updateOrCreate(
                 ['reconciliation_id' => $reconciliation->id, 'metric' => 'total_nilai_lhp', 'satuan' => null],
                 ['value' => $this->parseRupiah($nilaiRaw)]
+            );
+        }
+
+        $setorRaw = trim((string) ($data['total_nilai_setor'] ?? ''));
+        if ($setorRaw === '') {
+            ReconciliationSummaryOverride::where('reconciliation_id', $reconciliation->id)
+                ->where('metric', 'total_nilai_setor')->whereNull('satuan')->delete();
+        } else {
+            ReconciliationSummaryOverride::updateOrCreate(
+                ['reconciliation_id' => $reconciliation->id, 'metric' => 'total_nilai_setor', 'satuan' => null],
+                ['value' => $this->parseRupiah($setorRaw)]
             );
         }
         return back()->with('success', 'Ringkasan total berhasil diperbarui.');

@@ -7,6 +7,7 @@
 @section('subheader', 'Daftar semua proses rekonsiliasi yang telah diunggah ke dalam sistem.')
 
 @section('header_actions')
+    {{-- Tombol Aksi Header --}}
     <a href="{{ route('reconciliations.create') }}" class="w-full md:w-auto inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary hover:bg-primary_hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all">
         <span class="material-icons-outlined text-lg mr-2">cloud_upload</span>
         Upload Data Baru
@@ -27,6 +28,7 @@
         </div>
     @endif
 
+    {{-- Filter Pencarian & Triwulan --}}
     <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
         <form method="GET" action="{{ route('reconciliations.index') }}" class="flex flex-col lg:flex-row gap-4 justify-between items-center">
             <div class="relative w-full lg:w-96 group">
@@ -82,6 +84,7 @@
         </form>
     </div>
 
+    {{-- Tabel Rekonsiliasi --}}
     <div class="bg-surface-light dark:bg-surface-dark shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -101,6 +104,7 @@
                         @php
                             $uploader = $item->uploader;
                             $uName = $uploader?->name ?? '-';
+                            // Membuat inisial nama pengunggah untuk avatar.
                             $uInitials = collect(explode(' ', trim((string)$uName)))->filter()->map(fn($p) => mb_substr($p, 0, 1))->take(2)->join('');
                             $uInitials = $uInitials !== '' ? mb_strtoupper($uInitials) : 'U';
                             $isAdmin = $uploader && (($uploader->role ?? 'user') === 'admin');
@@ -135,6 +139,7 @@
                                     <a class="text-gray-400 hover:text-primary dark:hover:text-primary transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="Detail" href="{{ route('reconciliations.show', $item->id) }}">
                                         <span class="material-icons-outlined">visibility</span>
                                     </a>
+                                    <!-- Konfirmasi sebelum menghapus data rekonsiliasi. -->
                                     <form action="{{ route('reconciliations.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini? Semua detail data akan ikut terhapus.')">
                                         @csrf
                                         @method('DELETE')
@@ -154,6 +159,7 @@
             </table>
         </div>
 
+        {{-- Navigasi Pagination --}}
         @if(method_exists($reconciliations, 'total'))
             <div class="bg-surface-light dark:bg-surface-dark px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
                 <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">

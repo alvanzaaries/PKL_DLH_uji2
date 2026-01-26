@@ -7,28 +7,7 @@
     <title>@yield('title', 'Admin Dashboard - Pelaporan PNBP')</title>
 
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#0d9488",
-                        primary_hover: "#0f766e",
-                        "background-light": "#f3f4f6",
-                        "background-dark": "#111827",
-                        "surface-light": "#ffffff",
-                        "surface-dark": "#1f2937",
-                    },
-                    fontFamily: {
-                        display: ["Inter", "sans-serif"],
-                        body: ["Inter", "sans-serif"],
-                    },
-                    borderRadius: { DEFAULT: "0.5rem" },
-                },
-            },
-        };
-    </script>
+    <script src="{{ asset('js/pnbp/tailwind-config.js') }}"></script>
 
     <link rel="icon" type="image/png" href="{{ asset('img/Logo Provinsi Jawa Tengah.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
@@ -36,38 +15,13 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-
-        .dark ::-webkit-scrollbar-thumb {
-            background: #4b5563;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-    </style>
+    <link href="{{ asset('css/pnbp/admin-layout.css') }}" rel="stylesheet">
 </head>
 @php
     $authUser = auth()->user();
     $name = $authUser?->name ?? 'Administrator';
     $email = $authUser?->email ?? '';
+    // Membuat inisial nama untuk avatar dari nama pengguna.
     $initials = collect(explode(' ', trim($name)))->filter()->map(fn($p) => mb_substr($p, 0, 1))->take(2)->join('');
     $initials = $initials !== '' ? mb_strtoupper($initials) : 'AD';
 @endphp
@@ -96,7 +50,7 @@
                 href="{{ route('reconciliations.index') }}">
                 <span
                     class="material-icons-outlined mr-3 {{ request()->routeIs('reconciliations.*') ? '' : 'text-gray-400 group-hover:text-primary dark:text-gray-500 dark:group-hover:text-primary' }}">history</span>
-                Riwayat Rekonsiliasi
+                Arsip Rekonsiliasi
             </a>
 
             <a class="group flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors {{ request()->routeIs('admin.settings.*') ? 'bg-primary/10 text-primary' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700' }}"
@@ -186,6 +140,7 @@
     </main>
 
     <script>
+        // Inisialisasi tema gelap/terang dan toggle sidebar.
         (function () {
             const root = document.documentElement;
             const body = document.body;
@@ -193,6 +148,7 @@
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             const shouldDark = stored ? stored === 'dark' : prefersDark;
 
+            // Menerapkan tema gelap/terang pada root dan body.
             const applyDark = (on) => {
                 if (on) {
                     root.classList.add('dark');
@@ -205,6 +161,7 @@
 
             applyDark(shouldDark);
 
+            // Mengubah tema dan menyimpan preferensi ke localStorage.
             const toggle = () => {
                 const now = !(root.classList.contains('dark') || body.classList.contains('dark'));
                 applyDark(now);
@@ -215,6 +172,7 @@
             document.getElementById('toggleDarkDesktop')?.addEventListener('click', toggle);
             document.getElementById('toggleDarkSettings')?.addEventListener('click', toggle);
 
+            // Menampilkan/menyembunyikan sidebar pada perangkat kecil.
             document.getElementById('toggleSidebar')?.addEventListener('click', () => {
                 const s = document.getElementById('sidebar');
                 if (!s) return;

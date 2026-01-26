@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="w-full max-w-3xl mx-auto">
+    {{-- Form Upload Rekonsiliasi User --}}
     <div class="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
         <div class="bg-green-600 px-6 py-4">
             <h2 class="text-xl font-bold text-white flex items-center">
@@ -24,6 +25,7 @@
                 </a>
             </p>
 
+            {{-- Notifikasi Sukses --}}
             @if (session('success'))
                 <div class="bg-green-50 border-l-4 border-green-600 text-green-800 p-4 mb-6" role="alert">
                     <p class="font-bold">Berhasil</p>
@@ -31,6 +33,7 @@
                 </div>
             @endif
 
+            {{-- Notifikasi Error --}}
             @if ($errors->any())
                 <div class="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
                     <p class="font-bold">Terjadi Kesalahan</p>
@@ -42,6 +45,7 @@
                 </div>
             @endif
 
+            {{-- Form Upload --}}
             <form id="uploadForm" action="{{ route('reconciliations.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                 @csrf
 
@@ -72,6 +76,7 @@
                     </div>
                 </div>
 
+                {{-- Area Dropzone Upload --}}
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">File Excel (.xlsx, .xls, .csv)</label>
 
@@ -103,93 +108,9 @@
                     </div>
                 </div>
 
-                <script>
-                    const dropZone = document.getElementById('drop-zone');
-                    const fileInput = document.getElementById('file-upload');
-                    const emptyState = document.getElementById('empty-state');
-                    const fileInfo = document.getElementById('file-info');
-                    const filenameDisplay = document.getElementById('selected-filename');
-                    const filesizeDisplay = document.getElementById('selected-filesize');
-                    const removeBtn = document.getElementById('remove-file');
+                <script src="{{ asset('js/pnbp/user/upload.js') }}"></script>
 
-                    function updateUI(file) {
-                        if (file) {
-                            emptyState.classList.add('hidden');
-                            fileInfo.classList.remove('hidden');
-                            filenameDisplay.textContent = file.name;
-                            filesizeDisplay.textContent = (file.size / 1024).toFixed(2) + ' KB';
-                            dropZone.classList.add('border-green-500', 'bg-green-50');
-                            dropZone.classList.remove('border-gray-300');
-                        } else {
-                            resetUI();
-                        }
-                    }
-
-                    function resetUI() {
-                        fileInput.value = '';
-                        emptyState.classList.remove('hidden');
-                        fileInfo.classList.add('hidden');
-                        dropZone.classList.remove('border-green-500', 'bg-green-50');
-                        dropZone.classList.add('border-gray-300');
-                    }
-
-                    fileInput.addEventListener('change', function() {
-                        if (this.files.length > 0) {
-                            updateUI(this.files[0]);
-                        }
-                    });
-
-                    removeBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        resetUI();
-                    });
-
-                    // Whole box clickable
-                    dropZone.addEventListener('click', function() {
-                        fileInput.click();
-                    });
-
-                    // Drag and Drop Events
-                    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                        dropZone.addEventListener(eventName, preventDefaults, false);
-                    });
-
-                    function preventDefaults(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                    }
-
-                    ['dragenter', 'dragover'].forEach(eventName => {
-                        dropZone.addEventListener(eventName, highlight, false);
-                    });
-
-                    ['dragleave', 'drop'].forEach(eventName => {
-                        dropZone.addEventListener(eventName, unhighlight, false);
-                    });
-
-                    function highlight() {
-                        dropZone.classList.add('border-green-500', 'bg-green-50');
-                    }
-
-                    function unhighlight() {
-                        if (fileInput.files.length === 0) {
-                            dropZone.classList.remove('border-green-500', 'bg-green-50');
-                        }
-                    }
-
-                    dropZone.addEventListener('drop', handleDrop, false);
-
-                    function handleDrop(e) {
-                        const dt = e.dataTransfer;
-                        const files = dt.files;
-                        if (files.length > 0) {
-                            fileInput.files = files;
-                            updateUI(files[0]);
-                        }
-                    }
-                </script>
-
+                {{-- Tombol Aksi --}}
                 <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-100">
                     <button id="uploadBtn" type="submit" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
                         <svg id="uploadSpinner" class="hidden animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
@@ -200,24 +121,6 @@
                     </button>
                 </div>
             </form>
-
-            <script>
-                (function () {
-                    const form = document.getElementById('uploadForm');
-                    const btn = document.getElementById('uploadBtn');
-                    const spinner = document.getElementById('uploadSpinner');
-                    const text = document.getElementById('uploadBtnText');
-                    if (!form || !btn || !spinner || !text) return;
-
-                    form.addEventListener('submit', function () {
-                        btn.disabled = true;
-                        btn.classList.add('opacity-70', 'pointer-events-none');
-                        spinner.classList.remove('hidden');
-                        text.textContent = 'Mengupload…';
-                        form.setAttribute('aria-busy', 'true');
-                    });
-                })();
-            </script>
         </div>
     </div>
 </div>

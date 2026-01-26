@@ -5,6 +5,7 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto">
+    {{-- Notifikasi Sukses --}}
     @if (session('success'))
         <div class="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-600 text-green-800 dark:text-green-200 p-4 mb-6" role="alert">
             <p class="font-bold">Berhasil</p>
@@ -12,6 +13,7 @@
         </div>
     @endif
 
+    {{-- Notifikasi Error --}}
     @if ($errors->any())
         <div class="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 text-red-700 dark:text-red-200 p-4 mb-6" role="alert">
             <p class="font-bold">Terjadi Kesalahan</p>
@@ -23,6 +25,7 @@
         </div>
     @endif
 
+        {{-- Header Tabel User --}}
         <div class="flex items-center justify-between mb-4">
         <div>
             <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Daftar User</h2>
@@ -33,6 +36,7 @@
         </a>
     </div>
 
+    {{-- Tabel Daftar User --}}
     <div class="bg-surface-light dark:bg-surface-dark shadow rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
@@ -60,7 +64,8 @@
                             <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">{{ optional($user->created_at)->format('d/m/Y H:i') }}</td>
                             <td class="px-6 py-4 text-sm text-right space-x-2 whitespace-nowrap">
                                 <a href="{{ route('admin.users.edit', $user->id) }}" class="text-green-600 hover:text-green-900">Edit</a>
-                                <form action="{{ route('admin.users.reset-password', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Reset password untuk user ini? Password baru akan ditampilkan di notifikasi.');">
+                                <!-- Konfirmasi sebelum reset password. -->
+                                <form action="{{ route('admin.users.reset-password', $user->id) }}" method="POST" class="inline" onsubmit="return confirm('Reset password untuk user ini?');">
                                     @csrf
                                     <button type="submit" class="text-red-600 hover:text-red-900">Reset Password</button>
                                 </form>

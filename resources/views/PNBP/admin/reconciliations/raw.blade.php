@@ -6,10 +6,13 @@
 @endsection
 
 @section('content')
+    {{-- Kontainer Tampilan Raw Excel --}}
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 py-6">
+        {{-- Konten HTML hasil render Excel --}}
         <div class="bg-white border rounded shadow-sm p-4 overflow-auto">
             {!! $rawHtml !!}
         </div>
+        {{-- Tombol kembali ke detail rekonsiliasi --}}
         <div class="mt-4">
             <a href="{{ route('reconciliations.show', $reconciliation->id) }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">&larr; Kembali</a>
         </div>

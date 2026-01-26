@@ -45,7 +45,8 @@ class LaporanDataService
                 foreach ($rows as $item) {
                     $row = isset($item['cells']) ? $item['cells'] : $item;
 
-                    laporan_mutasi_kayu_bulat::create([
+                    // Debug logging untuk melihat data sebelum insert
+                    $dataToInsert = [
                         'laporan_id' => $laporan->id,
                         'jenis_kayu' => $row[0] ?? '',
                         'persediaan_awal_volume' => $this->toFloat($row[1] ?? 0),
@@ -53,7 +54,23 @@ class LaporanDataService
                         'penggunaan_pengurangan_volume' => $this->toFloat($row[3] ?? 0),
                         'persediaan_akhir_volume' => $this->toFloat($row[4] ?? 0),
                         'keterangan' => $row[5] ?? '',
+                    ];
+
+                    Log::debug('Attempting to insert laporan_mutasi_kayu_bulat', [
+                        'data' => $dataToInsert,
+                        'raw_row' => $row,
                     ]);
+
+                    try {
+                        laporan_mutasi_kayu_bulat::create($dataToInsert);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to insert laporan_mutasi_kayu_bulat row', [
+                            'exception' => $e->getMessage(),
+                            'data' => $dataToInsert,
+                            'raw_row' => $row,
+                        ]);
+                        throw $e; // Re-throw untuk ditangkap di controller
+                    }
                 }
                 break;
 
@@ -114,6 +131,8 @@ class LaporanDataService
 
     /**
      * Normalisasi nilai numeric yang mungkin mengandung pemisah ribuan atau koma desimal.
+     * Format: Titik (.) untuk desimal, Koma (,) untuk ribuan
+     * Contoh valid: 1,234.56 atau 1234.56 atau 2.27 atau 2,000
      */
     private function toFloat($value): float
     {
@@ -127,16 +146,35 @@ class LaporanDataService
 
         $s = trim((string) $value);
 
-        // Jika ada koma dan titik sekaligus, anggap koma sebagai pemisah ribuan
+        // Format yang diterima:
+        // - Koma (,) hanya sebagai pemisah ribuan
+        // - Titik (.) hanya sebagai pemisah desimal
+        // - Format valid: 1,234.56 atau 1234.56 atau 1,234 atau 1234
+
+        // Jika ada koma DAN titik, validasi posisi:
+        // Titik harus di belakang koma (format US: 1,234.56)
         if (strpos($s, ',') !== false && strpos($s, '.') !== false) {
-            $s = str_replace(',', '', $s);
-        } elseif (strpos($s, ',') !== false && strpos($s, '.') === false) {
-            // Jika hanya ada koma, kemungkinan koma adalah pemisah desimal lokal (e.g. 1234,56)
-            $s = str_replace('.', '', $s);
-            $s = str_replace(',', '.', $s);
-        } else {
+            $lastComma = strrpos($s, ',');
+            $lastDot = strrpos($s, '.');
+
+            if ($lastDot > $lastComma) {
+                // Format valid: 1,234.56 -> Hapus koma (ribuan)
+                $s = str_replace(',', '', $s);
+            } else {
+                // Format tidak valid: 1.234,56 (format Indonesia tidak diterima)
+                return 0.0;
+            }
+        }
+        // Jika HANYA ada Koma (1,234)
+        elseif (strpos($s, ',') !== false) {
+            // Koma sebagai ribuan -> hapus koma
             $s = str_replace(',', '', $s);
         }
+        // Jika HANYA ada Titik (1.5 atau 1.234)
+        // Titik dianggap desimal (format valid)
+
+        // Bersihkan karakter non-numeric lain
+        $s = preg_replace('/[^0-9\.\-]/', '', $s);
 
         return is_numeric($s) ? (float) $s : 0.0;
     }
@@ -263,8 +301,24 @@ class LaporanDataService
      */
     public function getDetailLaporan($bulan, $tahun, $jenis, $filters = [], $perPage = 25, $sortBy = null, $sortDirection = 'asc')
     {
+        // Map jenis slug to jenis_laporan label
+        $jenisLaporanMap = [
+            'penerimaan_kayu_bulat' => 'Laporan Penerimaan Kayu Bulat',
+            'penerimaan_kayu_olahan' => 'Laporan Penerimaan Kayu Olahan',
+            'mutasi_kayu_bulat' => 'Laporan Mutasi Kayu Bulat (LMKB)',
+            'mutasi_kayu_olahan' => 'Laporan Mutasi Kayu Olahan (LMKO)',
+            'penjualan_kayu_olahan' => 'Laporan Penjualan Kayu Olahan',
+        ];
+
+        $jenisLaporanLabel = $jenisLaporanMap[$jenis] ?? null;
+
         $laporanQuery = Laporan::whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun);
+
+        // Filter by jenis_laporan to get only the specific report type
+        if ($jenisLaporanLabel) {
+            $laporanQuery->where('jenis_laporan', $jenisLaporanLabel);
+        }
 
         // Jika ada filter industri_id, batasi laporan hanya untuk industri tersebut
         if (isset($filters['industri_id']) && $filters['industri_id']) {
@@ -426,8 +480,24 @@ class LaporanDataService
      */
     public function getDetailLaporanForExport($bulan, $tahun, $jenis, $filters = [])
     {
+        // Map jenis slug to jenis_laporan label
+        $jenisLaporanMap = [
+            'penerimaan_kayu_bulat' => 'Laporan Penerimaan Kayu Bulat',
+            'penerimaan_kayu_olahan' => 'Laporan Penerimaan Kayu Olahan',
+            'mutasi_kayu_bulat' => 'Laporan Mutasi Kayu Bulat (LMKB)',
+            'mutasi_kayu_olahan' => 'Laporan Mutasi Kayu Olahan (LMKO)',
+            'penjualan_kayu_olahan' => 'Laporan Penjualan Kayu Olahan',
+        ];
+
+        $jenisLaporanLabel = $jenisLaporanMap[$jenis] ?? null;
+
         $laporanQuery = Laporan::whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun);
+
+        // Filter by jenis_laporan to get only the specific report type
+        if ($jenisLaporanLabel) {
+            $laporanQuery->where('jenis_laporan', $jenisLaporanLabel);
+        }
 
         // Jika ada filter industri_id, batasi laporan hanya untuk industri tersebut
         if (isset($filters['industri_id']) && $filters['industri_id']) {
@@ -521,6 +591,7 @@ class LaporanDataService
 
     /**
      * Parse tanggal dari berbagai format Excel ke format Y-m-d
+     * Menggunakan logika yang sama dengan ValidationService untuk konsistensi
      */
     private function parseDate($value): ?string
     {
@@ -537,10 +608,57 @@ class LaporanDataService
             }
         }
 
-        // Coba parse string tanggal
-        $formats = ['Y-m-d', 'd/m/Y', 'd-m-Y', 'Y/m/d'];
+        $s = trim((string) $value);
+
+        // Jika format ISO year first (YYYY-MM-DD or YYYY/MM/DD)
+        if (preg_match('/^\d{4}[\-\/]\d{1,2}[\-\/]\d{1,2}$/', $s)) {
+            $d = \DateTime::createFromFormat('Y-m-d', str_replace('/', '-', $s));
+            if ($d !== false)
+                return $d->format('Y-m-d');
+        }
+
+        // Split by common separators (cek logika d/m/y vs m/d/y)
+        if (preg_match('/^[0-9]{1,4}[\/\-\.][0-9]{1,2}[\/\-\.][0-9]{1,4}$/', $s)) {
+            $parts = preg_split('/[\/\-\.]/', $s);
+            if (count($parts) === 3) {
+                $p0 = (int) $parts[0];
+                $p1 = (int) $parts[1];
+                $p2 = (int) $parts[2];
+
+                // Normalize 2-digit year
+                if ($p2 < 100) {
+                    $p2 += ($p2 >= 70) ? 1900 : 2000;
+                }
+
+                // Logika Heuristik (sama dengan ValidationService):
+                // - Jika part pertama > 12 -> pasti day (d/m/y)
+                // - Jika part kedua > 12 -> pasti day (m/d/y) jarang terjadi di Indo
+                // - Jika keduanya <= 12 -> Ambigoe, default ke d/m/y (Format Indo)
+                if ($p0 > 12) {
+                    $day = $p0;
+                    $month = $p1;
+                    $year = $p2;
+                } elseif ($p1 > 12) {
+                    $day = $p1;
+                    $month = $p0;
+                    $year = $p2;
+                } else {
+                    // Ambiguous - default to day/month/year (standard Indonesia)
+                    $day = $p0;
+                    $month = $p1;
+                    $year = $p2;
+                }
+
+                if (checkdate($month, $day, $year)) {
+                    return sprintf('%04d-%02d-%02d', $year, $month, $day);
+                }
+            }
+        }
+
+        // Coba parse string tanggal dengan format umum lainnya
+        $formats = ['Y-m-d', 'd/m/Y', 'd-m-Y', 'Y/m/d', 'm/d/Y'];
         foreach ($formats as $format) {
-            $date = \DateTime::createFromFormat($format, $value);
+            $date = \DateTime::createFromFormat($format, $s);
             if ($date !== false) {
                 return $date->format('Y-m-d');
             }

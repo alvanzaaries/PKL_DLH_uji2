@@ -300,9 +300,14 @@ class LaporanController extends Controller
 
         // Jika preview sebelumnya mengandung error dan user tidak mengirim edited_data,
         // jangan coba simpan langsung — minta user melakukan revalidasi.
-        if (!empty($previewData['errors']) && (!$request->has('edited_data') || empty($request->edited_data))) {
-            return redirect()->route('laporan.preview.show')
-                ->with('warning', 'Masih ada error validasi. Silakan perbaiki data di tabel lalu tekan "Perbaiki & Validasi Ulang".');
+        // PENTING: Setelah revalidasi berhasil, preview_data['errors'] sudah kosong,
+        // tapi kita tetap perlu edited_data untuk memastikan data yang benar tersimpan.
+        if (!empty($previewData['errors'])) {
+            // Ada error di preview, user harus perbaiki dulu
+            if (!$request->has('edited_data') || empty($request->edited_data)) {
+                return redirect()->route('laporan.preview.show')
+                    ->with('warning', 'Masih ada error validasi. Silakan perbaiki data di tabel lalu tekan "Perbaiki & Validasi Ulang".');
+            }
         }
 
         // Validasi unique lagi sebelum menyimpan (double check)
@@ -387,7 +392,7 @@ class LaporanController extends Controller
                 'industri_id' => $request->industri_id,
                 'jenis_laporan' => $request->jenis_laporan,
                 'tanggal' => $tanggal,
-                'path_laporan' => '',
+                'path_laporan' => '', // String kosong untuk memenuhi constraint NOT NULL
             ]);
 
             // Normalisasi rows agar konsisten (flat array) sebelum dikirim ke service
@@ -422,17 +427,38 @@ class LaporanController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // Enhanced logging with more context
             Log::error('Failed to save laporan', [
                 'exception' => $e,
+                'exception_message' => $e->getMessage(),
+                'exception_trace' => $e->getTraceAsString(),
                 'industri_id' => $request->industri_id ?? null,
                 'jenis_laporan' => $request->jenis_laporan ?? null,
                 'bulan' => $request->bulan ?? null,
                 'tahun' => $request->tahun ?? null,
+                'has_edited_data' => $request->has('edited_data'),
+                'preview_data_exists' => session()->has('preview_data'),
+                'preview_data_row_count' => isset($previewData['rows']) ? count($previewData['rows']) : 0,
             ]);
 
             // Gunakan redirect URL dari session atau fallback ke laporan.industri
             $redirectUrl = session('redirect_after_save');
-            $msg = 'Gagal menyimpan laporan. Silakan coba lagi atau hubungi administrator.';
+
+            // More descriptive error message
+            $msg = 'Gagal menyimpan laporan. ';
+
+            // Add specific error details based on exception type
+            if (strpos($e->getMessage(), 'Integrity constraint violation') !== false) {
+                $msg .= 'Data duplikat terdeteksi. Laporan untuk periode ini mungkin sudah ada.';
+            } elseif (strpos($e->getMessage(), 'SQLSTATE') !== false) {
+                $msg .= 'Terjadi kesalahan database. Periksa format data Anda.';
+            } elseif (strpos($e->getMessage(), 'Undefined') !== false || strpos($e->getMessage(), 'null') !== false) {
+                $msg .= 'Data tidak lengkap. Silakan validasi ulang data Anda sebelum menyimpan.';
+            } else {
+                $msg .= 'Error: ' . $e->getMessage();
+            }
+
             if ($redirectUrl) {
                 return redirect($redirectUrl)->with('error', $msg);
             } else {
@@ -515,6 +541,9 @@ class LaporanController extends Controller
         // Get detail data menggunakan service dengan filter tambahan jika ada, pagination, dan sorting
         $detailData = $this->dataService->getDetailLaporan($bulan, $tahun, $jenis, $filters, $perPage, $sortBy, $sortDirection);
 
+        // Get ALL items (non-paginated) for stat cards to show total across all pages
+        $allItems = $this->dataService->getDetailLaporanForExport($bulan, $tahun, $jenis, $filters);
+
         // Determine earliest year from Laporan.tanggal to populate the year dropdown in the view.
         // Fallback to 2020 if there are no records or parsing fails.
         $firstDate = Laporan::orderBy('tanggal', 'asc')->value('tanggal');
@@ -533,6 +562,7 @@ class LaporanController extends Controller
             'jenis' => $jenis,
             'jenisLabel' => $jenisOptions[$jenis],
             'items' => $detailData['items'],
+            'allItems' => $allItems,  // For stat cards - total across all pages
             'filterOptions' => $detailData['filterOptions'],
             'earliestYear' => $earliestYear,
             'perPage' => $perPage,
@@ -1611,6 +1641,10 @@ class LaporanController extends Controller
 
     /**
      * Parse angka dengan format Excel (koma untuk ribuan, titik untuk desimal)
+     * Format yang diterima:
+     * - Koma (,) hanya sebagai pemisah ribuan
+     * - Titik (.) hanya sebagai pemisah desimal
+     * - Format valid: 1,234.56 atau 1234.56 atau 1,234 atau 1234
      */
     private function parseNumber($value)
     {
@@ -1618,15 +1652,81 @@ class LaporanController extends Controller
             return null;
         }
 
+        // Jika sudah numeric (tanpa format string), langsung return
         if (is_numeric($value)) {
             return (float) $value;
         }
 
-        $stringValue = trim((string) $value);
-        $normalized = str_replace(',', '', $stringValue);
+        $s = trim((string) $value);
 
-        if (is_numeric($normalized)) {
-            return (float) $normalized;
+        // Jika ada koma DAN titik, validasi posisi:
+        // Titik harus di belakang koma (format US: 1,234.56)
+        if (strpos($s, ',') !== false && strpos($s, '.') !== false) {
+            $lastComma = strrpos($s, ',');
+            $lastDot = strrpos($s, '.');
+
+            if ($lastDot > $lastComma) {
+                // Format valid: 1,234.56 -> Hapus koma (ribuan)
+                $s = str_replace(',', '', $s);
+            } else {
+                // Format tidak valid: 1.234,56 (format Indonesia tidak diterima)
+                return null;
+            }
+        }
+        // Jika HANYA ada Koma (1,234 atau 3,85)
+        elseif (strpos($s, ',') !== false) {
+            // Validasi: koma hanya valid sebagai pemisah ribuan
+            // Pemisah ribuan harus diikuti oleh tepat 3 digit
+
+            // Split by comma dan cek pola
+            $parts = explode(',', $s);
+            $isValidThousandsSeparator = true;
+
+            if (count($parts) >= 2) {
+                $lastPart = array_pop($parts);
+
+                // Bagian terakhir harus tepat 3 digit untuk valid thousand separator
+                if (strlen($lastPart) !== 3) {
+                    // Jika bukan 3 digit, kemungkinan ini format desimal Indonesia (3,85)
+                    return null; // Reject format Indonesia
+                }
+
+                // Cek bagian-bagian sebelumnya
+                foreach ($parts as $i => $part) {
+                    if ($i === 0) {
+                        // Bagian pertama bisa 1-3 digit
+                        if (strlen($part) < 1 || strlen($part) > 3 || !ctype_digit($part)) {
+                            $isValidThousandsSeparator = false;
+                            break;
+                        }
+                    } else {
+                        // Bagian tengah harus tepat 3 digit
+                        if (strlen($part) !== 3 || !ctype_digit($part)) {
+                            $isValidThousandsSeparator = false;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                $isValidThousandsSeparator = false;
+            }
+
+            if ($isValidThousandsSeparator) {
+                // Valid thousand separator, hapus koma
+                $s = str_replace(',', '', $s);
+            } else {
+                // Format tidak valid (kemungkinan format desimal Indonesia)
+                return null;
+            }
+        }
+        // Jika HANYA ada Titik (1.5 atau 1.234)
+        // Titik dianggap desimal (format valid)
+
+        // Bersihkan karakter non-numeric lain (misal spasi, Rp, dll) selain titik dan minus
+        $s = preg_replace('/[^0-9\.\-]/', '', $s);
+
+        if (is_numeric($s)) {
+            return (float) $s;
         }
 
         return null;
