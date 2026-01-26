@@ -76,26 +76,17 @@ class UserDashboardController extends Controller
             }
         }
 
-        $jenisStatsRaw = $detailQuery->clone()
-            ->select('reconciliation_details.jenis_sdh', 'reconciliation_details.satuan', DB::raw('SUM(reconciliation_details.volume) as total_volume'))
+        $statsJenis = $detailQuery->clone()
+            ->select(
+                'reconciliation_details.jenis_sdh as label',
+                'reconciliation_details.satuan',
+                DB::raw('SUM(reconciliation_details.volume) as total_volume'),
+                DB::raw('SUM(reconciliation_details.lhp_nilai) as total_nilai')
+            )
             ->groupBy('reconciliation_details.jenis_sdh', 'reconciliation_details.satuan')
+            ->orderByDesc('total_volume')
             ->get();
 
-        $jenisStats = $jenisStatsRaw
-            ->groupBy('jenis_sdh')
-            ->map(function ($rows, $jenis) {
-                $totalVolume = (float) $rows->sum('total_volume');
-                $units = $rows->pluck('satuan')->filter()->unique()->values();
-                $unitLabel = $units->count() === 1 ? (string) $units->first() : 'campuran';
-
-                return (object) [
-                    'jenis_sdh' => $jenis,
-                    'total_volume' => $totalVolume,
-                    'unit' => $unitLabel,
-                ];
-            })
-            ->values();
-
-        return view('PNBP.user.history', compact('reconciliations', 'totals', 'volumeByCategory', 'jenisStats'));
+        return view('PNBP.user.history', compact('reconciliations', 'totals', 'volumeByCategory', 'statsJenis'));
     }
 }

@@ -424,6 +424,7 @@ class ReconciliationController extends Controller
         
         $activeWilayah = null;
         $activeBulan = null;
+        $jenisSatuanMap = [];
         $count = 0;
 
         // Ambil wilayah dari nama sheet jika tersedia.
@@ -476,6 +477,14 @@ class ReconciliationController extends Controller
             if ($volume <= 0 && $rupiah <= 0) continue;
 
             // Bersihkan satuan (default "-" jika kosong).
+            $jenisKey = $this->cleanJenisHH($colJenis);
+            if ($colSat === '-' ) $colSat = '';
+            if ($colSat !== '') {
+                $jenisSatuanMap[$jenisKey] = $colSat;
+            }
+            if ($colSat === '' && array_key_exists($jenisKey, $jenisSatuanMap)) {
+                $colSat = $jenisSatuanMap[$jenisKey];
+            }
             if ($colSat === '') $colSat = '-';
 
             // --- PEMETAAN KOLOM BILLING & SETOR (GESER KIRI) ---

@@ -24,39 +24,39 @@
             </div>
         </div>
 
-        {{-- Grafik Ringkasan Volume --}}
-        <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="rounded-lg border border-gray-200 p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-sm font-semibold text-gray-900">Total Volume Hasil Hutan</h2>
-                        <p class="text-xs text-gray-500"></p>
-                    </div>
-                </div>
-                <div class="mt-4 h-64">
-                    <canvas id="volumeCategoryChart"
-                        data-labels="{{ json_encode(array_keys($volumeByCategory ?? [])) }}"
-                        data-values="{{ json_encode(array_values($volumeByCategory ?? [])) }}"
-                        data-units="{{ json_encode([
-                            'HASIL HUTAN KAYU' => 'm³',
-                            'HASIL HUTAN BUKAN KAYU (HHBK)' => 'ton',
-                            'HASIL HUTAN LAINNYA' => 'unit',
-                        ]) }}"></canvas>
+        {{-- Rekap Jenis Hasil Hutan (Tabular) --}}
+        <div class="mt-6 rounded-lg border border-gray-200 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-sm font-semibold text-gray-900">Rekap Jenis Hasil Hutan</h2>
+                    <p class="text-xs text-gray-500">Jenis, volume, satuan, dan nilai LHP.</p>
                 </div>
             </div>
-            <div class="rounded-lg border border-gray-200 p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-sm font-semibold text-gray-900">Sebaran Volume Hasil Hutan</h2>
-                        <p class="text-xs text-gray-500"></p>
-                    </div>
-                </div>
-                <div class="mt-4 h-64">
-                    <canvas id="volumeJenisChart"
-                        data-labels="{{ json_encode(($jenisStats ?? collect())->pluck('jenis_sdh')) }}"
-                        data-values="{{ json_encode(($jenisStats ?? collect())->pluck('total_volume')) }}"
-                        data-units="{{ json_encode(($jenisStats ?? collect())->pluck('unit')) }}"></canvas>
-                </div>
+            <div class="mt-4 overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Jenis SDH</th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Volume</th>
+                            <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Nilai LHP</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @forelse(($statsJenis ?? []) as $jenis)
+                            <tr>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $jenis->label }}</td>
+                                <td class="px-4 py-2 text-sm text-right text-gray-700">{{ number_format($jenis->total_volume, 2, ',', '.') }}</td>
+                                <td class="px-4 py-2 text-sm text-left text-gray-500">{{ $jenis->satuan }}</td>
+                                <td class="px-4 py-3 text-sm text-right text-gray-900 font-semibold">Rp {{ number_format($jenis->total_nilai ?? 0, 0, ',', '.') }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">Belum ada data.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -95,6 +95,4 @@
         </div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{{ asset('js/pnbp/user/history.js') }}"></script>
 @endsection
