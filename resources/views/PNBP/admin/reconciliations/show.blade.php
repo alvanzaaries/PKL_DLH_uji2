@@ -73,7 +73,7 @@
     <div class="py-6">
         <div class="max-w-7xl mx-auto space-y-6">
 
-            {{-- Summary Cards --}}
+            {{-- Kartu Ringkasan --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {{-- Kategori: Kayu --}}
                 @if(($volumeByCat['HASIL HUTAN KAYU'] ?? 0) > 0)
@@ -127,7 +127,7 @@
                 </div>
             </div>
 
-            {{-- Edit Summary Overrides (Manual Override) --}}
+            {{-- Edit Ringkasan Override (Manual Override) --}}
             <div id="manualOverrideCard" class="bg-white dark:bg-surface-dark overflow-hidden shadow-sm rounded-lg border border-gray-200 dark:border-gray-700 mb-6 p-6">
                 <div id="manualOverrideHeader" class="flex items-center justify-between mb-4 cursor-pointer select-none" role="button" aria-expanded="false" aria-controls="manualOverrideContent">
                     <h3 class="font-bold text-gray-800 dark:text-white flex items-center">
@@ -343,7 +343,7 @@
                                 @forelse($details as $detail)
                                     <tr class="bg-white dark:bg-surface-dark hover:bg-gray-50 dark:hover:bg-gray-700">
                                         {{-- No & Wilayah --}}
-                                        <td class="px-3 py-2 sticky left-0 bg-white dark:bg-surface-dark font-medium text-center shadow-sm border-r dark:border-gray-700 text-gray-500 dark:text-gray-400">{{ $detail->no_urut ?? '-' }}</td>
+                                        <td class="px-3 py-2 sticky left-0 bg-white dark:bg-surface-dark font-medium text-center shadow-sm border-r dark:border-gray-700 text-gray-500 dark:text-gray-400">{{ ($details->firstItem() ?? 1) + $loop->index }}</td>
                                         <td class="px-3 py-2 font-medium text-gray-900 dark:text-gray-200 whitespace-nowrap">{{ $detail->wilayah }}</td>
 
                                         {{-- Data LHP --}}
@@ -382,6 +382,7 @@
     </div>
 
     <script>
+        // Menyiapkan toggle panel override saat DOM siap.
         document.addEventListener('DOMContentLoaded', () => {
             const card = document.getElementById('manualOverrideCard');
             const header = document.getElementById('manualOverrideHeader');
@@ -389,6 +390,7 @@
 
             if (!card || !header || !content) return;
 
+            // Toggle panel saat kartu diklik, kecuali klik di dalam konten.
             card.addEventListener('click', (event) => {
                 if (event.target.closest('#manualOverrideContent')) return;
                 const isHidden = content.classList.contains('hidden');
@@ -397,6 +399,6 @@
             });
         });
     </script>
-    <!-- External JS for Chart & Interactivity -->
+    <!-- JS eksternal untuk chart dan interaksi -->
     <script src="{{ asset('js/pnbp/admin/reconciliations/show.js') }}"></script>
 @endsection

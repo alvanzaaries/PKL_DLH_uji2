@@ -188,7 +188,7 @@
         {{-- Table: Stats by Jenis --}}
         <div class="bg-surface-light dark:bg-surface-dark rounded-lg shadow-sm">
             <div class="px-5 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">Statistik per Jenis SDH</h3>
+                <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">Statistik HH</h3>
             </div>
             <div class="overflow-x-auto max-h-[500px] overflow-y-auto">
                 <table class="min-w-full divide-y divide-gray-200">

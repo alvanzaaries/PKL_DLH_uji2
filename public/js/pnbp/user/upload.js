@@ -1,5 +1,6 @@
+// Menangani interaksi dropzone dan submit di halaman upload user.
 document.addEventListener('DOMContentLoaded', function () {
-    // --- Dropzone Logic ---
+    // --- Logika Dropzone ---
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-upload');
     const emptyState = document.getElementById('empty-state');
@@ -9,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const removeBtn = document.getElementById('remove-file');
 
     if (dropZone && fileInput) {
+        // Memperbarui tampilan berdasarkan file yang dipilih.
         function updateUI(file) {
             if (file) {
                 emptyState.classList.add('hidden');
@@ -22,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        // Mengembalikan UI ke kondisi awal tanpa file.
         function resetUI() {
             fileInput.value = '';
             emptyState.classList.remove('hidden');
@@ -30,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
             dropZone.classList.add('border-gray-300');
         }
 
+        // Menangani perubahan file input.
         fileInput.addEventListener('change', function() {
             if (this.files.length > 0) {
                 updateUI(this.files[0]);
@@ -37,6 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (removeBtn) {
+            // Menghapus pilihan file dan reset UI.
             removeBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -44,19 +49,16 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // Whole box clickable
+        // Membuat seluruh dropzone bisa diklik untuk membuka file picker.
         dropZone.addEventListener('click', function(e) {
-            // Prevent if clicking remove button (though remove button is hidden in empty state, and outside empty state logic handles it? 
-            // In user blade, removeBtn IS inside dropZone container? No, let's check structure.
-            // <div id="drop-zone"> ... <div id="file-info"> ... <button id="remove-file"> ... </div> </div>
-            // Yes, remove button is inside dropZone. So we need to stop propagation or check target.
+            // Cegah trigger jika klik tombol hapus.
             if (e.target && (e.target.id === 'remove-file' || (e.target.closest && e.target.closest('#remove-file')))) {
                 return;
             }
             fileInput.click();
         });
 
-        // Drag and Drop Events
+        // Menghentikan perilaku default browser saat drag & drop.
         function preventDefaults(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -66,10 +68,12 @@ document.addEventListener('DOMContentLoaded', function () {
             dropZone.addEventListener(eventName, preventDefaults, false);
         });
         
+        // Menambahkan highlight saat drag masuk/over.
         function highlight() {
             dropZone.classList.add('border-green-500', 'bg-green-50');
         }
 
+        // Menghapus highlight saat drag keluar/drop tanpa file terpilih.
         function unhighlight() {
             if (fileInput.files.length === 0) {
                 dropZone.classList.remove('border-green-500', 'bg-green-50');
@@ -86,6 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         dropZone.addEventListener('drop', handleDrop, false);
 
+        // Memproses file yang dijatuhkan ke dropzone.
         function handleDrop(e) {
             const dt = e.dataTransfer;
             const files = dt.files;
@@ -96,13 +101,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // --- Form Submit Logic ---
+    // --- Logika Submit Form ---
     const form = document.getElementById('uploadForm');
     const btn = document.getElementById('uploadBtn');
     const spinner = document.getElementById('uploadSpinner');
     const text = document.getElementById('uploadBtnText');
 
     if (form && btn && spinner && text) {
+        // Mengunci tombol dan menampilkan spinner saat submit.
         form.addEventListener('submit', function () {
             btn.disabled = true;
             btn.classList.add('opacity-70', 'pointer-events-none');

@@ -1,18 +1,20 @@
+// Inisialisasi fitur halaman pengaturan saat DOM siap.
 document.addEventListener('DOMContentLoaded', function () {
-    // --- 1. SEARCH FUNCTIONALITY ---
+    // --- 1. PENCARIAN KPH ---
     const searchInput = document.getElementById('searchKph');
     const table = document.getElementById('kphTable');
     const noResultRow = document.getElementById('noResultRow');
 
     if (searchInput && table) {
+        // Menyaring baris tabel KPH berdasarkan input pencarian.
         searchInput.addEventListener('keyup', function() {
             const filter = searchInput.value.toLowerCase();
             const rows = table.getElementsByTagName('tr');
             let hasVisibleRow = false;
 
-            // Loop rows (mulai index 1 karena index 0 adalah header)
+            // Loop baris (mulai index 1 karena index 0 adalah header)
             for (let i = 1; i < rows.length; i++) {
-                // Skip row "noResultRow" atau "empty state" bawaan
+                // Lewati baris "noResultRow" atau "empty state" bawaan
                 if (rows[i].id === 'noResultRow' || rows[i].cells.length < 2) continue;
 
                 const nameCell = rows[i].querySelector('.kph-name');
@@ -27,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            // Show/Hide "Tidak ditemukan" message
+            // Tampilkan/Sembunyikan pesan "Tidak ditemukan"
             if (noResultRow) {
                 if (!hasVisibleRow && filter !== '') {
                     noResultRow.classList.remove('hidden');
@@ -38,12 +40,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --- 2. MODAL FUNCTIONALITY ---
-    // Expose functions globally for onclick handlers in HTML if needed, 
-    // or attach event listeners here if IDs are present.
-    // The Blade template uses onclick="openKphModal()" and closeKphModal().
-    // We can define these on window.
+    // --- 2. MODAL KPH ---
+    // Definisikan fungsi global karena Blade memanggil onclick="openKphModal()" dan closeKphModal().
     
+    // Membuka modal input KPH dan fokus ke input nama.
     window.openKphModal = function() {
         const modal = document.getElementById('kphModal');
         const input = document.getElementById('nama');
@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
+    // Menutup modal input KPH.
     window.closeKphModal = function() {
         const modal = document.getElementById('kphModal');
         if (modal) {
@@ -60,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // Close modal on ESC key
+    // Menutup modal saat pengguna menekan tombol ESC.
     document.addEventListener('keydown', function(evt) {
         if (evt.key === 'Escape') {
             window.closeKphModal();

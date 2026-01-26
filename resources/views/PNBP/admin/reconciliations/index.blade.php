@@ -99,6 +99,7 @@
                         @php
                             $uploader = $item->uploader;
                             $uName = $uploader?->name ?? '-';
+                            // Membuat inisial nama pengunggah untuk avatar.
                             $uInitials = collect(explode(' ', trim((string)$uName)))->filter()->map(fn($p) => mb_substr($p, 0, 1))->take(2)->join('');
                             $uInitials = $uInitials !== '' ? mb_strtoupper($uInitials) : 'U';
                             $isAdmin = $uploader && (($uploader->role ?? 'user') === 'admin');
@@ -133,6 +134,7 @@
                                     <a class="text-gray-400 hover:text-primary dark:hover:text-primary transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="Detail" href="{{ route('reconciliations.show', $item->id) }}">
                                         <span class="material-icons-outlined">visibility</span>
                                     </a>
+                                    <!-- Konfirmasi sebelum menghapus data rekonsiliasi. -->
                                     <form action="{{ route('reconciliations.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini? Semua detail data akan ikut terhapus.')">
                                         @csrf
                                         @method('DELETE')

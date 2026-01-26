@@ -35,7 +35,7 @@
                 <input type="email" name="email" value="{{ old('email') }}" class="w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm py-2 px-3 border" required>
             </div>
 
-            <!-- Role is managed by system: new accounts are regular users -->
+            <!-- Role dikelola sistem: akun baru selalu berperan sebagai user. -->
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

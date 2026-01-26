@@ -12,6 +12,9 @@ use Illuminate\Validation\Rule;
 
 class UserManagementController extends Controller
 {
+    /**
+     * Menampilkan daftar pengguna untuk admin.
+     */
     public function index(Request $request)
     {
         $users = User::query()
@@ -21,11 +24,17 @@ class UserManagementController extends Controller
         return view('PNBP.admin.users_management.index', compact('users'));
     }
 
+    /**
+     * Menampilkan form tambah pengguna.
+     */
     public function create(Request $request)
     {
         return view('PNBP.admin.users_management.create');
     }
 
+    /**
+     * Menyimpan pengguna baru dari form admin.
+     */
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -34,7 +43,7 @@ class UserManagementController extends Controller
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
 
-        // New users are always regular 'user' (no role assignment from UI)
+        // Pengguna baru selalu berperan sebagai user (role tidak diubah dari UI).
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -47,11 +56,17 @@ class UserManagementController extends Controller
             ->with('success', 'User berhasil dibuat.');
     }
 
+    /**
+     * Menampilkan form edit pengguna.
+     */
     public function edit(Request $request, User $user)
     {
         return view('PNBP.admin.users_management.edit', compact('user'));
     }
 
+    /**
+     * Memperbarui data pengguna.
+     */
     public function update(Request $request, User $user)
     {
         $data = $request->validate([
@@ -60,7 +75,7 @@ class UserManagementController extends Controller
             'password' => ['nullable', 'string', 'min:6', 'confirmed'],
         ]);
 
-        // Role cannot be changed via UI; keep existing role
+        // Role tidak bisa diubah via UI; pertahankan role saat ini.
         $user->name = $data['name'];
         $user->email = $data['email'];
 
@@ -73,6 +88,9 @@ class UserManagementController extends Controller
         return back()->with('success', 'Perubahan user berhasil disimpan.');
     }
 
+    /**
+     * Mereset password pengguna ke nilai tetap.
+     */
     public function resetPassword(Request $request, User $user)
     {
         $generated = 'password';

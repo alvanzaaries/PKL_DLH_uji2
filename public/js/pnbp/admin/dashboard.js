@@ -1,9 +1,11 @@
+// Menyinkronkan pilihan filter triwulan gabungan pada dashboard admin.
 document.addEventListener('DOMContentLoaded', function () {
     const comboSelect = document.getElementById('combined_quarter_select');
     const inputQuarter = document.getElementById('input_quarter');
     const inputSampai = document.getElementById('input_sampai_quarter');
 
     if (comboSelect) {
+        // Memecah nilai gabungan dan mengisi input triwulan yang sesuai.
         comboSelect.addEventListener('change', function () {
             const val = this.value; 
             inputQuarter.value = '';

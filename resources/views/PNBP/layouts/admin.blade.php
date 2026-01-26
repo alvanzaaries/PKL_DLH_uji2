@@ -21,6 +21,7 @@
     $authUser = auth()->user();
     $name = $authUser?->name ?? 'Administrator';
     $email = $authUser?->email ?? '';
+    // Membuat inisial nama untuk avatar dari nama pengguna.
     $initials = collect(explode(' ', trim($name)))->filter()->map(fn($p) => mb_substr($p, 0, 1))->take(2)->join('');
     $initials = $initials !== '' ? mb_strtoupper($initials) : 'AD';
 @endphp
@@ -139,6 +140,7 @@
     </main>
 
     <script>
+        // Inisialisasi tema gelap/terang dan toggle sidebar.
         (function () {
             const root = document.documentElement;
             const body = document.body;
@@ -146,6 +148,7 @@
             const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             const shouldDark = stored ? stored === 'dark' : prefersDark;
 
+            // Menerapkan tema gelap/terang pada root dan body.
             const applyDark = (on) => {
                 if (on) {
                     root.classList.add('dark');
@@ -158,6 +161,7 @@
 
             applyDark(shouldDark);
 
+            // Mengubah tema dan menyimpan preferensi ke localStorage.
             const toggle = () => {
                 const now = !(root.classList.contains('dark') || body.classList.contains('dark'));
                 applyDark(now);
@@ -168,6 +172,7 @@
             document.getElementById('toggleDarkDesktop')?.addEventListener('click', toggle);
             document.getElementById('toggleDarkSettings')?.addEventListener('click', toggle);
 
+            // Menampilkan/menyembunyikan sidebar pada perangkat kecil.
             document.getElementById('toggleSidebar')?.addEventListener('click', () => {
                 const s = document.getElementById('sidebar');
                 if (!s) return;

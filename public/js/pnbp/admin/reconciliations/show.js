@@ -1,7 +1,9 @@
+// Menyiapkan interaksi tombol dan grafik pada halaman detail rekonsiliasi.
 document.addEventListener('DOMContentLoaded', function () {
-    // Reset Button Logic
+    // Logika tombol reset filter
     const resetBtn = document.getElementById('resetBtn');
     if (resetBtn) {
+        // Mengosongkan pencarian dan submit ulang filter.
         resetBtn.addEventListener('click', function(){
             const f = document.getElementById('filterForm');
             if(!f) return;
@@ -10,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Chart Logic
+    // Logika chart sebaran wilayah
     const canvas = document.getElementById('wilayahChart');
     if (canvas && typeof Chart !== 'undefined') {
         try {
@@ -22,11 +24,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 const ctx = canvas.getContext('2d');
                 const legendContainer = document.getElementById('wilayahLegend');
 
-                // Dynamic Colors Generation
-                const dynamicColors = rawLabels.map((_, i) => {
-                    const hue = (i * 137.508) % 360; 
-                    return `hsl(${hue}, 65%, 55%)`;
-                });
+                // Palet IBM Carbon: 5 hijau, 5 teal, 5 ungu
+                const carbonPalette = [
+                    '#a7f0ba', '#6fdc8c', '#42be65', '#24a148', '#198038',
+                    '#9ef0f0', '#3ddbd9', '#08bdba', '#009d9a', '#007d79',
+                    '#e8daff', '#d4bbff', '#be95ff', '#a56eff', '#8a3ffc'
+                ];
+                const dynamicColors = rawLabels.map((_, i) => carbonPalette[i % carbonPalette.length]);
 
                 const isDark = document.documentElement.classList.contains('dark');
                 const legendTextColor = isDark ? '#e5e7eb' : '#374151';
@@ -34,8 +38,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 const tooltipBorder = isDark ? '#374151' : '#e5e7eb';
                 const totalValue = rawData.reduce((sum, v) => sum + (Number(v) || 0), 0);
 
+                // Plugin untuk menampilkan persentase pada irisan doughnut.
                 const percentageLabels = {
                     id: 'percentageLabels',
+                    // Menggambar label persentase setelah dataset dirender.
                     afterDatasetsDraw(chart) {
                         const { ctx } = chart;
                         const meta = chart.getDatasetMeta(0);
@@ -130,6 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
 
+                // Merender legend kustom agar selaras dengan tema.
                 const renderLegend = () => {
                     if (!legendContainer) return;
                     legendContainer.innerHTML = '';
@@ -157,6 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 renderLegend();
 
+                // Mengamati perubahan tema (dark/light) agar legend ikut diperbarui.
                 const observer = new MutationObserver(() => renderLegend());
                 observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
             }

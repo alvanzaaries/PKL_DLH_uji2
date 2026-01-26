@@ -1,5 +1,6 @@
+// Menangani dropzone dan submit pada form upload admin.
 document.addEventListener('DOMContentLoaded', function () {
-    // --- Dropzone Logic ---
+    // --- Logika Dropzone ---
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-upload');
     const emptyState = document.getElementById('empty-state');
@@ -9,11 +10,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const removeBtn = document.getElementById('remove-file');
 
     if (dropZone && fileInput) {
-        // Classes untuk state aktif/sukses (Tema Primary)
-        // Note: Using configured classes matching the Blade template
+        // Kelas untuk state aktif/sukses (tema primary).
+        // Catatan: kelas mengikuti template Blade.
         const activeClasses = ['border-primary', 'bg-primary/5', 'dark:bg-primary/10'];
         const defaultBorder = ['border-gray-300', 'dark:border-gray-600'];
 
+        // Memperbarui tampilan dropzone berdasarkan file yang dipilih.
         function updateUI(file) {
             if (file) {
                 emptyState.classList.add('hidden');
@@ -28,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        // Mengembalikan tampilan dropzone ke kondisi awal.
         function resetUI() {
             fileInput.value = '';
             emptyState.classList.remove('hidden');
@@ -37,6 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
             dropZone.classList.add(...defaultBorder);
         }
 
+        // Menangani perubahan file input.
         fileInput.addEventListener('change', function(e) {
             if (this.files.length > 0) {
                 updateUI(this.files[0]);
@@ -44,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (removeBtn) {
+            // Menghapus file yang sudah dipilih.
             removeBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -51,15 +56,16 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
+        // Membuka file picker saat dropzone diklik.
         dropZone.addEventListener('click', function(e) {
-            // Prevent triggering if clicked on remove button
+            // Cegah trigger jika klik tombol hapus.
             if (e.target && (e.target.id === 'remove-file' || (e.target.closest && e.target.closest('#remove-file')))) {
                 return;
             }
             fileInput.click();
         });
 
-        // Drag and Drop Events
+        // Mencegah aksi default browser saat drag & drop.
         function preventDefaults(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -69,17 +75,13 @@ document.addEventListener('DOMContentLoaded', function () {
             dropZone.addEventListener(eventName, preventDefaults, false);
         });
 
+        // Menambahkan highlight saat drag masuk/over.
         function highlight(e) {
             dropZone.classList.add(...activeClasses);
         }
 
+        // Menghapus highlight saat drag keluar jika belum ada file.
         function unhighlight(e) {
-            // Only remove highlight if no file is selected (or dragging left)
-            // Logic adapted: original code removed highlight on dragleave if no file selected? 
-            // Original code: if (fileInput.files.length === 0) dropZone.classList.remove(...activeClasses);
-            // This allows the "active" style to stay if a file is already there? 
-            // Actually, usually you want drag-over style to be distinct or same. 
-            // Based on original code:
             if (fileInput.files.length === 0) {
                 dropZone.classList.remove(...activeClasses);
             }
@@ -95,6 +97,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         dropZone.addEventListener('drop', handleDrop, false);
 
+        // Memproses file yang dijatuhkan ke dropzone.
         function handleDrop(e) {
             const dt = e.dataTransfer;
             const files = dt.files;
@@ -105,13 +108,14 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // --- Form Submit Logic ---
+    // --- Logika Submit Form ---
     const form = document.getElementById('uploadForm');
     const btn = document.getElementById('uploadBtn');
     const spinner = document.getElementById('uploadSpinner');
     const text = document.getElementById('uploadBtnText');
 
     if (form && btn && spinner && text) {
+        // Mengunci tombol dan menampilkan spinner saat submit.
         form.addEventListener('submit', function () {
             btn.disabled = true;
             btn.classList.add('opacity-70', 'pointer-events-none');

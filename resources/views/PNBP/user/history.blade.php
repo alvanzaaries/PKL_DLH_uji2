@@ -23,6 +23,41 @@
             </div>
         </div>
 
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="rounded-lg border border-gray-200 p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-sm font-semibold text-gray-900">Total Volume Hasil Hutan</h2>
+                        <p class="text-xs text-gray-500"></p>
+                    </div>
+                </div>
+                <div class="mt-4 h-64">
+                    <canvas id="volumeCategoryChart"
+                        data-labels="{{ json_encode(array_keys($volumeByCategory ?? [])) }}"
+                        data-values="{{ json_encode(array_values($volumeByCategory ?? [])) }}"
+                        data-units="{{ json_encode([
+                            'HASIL HUTAN KAYU' => 'm³',
+                            'HASIL HUTAN BUKAN KAYU (HHBK)' => 'ton',
+                            'HASIL HUTAN LAINNYA' => 'unit',
+                        ]) }}"></canvas>
+                </div>
+            </div>
+            <div class="rounded-lg border border-gray-200 p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-sm font-semibold text-gray-900">Sebaran Volume Hasil Hutan</h2>
+                        <p class="text-xs text-gray-500"></p>
+                    </div>
+                </div>
+                <div class="mt-4 h-64">
+                    <canvas id="volumeJenisChart"
+                        data-labels="{{ json_encode(($jenisStats ?? collect())->pluck('jenis_sdh')) }}"
+                        data-values="{{ json_encode(($jenisStats ?? collect())->pluck('total_volume')) }}"
+                        data-units="{{ json_encode(($jenisStats ?? collect())->pluck('unit')) }}"></canvas>
+                </div>
+            </div>
+        </div>
+
         <div class="mt-6 overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
@@ -57,4 +92,6 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ asset('js/pnbp/user/history.js') }}"></script>
 @endsection
