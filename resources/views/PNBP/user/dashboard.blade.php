@@ -4,16 +4,19 @@
 
 @section('content')
 <div class="w-full max-w-4xl mx-auto space-y-6">
+    {{-- Form Upload Rekonsiliasi User --}}
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
             <h1 class="text-xl font-semibold text-gray-900">Halo, {{ auth()->user()->name }}.</h1>
             <p class="mt-1 text-sm text-gray-600">Silakan upload Kertas Kerja Rekonsiliasi Anda di bawah ini.</p>
 
+            {{-- Notifikasi Sukses --}}
             @if (session('success'))
                 <div class="mt-4 rounded-md bg-green-50 p-3 border border-green-200 text-sm text-green-800">
                     {{ session('success') }}
                 </div>
             @endif
 
+            {{-- Notifikasi Error --}}
             @if ($errors->any())
                 <div class="mt-4 rounded-md bg-red-50 p-3 border border-red-200 text-sm text-red-700">
                     <ul class="list-disc pl-5">
@@ -24,6 +27,7 @@
                 </div>
             @endif
 
+            {{-- Form Upload --}}
             <form id="uploadForm" action="{{ route('reconciliations.store') }}" method="POST" enctype="multipart/form-data" class="mt-6 space-y-4">
                 @csrf
 
@@ -64,6 +68,7 @@
             <script src="{{ asset('js/pnbp/user/dashboard.js') }}"></script>
     </div>
 
+    {{-- Ringkasan & Riwayat Upload User --}}
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
         <div class="flex items-start justify-between gap-4">
             <div>
@@ -121,6 +126,7 @@
         </div>
     </div>
 
+    {{-- Tombol Logout User --}}
     <form method="POST" action="{{ route('logout') }}" class="flex justify-center">
         @csrf
         <button type="submit" class="text-sm text-gray-600 hover:text-gray-900">Logout</button>

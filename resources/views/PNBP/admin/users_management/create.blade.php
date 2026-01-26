@@ -5,6 +5,7 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto">
+    {{-- Notifikasi Error --}}
     @if ($errors->any())
         <div class="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-700 text-red-700 dark:text-red-200 p-4 mb-6" role="alert">
             <p class="font-bold">Terjadi Kesalahan</p>
@@ -16,12 +17,14 @@
         </div>
     @endif
 
+    {{-- Form Tambah User --}}
     <div class="bg-white dark:bg-surface-dark shadow rounded-lg overflow-hidden">
         <div class="p-6 border-b border-gray-100 dark:border-gray-700">
             <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Form Tambah User</h2>
             <p class="text-sm text-gray-600 dark:text-gray-400">Buat akun baru untuk admin atau user.</p>
         </div>
 
+        {{-- Form Input User Baru --}}
         <form method="POST" action="{{ route('admin.users.store') }}" class="p-6 space-y-5">
             @csrf
 

@@ -4,6 +4,7 @@
 
 @section('content')
 <div class="w-full max-w-5xl mx-auto">
+    {{-- Ringkasan Riwayat Upload --}}
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
         <div class="flex items-start justify-between gap-4">
             <div>
@@ -23,6 +24,7 @@
             </div>
         </div>
 
+        {{-- Grafik Ringkasan Volume --}}
         <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div class="rounded-lg border border-gray-200 p-4">
                 <div class="flex items-center justify-between">
@@ -58,6 +60,7 @@
             </div>
         </div>
 
+        {{-- Tabel Riwayat Upload --}}
         <div class="mt-6 overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">

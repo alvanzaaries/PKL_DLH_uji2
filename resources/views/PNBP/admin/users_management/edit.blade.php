@@ -5,6 +5,7 @@
 
 @section('content')
 <div class="max-w-3xl mx-auto">
+    {{-- Notifikasi Sukses --}}
     @if (session('success'))
         <div class="bg-green-50 dark:bg-green-900/30 border-l-4 border-green-600 dark:border-green-700 text-green-800 dark:text-green-200 p-4 mb-6" role="alert">
             <p class="font-bold">Berhasil</p>
@@ -12,6 +13,7 @@
         </div>
     @endif
 
+    {{-- Notifikasi Error --}}
     @if ($errors->any())
         <div class="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500 dark:border-red-700 text-red-700 dark:text-red-200 p-4 mb-6" role="alert">
             <p class="font-bold">Terjadi Kesalahan</p>
@@ -23,12 +25,14 @@
         </div>
     @endif
 
+    {{-- Form Edit User --}}
     <div class="bg-white dark:bg-surface-dark shadow rounded-lg overflow-hidden">
         <div class="p-6 border-b border-gray-100 dark:border-gray-700">
             <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Edit User</h2>
             <p class="text-sm text-gray-600 dark:text-gray-400">Ubah informasi user dan password.</p>
         </div>
 
+        {{-- Form Update Data User --}}
         <form method="POST" action="{{ route('admin.users.update', $user->id) }}" class="p-6 space-y-5">
             @csrf
             @method('PUT')
@@ -57,6 +61,7 @@
                 @endif
             </div>
 
+            {{-- Bagian Ubah Password --}}
             <div class="border-t border-gray-100 dark:border-gray-700 pt-5">
                 <h3 class="text-sm font-semibold text-gray-800 dark:text-gray-100">Ubah Password</h3>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Kosongkan jika tidak ingin mengubah password.</p>
