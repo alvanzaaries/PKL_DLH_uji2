@@ -300,9 +300,14 @@ class LaporanController extends Controller
 
         // Jika preview sebelumnya mengandung error dan user tidak mengirim edited_data,
         // jangan coba simpan langsung — minta user melakukan revalidasi.
-        if (!empty($previewData['errors']) && (!$request->has('edited_data') || empty($request->edited_data))) {
-            return redirect()->route('laporan.preview.show')
-                ->with('warning', 'Masih ada error validasi. Silakan perbaiki data di tabel lalu tekan "Perbaiki & Validasi Ulang".');
+        // PENTING: Setelah revalidasi berhasil, preview_data['errors'] sudah kosong,
+        // tapi kita tetap perlu edited_data untuk memastikan data yang benar tersimpan.
+        if (!empty($previewData['errors'])) {
+            // Ada error di preview, user harus perbaiki dulu
+            if (!$request->has('edited_data') || empty($request->edited_data)) {
+                return redirect()->route('laporan.preview.show')
+                    ->with('warning', 'Masih ada error validasi. Silakan perbaiki data di tabel lalu tekan "Perbaiki & Validasi Ulang".');
+            }
         }
 
         // Validasi unique lagi sebelum menyimpan (double check)
@@ -387,6 +392,7 @@ class LaporanController extends Controller
                 'industri_id' => $request->industri_id,
                 'jenis_laporan' => $request->jenis_laporan,
                 'tanggal' => $tanggal,
+                'path_laporan' => '', // String kosong untuk memenuhi constraint NOT NULL
             ]);
 
             // Normalisasi rows agar konsisten (flat array) sebelum dikirim ke service
@@ -421,17 +427,38 @@ class LaporanController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // Enhanced logging with more context
             Log::error('Failed to save laporan', [
                 'exception' => $e,
+                'exception_message' => $e->getMessage(),
+                'exception_trace' => $e->getTraceAsString(),
                 'industri_id' => $request->industri_id ?? null,
                 'jenis_laporan' => $request->jenis_laporan ?? null,
                 'bulan' => $request->bulan ?? null,
                 'tahun' => $request->tahun ?? null,
+                'has_edited_data' => $request->has('edited_data'),
+                'preview_data_exists' => session()->has('preview_data'),
+                'preview_data_row_count' => isset($previewData['rows']) ? count($previewData['rows']) : 0,
             ]);
 
             // Gunakan redirect URL dari session atau fallback ke laporan.industri
             $redirectUrl = session('redirect_after_save');
-            $msg = 'Gagal menyimpan laporan. Silakan coba lagi atau hubungi administrator.';
+
+            // More descriptive error message
+            $msg = 'Gagal menyimpan laporan. ';
+
+            // Add specific error details based on exception type
+            if (strpos($e->getMessage(), 'Integrity constraint violation') !== false) {
+                $msg .= 'Data duplikat terdeteksi. Laporan untuk periode ini mungkin sudah ada.';
+            } elseif (strpos($e->getMessage(), 'SQLSTATE') !== false) {
+                $msg .= 'Terjadi kesalahan database. Periksa format data Anda.';
+            } elseif (strpos($e->getMessage(), 'Undefined') !== false || strpos($e->getMessage(), 'null') !== false) {
+                $msg .= 'Data tidak lengkap. Silakan validasi ulang data Anda sebelum menyimpan.';
+            } else {
+                $msg .= 'Error: ' . $e->getMessage();
+            }
+
             if ($redirectUrl) {
                 return redirect($redirectUrl)->with('error', $msg);
             } else {
