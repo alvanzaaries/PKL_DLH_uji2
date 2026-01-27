@@ -359,6 +359,17 @@
             display: inline-block;
         }
 
+        .badge-jenis {
+            background: linear-gradient(180deg, rgb(26, 64, 48) 0%, #5a8a64 100%);
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            margin: 2px;
+        }
+
         .badge-success {
             background: #d4edda;
             color: #155724;
@@ -727,9 +738,9 @@
                             <label>Sumber Bahan Baku</label>
                             <select name="sumber_bahan_baku" class="filter-input">
                                 <option value="">-- Semua Sumber --</option>
-                                @foreach($sumberBahanBakuList as $value => $label)
-                                    <option value="{{ $value }}" {{ request('sumber_bahan_baku') == $value ? 'selected' : '' }}>
-                                        {{ $label }}
+                                @foreach($sumberBahanBakuList as $id => $nama)
+                                    <option value="{{ $id }}" {{ request('sumber_bahan_baku') == $id ? 'selected' : '' }}>
+                                        {{ $nama }}
                                     </option>
                                 @endforeach
                             </select>
@@ -740,7 +751,7 @@
                                 <option value="">-- Semua Daya Tampung --</option>
                                 <option value="0-1999" {{ request('kapasitas') == '0-1999' ? 'selected' : '' }}>0 - 1.999 m³/tahun</option>
                                 <option value="2000-5999" {{ request('kapasitas') == '2000-5999' ? 'selected' : '' }}>2.000 - 5.999 m³/tahun</option>
-                                <option value=">= 6000" {{ request('kapasitas') == '>= 6000' ? 'selected' : '' }}>>= 6.000 m³/tahun</option>
+                                <option value=">=6000" {{ request('kapasitas') == '>=6000' ? 'selected' : '' }}>>= 6.000 m³/tahun</option>
                             </select>
                         </div>
                         <div class="filter-group">
@@ -831,7 +842,7 @@
                             <th>Kabupaten/Kota</th>
                             <th>Penanggung Jawab</th>
                             <th>Sumber Bahan Baku</th>
-                            <th>Daya Tampung Izin</th>
+                            <th>Kapasitas (m³/tahun)</th>
                             <th>Masa Berlaku</th>
                             <th>Status Izin</th>
                             <th>Status</th>
@@ -846,8 +857,24 @@
                             <td>{{ $item->industri->tanggal ? \Carbon\Carbon::parse($item->industri->tanggal)->format('d/m/Y') : '-' }}</td>
                             <td>{{ $item->industri->kabupaten }}</td>
                             <td>{{ $item->industri->penanggungjawab }}</td>
-                            <td>{{ $item->sumber_bahan_baku }}</td>
-                            <td>{{ $item->kapasitas_izin }}</td>
+                            <td>
+                                @if($item->sumberBahanBaku->count() > 0)
+                                    @foreach($item->sumberBahanBaku as $sumber)
+                                        <span class="badge badge-jenis">{{ $sumber->nama }}</span>
+                                    @endforeach
+                                @else
+                                    -
+                                @endif
+                            </td>
+                            <td>
+                                @if($item->sumberBahanBaku->count() > 0)
+                                    @foreach($item->sumberBahanBaku as $sumber)
+                                        <div>{{ $sumber->nama }}: {{ number_format($sumber->pivot->kapasitas, 2, ',', '.') }}</div>
+                                    @endforeach
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td>{{ $item->masa_berlaku ? $item->masa_berlaku->format('d/m/Y') : '-' }}</td>
                             <td>
                                 @if($item->isMasaBerlakuAktif())
@@ -947,14 +974,21 @@
                         <td class="detail-label-col">Pemberi Izin</td>
                         <td class="detail-value-col" id="modal-pemberi-izin">-</td>
                     </tr>
-                    <tr>
-                        <td class="detail-label-col">Sumber Bahan Baku</td>
-                        <td class="detail-value-col" id="modal-sumber-bahan-baku">-</td>
-                    </tr>
-                    <tr>
-                        <td class="detail-label-col">Daya Tampung Izin</td>
-                        <td class="detail-value-col" id="modal-kapasitas">-</td>
-                    </tr>
+                </table>
+
+                <div class="detail-section-title">Sumber Bahan Baku & Kapasitas</div>
+                <table class="table-detail" id="modal-sumber-table">
+                    <thead>
+                        <tr style="background: #f8fafc;">
+                            <th style="padding: 10px; font-weight: 600;">Sumber</th>
+                            <th style="padding: 10px; font-weight: 600; text-align: right;">Kapasitas (m³/tahun)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-sumber-body">
+                        <tr>
+                            <td colspan="2" style="text-align: center; padding: 20px;">Tidak ada data</td>
+                        </tr>
+                    </tbody>
                 </table>
 
                 <div class="detail-section-title">Lokasi</div>
@@ -967,7 +1001,20 @@
                         <td class="detail-label-col">Kabupaten/Kota</td>
                         <td class="detail-value-col" id="modal-kabupaten">-</td>
                     </tr>
+                    <tr>
+                        <td class="detail-label-col">Latitude</td>
+                        <td class="detail-value-col" id="modal-latitude">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Longitude</td>
+                        <td class="detail-value-col" id="modal-longitude">-</td>
+                    </tr>
                 </table>
+                
+                <div id="modal-map-container" style="display: none; margin-top: 15px;">
+                    <div class="detail-section-title">Peta Lokasi</div>
+                    <div id="modal-map" style="height: 250px; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -984,8 +1031,22 @@
             document.getElementById('modal-penanggungjawab').textContent = item.industri.penanggungjawab;
             document.getElementById('modal-kontak').textContent = item.industri.kontak;
             document.getElementById('modal-pemberi-izin').textContent = item.pemberi_izin;
-            document.getElementById('modal-sumber-bahan-baku').textContent = item.sumber_bahan_baku;
-            document.getElementById('modal-kapasitas').textContent = item.kapasitas_izin;
+            
+            // Tampilkan sumber bahan baku
+            const sumberBody = document.getElementById('modal-sumber-body');
+            if (item.sumber_bahan_baku && item.sumber_bahan_baku.length > 0) {
+                sumberBody.innerHTML = '';
+                item.sumber_bahan_baku.forEach(sumber => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td style="padding: 10px;">${sumber.nama}</td>
+                        <td style="padding: 10px; text-align: right;">${parseFloat(sumber.pivot.kapasitas).toLocaleString('id-ID', {minimumFractionDigits: 2})}</td>
+                    `;
+                    sumberBody.appendChild(row);
+                });
+            } else {
+                sumberBody.innerHTML = '<tr><td colspan="2" style="text-align: center; padding: 20px;">Tidak ada data sumber bahan baku</td></tr>';
+            }
             
             // Format tanggal izin
             if(item.industri.tanggal) {
@@ -1011,11 +1072,54 @@
                 statusEl.innerHTML = '<span class="badge badge-danger">✗ Kadaluarsa</span>';
             }
 
+            // Tampilkan koordinat
+            const latitude = item.industri.latitude;
+            const longitude = item.industri.longitude;
+            
+            if (latitude && longitude) {
+                document.getElementById('modal-latitude').textContent = parseFloat(latitude).toFixed(6);
+                document.getElementById('modal-longitude').textContent = parseFloat(longitude).toFixed(6);
+                document.getElementById('modal-map-container').style.display = 'block';
+                
+                setTimeout(() => initDetailMap(parseFloat(latitude), parseFloat(longitude)), 100);
+            } else {
+                document.getElementById('modal-latitude').textContent = '-';
+                document.getElementById('modal-longitude').textContent = '-';
+                document.getElementById('modal-map-container').style.display = 'none';
+            }
+
             document.getElementById('detailModal').style.display = 'block';
         }
 
         function closeModal() {
             document.getElementById('detailModal').style.display = 'none';
+            // Hapus peta untuk menghindari memory leak
+            if (window.detailMap) {
+                window.detailMap.remove();
+                window.detailMap = null;
+            }
+        }
+
+        // Fungsi untuk inisialisasi peta di modal detail
+        function initDetailMap(lat, lng) {
+            // Hapus peta lama jika ada
+            if (window.detailMap) {
+                window.detailMap.remove();
+            }
+            
+            // Buat peta baru
+            window.detailMap = L.map('modal-map').setView([lat, lng], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(window.detailMap);
+            
+            // Tambahkan marker
+            L.marker([lat, lng])
+                .addTo(window.detailMap)
+                .bindPopup(`Lokasi: ${lat.toFixed(6)}, ${lng.toFixed(6)}`)
+                .openPopup();
         }
 
         window.onclick = function(event) {
@@ -1161,4 +1265,9 @@
             });
         });
     </script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+         crossorigin=""></script>
 @endpush

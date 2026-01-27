@@ -621,7 +621,20 @@
                         <td class="detail-label-col">Kabupaten/Kota</td>
                         <td class="detail-value-col" id="modal-kabupaten">-</td>
                     </tr>
+                    <tr>
+                        <td class="detail-label-col">Latitude</td>
+                        <td class="detail-value-col" id="modal-latitude">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Longitude</td>
+                        <td class="detail-value-col" id="modal-longitude">-</td>
+                    </tr>
                 </table>
+                
+                <div id="modal-map-container" style="display: none; margin-top: 15px;">
+                    <div class="detail-section-title">Peta Lokasi</div>
+                    <div id="modal-map" style="height: 250px; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -646,11 +659,54 @@
                 document.getElementById('modal-tanggal').textContent = '-';
             }
 
+            // Tampilkan koordinat
+            const latitude = item.industri.latitude;
+            const longitude = item.industri.longitude;
+            
+            if (latitude && longitude) {
+                document.getElementById('modal-latitude').textContent = parseFloat(latitude).toFixed(6);
+                document.getElementById('modal-longitude').textContent = parseFloat(longitude).toFixed(6);
+                document.getElementById('modal-map-container').style.display = 'block';
+                
+                setTimeout(() => initDetailMap(parseFloat(latitude), parseFloat(longitude)), 100);
+            } else {
+                document.getElementById('modal-latitude').textContent = '-';
+                document.getElementById('modal-longitude').textContent = '-';
+                document.getElementById('modal-map-container').style.display = 'none';
+            }
+
             document.getElementById('detailModal').style.display = 'block';
         }
 
         function closeModal() {
             document.getElementById('detailModal').style.display = 'none';
+            // Hapus peta untuk menghindari memory leak
+            if (window.detailMap) {
+                window.detailMap.remove();
+                window.detailMap = null;
+            }
+        }
+
+        // Fungsi untuk inisialisasi peta di modal detail
+        function initDetailMap(lat, lng) {
+            // Hapus peta lama jika ada
+            if (window.detailMap) {
+                window.detailMap.remove();
+            }
+            
+            // Buat peta baru
+            window.detailMap = L.map('modal-map').setView([lat, lng], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 19
+            }).addTo(window.detailMap);
+            
+            // Tambahkan marker
+            L.marker([lat, lng])
+                .addTo(window.detailMap)
+                .bindPopup(`Lokasi: ${lat.toFixed(6)}, ${lng.toFixed(6)}`)
+                .openPopup();
         }
 
         window.onclick = function(event) {
@@ -778,4 +834,9 @@
             
         });
     </script>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+         crossorigin=""></script>
 @endpush

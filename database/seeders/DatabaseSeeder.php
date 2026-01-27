@@ -59,8 +59,10 @@ class DatabaseSeeder extends Seeder
         }
 
         // call master jenisproduksi
-
         $this->call(\Database\Seeders\MasterJenisProduksiSeeder::class);
+        
+        // call master sumber bahan baku
+        $this->call(\Database\Seeders\MasterSumberSeeder::class);
     }
 
 

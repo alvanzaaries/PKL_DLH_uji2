@@ -100,6 +100,8 @@ class PerajinController extends Controller implements HasMiddleware
             'kabupaten' => 'required|string|max:100',
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:50',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'tanggal' => 'required|date',
         ]);
 
@@ -112,6 +114,8 @@ class PerajinController extends Controller implements HasMiddleware
             'kabupaten' => $validated['kabupaten'],
             'penanggungjawab' => $validated['penanggungjawab'],
             'kontak' => $validated['kontak'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'tanggal' => $validated['tanggal'],
         ]);
 
@@ -139,6 +143,8 @@ class PerajinController extends Controller implements HasMiddleware
             'kabupaten' => 'required|string|max:100',
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:50',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'tanggal' => 'required|date',
             'status' => 'required|in:Aktif,Tidak Aktif',
         ]);
@@ -151,6 +157,8 @@ class PerajinController extends Controller implements HasMiddleware
             'kabupaten' => $validated['kabupaten'],
             'penanggungjawab' => $validated['penanggungjawab'],
             'kontak' => $validated['kontak'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'tanggal' => $validated['tanggal'],
             'status' => $validated['status'],
         ]);

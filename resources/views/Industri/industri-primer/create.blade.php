@@ -3,6 +3,10 @@
 @section('title', 'Tambah Industri Primer')
 
 @push('styles')
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
 <style>
     .container {
         max-width: 100%;
@@ -305,18 +309,29 @@
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Latitude</label>
-                    <input type="number" step="0.00000001" name="latitude" class="form-input" 
-                           placeholder="Contoh: -7.250445" value="{{ old('latitude') }}">
+                    <input type="number" step="0.00000001" name="latitude" id="latitude" class="form-input" 
+                           placeholder="Contoh: -7.250445" value="{{ old('latitude') }}" 
+                           onchange="updateMapFromInputs()">
                     <div class="file-info">Koordinat lintang (-90 sampai 90)</div>
                     @error('latitude')<div class="error-message">{{ $message }}</div>@enderror
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Longitude</label>
-                    <input type="number" step="0.00000001" name="longitude" class="form-input" 
-                           placeholder="Contoh: 110.408447" value="{{ old('longitude') }}">
+                    <input type="number" step="0.00000001" name="longitude" id="longitude" class="form-input" 
+                           placeholder="Contoh: 110.408447" value="{{ old('longitude') }}" 
+                           onchange="updateMapFromInputs()">
                     <div class="file-info">Koordinat bujur (-180 sampai 180)</div>
                     @error('longitude')<div class="error-message">{{ $message }}</div>@enderror
+                </div>
+            </div>
+
+            <!-- Map Container -->
+            <div class="form-group">
+                <label class="form-label">Pilih Lokasi dari Peta</label>
+                <div id="map" style="height: 400px; border-radius: 8px; border: 1px solid var(--border);"></div>
+                <div class="file-info" style="margin-top: 8px;">
+                    Klik pada peta untuk memilih lokasi, atau isi koordinat secara manual di atas
                 </div>
             </div>
 
@@ -475,6 +490,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize map
+        initMap();
+        
         // Load kabupaten
         const kabupatenSelect = document.getElementById('kabupatenSelect');
         const loadingInfo = kabupatenSelect.nextElementSibling;
@@ -499,6 +517,83 @@
         // Add initial item
         addJenisProduksi();
     });
+
+    // Map variables
+    let map;
+    let marker;
+    const defaultLat = -7.150975; // Jawa Tengah center
+    const defaultLng = 110.1402594;
+
+    function initMap() {
+        // Initialize the map centered on Jawa Tengah
+        map = L.map('map').setView([defaultLat, defaultLng], 8);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Add click event to map
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            
+            // Update marker position
+            updateMarker(lat, lng);
+            
+            // Update input fields
+            document.getElementById('latitude').value = lat.toFixed(8);
+            document.getElementById('longitude').value = lng.toFixed(8);
+        });
+
+        // Load existing coordinates if any
+        const existingLat = document.getElementById('latitude').value;
+        const existingLng = document.getElementById('longitude').value;
+        
+        if (existingLat && existingLng) {
+            const lat = parseFloat(existingLat);
+            const lng = parseFloat(existingLng);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                updateMarker(lat, lng);
+                map.setView([lat, lng], 13);
+            }
+        }
+    }
+
+    function updateMarker(lat, lng) {
+        if (marker) {
+            marker.setLatLng([lat, lng]);
+        } else {
+            marker = L.marker([lat, lng], {
+                draggable: true
+            }).addTo(map);
+            
+            // Add drag event to marker
+            marker.on('dragend', function(e) {
+                const position = marker.getLatLng();
+                document.getElementById('latitude').value = position.lat.toFixed(8);
+                document.getElementById('longitude').value = position.lng.toFixed(8);
+            });
+        }
+        
+        marker.bindPopup(`Lokasi: ${lat.toFixed(6)}, ${lng.toFixed(6)}`).openPopup();
+    }
+
+    function updateMapFromInputs() {
+        const lat = parseFloat(document.getElementById('latitude').value);
+        const lng = parseFloat(document.getElementById('longitude').value);
+        
+        if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+            updateMarker(lat, lng);
+            map.setView([lat, lng], 13);
+        }
+    }
 </script>
 @endpush
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
 @endsection

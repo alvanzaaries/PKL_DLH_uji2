@@ -3,6 +3,10 @@
 @section('title', 'Edit TPT-KB')
 
 @push('styles')
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
 <style>
         :root {
             --primary: #0f172a;
@@ -219,6 +223,63 @@
             margin-top: 6px;
         }
 
+        .btn-add-more {
+            background: #15803d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-add-more:hover {
+            background: #166534;
+            transform: translateY(-1px);
+        }
+
+        .btn-remove-sumber {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .btn-remove-sumber:hover {
+            background: #dc2626;
+        }
+
+        .sumber-item {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent);
+        }
+
         @media (max-width: 768px) {
             .form-row {
                 grid-template-columns: 1fr;
@@ -318,6 +379,41 @@
                     </div>
                 </div>
 
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Latitude</label>
+                        <input type="number" step="0.00000001" name="latitude" id="latitude" class="form-input" 
+                               placeholder="Contoh: -7.250445" 
+                               value="{{ old('latitude', $tptkb->industri->latitude) }}"
+                               onchange="updateMapFromInputs()">
+                        <div class="file-info">Koordinat lintang (-90 sampai 90)</div>
+                        @error('latitude')
+                            <div class="error-message">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Longitude</label>
+                        <input type="number" step="0.00000001" name="longitude" id="longitude" class="form-input" 
+                               placeholder="Contoh: 110.408447" 
+                               value="{{ old('longitude', $tptkb->industri->longitude) }}"
+                               onchange="updateMapFromInputs()">
+                        <div class="file-info">Koordinat bujur (-180 sampai 180)</div>
+                        @error('longitude')
+                            <div class="error-message">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Map Container -->
+                <div class="form-group">
+                    <label class="form-label">Pilih Lokasi dari Peta</label>
+                    <div id="map" style="height: 400px; border-radius: 8px; border: 1px solid var(--border);"></div>
+                    <div class="file-info" style="margin-top: 8px;">
+                        Klik pada peta untuk memilih lokasi, atau isi koordinat secara manual di atas
+                    </div>
+                </div>
+
                 <h3 style="font-size: 18px; color: var(--primary); margin: 30px 0 20px; padding-bottom: 10px; border-bottom: 2px solid var(--accent);">
                     Data Izin & Daya Tampung
                 </h3>
@@ -333,36 +429,86 @@
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
-
-                    <div class="form-group">
-                        <label class="form-label">
-                            Sumber Bahan Baku <span class="required">*</span>
-                        </label>
-                        <select 
-                            name="sumber_bahan_baku" 
-                            class="form-select" 
-                            required
-                        >
-                            <option value="">-- Pilih Sumber Bahan Baku --</option>
-                            <option value="Hutan Alam" {{ old('sumber_bahan_baku') == 'Hutan Alam' ? 'selected' : '' }}>Hutan Alam</option>
-                            <option value="Perhutani" {{ old('sumber_bahan_baku') == 'Perhutani' ? 'selected' : '' }}>Hutan Tanaman</option>
-                            <option value="Hutan Rakyat" {{ old('sumber_bahan_baku') == 'Hutan Rakyat' ? 'selected' : '' }}>Hutan Rakyat</option>
-                        </select>
-                        @error('sumber_bahan_baku')
-                            <div class="error-message">{{ $message }}</div>
-                        @enderror
-                    </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Daya Tampung Izin <span class="required">*</span></label>
-                        <input type="text" name="kapasitas_izin" class="form-input" value="{{ old('kapasitas_izin', $tptkb->kapasitas_izin) }}" placeholder="Contoh: 5000 m³/tahun" required>
-                        @error('kapasitas_izin')
-                            <div class="error-message">{{ $message }}</div>
-                        @enderror
+                <!-- Sumber Bahan Baku (Dynamic) -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px;">
+                    <div>
+                        <div class="section-title" style="margin: 0; padding-bottom: 10px; border-bottom: 2px solid var(--accent);">
+                            Sumber Bahan Baku & Kapasitas <span class="required">*</span>
+                        </div>
+                        <div style="font-size: 14px; color: #64748b; margin-top: 10px;">Daftar Sumber Bahan Baku</div>
                     </div>
+                    <button type="button" class="btn btn-add-more" onclick="addSumber()">
+                        + Tambah Sumber Bahan Baku
+                    </button>
+                </div>
+                
+                <div id="sumber-container" style="margin-top: 20px;">
+                    @foreach($tptkb->sumberBahanBaku as $index => $sumber)
+                    <div class="sumber-item" data-index="{{ $index }}">
+                        <div style="display: flex; align-items: flex-start; gap: 15px;">
+                            <div style="width: 40px; padding-top: 35px;">
+                                <span class="item-number" style="display: inline-block; width: 32px; height: 32px; background: #15803d; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: 600;">{{ $index + 1 }}</span>
+                            </div>
+                            
+                            <div style="flex: 1;">
+                                <div class="form-group" style="margin-bottom: 15px;">
+                                    <label class="form-label">Sumber Bahan Baku</label>
+                                    <select 
+                                        name="sumber_id[]" 
+                                        class="form-select sumber-select" 
+                                        onchange="toggleCustomSumber(this)"
+                                        required
+                                    >
+                                        <option value="">-- Pilih Sumber Bahan Baku --</option>
+                                        @foreach($masterSumber as $ms)
+                                            <option value="{{ $ms->id }}" 
+                                                    data-nama="{{ $ms->nama }}"
+                                                    {{ $sumber->id == $ms->id ? 'selected' : '' }}>
+                                                {{ $ms->nama }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
 
+                                <div class="custom-sumber-container" style="{{ $sumber->nama == 'Lainnya' ? 'display: block;' : 'display: none;' }} margin-bottom: 15px;">
+                                    <label class="form-label">Nama Sumber (Lainnya)</label>
+                                    <input 
+                                        type="text" 
+                                        name="sumber_custom[]" 
+                                        class="form-input custom-sumber-input" 
+                                        placeholder="Masukkan nama sumber bahan baku"
+                                        value="{{ $sumber->nama == 'Lainnya' ? '' : '' }}"
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Kapasitas Izin</label>
+                                    <input 
+                                        type="number" 
+                                        step="0.01"
+                                        name="kapasitas[]" 
+                                        class="form-input" 
+                                        placeholder="Contoh: 1000"
+                                        value="{{ $sumber->pivot->kapasitas }}"
+                                        required
+                                    >
+                                </div>
+                            </div>
+
+                            <div style="width: 80px; padding-top: 35px;">
+                                <button type="button" class="btn-remove-sumber" onclick="removeSumber(this)" style="{{ $index == 0 ? 'display: none;' : '' }}">
+                                    <span>✕ Hapus</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+
+                <!-- Row: Tanggal SK & Masa Berlaku -->
+                <div class="form-row" style="margin-top: 30px;">
                     <div class="form-group">
                         <label class="form-label">Tanggal SK <span class="required">*</span></label>
                         <input type="date" name="tanggal" class="form-input" value="{{ old('tanggal', $tptkb->industri->tanggal) }}" required>
@@ -370,11 +516,10 @@
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">Masa Berlaku Izin <span class="required">*</span></label>
-                    <input type="date" name="masa_berlaku" class="form-input" value="{{ old('masa_berlaku', $tptkb->masa_berlaku ? $tptkb->masa_berlaku->format('Y-m-d') : '') }}" required>
+                    <div class="form-group">
+                        <label class="form-label">Masa Berlaku Izin <span class="required">*</span></label>
+                        <input type="date" name="masa_berlaku" class="form-input" value="{{ old('masa_berlaku', $tptkb->masa_berlaku ? $tptkb->masa_berlaku->format('Y-m-d') : '') }}" required>
                     @error('masa_berlaku')
                         <div class="error-message">{{ $message }}</div>
                     @enderror
@@ -445,5 +590,205 @@
                 setTimeout(() => alert.remove(), 500);
             });
         }, 5000);
+
+        // Map variables
+        let map;
+        let marker;
+        const defaultLat = -7.150975; // Jawa Tengah center
+        const defaultLng = 110.1402594;
+
+        function initMap() {
+            // Initialize the map centered on Jawa Tengah
+            map = L.map('map').setView([defaultLat, defaultLng], 8);
+
+            // Add OpenStreetMap tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Add click event to map
+            map.on('click', function(e) {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                
+                // Update marker position
+                updateMarker(lat, lng);
+                
+                // Update input fields
+                document.getElementById('latitude').value = lat.toFixed(8);
+                document.getElementById('longitude').value = lng.toFixed(8);
+            });
+
+            // Load existing coordinates if any
+            const existingLat = document.getElementById('latitude').value;
+            const existingLng = document.getElementById('longitude').value;
+            
+            if (existingLat && existingLng) {
+                const lat = parseFloat(existingLat);
+                const lng = parseFloat(existingLng);
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    updateMarker(lat, lng);
+                    map.setView([lat, lng], 13);
+                }
+            }
+        }
+
+        function updateMarker(lat, lng) {
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng], {
+                    draggable: true
+                }).addTo(map);
+                
+                // Add drag event to marker
+                marker.on('dragend', function(e) {
+                    const position = marker.getLatLng();
+                    document.getElementById('latitude').value = position.lat.toFixed(8);
+                    document.getElementById('longitude').value = position.lng.toFixed(8);
+                });
+            }
+            
+            marker.bindPopup(`Lokasi: ${lat.toFixed(6)}, ${lng.toFixed(6)}`).openPopup();
+        }
+
+        function updateMapFromInputs() {
+            const lat = parseFloat(document.getElementById('latitude').value);
+            const lng = parseFloat(document.getElementById('longitude').value);
+            
+            if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+                updateMarker(lat, lng);
+                map.setView([lat, lng], 13);
+            }
+        }
+
+        // Dynamic Sumber Bahan Baku
+        let sumberIndex = {{ $tptkb->sumberBahanBaku->count() }};
+
+        function toggleCustomSumber(selectElement) {
+            const sumberItem = selectElement.closest('.sumber-item');
+            const customContainer = sumberItem.querySelector('.custom-sumber-container');
+            const customInput = sumberItem.querySelector('.custom-sumber-input');
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const namaSumber = selectedOption.getAttribute('data-nama');
+            
+            if (namaSumber === 'Lainnya') {
+                customContainer.style.display = 'block';
+                customInput.required = true;
+            } else {
+                customContainer.style.display = 'none';
+                customInput.required = false;
+                customInput.value = '';
+            }
+        }
+
+        function addSumber() {
+            const container = document.getElementById('sumber-container');
+            const newItem = document.createElement('div');
+            newItem.className = 'sumber-item';
+            newItem.setAttribute('data-index', sumberIndex);
+            
+            sumberIndex++;
+            const itemNumber = sumberIndex;
+            
+            newItem.innerHTML = `
+                <div style="display: flex; align-items: flex-start; gap: 15px;">
+                    <div style="width: 40px; padding-top: 35px;">
+                        <span class="item-number" style="display: inline-block; width: 32px; height: 32px; background: #15803d; color: white; border-radius: 50%; text-align: center; line-height: 32px; font-weight: 600;">${itemNumber}</span>
+                    </div>
+                    
+                    <div style="flex: 1;">
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label class="form-label">Sumber Bahan Baku</label>
+                            <select 
+                                name="sumber_id[]" 
+                                class="form-select sumber-select" 
+                                onchange="toggleCustomSumber(this)"
+                                required
+                            >
+                                <option value="">-- Pilih Sumber Bahan Baku --</option>
+                                @foreach($masterSumber as $sumber)
+                                    <option value="{{ $sumber->id }}" data-nama="{{ $sumber->nama }}">{{ $sumber->nama }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="custom-sumber-container" style="display: none; margin-bottom: 15px;">
+                            <label class="form-label">Nama Sumber (Lainnya)</label>
+                            <input 
+                                type="text" 
+                                name="sumber_custom[]" 
+                                class="form-input custom-sumber-input" 
+                                placeholder="Masukkan nama sumber bahan baku"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Kapasitas Izin</label>
+                            <input 
+                                type="number" 
+                                step="0.01"
+                                name="kapasitas[]" 
+                                class="form-input" 
+                                placeholder="Contoh: 1000"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <div style="width: 80px; padding-top: 35px;">
+                        <button type="button" class="btn-remove-sumber" onclick="removeSumber(this)">
+                            <span>✕ Hapus</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            container.appendChild(newItem);
+            updateRemoveButtons();
+            updateItemNumbers();
+        }
+
+        function removeSumber(button) {
+            const sumberItem = button.closest('.sumber-item');
+            sumberItem.remove();
+            updateRemoveButtons();
+            updateItemNumbers();
+        }
+
+        function updateRemoveButtons() {
+            const items = document.querySelectorAll('.sumber-item');
+            items.forEach((item, index) => {
+                const removeBtn = item.querySelector('.btn-remove-sumber');
+                if (removeBtn) {
+                    removeBtn.style.display = items.length > 1 ? 'flex' : 'none';
+                }
+            });
+        }
+
+        function updateItemNumbers() {
+            const items = document.querySelectorAll('.sumber-item');
+            items.forEach((item, index) => {
+                const numberSpan = item.querySelector('.item-number');
+                if (numberSpan) {
+                    numberSpan.textContent = index + 1;
+                }
+            });
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateRemoveButtons();
+            initMap();
+        });
+
+        // Initialize map when document is ready
+        initMap();
     </script>
 @endpush
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>

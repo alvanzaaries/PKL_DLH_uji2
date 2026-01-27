@@ -39,6 +39,16 @@ class Tptkb extends Model
     }
 
     /**
+     * Relationship ke Master Sumber (many-to-many)
+     */
+    public function sumberBahanBaku()
+    {
+        return $this->belongsToMany(MasterSumber::class, 'tptkb_sumber', 'tptkb_id', 'master_sumber_id')
+                    ->withPivot('kapasitas')
+                    ->withTimestamps();
+    }
+
+    /**
      * Scope untuk filter berdasarkan jenis kayu
      */
     public function scopeBySumberBahanBaku($query, $sumber)

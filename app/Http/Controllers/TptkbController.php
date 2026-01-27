@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tptkb;
 use App\Models\IndustriBase;
+use App\Models\MasterSumber;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
@@ -50,7 +51,7 @@ class TptkbController extends Controller implements HasMiddleware
         // Auto-update status berdasarkan masa berlaku izin
         $this->updateExpiredStatus();
 
-        $query = Tptkb::with('industri');
+        $query = Tptkb::with(['industri', 'sumberBahanBaku']);
 
         // Filter
         if ($request->filled('nama')) {
@@ -65,9 +66,11 @@ class TptkbController extends Controller implements HasMiddleware
             });
         }
 
-        // Filter berdasarkan sumber bahan baku
+        // Filter berdasarkan sumber bahan baku (dari pivot table tptkb_sumber)
         if ($request->filled('sumber_bahan_baku')) {
-            $query->where('sumber_bahan_baku', $request->sumber_bahan_baku);
+            $query->whereHas('sumberBahanBaku', function($q) use ($request) {
+                $q->where('master_sumber.id', $request->sumber_bahan_baku);
+            });
         }
 
         // Filter berdasarkan status
@@ -90,8 +93,8 @@ class TptkbController extends Controller implements HasMiddleware
             });
         }
 
-        // Filter berdasarkan kapasitas izin
-        // Menggunakan logika yang sama dengan IndustriSekunderController
+        // Filter berdasarkan kapasitas izin (dari pivot table tptkb_sumber)
+        // Menggunakan logika OR: tampilkan perusahaan jika MINIMAL SATU sumber memenuhi range
         $kapasitasFilter = $request->filled('kapasitas') ? $request->kapasitas : null;
 
         // Jika ada filter kapasitas, lakukan filtering di collection level
@@ -99,13 +102,9 @@ class TptkbController extends Controller implements HasMiddleware
             $allFiltered = (clone $query)->latest()->get();
 
             $filteredCollection = $allFiltered->filter(function($item) use ($kapasitasFilter) {
-                // Ekstrak angka dari kapasitas_izin
-                $kapasitasStr = $item->kapasitas_izin ?? '0';
-                // Ekstrak angka dari string seperti "1500 m³/tahun" atau "2000"
-                preg_match('/(\d+[\d\.,]*)/', $kapasitasStr, $matches);
-                if (isset($matches[1])) {
-                    // Hapus titik/koma pemisah ribuan dan konversi ke integer
-                    $numericValue = (int)str_replace(['.', ','], '', $matches[1]);
+                // Cek apakah ada minimal satu sumber bahan baku yang memenuhi range
+                foreach ($item->sumberBahanBaku as $sumber) {
+                    $numericValue = $sumber->pivot->kapasitas ?? 0;
                     
                     // Cek apakah kapasitas ini memenuhi range filter
                     $matches_range = false;
@@ -121,10 +120,13 @@ class TptkbController extends Controller implements HasMiddleware
                             break;
                     }
                     
-                    return $matches_range;
+                    // Jika ada satu sumber yang memenuhi, return true (logika OR)
+                    if ($matches_range) {
+                        return true;
+                    }
                 }
                 
-                // Tidak ada kapasitas yang valid
+                // Tidak ada satupun sumber yang memenuhi range
                 return false;
             })->values();
 
@@ -152,12 +154,8 @@ class TptkbController extends Controller implements HasMiddleware
             ->sort()
             ->values();
 
-        // Get list sumber bahan baku sesuai form create
-        $sumberBahanBakuList = [
-            'Hutan Alam' => 'Hutan Alam',
-            'Perhutani' => 'Hutan Tanaman',
-            'Hutan Rakyat' => 'Hutan Rakyat'
-        ];
+        // Get list sumber bahan baku dari master_sumber (termasuk yang custom)
+        $sumberBahanBakuList = MasterSumber::orderBy('nama')->pluck('nama', 'id');
 
         // Data untuk visualisasi chart — gunakan hasil dari query yang sudah difilter
         $filteredData = (clone $query)->get();
@@ -209,7 +207,8 @@ class TptkbController extends Controller implements HasMiddleware
 
     public function create()
     {
-        return view('Industri.tptkb.create');
+        $masterSumber = \App\Models\MasterSumber::all();
+        return view('Industri.tptkb.create', compact('masterSumber'));
     }
 
     public function store(Request $request)
@@ -221,9 +220,15 @@ class TptkbController extends Controller implements HasMiddleware
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:255',
             'nomor_izin' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'pemberi_izin' => 'required|string|max:255',
-            'sumber_bahan_baku' => 'required|string|max:255',
-            'kapasitas_izin' => 'required|string|max:255',
+            'sumber_id' => 'required|array|min:1',
+            'sumber_id.*' => 'required|exists:master_sumber,id',
+            'sumber_custom' => 'nullable|array',
+            'sumber_custom.*' => 'nullable|string|max:255',
+            'kapasitas' => 'required|array|min:1',
+            'kapasitas.*' => 'required|numeric|min:0',
             'tanggal' => 'required|date',
             'masa_berlaku' => 'required|date',
         ]);
@@ -241,19 +246,45 @@ class TptkbController extends Controller implements HasMiddleware
             'penanggungjawab' => $validated['penanggungjawab'],
             'kontak' => $validated['kontak'],
             'nomor_izin' => $validated['nomor_izin'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'tanggal' => $validated['tanggal'],
             'type' => 'tpt_kb',
-            'status' => $status, // Set status otomatis berdasarkan masa berlaku
+            'status' => $status,
         ]);
 
         // Create TPTKB
-        Tptkb::create([
+        $tptkb = Tptkb::create([
             'industri_id' => $industri->id,
             'pemberi_izin' => $validated['pemberi_izin'],
-            'sumber_bahan_baku' => $validated['sumber_bahan_baku'],
-            'kapasitas_izin' => $validated['kapasitas_izin'],
+            'sumber_bahan_baku' => '', // Deprecated, now using pivot table
+            'kapasitas_izin' => '', // Deprecated, now using per-sumber capacity
             'masa_berlaku' => $validated['masa_berlaku'],
         ]);
+
+        // Attach sumber bahan baku with kapasitas
+        // Handle custom sumber names for "Lainnya"
+        $sumberData = [];
+        $sumberCustom = $request->input('sumber_custom', []);
+        
+        foreach ($validated['sumber_id'] as $index => $sumberId) {
+            // Check if this is "Lainnya" and has custom name
+            $sumber = \App\Models\MasterSumber::find($sumberId);
+            $customName = isset($sumberCustom[$index]) && !empty($sumberCustom[$index]) ? $sumberCustom[$index] : null;
+            
+            // If it's "Lainnya" and has custom name, create new sumber or find existing
+            if ($sumber && $sumber->nama === 'Lainnya' && $customName) {
+                // Try to find existing custom sumber or create new
+                $customSumber = \App\Models\MasterSumber::firstOrCreate(
+                    ['nama' => $customName],
+                    ['keterangan' => 'Sumber custom dari user']
+                );
+                $sumberData[$customSumber->id] = ['kapasitas' => $validated['kapasitas'][$index]];
+            } else {
+                $sumberData[$sumberId] = ['kapasitas' => $validated['kapasitas'][$index]];
+            }
+        }
+        $tptkb->sumberBahanBaku()->attach($sumberData);
 
         $message = 'Data TPT-KB berhasil ditambahkan!';
         if ($status === 'Tidak Aktif') {
@@ -265,8 +296,9 @@ class TptkbController extends Controller implements HasMiddleware
 
     public function edit($id)
     {
-        $tptkb = Tptkb::with('industri')->findOrFail($id);
-        return view('Industri.tptkb.edit', compact('tptkb'));
+        $tptkb = Tptkb::with(['industri', 'sumberBahanBaku'])->findOrFail($id);
+        $masterSumber = MasterSumber::all();
+        return view('Industri.tptkb.edit', compact('tptkb', 'masterSumber'));
     }
 
     public function update(Request $request, $id)
@@ -278,9 +310,15 @@ class TptkbController extends Controller implements HasMiddleware
             'penanggungjawab' => 'required|string|max:255',
             'kontak' => 'required|string|max:255',
             'nomor_izin' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'pemberi_izin' => 'required|string|max:255',
-            'sumber_bahan_baku' => 'required|string|max:255',
-            'kapasitas_izin' => 'required|string|max:255',
+            'sumber_id' => 'required|array',
+            'sumber_id.*' => 'required|exists:master_sumber,id',
+            'sumber_custom' => 'array',
+            'sumber_custom.*' => 'nullable|string|max:255',
+            'kapasitas' => 'required|array',
+            'kapasitas.*' => 'required|numeric|min:0',
             'tanggal' => 'required|date',
             'masa_berlaku' => 'required|date',
             'status' => 'required|in:Aktif,Tidak Aktif',
@@ -289,7 +327,6 @@ class TptkbController extends Controller implements HasMiddleware
         $tptkb = Tptkb::findOrFail($id);
 
         // Cek apakah masa berlaku sudah kadaluarsa
-        // Jika sudah kadaluarsa, override status menjadi "Tidak Aktif" meskipun user pilih "Aktif"
         $today = \Carbon\Carbon::now('Asia/Jakarta')->startOfDay();
         $masaBerlaku = \Carbon\Carbon::parse($validated['masa_berlaku'])->startOfDay();
         
@@ -308,6 +345,8 @@ class TptkbController extends Controller implements HasMiddleware
             'penanggungjawab' => $validated['penanggungjawab'],
             'kontak' => $validated['kontak'],
             'nomor_izin' => $validated['nomor_izin'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'tanggal' => $validated['tanggal'],
             'status' => $validated['status'],
         ]);
@@ -315,10 +354,28 @@ class TptkbController extends Controller implements HasMiddleware
         // Update TPTKB
         $tptkb->update([
             'pemberi_izin' => $validated['pemberi_izin'],
-            'sumber_bahan_baku' => $validated['sumber_bahan_baku'],
-            'kapasitas_izin' => $validated['kapasitas_izin'],
             'masa_berlaku' => $validated['masa_berlaku'],
         ]);
+
+        // Handle sumber bahan baku
+        $sumberData = [];
+        foreach ($validated['sumber_id'] as $index => $sumberId) {
+            $selectedSumber = MasterSumber::find($sumberId);
+            
+            // Check if "Lainnya" and has custom name
+            if ($selectedSumber && $selectedSumber->nama === 'Lainnya' && !empty($validated['sumber_custom'][$index])) {
+                $customSumber = MasterSumber::firstOrCreate(
+                    ['nama' => $validated['sumber_custom'][$index]],
+                    ['keterangan' => 'Custom sumber created by user']
+                );
+                $sumberData[$customSumber->id] = ['kapasitas' => $validated['kapasitas'][$index]];
+            } else {
+                $sumberData[$sumberId] = ['kapasitas' => $validated['kapasitas'][$index]];
+            }
+        }
+
+        // Sync pivot table
+        $tptkb->sumberBahanBaku()->sync($sumberData);
 
         $message = 'Data TPT-KB berhasil diperbarui!';
         if ($statusOverridden) {
