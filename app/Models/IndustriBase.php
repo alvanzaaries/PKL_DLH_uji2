@@ -17,6 +17,8 @@ class IndustriBase extends Model
         'alamat',
         'penanggungjawab',
         'kabupaten',
+        'latitude',
+        'longitude',
         'kontak',
         'nomor_izin',
         'tanggal',

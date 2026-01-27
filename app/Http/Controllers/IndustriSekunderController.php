@@ -109,31 +109,25 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             $filteredCollection = $allFiltered->filter(function($item) use ($kapasitasFilter) {
                 // Cek apakah ada minimal satu jenis produksi yang memenuhi range
                 foreach ($item->jenisProduksi as $jp) {
-                    $kapasitasStr = $jp->pivot->kapasitas_izin ?? '0';
-                    // Ekstrak angka dari string seperti "1500 m³/tahun" atau "2000"
-                    preg_match('/(\d+[\d\.,]*)/', $kapasitasStr, $matches);
-                    if (isset($matches[1])) {
-                        // Hapus titik/koma pemisah ribuan dan konversi ke integer
-                        $numericValue = (int)str_replace(['.', ','], '', $matches[1]);
-                        
-                        // Cek apakah kapasitas ini memenuhi range filter
-                        $matches_range = false;
-                        switch ($kapasitasFilter) {
-                            case '0-1999':
-                                $matches_range = $numericValue >= 0 && $numericValue <= 1999;
-                                break;
-                            case '2000-5999':
-                                $matches_range = $numericValue >= 2000 && $numericValue <= 5999;
-                                break;
-                            case '>=6000':
-                                $matches_range = $numericValue >= 6000;
-                                break;
-                        }
-                        
-                        // Jika ada satu jenis produksi yang memenuhi, return true (logika OR)
-                        if ($matches_range) {
-                            return true;
-                        }
+                    $numericValue = $jp->pivot->kapasitas_izin ?? 0;
+                    
+                    // Cek apakah kapasitas ini memenuhi range filter
+                    $matches_range = false;
+                    switch ($kapasitasFilter) {
+                        case '0-1999':
+                            $matches_range = $numericValue >= 0 && $numericValue <= 1999;
+                            break;
+                        case '2000-5999':
+                            $matches_range = $numericValue >= 2000 && $numericValue <= 5999;
+                            break;
+                        case '>=6000':
+                            $matches_range = $numericValue >= 6000;
+                            break;
+                    }
+                    
+                    // Jika ada satu jenis produksi yang memenuhi, return true (logika OR)
+                    if ($matches_range) {
+                        return true;
                     }
                 }
                 
@@ -218,9 +212,7 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             // Hitung total kapasitas dari semua jenis produksi
             $totalCapacity = 0;
             foreach ($item->jenisProduksi as $jp) {
-                $kapasitasStr = $jp->pivot->kapasitas_izin ?? '0';
-                preg_match('/\d+/', $kapasitasStr, $matches);
-                $numericCapacity = isset($matches[0]) ? (int)$matches[0] : 0;
+                $numericCapacity = $jp->pivot->kapasitas_izin ?? 0;
                 $totalCapacity += $numericCapacity;
             }
             
@@ -270,12 +262,14 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             'alamat' => 'required|string',
             'penanggungjawab' => 'required|string|max:255',
             'kabupaten' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'kontak' => 'required|string|max:255',
             'pemberi_izin' => 'required|string|max:255',
             'jenis_produksi' => 'required|array|min:1',
             'jenis_produksi.*' => 'required|exists:master_jenis_produksi,id',
             'kapasitas_izin' => 'required|array',
-            'kapasitas_izin.*' => 'required|string|max:255',
+            'kapasitas_izin.*' => 'required|integer|min:0',
             'nama_custom' => 'nullable|array',
             'nama_custom.*' => 'nullable|string|max:255',
             'tanggal' => 'required|date',
@@ -288,6 +282,8 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             'alamat' => $validated['alamat'],
             'penanggungjawab' => $validated['penanggungjawab'],
             'kabupaten' => $validated['kabupaten'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'kontak' => $validated['kontak'],
             'nomor_izin' => $validated['nomor_izin'],
             'tanggal' => $validated['tanggal'],
@@ -340,12 +336,14 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             'alamat' => 'required|string',
             'penanggungjawab' => 'required|string|max:255',
             'kabupaten' => 'required|string|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'kontak' => 'required|string|max:255',
             'pemberi_izin' => 'required|string|max:255',
             'jenis_produksi' => 'required|array|min:1',
             'jenis_produksi.*' => 'required|exists:master_jenis_produksi,id',
             'kapasitas_izin' => 'required|array',
-            'kapasitas_izin.*' => 'required|string|max:255',
+            'kapasitas_izin.*' => 'required|integer|min:0',
             'nama_custom' => 'nullable|array',
             'nama_custom.*' => 'nullable|string|max:255',
             'tanggal' => 'required|date',
@@ -363,6 +361,8 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             'alamat' => $validated['alamat'],
             'penanggungjawab' => $validated['penanggungjawab'],
             'kabupaten' => $validated['kabupaten'],
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
             'kontak' => $validated['kontak'],
             'nomor_izin' => $validated['nomor_izin'],
             'tanggal' => $validated['tanggal'],

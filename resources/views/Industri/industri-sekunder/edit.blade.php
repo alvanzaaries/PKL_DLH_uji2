@@ -334,6 +334,26 @@
 
             <div class="form-row">
                 <div class="form-group">
+                    <label class="form-label">Latitude</label>
+                    <input type="number" step="0.00000001" name="latitude" class="form-input" 
+                           placeholder="Contoh: -7.250445" 
+                           value="{{ old('latitude', $industriSekunder->industri->latitude) }}">
+                    <div class="file-info">Koordinat lintang (-90 sampai 90)</div>
+                    @error('latitude')<div class="error-message">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Longitude</label>
+                    <input type="number" step="0.00000001" name="longitude" class="form-input" 
+                           placeholder="Contoh: 110.408447" 
+                           value="{{ old('longitude', $industriSekunder->industri->longitude) }}">
+                    <div class="file-info">Koordinat bujur (-180 sampai 180)</div>
+                    @error('longitude')<div class="error-message">{{ $message }}</div>@enderror
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
                     <label class="form-label">Kontak <span class="required">*</span></label>
                     <input type="text" name="kontak" class="form-input" value="{{ old('kontak', $industriSekunder->industri->kontak) }}" required>
                     @error('kontak')<div class="error-message">{{ $message }}</div>@enderror
@@ -442,8 +462,8 @@
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
                     <label class="form-label">Kapasitas Izin</label>
-                    <input type="text" name="kapasitas_izin[]" class="form-input" 
-                           placeholder="Contoh: 1000 m³/tahun" value="${kapasitas}" required>
+                    <input type="number" name="kapasitas_izin[]" class="form-input" 
+                           placeholder="Contoh: 1000" min="0" value="${kapasitas}" required>
                 </div>
             </div>
             <div class="form-group custom-input-container" id="customInput_${jenisProduksiCounter}" 
