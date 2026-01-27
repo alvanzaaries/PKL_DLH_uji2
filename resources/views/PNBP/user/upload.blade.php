@@ -66,9 +66,9 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">KPH</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">KPH/KPS</label>
                         <select name="kph" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring focus:ring-green-200 focus:ring-opacity-50 py-2 px-3 border bg-white" required>
-                            <option value="">-- Pilih KPH --</option>
+                            <option value="">-- Pilih KPH/KPS --</option>
                             @foreach(($kphOptions ?? []) as $kph)
                                 <option value="{{ $kph }}" {{ old('kph') == $kph ? 'selected' : '' }}>{{ $kph }}</option>
                             @endforeach

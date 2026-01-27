@@ -18,9 +18,9 @@
             </div>
 
             <div class="flex-1 w-full md:w-auto">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">KPH</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">KPH/KPS</label>
                 <select name="kph" class="block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-surface-dark text-gray-700 dark:text-gray-200 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm p-2 border">
-                    <option value="">Semua KPH</option>
+                    <option value="">Semua KPH/KPS</option>
                     @foreach(($availableKph ?? []) as $kph)
                         <option value="{{ $kph }}" {{ request('kph') == $kph ? 'selected' : '' }}>{{ $kph }}</option>
                     @endforeach
