@@ -13,7 +13,7 @@
     <div class="info-header">
         <h1>LAPORAN PNBP</h1>
         <p><strong>{{ strtoupper($filter ?? 'SEMUA DATA') }}</strong></p>
-        <p class="muted">Dicetak pada: {{ now()->format('d/m/Y H:i') }} | Sistem Pelaporan PNBP</p>
+        <p class="muted">Dicetak pada: {{ now()->format('d/m/Y H:i') }}</p>
     </div>
 
     {{-- BAGIAN 1: RINGKASAN DATA --}}
@@ -27,7 +27,7 @@
         </thead>
         <tbody>
             <tr>
-                <td>Total File Ter-Upload</td>
+                <td>Total Dokumen Ter-Upload</td>
                 <td class="right">{{ number_format($totalFiles) }} Dokumen</td>
             </tr>
             <tr>
@@ -83,7 +83,7 @@
     <table>
         <thead>
             <tr>
-                <th>WILAYAH / CABANG DINAS</th>
+                <th>WILAYAH</th>
                 <th class="right">TOTAL SETOR (Rp)</th>
             </tr>
         </thead>
@@ -103,11 +103,11 @@
 
     {{-- BAGIAN 4: DETAIL JENIS SDH --}}
     @if(count($statsJenis) > 0)
-    <h2>DETAIL JENIS SUMBER DAYA HUTAN (SDH)</h2>
+    <h2>REKAPITULASI HASIL HUTAN</h2>
     <table>
         <thead>
             <tr>
-                <th>JENIS SDH</th>
+                <th>JENIS HH</th>
                 <th class="right">VOLUME</th>
                 <th class="right">NILAI SETOR (Rp)</th>
             </tr>
@@ -121,7 +121,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="3" class="center muted">Tidak ada data jenis SDH.</td>
+                    <td colspan="3" class="center muted">Tidak ada data Hasil Hutan.</td>
                 </tr>
             @endforelse
         </tbody>

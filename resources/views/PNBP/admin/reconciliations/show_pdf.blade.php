@@ -22,7 +22,7 @@
     <table>
         <thead>
             <tr>
-                <th style="width: 40%">URAIAN / KATEGORI</th>
+                <th style="width: 40%">URAIAN</th>
                 <th class="right" style="width: 20%">TOTAL VOLUME</th>
                 <th class="right" style="width: 20%">TOTAL NILAI LHP (Rp)</th>
                 <th class="right" style="width: 20%">TOTAL NILAI SETOR (Rp)</th>
@@ -62,12 +62,12 @@
 
     {{-- BAGIAN 2: REKAPITULASI TAMBAHAN --}}
     
-    <h2>REKAPITULASI BERDASARKAN JENIS HASIL HUTAN</h2>
+    <h2>REKAPITULASI HASIL HUTAN</h2>
     <table>
         <thead>
             <tr>
-                <th>JENIS HASIL HUTAN</th>
-                <th class="center" style="width: 10%">SATUAN</th>
+                <th>HASIL HUTAN</th>
+                <th class="center" style="width: 10%"></th>
                 <th class="right" style="width: 20%">TOTAL VOLUME</th>
                 <th class="right" style="width: 25%">TOTAL NILAI LHP (Rp)</th>
             </tr>
@@ -89,8 +89,8 @@
     <table>
         <thead>
             <tr>
-                <th>WILAYAH (KABUPATEN / KOTA)</th>
-                <th class="center" style="width: 15%">FREKUENSI TRANS.</th>
+                <th>WILAYAH</th>
+                <th class="center" style="width: 15%">FREKUENSI TRANSAKSI</th>
                 <th class="right" style="width: 20%">TOTAL VOLUME</th>
                 <th class="right" style="width: 25%">TOTAL NILAI LHP (Rp)</th>
             </tr>
@@ -114,7 +114,7 @@
         <thead>
             <tr>
                 <th>NAMA BANK</th>
-                <th class="center" style="width: 15%">FREKUENSI TRANS.</th>
+                <th class="center" style="width: 15%">FREKUENSI TRANSAKSI</th>
                 <th class="right" style="width: 30%">TOTAL SETOR (Rp)</th>
             </tr>
         </thead>
