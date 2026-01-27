@@ -49,10 +49,10 @@
             <div>
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center">
                     <span class="material-icons-outlined mr-2 text-primary">dns</span>
-                    Master Data KPH
+                    Data KPH/KPS
                 </h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Total KPH Terdaftar: <span class="font-semibold text-gray-900 dark:text-white">{{ $kphs->count() }}</span>
+                    Total KPH/KPS Terdaftar: <span class="font-semibold text-gray-900 dark:text-white">{{ $kphs->count() }}</span>
                 </p>
             </div>
 
@@ -69,7 +69,7 @@
                 {{-- Buka modal tambah KPH. --}}
                 <button type="button" onclick="openKphModal()" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary_hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-sm transition-all hover:shadow-md">
                     <span class="material-icons-outlined text-sm mr-2">add</span>
-                    Tambah KPH
+                    Tambah KPH/KPS
                 </button>
             </div>
         </div>
@@ -80,7 +80,7 @@
                 <thead class="bg-gray-50 dark:bg-gray-800/50">
                     <tr>
                         <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Nama Kesatuan Pengelolaan Hutan (KPH)
+                            Nama KPH/KPS
                         </th>
                         <th scope="col" class="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
                             Aksi
@@ -111,7 +111,7 @@
                             <td colspan="2" class="px-6 py-10 text-center">
                                 <div class="flex flex-col items-center justify-center">
                                     <span class="material-icons-outlined text-gray-300 text-4xl mb-2">folder_off</span>
-                                    <p class="text-gray-500 dark:text-gray-400 text-sm">Belum ada data KPH yang ditambahkan.</p>
+                                    <p class="text-gray-500 dark:text-gray-400 text-sm">Belum ada data KPH/KPS yang ditambahkan.</p>
                                 </div>
                             </td>
                         </tr>
@@ -119,7 +119,7 @@
                     {{-- Baris hasil kosong (disembunyikan secara default) --}}
                     <tr id="noResultRow" class="hidden">
                         <td colspan="2" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400 text-sm">
-                            Tidak ditemukan KPH dengan nama tersebut.
+                            Tidak ditemukan KPH/KPS dengan nama tersebut.
                         </td>
                     </tr>
                 </tbody>
@@ -129,7 +129,7 @@
         {{-- Catatan footer/pagination (opsional) --}}
         <div class="bg-gray-50 dark:bg-gray-800/50 px-6 py-3 border-t border-gray-200 dark:border-gray-700">
             <p class="text-xs text-gray-500 dark:text-gray-400">
-                Menampilkan seluruh data KPH aktif.
+                Menampilkan seluruh data KPH/KPS aktif.
             </p>
         </div>
     </div>
@@ -154,11 +154,11 @@
                             </div>
                             <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white" id="modal-title">
-                                    Tambah KPH Baru
+                                    Tambah KPH/KPS Baru
                                 </h3>
                                 <div class="mt-4">
-                                    <label for="nama" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama KPH</label>
-                                    <input type="text" name="nama" id="nama" class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-2" placeholder="Contoh: KPH ..." required>
+                                    <label for="nama" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nama KPH/KPS</label>
+                                    <input type="text" name="nama" id="nama" class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md p-2" placeholder="Contoh: KPH/KPS ..." required>
                                     @error('nama')
                                         <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                     @enderror
