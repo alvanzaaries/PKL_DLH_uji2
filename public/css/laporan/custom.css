@@ -1037,4 +1037,73 @@
     .pagination {
         flex-wrap: wrap;
     }
+
+    /* Category Tabs Responsive */
+    .category-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 1rem 0;
+    }
+
+    .tab-item {
+        padding: 0.625rem 1rem;
+        font-size: 0.8125rem;
+    }
+
+    .tab-item i {
+        font-size: 0.875rem;
+    }
+}
+
+/* =========================================
+   CATEGORY TABS (REKAP LAPORAN)
+   ========================================= */
+
+.category-tabs {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.5rem 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #E5E7EB;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tab-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    border: 1px solid #D1D5DB;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #6B7280;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.tab-item i {
+    font-size: 1rem;
+}
+
+.tab-item:hover {
+    background-color: #F3F4F6;
+    border-color: #9CA3AF;
+    color: #374151;
+}
+
+.tab-item.active {
+    background-color: #0F2F24;
+    border-color: #0F2F24;
+    color: white;
+}
+
+.tab-item.active:hover {
+    background-color: #183F32;
+    border-color: #183F32;
 }

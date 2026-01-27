@@ -666,4 +666,340 @@ class LaporanDataService
 
         return null;
     }
+
+    /**
+     * Get Rekap Tahunan dengan breakdown bulanan per industri
+     * 
+     * @param int $tahun Tahun yang akan direkap
+     * @param string $kategori Kategori rekap (produksi_kayu_bulat, produksi_kayu_olahan, penjualan, pemenuhan_bahan_baku)
+     * @param string $groupBy Grouping dimension (untuk kategori yang support)
+     * @param string $eksporLokal Filter ekspor/lokal (untuk kategori penjualan)
+     * @return array Array berisi data rekap per industri dengan breakdown bulanan
+     */
+    public function getRekapTahunan($tahun, $kategori, $groupBy = 'asal_kayu', $eksporLokal = 'semua')
+    {
+        switch ($kategori) {
+            case 'produksi_kayu_bulat':
+                return $this->rekapProduksiKayuBulat($tahun, $groupBy);
+            case 'produksi_kayu_olahan':
+                return $this->rekapProduksiKayuOlahan($tahun, $groupBy);
+            case 'penjualan':
+                return $this->rekapPenjualan($tahun, $groupBy, $eksporLokal);
+            case 'pemenuhan_bahan_baku':
+                return $this->rekapPemenuhanBahanBaku($tahun);
+            default:
+                return [];
+        }
+    }
+
+    /**
+     * Rekap Tahunan: Produksi Kayu Bulat
+     * 
+     * Menghitung total volume penerimaan kayu bulat dengan breakdown per bulan.
+     * 
+     * @param int $tahun Tahun yang akan direkap
+     * @param string $groupBy Grouping dimension: 'industri', 'asal_kayu', 'jenis_kayu'
+     * @return array Format: [
+     *   'data' => [
+     *     group_key => [
+     *       'nama' => 'Group Name',
+     *       'bulan' => [1 => 100.5, 2 => 200.3, ..., 12 => 150.0],
+     *       'total' => 1500.0
+     *     ]
+     *   ],
+     *   'grand_total' => [1 => 500.0, 2 => 600.0, ..., 12 => 450.0, 'total' => 6000.0]
+     * ]
+     */
+    private function rekapProduksiKayuBulat($tahun, $groupBy = 'industri')
+    {
+        // Query laporan untuk tahun yang dipilih
+        $laporanIds = Laporan::whereYear('tanggal', $tahun)
+            ->where('jenis_laporan', 'Laporan Penerimaan Kayu Bulat')
+            ->pluck('id');
+
+        if ($laporanIds->isEmpty()) {
+            return [
+                'data' => [],
+                'grand_total' => array_fill(1, 12, 0) + ['total' => 0]
+            ];
+        }
+
+        // Query data penerimaan kayu bulat
+        $query = laporan_penerimaan_kayu_bulat::query()
+            ->select(
+                DB::raw('MONTH(laporan.tanggal) as bulan'),
+                DB::raw('SUM(laporan_penerimaan_kayu_bulat.volume) as total_volume')
+            )
+            ->join('laporan', 'laporan_penerimaan_kayu_bulat.laporan_id', '=', 'laporan.id')
+            ->whereIn('laporan_penerimaan_kayu_bulat.laporan_id', $laporanIds);
+
+        // Add grouping based on selected dimension
+        switch ($groupBy) {
+            case 'asal_kayu':
+                $query->addSelect(DB::raw('LOWER(TRIM(laporan_penerimaan_kayu_bulat.asal_kayu)) as group_key'))
+                    ->addSelect('laporan_penerimaan_kayu_bulat.asal_kayu as group_name')
+                    ->groupBy('group_key', 'group_name', 'bulan');
+                break;
+
+            case 'jenis_kayu':
+            default:
+                $query->addSelect(DB::raw('LOWER(TRIM(laporan_penerimaan_kayu_bulat.jenis_kayu)) as group_key'))
+                    ->addSelect('laporan_penerimaan_kayu_bulat.jenis_kayu as group_name')
+                    ->groupBy('group_key', 'group_name', 'bulan');
+                break;
+        }
+
+        $results = $query->get();
+
+        // Process results into structured format
+        $data = [];
+        $grandTotal = array_fill(1, 12, 0);
+        $grandTotalSum = 0;
+
+        foreach ($results as $row) {
+            $key = $row->group_key;
+            $bulan = (int) $row->bulan;
+            $volume = (float) $row->total_volume;
+
+            // Initialize group if not exists
+            if (!isset($data[$key])) {
+                $data[$key] = [
+                    'nama' => $row->group_name ?? 'N/A',
+                    'bulan' => array_fill(1, 12, 0),
+                    'total' => 0
+                ];
+            }
+
+            // Add volume to specific month
+            $data[$key]['bulan'][$bulan] = $volume;
+            $data[$key]['total'] += $volume;
+
+            // Add to grand total
+            $grandTotal[$bulan] += $volume;
+            $grandTotalSum += $volume;
+        }
+
+        $grandTotal['total'] = $grandTotalSum;
+
+        // Sort data by name
+        uasort($data, function ($a, $b) {
+            return strcmp($a['nama'], $b['nama']);
+        });
+
+        return [
+            'data' => $data,
+            'grand_total' => $grandTotal
+        ];
+    }
+
+    /**
+     * Rekap Tahunan: Produksi Kayu Olahan
+     * 
+     * Menghitung total volume penerimaan kayu olahan dengan breakdown per bulan.
+     * 
+     * @param int $tahun Tahun yang akan direkap
+     * @param string $groupBy Grouping dimension: 'asal_kayu', 'jenis_olahan'
+     * @return array Format sama dengan rekapProduksiKayuBulat
+     */
+    private function rekapProduksiKayuOlahan($tahun, $groupBy = 'asal_kayu')
+    {
+        // Query laporan untuk tahun yang dipilih
+        $laporanIds = Laporan::whereYear('tanggal', $tahun)
+            ->where('jenis_laporan', 'Laporan Penerimaan Kayu Olahan')
+            ->pluck('id');
+
+        if ($laporanIds->isEmpty()) {
+            return [
+                'data' => [],
+                'grand_total' => array_fill(1, 12, 0) + ['total' => 0]
+            ];
+        }
+
+        // Query data penerimaan kayu olahan
+        $query = laporan_penerimaan_kayu_olahan::query()
+            ->select(
+                DB::raw('MONTH(laporan.tanggal) as bulan'),
+                DB::raw('SUM(laporan_penerimaan_kayu_olahan.volume) as total_volume')
+            )
+            ->join('laporan', 'laporan_penerimaan_kayu_olahan.laporan_id', '=', 'laporan.id')
+            ->whereIn('laporan_penerimaan_kayu_olahan.laporan_id', $laporanIds);
+
+        // Add grouping based on selected dimension
+        switch ($groupBy) {
+            case 'asal_kayu':
+                $query->addSelect(DB::raw('LOWER(TRIM(laporan_penerimaan_kayu_olahan.asal_kayu)) as group_key'))
+                    ->addSelect('laporan_penerimaan_kayu_olahan.asal_kayu as group_name')
+                    ->groupBy('group_key', 'group_name', 'bulan');
+                break;
+
+            case 'jenis_olahan':
+            default:
+                $query->addSelect(DB::raw('LOWER(TRIM(laporan_penerimaan_kayu_olahan.jenis_olahan)) as group_key'))
+                    ->addSelect('laporan_penerimaan_kayu_olahan.jenis_olahan as group_name')
+                    ->groupBy('group_key', 'group_name', 'bulan');
+                break;
+        }
+
+        $results = $query->get();
+
+        // Process results into structured format
+        $data = [];
+        $grandTotal = array_fill(1, 12, 0);
+        $grandTotalSum = 0;
+
+        foreach ($results as $row) {
+            $key = $row->group_key;
+            $bulan = (int) $row->bulan;
+            $volume = (float) $row->total_volume;
+
+            // Initialize group if not exists
+            if (!isset($data[$key])) {
+                $data[$key] = [
+                    'nama' => $row->group_name ?? 'N/A',
+                    'bulan' => array_fill(1, 12, 0),
+                    'total' => 0
+                ];
+            }
+
+            // Add volume to specific month
+            $data[$key]['bulan'][$bulan] = $volume;
+            $data[$key]['total'] += $volume;
+
+            // Add to grand total
+            $grandTotal[$bulan] += $volume;
+            $grandTotalSum += $volume;
+        }
+
+        $grandTotal['total'] = $grandTotalSum;
+
+        // Sort data by name
+        uasort($data, function ($a, $b) {
+            return strcmp($a['nama'], $b['nama']);
+        });
+
+        return [
+            'data' => $data,
+            'grand_total' => $grandTotal
+        ];
+    }
+
+    /**
+     * Rekap Tahunan: Penjualan
+     * 
+     * Menghitung total penjualan per industri dengan breakdown per bulan.
+     * Mendukung filter ekspor/lokal dan grouping by tujuan_kirim atau jenis_olahan.
+     * 
+     * @param int $tahun Tahun yang akan direkap
+     * @param string $groupBy Grouping dimension: 'tujuan_kirim', 'jenis_olahan'
+     * @param string $eksporLokal Filter: 'ekspor', 'lokal', 'semua'
+     * @return array Format sama dengan rekapProduksiKayuBulat
+     */
+    private function rekapPenjualan($tahun, $groupBy = 'tujuan_kirim', $eksporLokal = 'semua')
+    {
+        // Query laporan untuk tahun yang dipilih
+        $laporanIds = Laporan::whereYear('tanggal', $tahun)
+            ->where('jenis_laporan', 'Laporan Penjualan Kayu Olahan')
+            ->pluck('id');
+
+        if ($laporanIds->isEmpty()) {
+            return [
+                'data' => [],
+                'grand_total' => array_fill(1, 12, 0) + ['total' => 0]
+            ];
+        }
+
+        // Query data penjualan kayu olahan
+        $query = laporan_penjualan_kayu_olahan::query()
+            ->select(
+                DB::raw('MONTH(laporan.tanggal) as bulan'),
+                DB::raw('SUM(laporan_penjualan_kayu_olahan.volume) as total_volume')
+            )
+            ->join('laporan', 'laporan_penjualan_kayu_olahan.laporan_id', '=', 'laporan.id')
+            ->whereIn('laporan_penjualan_kayu_olahan.laporan_id', $laporanIds);
+
+        // Filter ekspor/lokal berdasarkan keterangan (case-insensitive)
+        if ($eksporLokal === 'ekspor') {
+            $query->whereRaw('LOWER(laporan_penjualan_kayu_olahan.keterangan) LIKE ?', ['%ekspor%']);
+        } elseif ($eksporLokal === 'lokal') {
+            // Lokal = keterangan tidak mengandung 'ekspor' atau null
+            $query->whereRaw('(laporan_penjualan_kayu_olahan.keterangan IS NULL OR LOWER(laporan_penjualan_kayu_olahan.keterangan) NOT LIKE ?)', ['%ekspor%']);
+        }
+        // Jika 'semua', tidak ada filter tambahan
+
+        // Add grouping based on selected dimension
+        switch ($groupBy) {
+            case 'tujuan_kirim':
+                $query->addSelect(DB::raw('LOWER(TRIM(laporan_penjualan_kayu_olahan.tujuan_kirim)) as group_key'))
+                    ->addSelect('laporan_penjualan_kayu_olahan.tujuan_kirim as group_name')
+                    ->groupBy('group_key', 'group_name', 'bulan');
+                break;
+
+            case 'jenis_olahan':
+            default:
+                $query->addSelect(DB::raw('LOWER(TRIM(laporan_penjualan_kayu_olahan.jenis_olahan)) as group_key'))
+                    ->addSelect('laporan_penjualan_kayu_olahan.jenis_olahan as group_name')
+                    ->groupBy('group_key', 'group_name', 'bulan');
+                break;
+        }
+
+        $results = $query->get();
+
+        // Process results into structured format
+        $data = [];
+        $grandTotal = array_fill(1, 12, 0);
+        $grandTotalSum = 0;
+
+        foreach ($results as $row) {
+            $key = $row->group_key;
+            $bulan = (int) $row->bulan;
+            $volume = (float) $row->total_volume;
+
+            // Initialize group if not exists
+            if (!isset($data[$key])) {
+                $data[$key] = [
+                    'nama' => $row->group_name ?? 'N/A',
+                    'bulan' => array_fill(1, 12, 0),
+                    'total' => 0
+                ];
+            }
+
+            // Add volume to specific month
+            $data[$key]['bulan'][$bulan] = $volume;
+            $data[$key]['total'] += $volume;
+
+            // Add to grand total
+            $grandTotal[$bulan] += $volume;
+            $grandTotalSum += $volume;
+        }
+
+        $grandTotal['total'] = $grandTotalSum;
+
+        // Sort data by name
+        uasort($data, function ($a, $b) {
+            return strcmp($a['nama'], $b['nama']);
+        });
+
+        return [
+            'data' => $data,
+            'grand_total' => $grandTotal
+        ];
+    }
+
+    /**
+     * Rekap Tahunan: Pemenuhan Bahan Baku
+     * 
+     * Menghitung total pemenuhan bahan baku per industri dengan breakdown per bulan.
+     * 
+     * @param int $tahun Tahun yang akan direkap
+     * @return array Format sama dengan rekapProduksiKayuBulat
+     * 
+     * TODO: Implement logic sesuai spesifikasi user
+     */
+    private function rekapPemenuhanBahanBaku($tahun)
+    {
+        return [
+            'data' => [],
+            'grand_total' => array_fill(1, 12, 0) + ['total' => 0]
+        ];
+    }
 }

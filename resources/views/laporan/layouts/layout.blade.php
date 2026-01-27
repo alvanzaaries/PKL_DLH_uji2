@@ -303,6 +303,12 @@
                 <i class="fas fa-chart-pie nav-icon"></i> <span>Monitoring</span>
             </a>
 
+            <a href="{{ route('laporan.rekap') }}"
+                class="nav-link {{ request()->routeIs('laporan.rekap') || request()->routeIs('laporan.detail') ? 'active' : '' }}">
+                <i class="fas fa-table nav-icon"></i>
+                <span>Rekapitulasi</span>
+            </a>
+
             <div class="menu-label">Pengelolaan Data</div>
 
             @auth
@@ -313,11 +319,7 @@
                         <span>Input Laporan</span>
                     </a>
 
-                    <a href="{{ route('laporan.rekap') }}"
-                        class="nav-link {{ request()->routeIs('laporan.rekap') || request()->routeIs('laporan.detail') ? 'active' : '' }}">
-                        <i class="fas fa-table nav-icon"></i>
-                        <span>Rekapitulasi</span>
-                    </a>
+
                 @endif
             @endauth
 

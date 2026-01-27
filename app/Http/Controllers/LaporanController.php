@@ -21,7 +21,7 @@ class LaporanController extends Controller
 {
     protected $validationService;
     protected $dataService;
-        protected $exportService;
+    protected $exportService;
 
     public function __construct(
         LaporanValidationService $validationService,
@@ -506,72 +506,54 @@ class LaporanController extends Controller
     }
 
     /**
-     * Menampilkan halaman rekap laporan dengan filter bulan dan tahun
+     * Menampilkan halaman rekap laporan dengan statistik berdasarkan kategori
      */
     public function rekapLaporan(Request $request)
     {
-        // Ambil filter dari request atau gunakan bulan dan tahun saat ini
-        $bulan = (int) $request->input('bulan', now()->month);
-        $tahun = (int) $request->input('tahun', now()->year);
-        $jenis = (string) $request->input('jenis', 'penerimaan_kayu_bulat');
-        $perPage = $request->input('per_page', 25); // Default 25 items per page
-        $sortBy = $request->input('sort_by');
-        $sortDirection = $request->input('sort_direction', 'asc');
+        // Ambil parameter dari request
+        $tahun = $request->input('tahun');
+        $kategori = $request->input('kategori', 'produksi_kayu_bulat'); // Default ke produksi_kayu_bulat
+        $groupBy = $request->input('groupBy', 'asal_kayu'); // Default ke asal_kayu
+        $eksporLokal = $request->input('eksporLokal', 'semua'); // Default ke semua
 
-        $jenisOptions = [
-            'penerimaan_kayu_bulat' => 'Laporan Penerimaan Kayu Bulat',
-            'penerimaan_kayu_olahan' => 'Laporan Penerimaan Kayu Olahan',
-            'mutasi_kayu_bulat' => 'Laporan Mutasi Kayu Bulat (LMKB)',
-            'mutasi_kayu_olahan' => 'Laporan Mutasi Kayu Olahan (LMKO)',
-            'penjualan_kayu_olahan' => 'Laporan Penjualan Kayu Olahan',
-        ];
-
-        if (!array_key_exists($jenis, $jenisOptions)) {
-            $jenis = 'penerimaan_kayu_bulat';
+        // Validasi kategori
+        $validKategori = ['produksi_kayu_bulat', 'produksi_kayu_olahan', 'penjualan', 'pemenuhan_bahan_baku'];
+        if (!in_array($kategori, $validKategori)) {
+            $kategori = 'produksi_kayu_bulat';
         }
 
-        // Build filters array (allow filtering on the rekap page)
-        $filters = [];
-        if ($request->filled('jenis_kayu'))
-            $filters['jenis_kayu'] = $request->jenis_kayu;
-        if ($request->filled('asal_kayu'))
-            $filters['asal_kayu'] = $request->asal_kayu;
-        if ($request->filled('jenis_olahan'))
-            $filters['jenis_olahan'] = $request->jenis_olahan;
-        if ($request->filled('tujuan_kirim'))
-            $filters['tujuan_kirim'] = $request->tujuan_kirim;
-        if ($request->filled('ekspor_impor'))
-            $filters['ekspor_impor'] = $request->ekspor_impor;
-
-        // Get detail data menggunakan service dengan filter tambahan jika ada, pagination, dan sorting
-        $detailData = $this->dataService->getDetailLaporan($bulan, $tahun, $jenis, $filters, $perPage, $sortBy, $sortDirection);
-
-        // Get ALL items (non-paginated) for stat cards to show total across all pages
-        $allItems = $this->dataService->getDetailLaporanForExport($bulan, $tahun, $jenis, $filters);
-
-        // Determine earliest year from Laporan.tanggal to populate the year dropdown in the view.
-        // Fallback to 2020 if there are no records or parsing fails.
-        $firstDate = Laporan::orderBy('tanggal', 'asc')->value('tanggal');
-        $earliestYear = 2020;
-        if ($firstDate) {
-            try {
-                $earliestYear = (int) \Carbon\Carbon::parse($firstDate)->year;
-            } catch (\Exception $e) {
-                // keep default earliestYear
-            }
+        // Validasi groupBy berdasarkan kategori
+        if ($kategori === 'produksi_kayu_bulat') {
+            $validGroupBy = ['asal_kayu', 'jenis_kayu'];
+            $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'asal_kayu';
+        } elseif ($kategori === 'produksi_kayu_olahan') {
+            $validGroupBy = ['asal_kayu', 'jenis_olahan'];
+            $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'asal_kayu';
+        } elseif ($kategori === 'penjualan') {
+            $validGroupBy = ['tujuan_kirim', 'jenis_olahan'];
+            $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'tujuan_kirim';
+        } else {
+            $groupBy = 'asal_kayu'; // Default untuk kategori lain
         }
 
-        return view('laporan.rekapLaporan', [
-            'bulan' => $bulan,
-            'tahun' => $tahun,
-            'jenis' => $jenis,
-            'jenisLabel' => $jenisOptions[$jenis],
-            'items' => $detailData['items'],
-            'allItems' => $allItems,  // For stat cards - total across all pages
-            'filterOptions' => $detailData['filterOptions'],
-            'earliestYear' => $earliestYear,
-            'perPage' => $perPage,
-        ]);
+        // Validasi eksporLokal (hanya untuk kategori penjualan)
+        $validEksporLokal = ['ekspor', 'lokal', 'semua'];
+        if (!in_array($eksporLokal, $validEksporLokal)) {
+            $eksporLokal = 'semua';
+        }
+
+        // Ambil tahun paling awal dari database untuk dropdown filter
+        $earliestYear = Laporan::selectRaw('MIN(YEAR(tanggal)) as min_year')->value('min_year') ?? 2020;
+
+        // Inisialisasi data rekap
+        $rekapData = [];
+
+        // Jika tahun dipilih, ambil data dari service
+        if ($tahun) {
+            $rekapData = $this->dataService->getRekapTahunan($tahun, $kategori, $groupBy, $eksporLokal);
+        }
+
+        return view('laporan.rekapLaporan', compact('tahun', 'kategori', 'earliestYear', 'rekapData', 'groupBy', 'eksporLokal'));
     }
 
     /**
@@ -641,88 +623,6 @@ class LaporanController extends Controller
     }
 
     /**
-     * Export rekap laporan ke Excel
-     */
-    public function exportRekapLaporan(Request $request)
-    {
-        $bulan = (int) $request->input('bulan', now()->month);
-        $tahun = (int) $request->input('tahun', now()->year);
-        $jenis = (string) $request->input('jenis', 'penerimaan_kayu_bulat');
-
-        // Build filters array (allow filtering on the rekap page)
-        $filters = [];
-        if ($request->filled('jenis_kayu'))
-            $filters['jenis_kayu'] = $request->jenis_kayu;
-        if ($request->filled('asal_kayu'))
-            $filters['asal_kayu'] = $request->asal_kayu;
-        if ($request->filled('jenis_olahan'))
-            $filters['jenis_olahan'] = $request->jenis_olahan;
-        if ($request->filled('tujuan_kirim'))
-            $filters['tujuan_kirim'] = $request->tujuan_kirim;
-        if ($request->filled('ekspor_impor'))
-            $filters['ekspor_impor'] = $request->ekspor_impor;
-
-        // Get data
-        $items = $this->dataService->getDetailLaporanForExport($bulan, $tahun, $jenis, $filters);
-
-        $this->exportService->exportRekap($items, $bulan, $tahun, $jenis, $filters);
-    }
-
-    public function exportDetailLaporan(Request $request, $industri, $id)
-    {
-        // Temukan master laporan
-        $laporan = Laporan::findOrFail($id);
-
-        // Pastikan laporan ini milik industri yang diberikan di URL
-        if ((int) $laporan->industri_id !== (int) $industri) {
-            abort(404);
-        }
-
-        // Derive periode dari master laporan
-        $bulan = (int) \Carbon\Carbon::parse($laporan->tanggal)->month;
-        $tahun = (int) \Carbon\Carbon::parse($laporan->tanggal)->year;
-
-        $jenisOptions = [
-            'penerimaan_kayu_bulat' => 'Laporan Penerimaan Kayu Bulat',
-            'penerimaan_kayu_olahan' => 'Laporan Penerimaan Kayu Olahan',
-            'mutasi_kayu_bulat' => 'Laporan Mutasi Kayu Bulat (LMKB)',
-            'mutasi_kayu_olahan' => 'Laporan Mutasi Kayu Olahan (LMKO)',
-            'penjualan_kayu_olahan' => 'Laporan Penjualan Kayu Olahan',
-        ];
-
-        // Cari slug jenis berdasarkan label yang tersimpan di master laporan
-        $jenis = array_search($laporan->jenis_laporan, $jenisOptions);
-        if ($jenis === false) {
-            return redirect()->route('laporan.industri', ['industri' => $industri])
-                ->with('error', 'Jenis laporan tidak valid.');
-        }
-
-        // Build filters from request (so export respects applied detail filters)
-        $filters = [];
-        if ($request->filled('jenis_kayu'))
-            $filters['jenis_kayu'] = $request->jenis_kayu;
-        if ($request->filled('asal_kayu'))
-            $filters['asal_kayu'] = $request->asal_kayu;
-        if ($request->filled('jenis_olahan'))
-            $filters['jenis_olahan'] = $request->jenis_olahan;
-        if ($request->filled('tujuan_kirim'))
-            $filters['tujuan_kirim'] = $request->tujuan_kirim;
-        if ($request->filled('ekspor_impor'))
-            $filters['ekspor_impor'] = $request->ekspor_impor;
-
-        // Pastikan hanya data industri ini yang diambil
-        $filters['industri_id'] = $laporan->industri_id;
-
-        // Get data - use getDetailLaporanForExport to get ALL data without pagination
-        $items = $this->dataService->getDetailLaporanForExport($bulan, $tahun, $jenis, $filters);
-
-        // Get company name
-        $companyName = $laporan->industri->nama ?? 'Perusahaan';
-
-        $this->exportService->exportDetail($items, $bulan, $tahun, $jenis, $companyName, $filters);
-    }
-
-    /**
      * Validasi data yang sudah diedit oleh user (menggunakan Service)
      */
     private function validateEditedDataUsingService($dataRows, $jenisLaporan, $rowNumberMap = [])
@@ -756,8 +656,8 @@ class LaporanController extends Controller
             if ($isEmpty)
                 continue;
 
-            // Delegate validation to service
-            $rowErrors = $this->validationService->validateRow($row, $jenisLaporan, $rowNumber);
+            // Validasi row berdasarkan jenis laporan
+            $rowErrors = $this->validateRowByType($row, $jenisLaporan, $rowNumber);
 
             if (!empty($rowErrors)) {
                 $errors = array_merge($errors, $rowErrors);
@@ -773,6 +673,157 @@ class LaporanController extends Controller
             'valid' => $validCount,
             'errors' => $errors
         ];
+    }
+
+    /**
+     * Validasi single row berdasarkan jenis laporan
+     */
+    private function validateRowByType($row, $jenisLaporan, $rowNumber)
+    {
+        $rowErrors = [];
+
+        switch ($jenisLaporan) {
+            case 'Laporan Penerimaan Kayu Bulat':
+                // Validasi Nomor Dokumen (kolom 0) - wajib
+                if (trim((string) ($row[0] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Nomor Dokumen tidak boleh kosong";
+                }
+                // Validasi Tanggal (kolom 1) - wajib
+                if (trim((string) ($row[1] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Tanggal tidak boleh kosong";
+                }
+                // Validasi Asal Kayu (kolom 2) - wajib
+                if (trim((string) ($row[2] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Asal Kayu tidak boleh kosong";
+                }
+                // Validasi Jenis Kayu (kolom 3) - wajib
+                if (trim((string) ($row[3] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Jenis Kayu tidak boleh kosong";
+                }
+                // Validasi Jumlah Batang (kolom 4) - wajib dan numeric
+                if (trim((string) ($row[4] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang tidak boleh kosong";
+                } elseif (!is_numeric($row[4]) || $row[4] < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang harus berupa angka positif";
+                }
+                // Validasi Volume (kolom 5) - wajib dan numeric
+                if (trim((string) ($row[5] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
+                } elseif (!is_numeric($row[5]) || $row[5] < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka positif";
+                }
+                break;
+
+            case 'Laporan Mutasi Kayu Bulat (LMKB)':
+                // Validasi Jenis Kayu (kolom 0) - wajib
+                if (trim((string) ($row[0] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Jenis Kayu tidak boleh kosong";
+                }
+                // Validasi Persediaan Awal (kolom 1) - numeric
+                if (isset($row[1]) && trim((string) $row[1]) !== '' && (!is_numeric($row[1]) || $row[1] < 0)) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal harus berupa angka positif";
+                }
+                // Validasi Penambahan (kolom 2) - numeric
+                if (isset($row[2]) && trim((string) $row[2]) !== '' && (!is_numeric($row[2]) || $row[2] < 0)) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka positif";
+                }
+                // Validasi Penggunaan/Pengurangan (kolom 3) - numeric
+                if (isset($row[3]) && trim((string) $row[3]) !== '' && (!is_numeric($row[3]) || $row[3] < 0)) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka positif";
+                }
+                // Validasi Persediaan Akhir (kolom 4) - numeric
+                if (isset($row[4]) && trim((string) $row[4]) !== '' && (!is_numeric($row[4]) || $row[4] < 0)) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka positif";
+                }
+                break;
+
+            case 'Laporan Penerimaan Kayu Olahan':
+                // Validasi Nomor Dokumen (kolom 0) - wajib
+                if (trim((string) ($row[0] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Nomor Dokumen tidak boleh kosong";
+                }
+                // Validasi Tanggal (kolom 1) - wajib
+                if (trim((string) ($row[1] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Tanggal tidak boleh kosong";
+                }
+                // Validasi Asal Kayu (kolom 2) - wajib
+                if (trim((string) ($row[2] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Asal Kayu tidak boleh kosong";
+                }
+                // Validasi Jenis Produk (kolom 3) - wajib
+                if (trim((string) ($row[3] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
+                }
+                // Validasi Jumlah Keping (kolom 4) - wajib dan numeric
+                if (trim((string) ($row[4] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh kosong";
+                } elseif (!is_numeric($row[4]) || $row[4] < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka positif";
+                }
+                // Validasi Volume (kolom 5) - wajib dan numeric
+                if (trim((string) ($row[5] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
+                } elseif (!is_numeric($row[5]) || $row[5] < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka positif";
+                }
+                break;
+
+            case 'Laporan Mutasi Kayu Olahan (LMKO)':
+                // Validasi Jenis Produk (kolom 0) - wajib
+                if (trim((string) ($row[0] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
+                }
+                // Validasi Persediaan Awal (kolom 1) - numeric
+                if (isset($row[1]) && trim((string) $row[1]) !== '' && (!is_numeric($row[1]) || $row[1] < 0)) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal harus berupa angka positif";
+                }
+                // Validasi Penambahan (kolom 2) - numeric
+                if (isset($row[2]) && trim((string) $row[2]) !== '' && (!is_numeric($row[2]) || $row[2] < 0)) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka positif";
+                }
+                // Validasi Penggunaan/Pengurangan (kolom 3) - numeric
+                if (isset($row[3]) && trim((string) $row[3]) !== '' && (!is_numeric($row[3]) || $row[3] < 0)) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka positif";
+                }
+                // Validasi Persediaan Akhir (kolom 4) - numeric
+                if (isset($row[4]) && trim((string) $row[4]) !== '' && (!is_numeric($row[4]) || $row[4] < 0)) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka positif";
+                }
+                break;
+
+            case 'Laporan Penjualan Kayu Olahan':
+                // Validasi Nomor Dokumen (kolom 0) - wajib
+                if (trim((string) ($row[0] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Nomor Dokumen tidak boleh kosong";
+                }
+                // Validasi Tanggal (kolom 1) - wajib
+                if (trim((string) ($row[1] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Tanggal tidak boleh kosong";
+                }
+                // Validasi Tujuan Kirim (kolom 2) - wajib
+                if (trim((string) ($row[2] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Tujuan Kirim tidak boleh kosong";
+                }
+                // Validasi Jenis Produk (kolom 3) - wajib
+                if (trim((string) ($row[3] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
+                }
+                // Validasi Jumlah Keping (kolom 4) - wajib dan numeric
+                if (trim((string) ($row[4] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh kosong";
+                } elseif (!is_numeric($row[4]) || $row[4] < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka positif";
+                }
+                // Validasi Volume (kolom 5) - wajib dan numeric
+                if (trim((string) ($row[5] ?? '')) === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
+                } elseif (!is_numeric($row[5]) || $row[5] < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka positif";
+                }
+                break;
+        }
+
+        return $rowErrors;
     }
 }
 
