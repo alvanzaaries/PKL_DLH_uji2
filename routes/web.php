@@ -161,6 +161,8 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
 // ===================================================================
 // Entry point (Dashboard Pelaporan) - public read access
 Route::get('/laporan', [IndustriController::class, 'index'])->name('laporan.index');
+// Monitoring
+Route::get('/laporan/monitoring', [IndustriController::class, 'monitoring'])->name('laporan.monitoring');
 // Rekap - public read access
 Route::get('/rekap', [LaporanController::class, 'rekapLaporan'])->name('laporan.rekap');
 

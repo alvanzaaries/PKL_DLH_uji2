@@ -300,7 +300,12 @@
 
             <a href="{{ route('laporan.index') }}"
                 class="nav-link {{ request()->routeIs('laporan.index') || request()->routeIs('laporan.preview') || request()->routeIs('data.industri') || request()->routeIs('laporan.industri') ? 'active' : '' }}">
-                <i class="fas fa-chart-pie nav-icon"></i> <span>Monitoring</span>
+                <i class="fas fa-chart-pie nav-icon"></i> <span>Dashboard</span>
+            </a>
+
+            <a href="{{ route('laporan.monitoring') }}"
+                class="nav-link {{ request()->routeIs('laporan.monitoring') ? 'active' : '' }}">
+                <i class="fas fa-desktop nav-icon"></i> <span>Monitoring</span>
             </a>
 
             <a href="{{ route('laporan.rekap') }}"

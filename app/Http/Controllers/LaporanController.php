@@ -517,24 +517,21 @@ class LaporanController extends Controller
         $eksporLokal = $request->input('eksporLokal', 'semua'); // Default ke semua
 
         // Validasi kategori
-        $validKategori = ['produksi_kayu_bulat', 'produksi_kayu_olahan', 'penjualan', 'pemenuhan_bahan_baku'];
+        $validKategori = ['produksi_kayu_bulat', 'produksi_kayu_olahan', 'penjualan'];
         if (!in_array($kategori, $validKategori)) {
             $kategori = 'produksi_kayu_bulat';
         }
 
         // Validasi groupBy berdasarkan kategori
         if ($kategori === 'produksi_kayu_bulat') {
-            $validGroupBy = ['asal_kayu', 'jenis_kayu'];
-            $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'asal_kayu';
+            $validGroupBy = ['kabupaten', 'asal_kayu'];
+            $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'kabupaten';
         } elseif ($kategori === 'produksi_kayu_olahan') {
             $validGroupBy = ['asal_kayu', 'jenis_olahan'];
             $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'asal_kayu';
         } elseif ($kategori === 'penjualan') {
             $validGroupBy = ['tujuan_kirim', 'jenis_olahan'];
             $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'tujuan_kirim';
-        } elseif ($kategori === 'pemenuhan_bahan_baku') {
-            $validGroupBy = ['asal_kayu', 'kabupaten'];
-            $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'asal_kayu';
         } else {
             $groupBy = 'asal_kayu'; // Default untuk kategori lain
         }

@@ -685,20 +685,18 @@ class LaporanDataService
                 return $this->rekapProduksiKayuOlahan($tahun, $groupBy);
             case 'penjualan':
                 return $this->rekapPenjualan($tahun, $groupBy, $eksporLokal);
-            case 'pemenuhan_bahan_baku':
-                return $this->rekapPemenuhanBahanBaku($tahun, $groupBy);
             default:
                 return [];
         }
     }
 
     /**
-     * Rekap Tahunan: Produksi Kayu Bulat
+     * Rekap Tahunan: Pemenuhan Kayu Bulat
      * 
      * Menghitung total volume penerimaan kayu bulat dengan breakdown per bulan.
      * 
      * @param int $tahun Tahun yang akan direkap
-     * @param string $groupBy Grouping dimension: 'industri', 'asal_kayu', 'jenis_kayu'
+     * @param string $groupBy Grouping dimension: 'kabupaten' (asal industri), 'asal_kayu'
      * @return array Format: [
      *   'data' => [
      *     group_key => [
@@ -710,11 +708,11 @@ class LaporanDataService
      *   'grand_total' => [1 => 500.0, 2 => 600.0, ..., 12 => 450.0, 'total' => 6000.0]
      * ]
      */
-    private function rekapProduksiKayuBulat($tahun, $groupBy = 'industri')
+    private function rekapProduksiKayuBulat($tahun, $groupBy = 'kabupaten')
     {
         // Query laporan untuk tahun yang dipilih
         $laporanIds = Laporan::whereYear('tanggal', $tahun)
-            ->where('jenis_laporan', 'Laporan Mutasi Kayu Bulat')
+            ->where('jenis_laporan', 'Laporan Penerimaan Kayu Bulat')
             ->pluck('id');
 
         if ($laporanIds->isEmpty()) {
@@ -724,29 +722,29 @@ class LaporanDataService
             ];
         }
 
-        // Query data mutasi kayu bulat
-        $query = laporan_mutasi_kayu_bulat::query()
+        // Query data penerimaan kayu bulat
+        $query = laporan_penerimaan_kayu_bulat::query()
             ->select(
                 DB::raw('MONTH(laporan.tanggal) as bulan'),
-                DB::raw('SUM(laporan_mutasi_kayu_bulat.penambahan_volume) as total_volume')
+                DB::raw('SUM(laporan_penerimaan_kayu_bulat.volume) as total_volume')
             )
-            ->join('laporan', 'laporan_mutasi_kayu_bulat.laporan_id', '=', 'laporan.id')
-            ->whereIn('laporan_mutasi_kayu_bulat.laporan_id', $laporanIds);
+            ->join('laporan', 'laporan_penerimaan_kayu_bulat.laporan_id', '=', 'laporan.id')
+            ->whereIn('laporan_penerimaan_kayu_bulat.laporan_id', $laporanIds);
 
         // Add grouping based on selected dimension
         switch ($groupBy) {
-            case 'asal_kayu':
-                // Join dengan industries untuk mendapatkan kabupaten
+            case 'kabupaten':
+                // Join dengan industries untuk mendapatkan kabupaten (asal industri)
                 $query->join('industries', 'laporan.industri_id', '=', 'industries.id')
                     ->addSelect(DB::raw('LOWER(TRIM(industries.kabupaten)) as group_key'))
                     ->addSelect(DB::raw('UPPER(industries.kabupaten) as group_name'))
                     ->groupBy('group_key', 'group_name', 'bulan');
                 break;
 
-            case 'jenis_kayu':
+            case 'asal_kayu':
             default:
-                $query->addSelect(DB::raw('LOWER(TRIM(laporan_mutasi_kayu_bulat.jenis_kayu)) as group_key'))
-                    ->addSelect(DB::raw('UPPER(laporan_mutasi_kayu_bulat.jenis_kayu) as group_name'))
+                $query->addSelect(DB::raw('LOWER(TRIM(laporan_penerimaan_kayu_bulat.asal_kayu)) as group_key'))
+                    ->addSelect(DB::raw('UPPER(laporan_penerimaan_kayu_bulat.asal_kayu) as group_name'))
                     ->groupBy('group_key', 'group_name', 'bulan');
                 break;
         }
