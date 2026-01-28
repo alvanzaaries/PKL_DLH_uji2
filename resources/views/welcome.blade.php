@@ -142,7 +142,7 @@
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-green-200 dark:border-green-800"
                             href="{{ route('pnbp.landing') }}" target="_blank">
-                            <span>Akses Aplikasi</span>
+                            <span>Akses</span>
                             <span
                                 class="material-icons ml-1 text-sm group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
                         </a>
@@ -175,7 +175,7 @@
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-[#72C55E]/10 hover:bg-[#72C55E]/20 dark:bg-[#72C55E]/20 dark:hover:bg-[#72C55E]/30 text-[#457838] dark:text-[#A8E699] font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-[#72C55E]/40 dark:border-[#72C55E]/40"
                             href="{{ route('industri.dashboard') }}" target="_blank">
-                            <span>Akses Aplikasi</span>
+                            <span>Akses</span>
                             <span
                                 class="material-icons ml-1 text-sm group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
                         </a>
@@ -207,8 +207,8 @@
 
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-amber-200 dark:border-amber-800"
-                        href="{{ route('laporan.index') }}" target="_blank">
-                            <span>Akses Aplikasi</span>
+                        href="{{ route('laporan.landing') }}" target="_blank">
+                            <span>Akses</span>
                             <span
                                 class="material-icons ml-1 text-sm group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
                         </a>

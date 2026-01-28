@@ -34,6 +34,14 @@ class LaporanController extends Controller
     }
 
     /**
+     * Show landing page for Laporan module
+     */
+    public function landing()
+    {
+        return view('laporan.landingLaporan');
+    }
+
+    /**
      * Preview data Excel sebelum disimpan
      */
     public function preview(Request $request)
