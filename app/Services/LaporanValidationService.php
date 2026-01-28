@@ -48,32 +48,6 @@ class LaporanValidationService
     }
 
     /**
-     * Validasi satu baris data (untuk data yang diedit)
-     */
-    public function validateRow($row, $jenisLaporan, $rowNumber)
-    {
-        switch ($jenisLaporan) {
-            case 'Laporan Penerimaan Kayu Bulat':
-                return $this->validatePenerimaanKayuBulatRow($row, $rowNumber);
-
-            case 'Laporan Mutasi Kayu Bulat (LMKB)':
-                return $this->validateMutasiKayuBulatRow($row, $rowNumber);
-
-            case 'Laporan Penerimaan Kayu Olahan':
-                return $this->validatePenerimaanKayuOlahanRow($row, $rowNumber);
-
-            case 'Laporan Mutasi Kayu Olahan (LMKO)':
-                return $this->validateMutasiKayuOlahanRow($row, $rowNumber);
-
-            case 'Laporan Penjualan Kayu Olahan':
-                return $this->validatePenjualanKayuOlahanRow($row, $rowNumber);
-
-            default:
-                return ["Jenis laporan tidak dikenali"];
-        }
-    }
-
-    /**
      * Validasi format Laporan Penerimaan Kayu Bulat
      * Header di row 7, Data dimulai row 8, kolom A (No) diabaikan
      * Kolom B-H: Nomor Dokumen | Tanggal | Asal Kayu | Jenis Kayu | Jumlah Batang | Volume | Keterangan
@@ -108,8 +82,60 @@ class LaporanValidationService
                 continue;
             }
 
-            // Validasi row menggunakan helper method yang reusable
-            $rowErrors = $this->validatePenerimaanKayuBulatRow($row, $rowNumber);
+            // Validasi Nomor Dokumen (kolom 0) - wajib
+            if (trim((string) ($row[0] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Nomor Dokumen tidak boleh kosong";
+            }
+
+            // Validasi Tanggal (kolom 1) - wajib dan format
+            if (trim((string) ($row[1] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Tanggal tidak boleh kosong";
+            } else {
+                $tanggal = $this->parseExcelDate($row[1]);
+                if (!$tanggal) {
+                    $rowErrors[] = "Baris {$rowNumber}: Format tanggal tidak valid (gunakan format: DD/MM/YYYY atau YYYY-MM-DD)";
+                } else {
+                    // Untuk preview, tampilkan tanggal dalam format yang mudah dibaca (DD/MM/YYYY)
+                    $d = \DateTime::createFromFormat('Y-m-d', $tanggal);
+                    if ($d !== false) {
+                        $row[1] = $d->format('d/m/Y');
+                    }
+                }
+            }
+
+            // Validasi Asal Kayu (kolom 2) - wajib
+            if (trim((string) ($row[2] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Asal Kayu tidak boleh kosong";
+            }
+
+            // Validasi Jenis Kayu (kolom 3) - wajib
+            if (trim((string) ($row[3] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Jenis Kayu tidak boleh kosong";
+            }
+
+            // Validasi Jumlah Batang (kolom 4) - wajib, harus angka
+            if (trim((string) ($row[4] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang tidak boleh kosong";
+            } else {
+                $jumlahBatang = $this->parseExcelNumber($row[4]);
+                if ($jumlahBatang === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234 atau 1234)";
+                } elseif ($jumlahBatang < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang tidak boleh negatif";
+                }
+            }
+
+            // Validasi Volume (kolom 5) - wajib, harus angka
+            if (trim((string) ($row[5] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
+            } else {
+                $volume = $this->parseExcelNumber($row[5]);
+                if ($volume === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
+                } elseif ($volume < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh negatif";
+                }
+            }
 
             if (!empty($rowErrors)) {
                 $errors = array_merge($errors, $rowErrors);
@@ -157,8 +183,66 @@ class LaporanValidationService
                 continue;
             }
 
-            // Validasi row menggunakan helper method yang reusable
-            $rowErrors = $this->validateMutasiKayuBulatRow($row, $rowNumber);
+            if (trim((string) ($row[0] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Jenis Kayu tidak boleh kosong";
+            }
+
+            if (trim((string) ($row[1] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh kosong";
+            } else {
+                $persediaanAwal = $this->parseExcelNumber($row[1]);
+                if ($persediaanAwal === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
+                } elseif ($persediaanAwal < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh negatif";
+                }
+            }
+
+            if (trim((string) ($row[2] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh kosong";
+            } else {
+                $penambahan = $this->parseExcelNumber($row[2]);
+                if ($penambahan === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
+                } elseif ($penambahan < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh negatif";
+                }
+            }
+
+            if (trim((string) ($row[3] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh kosong";
+            } else {
+                $penggunaan = $this->parseExcelNumber($row[3]);
+                if ($penggunaan === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
+                } elseif ($penggunaan < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh negatif";
+                }
+            }
+
+            if (trim((string) ($row[4] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh kosong";
+            } else {
+                $persediaanAkhir = $this->parseExcelNumber($row[4]);
+                if ($persediaanAkhir === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
+                } elseif ($persediaanAkhir < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh negatif";
+                }
+            }
+
+            // Validasi logika: Persediaan Akhir = Persediaan Awal + Penambahan - Penggunaan
+            $persediaanAwal = $this->parseExcelNumber($row[1]);
+            $penambahan = $this->parseExcelNumber($row[2]);
+            $penggunaan = $this->parseExcelNumber($row[3]);
+            $persediaanAkhir = $this->parseExcelNumber($row[4]);
+
+            if ($persediaanAwal !== null && $penambahan !== null && $penggunaan !== null && $persediaanAkhir !== null) {
+                $expectedAkhir = $persediaanAwal + $penambahan - $penggunaan;
+                if (abs($expectedAkhir - $persediaanAkhir) > 0.01) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
+                }
+            }
 
             if (!empty($rowErrors)) {
                 $errors = array_merge($errors, $rowErrors);
@@ -206,13 +290,68 @@ class LaporanValidationService
                 continue;
             }
 
-            // Validasi row menggunakan helper method yang reusable
-            $rowErrors = $this->validatePenerimaanKayuOlahanRow($row, $rowNumber);
+            if (trim((string) ($row[0] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Nomor Dokumen tidak boleh kosong";
+            }
+
+            if (trim((string) ($row[1] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Tanggal tidak boleh kosong";
+            } elseif (!$this->parseExcelDate($row[1])) {
+                $rowErrors[] = "Baris {$rowNumber}: Format tanggal tidak valid";
+            }
+
+            // Jika tanggal valid, format untuk preview
+            $tanggalPreview = $this->parseExcelDate($row[1]);
+            if ($tanggalPreview) {
+                $d = \DateTime::createFromFormat('Y-m-d', $tanggalPreview);
+                if ($d !== false) {
+                    $row[1] = $d->format('d/m/Y');
+                }
+            }
+
+            if (trim((string) ($row[2] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Asal Kayu tidak boleh kosong";
+            }
+
+            if (trim((string) ($row[3] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
+            }
+
+            if (trim((string) ($row[4] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh kosong";
+            } else {
+                $jumlahKeping = $this->parseExcelNumber($row[4]);
+                if ($jumlahKeping === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234 atau 1234)";
+                } elseif ($jumlahKeping < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh negatif";
+                }
+            }
+
+            if (trim((string) ($row[5] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
+            } else {
+                $volume = $this->parseExcelNumber($row[5]);
+                if ($volume === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
+                } elseif ($volume < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh negatif";
+                }
+            }
 
             if (!empty($rowErrors)) {
                 $errors = array_merge($errors, $rowErrors);
             } else {
                 $validCount++;
+            }
+
+            // Jika ada tanggal dan valid, pastikan tampilannya user-friendly di preview
+            $tanggalPreview = $this->parseExcelDate($row[1] ?? null);
+            if ($tanggalPreview) {
+                $d = \DateTime::createFromFormat('Y-m-d', $tanggalPreview);
+                if ($d !== false) {
+                    $row[1] = $d->format('d/m/Y');
+                }
             }
 
             // Tambahkan semua row, baik valid maupun invalid; sertakan nomor baris sumber Excel agar bisa dipetakan ke nomor sementara
@@ -255,8 +394,66 @@ class LaporanValidationService
                 continue;
             }
 
-            // Validasi row menggunakan helper method yang reusable
-            $rowErrors = $this->validateMutasiKayuOlahanRow($row, $rowNumber);
+            if (trim((string) ($row[0] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
+            }
+
+            if (trim((string) ($row[1] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh kosong";
+            } else {
+                $persediaanAwal = $this->parseExcelNumber($row[1]);
+                if ($persediaanAwal === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
+                } elseif ($persediaanAwal < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh negatif";
+                }
+            }
+
+            if (trim((string) ($row[2] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh kosong";
+            } else {
+                $penambahan = $this->parseExcelNumber($row[2]);
+                if ($penambahan === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
+                } elseif ($penambahan < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh negatif";
+                }
+            }
+
+            if (trim((string) ($row[3] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh kosong";
+            } else {
+                $penggunaan = $this->parseExcelNumber($row[3]);
+                if ($penggunaan === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
+                } elseif ($penggunaan < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh negatif";
+                }
+            }
+
+            if (trim((string) ($row[4] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh kosong";
+            } else {
+                $persediaanAkhir = $this->parseExcelNumber($row[4]);
+                if ($persediaanAkhir === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
+                } elseif ($persediaanAkhir < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh negatif";
+                }
+            }
+
+            // Validasi logika: Persediaan Akhir = Persediaan Awal + Penambahan - Penggunaan
+            $persediaanAwal = $this->parseExcelNumber($row[1]);
+            $penambahan = $this->parseExcelNumber($row[2]);
+            $penggunaan = $this->parseExcelNumber($row[3]);
+            $persediaanAkhir = $this->parseExcelNumber($row[4]);
+
+            if ($persediaanAwal !== null && $penambahan !== null && $penggunaan !== null && $persediaanAkhir !== null) {
+                $expectedAkhir = $persediaanAwal + $penambahan - $penggunaan;
+                if (abs($expectedAkhir - $persediaanAkhir) > 0.01) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
+                }
+            }
 
             if (!empty($rowErrors)) {
                 $errors = array_merge($errors, $rowErrors);
@@ -304,8 +501,45 @@ class LaporanValidationService
                 continue;
             }
 
-            // Validasi row menggunakan helper method yang reusable
-            $rowErrors = $this->validatePenjualanKayuOlahanRow($row, $rowNumber);
+            if (trim((string) ($row[0] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Nomor Dokumen tidak boleh kosong";
+            }
+
+            if (trim((string) ($row[1] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Tanggal tidak boleh kosong";
+            } elseif (!$this->parseExcelDate($row[1])) {
+                $rowErrors[] = "Baris {$rowNumber}: Format tanggal tidak valid";
+            }
+
+            if (trim((string) ($row[2] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Tujuan Kirim tidak boleh kosong";
+            }
+
+            if (trim((string) ($row[3] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
+            }
+
+            if (trim((string) ($row[4] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh kosong";
+            } else {
+                $jumlahKeping = $this->parseExcelNumber($row[4]);
+                if ($jumlahKeping === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234 atau 1234)";
+                } elseif ($jumlahKeping < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh negatif";
+                }
+            }
+
+            if (trim((string) ($row[5] ?? '')) === '') {
+                $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
+            } else {
+                $volume = $this->parseExcelNumber($row[5]);
+                if ($volume === null) {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
+                } elseif ($volume < 0) {
+                    $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh negatif";
+                }
+            }
 
             if (!empty($rowErrors)) {
                 $errors = array_merge($errors, $rowErrors);
@@ -324,261 +558,6 @@ class LaporanValidationService
             'valid' => $validCount,
             'errors' => $errors
         ];
-    }
-
-    // --- Helper Methods per RowType ---
-
-    private function validatePenerimaanKayuBulatRow(&$row, $rowNumber)
-    {
-        $rowErrors = [];
-
-        // Validasi Nomor Dokumen (kolom 0) - wajib
-        if (trim((string) ($row[0] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Nomor Dokumen tidak boleh kosong";
-        }
-
-        // Validasi Tanggal (kolom 1) - wajib dan format
-        if (trim((string) ($row[1] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Tanggal tidak boleh kosong";
-        } else {
-            $tanggal = $this->parseExcelDate($row[1]);
-            if (!$tanggal) {
-                $rowErrors[] = "Baris {$rowNumber}: Format tanggal tidak valid (gunakan format: DD/MM/YYYY atau YYYY-MM-DD)";
-            } else {
-                // Untuk preview, tampilkan tanggal dalam format yang mudah dibaca (DD/MM/YYYY)
-                $d = \DateTime::createFromFormat('Y-m-d', $tanggal);
-                if ($d !== false) {
-                    $row[1] = $d->format('d/m/Y');
-                }
-            }
-        }
-
-        // Validasi Asal Kayu (kolom 2) - wajib
-        if (trim((string) ($row[2] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Asal Kayu tidak boleh kosong";
-        }
-
-        // Validasi Jenis Kayu (kolom 3) - wajib
-        if (trim((string) ($row[3] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Jenis Kayu tidak boleh kosong";
-        }
-
-        // Validasi Jumlah Batang (kolom 4) - wajib, harus angka
-        if (trim((string) ($row[4] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang tidak boleh kosong";
-        } else {
-            $jumlahBatang = $this->parseExcelNumber($row[4]);
-            if ($jumlahBatang === null) {
-                $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234 atau 1234)";
-            } elseif ($jumlahBatang < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang tidak boleh negatif";
-            }
-        }
-
-        // Validasi Volume (kolom 5) - wajib, harus angka
-        if (trim((string) ($row[5] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
-        } else {
-            $volume = $this->parseExcelNumber($row[5]);
-            if ($volume === null) {
-                $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
-            } elseif ($volume < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh negatif";
-            }
-        }
-        return $rowErrors;
-    }
-
-    private function validateMutasiKayuBulatRow(&$row, $rowNumber)
-    {
-        $rowErrors = [];
-
-        if (trim((string) ($row[0] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Jenis Kayu tidak boleh kosong";
-        }
-
-        if (trim((string) ($row[1] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh kosong";
-        } else {
-            $persediaanAwal = $this->parseExcelNumber($row[1]);
-            if ($persediaanAwal === null) {
-                $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
-            } elseif ($persediaanAwal < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh negatif";
-            }
-        }
-
-        if (trim((string) ($row[2] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh kosong";
-        } else {
-            $penambahan = $this->parseExcelNumber($row[2]);
-            if ($penambahan === null) {
-                $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
-            } elseif ($penambahan < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh negatif";
-            }
-        }
-
-        if (trim((string) ($row[3] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh kosong";
-        } else {
-            $penggunaan = $this->parseExcelNumber($row[3]);
-            if ($penggunaan === null) {
-                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
-            } elseif ($penggunaan < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh negatif";
-            }
-        }
-
-        if (trim((string) ($row[4] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh kosong";
-        } else {
-            $persediaanAkhir = $this->parseExcelNumber($row[4]);
-            if ($persediaanAkhir === null) {
-                $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
-            } elseif ($persediaanAkhir < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh negatif";
-            }
-        }
-
-        // Validasi logika: Persediaan Akhir = Persediaan Awal + Penambahan - Penggunaan
-        $persediaanAwal = $this->parseExcelNumber($row[1]);
-        $penambahan = $this->parseExcelNumber($row[2]);
-        $penggunaan = $this->parseExcelNumber($row[3]);
-        $persediaanAkhir = $this->parseExcelNumber($row[4]);
-
-        if ($persediaanAwal !== null && $penambahan !== null && $penggunaan !== null && $persediaanAkhir !== null) {
-            $expectedAkhir = $persediaanAwal + $penambahan - $penggunaan;
-            if (abs($expectedAkhir - $persediaanAkhir) > 0.01) {
-                $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
-            }
-        }
-        return $rowErrors;
-    }
-
-    private function validatePenerimaanKayuOlahanRow(&$row, $rowNumber)
-    {
-        $rowErrors = [];
-
-        if (trim((string) ($row[0] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Nomor Dokumen tidak boleh kosong";
-        }
-
-        if (trim((string) ($row[1] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Tanggal tidak boleh kosong";
-        } elseif (!$this->parseExcelDate($row[1])) {
-            $rowErrors[] = "Baris {$rowNumber}: Format tanggal tidak valid";
-        }
-
-        // Jika tanggal valid, format untuk preview
-        $tanggalPreview = $this->parseExcelDate($row[1]);
-        if ($tanggalPreview) {
-            $d = \DateTime::createFromFormat('Y-m-d', $tanggalPreview);
-            if ($d !== false) {
-                $row[1] = $d->format('d/m/Y');
-            }
-        }
-
-        if (trim((string) ($row[2] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Asal Kayu tidak boleh kosong";
-        }
-
-        if (trim((string) ($row[3] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
-        }
-
-        if (trim((string) ($row[4] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh kosong";
-        } else {
-            $jumlahKeping = $this->parseExcelNumber($row[4]);
-            if ($jumlahKeping === null) {
-                $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234 atau 1234)";
-            } elseif ($jumlahKeping < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh negatif";
-            }
-        }
-
-        if (trim((string) ($row[5] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
-        } else {
-            $volume = $this->parseExcelNumber($row[5]);
-            if ($volume === null) {
-                $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
-            } elseif ($volume < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh negatif";
-            }
-        }
-
-        // Jika ada tanggal dan valid, pastikan tampilannya user-friendly di preview
-        $tanggalPreview = $this->parseExcelDate($row[1] ?? null);
-        if ($tanggalPreview) {
-            $d = \DateTime::createFromFormat('Y-m-d', $tanggalPreview);
-            if ($d !== false) {
-                $row[1] = $d->format('d/m/Y');
-            }
-        }
-        return $rowErrors;
-    }
-
-    private function validateMutasiKayuOlahanRow(&$row, $rowNumber)
-    {
-        // Layoutnya sama dengan Mutasi Kayu Bulat, hanya beda judul kolom 0
-        $rowErrors = $this->validateMutasiKayuBulatRow($row, $rowNumber);
-
-        // Update error message jika "Jenis Kayu" disebut, ganti jadi "Jenis Produk"
-        foreach ($rowErrors as $k => $msg) {
-            if (strpos($msg, 'Jenis Kayu') !== false) {
-                $rowErrors[$k] = str_replace('Jenis Kayu', 'Jenis Produk', $msg);
-            }
-        }
-        return $rowErrors;
-    }
-
-    private function validatePenjualanKayuOlahanRow(&$row, $rowNumber)
-    {
-        $rowErrors = [];
-
-        if (trim((string) ($row[0] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Nomor Dokumen tidak boleh kosong";
-        }
-
-        if (trim((string) ($row[1] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Tanggal tidak boleh kosong";
-        } elseif (!$this->parseExcelDate($row[1])) {
-            $rowErrors[] = "Baris {$rowNumber}: Format tanggal tidak valid";
-        }
-
-        if (trim((string) ($row[2] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Tujuan Kirim tidak boleh kosong";
-        }
-
-        if (trim((string) ($row[3] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
-        }
-
-        if (trim((string) ($row[4] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh kosong";
-        } else {
-            $jumlahKeping = $this->parseExcelNumber($row[4]);
-            if ($jumlahKeping === null) {
-                $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234 atau 1234)";
-            } elseif ($jumlahKeping < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh negatif";
-            }
-        }
-
-        if (trim((string) ($row[5] ?? '')) === '') {
-            $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
-        } else {
-            $volume = $this->parseExcelNumber($row[5]);
-            if ($volume === null) {
-                $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka (format: desimal pakai titik, ribuan pakai koma. Contoh: 1,234.56 atau 2.27)";
-            } elseif ($volume < 0) {
-                $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh negatif";
-            }
-        }
-        return $rowErrors;
-
     }
 
     /**
@@ -604,7 +583,7 @@ class LaporanValidationService
         // - Koma (,) hanya sebagai pemisah ribuan
         // - Titik (.) hanya sebagai pemisah desimal
         // - Format valid: 1,234.56 atau 1234.56 atau 1,234 atau 1234
-
+        
         // Jika ada koma DAN titik, validasi posisi:
         // Titik harus di belakang koma (format US: 1,234.56)
         if (strpos($s, ',') !== false && strpos($s, '.') !== false) {
@@ -625,22 +604,22 @@ class LaporanValidationService
             // Pemisah ribuan harus diikuti oleh tepat 3 digit (atau pola ribuan yang benar)
             // Format valid: 1,234 atau 1,234,567 atau 12,345
             // Format invalid: 3,85 atau 1,2 atau 12,3456 (ini format desimal Indonesia)
-
+            
             // Split by comma dan cek pola
             $parts = explode(',', $s);
             $isValidThousandsSeparator = true;
-
+            
             // Semua bagian kecuali yang terakhir harus 1-3 digit (bagian pertama) atau tepat 3 digit
             // Bagian terakhir harus tepat 3 digit untuk thousand separator yang valid
             if (count($parts) >= 2) {
                 $lastPart = array_pop($parts);
-
+                
                 // Bagian terakhir harus tepat 3 digit untuk valid thousand separator
                 if (strlen($lastPart) !== 3) {
                     // Jika bukan 3 digit, kemungkinan ini format desimal Indonesia (3,85)
                     return null; // Reject format Indonesia
                 }
-
+                
                 // Cek bagian-bagian sebelumnya
                 foreach ($parts as $i => $part) {
                     if ($i === 0) {
@@ -660,7 +639,7 @@ class LaporanValidationService
             } else {
                 $isValidThousandsSeparator = false;
             }
-
+            
             if ($isValidThousandsSeparator) {
                 // Valid thousand separator, hapus koma
                 $s = str_replace(',', '', $s);
@@ -671,7 +650,7 @@ class LaporanValidationService
         }
         // Jika HANYA ada Titik (1.5 atau 1.234)
         // Titik dianggap desimal (format valid)
-
+        
         // Bersihkan karakter non-numeric lain (misal spasi, Rp, dll) selain titik dan minus
         $s = preg_replace('/[^0-9\.\-]/', '', $s);
 

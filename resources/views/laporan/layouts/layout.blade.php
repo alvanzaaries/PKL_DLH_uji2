@@ -296,11 +296,28 @@
         </div>
 
         <nav class="sidebar-menu">
-            <div class="menu-label">Main Menu</div>
+            <div class="menu-label">Menu Utama</div>
 
-            <a href="{{ route('laporan.index') }}"
-                class="nav-link {{ request()->routeIs('laporan.index') || request()->routeIs('laporan.preview') || request()->routeIs('data.industri') || request()->routeIs('laporan.industri') ? 'active' : '' }}">
-                <i class="fas fa-chart-pie nav-icon"></i> <span>Monitoring</span>
+            @auth   
+                @if(Auth::user()->role === 'admin')
+                
+                <a href="{{ route('laporan.index') }}"
+                    class="nav-link {{ request()->routeIs('laporan.index') || request()->routeIs('laporan.preview') || request()->routeIs('data.industri') || request()->routeIs('laporan.industri') ? 'active' : '' }}">
+                    <i class="fas fa-chart-pie nav-icon"></i> <span>Dashboard</span>
+                </a>
+
+                <a href="{{ route('laporan.monitoring') }}"
+                    class="nav-link {{ request()->routeIs('laporan.monitoring') ? 'active' : '' }}">
+                    <i class="fas fa-desktop nav-icon"></i> <span>Monitoring</span>
+                </a>
+                @endif
+            
+            @endauth
+
+            <a href="{{ route('laporan.rekap') }}"
+                class="nav-link {{ request()->routeIs('laporan.rekap') || request()->routeIs('laporan.detail') ? 'active' : '' }}">
+                <i class="fas fa-table nav-icon"></i>
+                <span>Rekapitulasi</span>
             </a>
 
             <div class="menu-label">Pengelolaan Data</div>
@@ -313,11 +330,7 @@
                         <span>Input Laporan</span>
                     </a>
 
-                    <a href="{{ route('laporan.rekap') }}"
-                        class="nav-link {{ request()->routeIs('laporan.rekap') || request()->routeIs('laporan.detail') ? 'active' : '' }}">
-                        <i class="fas fa-table nav-icon"></i>
-                        <span>Rekapitulasi</span>
-                    </a>
+
                 @endif
             @endauth
 

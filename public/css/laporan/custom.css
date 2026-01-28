@@ -194,7 +194,7 @@
 .ledger-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.875rem;
+    font-size: 0.75rem;
 }
 
 .ledger-table thead {
@@ -204,17 +204,17 @@
 
 .ledger-table th {
     text-align: left;
-    padding: 0.875rem 1rem;
-    font-size: 0.7rem;
+    padding: 0.625rem 0.5rem;
+    font-size: 0.65rem;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.05em;
     font-weight: 700;
     color: #6B7280;
     white-space: nowrap;
 }
 
 .ledger-table td {
-    padding: 0.875rem 1rem;
+    padding: 0.5rem 0.5rem;
     border-bottom: 1px solid #E5E7EB;
     color: #374151;
     vertical-align: middle;
@@ -242,20 +242,30 @@
 }
 
 .ledger-table th.col-month {
-    width: 45px;
+    width: 60px;
     text-align: center;
-    padding: 0.875rem 0.25rem;
+    padding: 0.5rem 0.25rem;
 }
 
 /* Total Row */
-.ledger-table tbody tr.total-row {
-    background-color: #F3F4F6;
+.ledger-table tbody tr.total-row,
+.ledger-table tfoot tr.total-row,
+.table-container .ledger-table tfoot tr.total-row {
+    background-color: #0F2F24 !important;
+    color: white !important;
     font-weight: 700;
     border-top: 2px solid #0F2F24;
 }
 
-.ledger-table tbody tr.total-row:hover {
-    background-color: #F3F4F6;
+.ledger-table tbody tr.total-row:hover,
+.ledger-table tfoot tr.total-row:hover,
+.table-container .ledger-table tfoot tr.total-row:hover {
+    background-color: #183F32 !important;
+}
+
+.ledger-table tfoot tr.total-row td,
+.table-container .ledger-table tfoot tr.total-row td {
+    color: white !important;
 }
 
 /* Status Indicators */
@@ -1037,4 +1047,73 @@
     .pagination {
         flex-wrap: wrap;
     }
+
+    /* Category Tabs Responsive */
+    .category-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding: 1rem 0;
+    }
+
+    .tab-item {
+        padding: 0.625rem 1rem;
+        font-size: 0.8125rem;
+    }
+
+    .tab-item i {
+        font-size: 0.875rem;
+    }
+}
+
+/* =========================================
+   CATEGORY TABS (REKAP LAPORAN)
+   ========================================= */
+
+.category-tabs {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.5rem 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #E5E7EB;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tab-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    border: 1px solid #D1D5DB;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #6B7280;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.tab-item i {
+    font-size: 1rem;
+}
+
+.tab-item:hover {
+    background-color: #F3F4F6;
+    border-color: #9CA3AF;
+    color: #374151;
+}
+
+.tab-item.active {
+    background-color: #0F2F24;
+    border-color: #0F2F24;
+    color: white;
+}
+
+.tab-item.active:hover {
+    background-color: #183F32;
+    border-color: #183F32;
 }

@@ -212,7 +212,7 @@
 
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-amber-200 dark:border-amber-800"
-                        href="{{ route('laporan.index') }}" target="_blank">
+                        href="{{ route('laporan.landing') }}" target="_blank">
                             <span>Akses</span>
                             <span
                                 class="material-icons ml-1 text-sm group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
