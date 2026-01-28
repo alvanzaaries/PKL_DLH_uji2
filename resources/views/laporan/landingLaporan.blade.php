@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Pelaporan Industri Kayu - DLHK Jawa Tengah</title>
+    <title> Pelaporan Hasil Hutan - DLHK Jawa Tengah</title>
     <link rel="icon" href="{{ asset('logo jateng.webp') }}" type="image/webp">
 
     {{-- Tailwind CSS --}}
@@ -245,7 +245,7 @@
             <div class="landing-content">
                 <div style="max-width: 42rem; margin: 0 auto;">
                     <h1 class="landing-title">
-                        <span style="display: block;">Sistem Pelaporan</span>
+                        <span style="display: block;">Pelaporan</span>
                         <span class="landing-title-highlight">Hasil Hutan</span>
                     </h1>
                     <p class="landing-description">
