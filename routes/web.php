@@ -172,10 +172,10 @@ Route::prefix('laporan')->middleware(['auth', 'session.timeout', 'role:admin'])-
 
 
     // Dashboard
-    Route::get('/laporan', [IndustriController::class, 'index'])->name('laporan.index');
+    Route::get('/', [IndustriController::class, 'index'])->name('laporan.index');
    
     // Monitoring
-    Route::get('/laporan/monitoring', [IndustriController::class, 'monitoring'])->name('laporan.monitoring');
+    Route::get('/monitoring', [IndustriController::class, 'monitoring'])->name('laporan.monitoring');
 
     // Upload + proses pelaporan    
     Route::get('/upload', [LaporanController::class, 'showUploadForm'])->name('laporan.upload.form');
