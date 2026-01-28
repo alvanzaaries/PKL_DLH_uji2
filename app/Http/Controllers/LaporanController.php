@@ -532,6 +532,9 @@ class LaporanController extends Controller
         } elseif ($kategori === 'penjualan') {
             $validGroupBy = ['tujuan_kirim', 'jenis_olahan'];
             $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'tujuan_kirim';
+        } elseif ($kategori === 'pemenuhan_bahan_baku') {
+            $validGroupBy = ['asal_kayu', 'kabupaten'];
+            $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'asal_kayu';
         } else {
             $groupBy = 'asal_kayu'; // Default untuk kategori lain
         }

@@ -50,6 +50,7 @@
             'jenis_kayu' => 'Jenis Kayu',
             'jenis_olahan' => 'Jenis Olahan',
             'tujuan_kirim' => 'Tujuan Kirim',
+            'kabupaten' => 'Kabupaten Industri',
         ];
         $groupByLabel = $groupByLabels[$groupBy] ?? 'Asal Kayu';
 
@@ -201,6 +202,25 @@
             </div>
         @endif
 
+        {{-- Toggle Buttons for Pemenuhan Bahan Baku --}}
+        @if ($kategori === 'pemenuhan_bahan_baku')
+            <div class="filter-ribbon no-print" style="margin-top: 1rem;">
+                <div class="filter-group">
+                    <label class="filter-label">Tampilkan Berdasarkan</label>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <a href="{{ route('laporan.rekap', ['kategori' => $kategori, 'tahun' => $tahun, 'groupBy' => 'asal_kayu']) }}"
+                            class="btn {{ $groupBy === 'asal_kayu' ? 'btn-primary' : 'btn-secondary' }}">
+                            <i class="fas fa-map-marker-alt"></i> Asal Kayu
+                        </a>
+                        <a href="{{ route('laporan.rekap', ['kategori' => $kategori, 'tahun' => $tahun, 'groupBy' => 'kabupaten']) }}"
+                            class="btn {{ $groupBy === 'kabupaten' ? 'btn-primary' : 'btn-secondary' }}">
+                            <i class="fas fa-city"></i> Kabupaten Industri
+                        </a>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Content Area -->
         <div class="table-container">
             @if ($tahun)
@@ -314,13 +334,13 @@
                 toast.className = 'toast toast-' + (variant === 'warning' ? 'warning' : variant);
                 toast.setAttribute('role', 'alert');
                 toast.innerHTML = `
-                                                                                                <div class="toast-icon ${variant === 'warning' ? 'warning' : ''}">!</div>
-                                                                                                <div class="toast-content">
-                                                                                                    <div class="toast-title">${title}</div>
-                                                                                                    <div class="toast-message">${message}</div>
-                                                                                                </div>
-                                                                                                <button class="toast-close" aria-label="Close">&times;</button>
-                                                                                            `;
+                                                                                                    <div class="toast-icon ${variant === 'warning' ? 'warning' : ''}">!</div>
+                                                                                                    <div class="toast-content">
+                                                                                                        <div class="toast-title">${title}</div>
+                                                                                                        <div class="toast-message">${message}</div>
+                                                                                                    </div>
+                                                                                                    <button class="toast-close" aria-label="Close">&times;</button>
+                                                                                                `;
                 toastContainer.appendChild(toast);
 
                 const closeBtn = toast.querySelector('.toast-close');
