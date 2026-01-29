@@ -129,7 +129,6 @@
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span>Sistem Berjalan Normal</span>
                     </div>
                     <div class="hidden md:block h-4 w-px bg-gray-200 dark:bg-gray-700"></div>
@@ -138,49 +137,7 @@
             </div>
         </footer>
     </main>
-
-    <script>
-        // Inisialisasi tema gelap/terang dan toggle sidebar.
-        (function () {
-            const root = document.documentElement;
-            const body = document.body;
-            const stored = localStorage.getItem('theme');
-            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const shouldDark = stored ? stored === 'dark' : prefersDark;
-
-            // Menerapkan tema gelap/terang pada root dan body.
-            const applyDark = (on) => {
-                if (on) {
-                    root.classList.add('dark');
-                    body.classList.add('dark');
-                } else {
-                    root.classList.remove('dark');
-                    body.classList.remove('dark');
-                }
-            };
-
-            applyDark(shouldDark);
-
-            // Mengubah tema dan menyimpan preferensi ke localStorage.
-            const toggle = () => {
-                const now = !(root.classList.contains('dark') || body.classList.contains('dark'));
-                applyDark(now);
-                localStorage.setItem('theme', now ? 'dark' : 'light');
-            };
-
-            document.getElementById('toggleDark')?.addEventListener('click', toggle);
-            document.getElementById('toggleDarkDesktop')?.addEventListener('click', toggle);
-            document.getElementById('toggleDarkSettings')?.addEventListener('click', toggle);
-
-            // Menampilkan/menyembunyikan sidebar pada perangkat kecil.
-            document.getElementById('toggleSidebar')?.addEventListener('click', () => {
-                const s = document.getElementById('sidebar');
-                if (!s) return;
-                s.classList.toggle('hidden');
-            });
-        })();
-    </script>
-
+    <script src="{{ asset('js/pnbp/admin/settings/settings.js') }}"></script>
 </body>
 
 </html>

@@ -163,13 +163,23 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
 // ===================================================================
 // PELAPORAN (SIMPEL-HUT)
 // ===================================================================
-// Entry point (Dashboard Pelaporan) - public read access
-Route::get('/laporan', [IndustriController::class, 'index'])->name('laporan.index');
 // Rekap - public read access
 Route::get('/rekap', [LaporanController::class, 'rekapLaporan'])->name('laporan.rekap');
+// Landing Page Laporan - public read access
+Route::get('/laporan/info', [LaporanController::class, 'landing'])->name('laporan.landing');
+
 
 // Admin operations (upload/rekap/detail) tetap khusus admin
 Route::prefix('laporan')->middleware(['auth', 'session.timeout', 'role:admin'])->group(function () {
+
+    // ini untuk admin
+
+
+    // Dashboard
+    Route::get('/', [IndustriController::class, 'index'])->name('laporan.index');
+   
+    // Monitoring
+    Route::get('/monitoring', [IndustriController::class, 'monitoring'])->name('laporan.monitoring');
 
     // Upload + proses pelaporan    
     Route::get('/upload', [LaporanController::class, 'showUploadForm'])->name('laporan.upload.form');

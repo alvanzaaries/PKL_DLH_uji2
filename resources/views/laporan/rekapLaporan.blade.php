@@ -2,7 +2,7 @@
 
 @section('title', 'Rekap Laporan')
 
-@section('page-title', 'Rekapitulasi Laporan')
+@section('page-title', 'Statistik Industri Kayu')
 
 @section('content')
 
@@ -25,17 +25,15 @@
         ];
 
         $kategoriLabels = [
-            'produksi_kayu_bulat' => 'Produksi Kayu Bulat',
+            'produksi_kayu_bulat' => 'Pemenuhan Kayu Bulat',
             'produksi_kayu_olahan' => 'Produksi Kayu Olahan',
             'penjualan' => 'Penjualan',
-            'pemenuhan_bahan_baku' => 'Pemenuhan Bahan Baku',
         ];
 
         $kategoriIcons = [
             'produksi_kayu_bulat' => 'fa-tree',
             'produksi_kayu_olahan' => 'fa-industry',
             'penjualan' => 'fa-shopping-cart',
-            'pemenuhan_bahan_baku' => 'fa-boxes',
         ];
 
         // Ensure kategori is set with a default value
@@ -44,14 +42,15 @@
         $periodeLabel = $tahun ? $tahun : 'Pilih Tahun';
 
         // GroupBy labels and default
-        $groupBy = $groupBy ?? 'asal_kayu';
+        $groupBy = $groupBy ?? 'kabupaten';
         $groupByLabels = [
             'asal_kayu' => 'Asal Kayu',
             'jenis_kayu' => 'Jenis Kayu',
             'jenis_olahan' => 'Jenis Olahan',
             'tujuan_kirim' => 'Tujuan Kirim',
+            'kabupaten' => 'Asal Industri',
         ];
-        $groupByLabel = $groupByLabels[$groupBy] ?? 'Asal Kayu';
+        $groupByLabel = $groupByLabels[$groupBy] ?? 'Asal Industri';
 
         // EksporLokal default
         $eksporLokal = $eksporLokal ?? 'semua';
@@ -62,7 +61,7 @@
 
         <div class="page-header">
             <div class="page-title">
-                <h2>REKAP DATA LAPORAN</h2>
+                <!-- <h2>STATISTIK INDUSTRI KAYU</h2> -->
                 <p>{{ $kategoriLabel }} • Periode: {{ $periodeLabel }}</p>
             </div>
             <div style="display: flex; gap: 8px;">
@@ -70,6 +69,17 @@
                     <i class="fas fa-arrow-left"></i> Kembali
                 </a>
             </div>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            @foreach ($kategoriLabels as $key => $label)
+                <a href="{{ route('laporan.rekap', ['kategori' => $key, 'tahun' => $tahun]) }}"
+                    class="tab-item {{ $kategori === $key ? 'active' : '' }}">
+                    <i class="fas {{ $kategoriIcons[$key] }}"></i>
+                    {{ $label }}
+                </a>
+            @endforeach
         </div>
 
         <!-- Filter Ribbon -->
@@ -81,8 +91,8 @@
 
 
                 <div class="filter-group">
-                    <label class="filter-label" for="tahun">Tahun</label>
-                    <select name="tahun" id="tahun" class="filter-input" style="min-width: 120px;">
+                    <label class="filter-label" style="margin-left: 1rem;" for="tahun">Tahun</label>
+                    <select name="tahun" id="tahun" class="filter-input" style="min-width: 120px; margin-left: 1rem;">
                         <option value="" {{ !$tahun ? 'selected' : '' }} disabled>Pilih Tahun</option>
                         @php
                             $currentYear = date('Y');
@@ -111,30 +121,19 @@
             </form>
         </div>
 
-        <!-- Category Tabs -->
-        <div class="category-tabs">
-            @foreach ($kategoriLabels as $key => $label)
-                <a href="{{ route('laporan.rekap', ['kategori' => $key, 'tahun' => $tahun]) }}"
-                    class="tab-item {{ $kategori == $key ? 'active' : '' }}">
-                    <i class="fas {{ $kategoriIcons[$key] }}"></i>
-                    {{ $label }}
-                </a>
-            @endforeach
-        </div>
-
-        <!-- Toggle Buttons for Produksi Kayu Bulat -->
+        {{-- Toggle Buttons for Pemenuhan Kayu Bulat --}}
         @if ($kategori === 'produksi_kayu_bulat' && $tahun)
             <div class="filter-ribbon no-print" style="margin-top: 1rem;">
                 <div class="filter-group">
                     <label class="filter-label">Tampilkan Berdasarkan</label>
                     <div style="display: flex; gap: 0.5rem;">
+                        <a href="{{ route('laporan.rekap', ['kategori' => $kategori, 'tahun' => $tahun, 'groupBy' => 'kabupaten']) }}"
+                            class="btn {{ $groupBy === 'kabupaten' ? 'btn-primary' : 'btn-secondary' }}">
+                            <i class="fas fa-city"></i> Asal Industri
+                        </a>
                         <a href="{{ route('laporan.rekap', ['kategori' => $kategori, 'tahun' => $tahun, 'groupBy' => 'asal_kayu']) }}"
                             class="btn {{ $groupBy === 'asal_kayu' ? 'btn-primary' : 'btn-secondary' }}">
                             <i class="fas fa-map-marker-alt"></i> Asal Kayu
-                        </a>
-                        <a href="{{ route('laporan.rekap', ['kategori' => $kategori, 'tahun' => $tahun, 'groupBy' => 'jenis_kayu']) }}"
-                            class="btn {{ $groupBy === 'jenis_kayu' ? 'btn-primary' : 'btn-secondary' }}">
-                            <i class="fas fa-tree"></i> Jenis Kayu
                         </a>
                     </div>
                 </div>
@@ -314,13 +313,13 @@
                 toast.className = 'toast toast-' + (variant === 'warning' ? 'warning' : variant);
                 toast.setAttribute('role', 'alert');
                 toast.innerHTML = `
-                                                                                                <div class="toast-icon ${variant === 'warning' ? 'warning' : ''}">!</div>
-                                                                                                <div class="toast-content">
-                                                                                                    <div class="toast-title">${title}</div>
-                                                                                                    <div class="toast-message">${message}</div>
-                                                                                                </div>
-                                                                                                <button class="toast-close" aria-label="Close">&times;</button>
-                                                                                            `;
+                                                                                                                            <div class="toast-icon ${variant === 'warning' ? 'warning' : ''}">!</div>
+                                                                                                                            <div class="toast-content">
+                                                                                                                                <div class="toast-title">${title}</div>
+                                                                                                                                <div class="toast-message">${message}</div>
+                                                                                                                            </div>
+                                                                                                                            <button class="toast-close" aria-label="Close">&times;</button>
+                                                                                                                        `;
                 toastContainer.appendChild(toast);
 
                 const closeBtn = toast.querySelector('.toast-close');

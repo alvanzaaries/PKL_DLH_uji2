@@ -97,10 +97,15 @@
             </svg>
         </div>
 
-        <div class="relative z-10 text-center px-4 max-w-5xl mx-auto mt-12">
-            <h1 class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-snug drop-shadow-xl mb-8">
-                SISTEM INFORMASI<br class="hidden md:block">
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-200 to-emerald-100">PEMANFAATAN &amp; PENGOLAHAN KAYU</span> JAWA TENGAH
+        <div class="relative z-10 text-center px-4 max-w-7xl mx-auto mt-12">
+            <h1 class="text-3xl md:text-4xl lg:text-3xl font-extrabold text-white leading-snug drop-shadow-xl mb-8">
+                SISTEM INFORMASI
+                
+                <span class="block md:whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-green-200 to-emerald-100 my-2">
+                    PEMANFAATAN &amp; PENGOLAHAN HASIL HUTAN
+                </span>
+                
+                JAWA TENGAH
             </h1>
         </div>
 
@@ -136,13 +141,12 @@
                     <h3
                         class="text-[11px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider mb-2 border-b border-green-100 dark:border-green-800 pb-1">
                         Sistem Pengelolan PNBP Jateng</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4 text-xs leading-snug line-clamp-3">Layanan digital untuk
-                        memantau distribusi, sertifikasi, dan ketersediaan benih tani hutan secara real-time.</p>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4 text-xs leading-snug line-clamp-3">Layanan digital untuk mengelola pelaporan, rekonsiliasi data hasil hutan, dan monitoring PNBP secara real-time.</p>
 
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-green-200 dark:border-green-800"
                             href="{{ route('pnbp.landing') }}" target="_blank">
-                            <span>Akses Aplikasi</span>
+                            <span>Akses</span>
                             <span
                                 class="material-icons ml-1 text-sm group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
                         </a>
@@ -175,7 +179,7 @@
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-[#72C55E]/10 hover:bg-[#72C55E]/20 dark:bg-[#72C55E]/20 dark:hover:bg-[#72C55E]/30 text-[#457838] dark:text-[#A8E699] font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-[#72C55E]/40 dark:border-[#72C55E]/40"
                             href="{{ route('industri.dashboard') }}" target="_blank">
-                            <span>Akses Aplikasi</span>
+                            <span>Akses</span>
                             <span
                                 class="material-icons ml-1 text-sm group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
                         </a>
@@ -207,8 +211,8 @@
 
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-amber-200 dark:border-amber-800"
-                        href="{{ route('laporan.index') }}" target="_blank">
-                            <span>Akses Aplikasi</span>
+                        href="{{ route('laporan.landing') }}" target="_blank">
+                            <span>Akses</span>
                             <span
                                 class="material-icons ml-1 text-sm group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
                         </a>
