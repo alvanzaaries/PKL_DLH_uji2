@@ -48,6 +48,175 @@ class LaporanValidationService
     }
 
     /**
+     * Validasi data manual input berdasarkan jenis laporan
+     * Mengubah array manual_data menjadi format yang sama dengan Excel validation
+     */
+    public function validateManualData($manualData, $jenisLaporan)
+    {
+        // Define field mappings for each report type
+        $fieldMappings = [
+            'Laporan Penerimaan Kayu Bulat' => [
+                'headers' => ['Nomor Dokumen', 'Tanggal', 'Asal Kayu', 'Jenis Kayu', 'Jumlah Batang', 'Volume', 'Keterangan'],
+                'fields' => ['nomor_dokumen', 'tanggal', 'asal_kayu', 'jenis_kayu', 'jumlah_batang', 'volume', 'keterangan'],
+                'required' => ['nomor_dokumen', 'tanggal', 'asal_kayu', 'jenis_kayu', 'jumlah_batang', 'volume'],
+                'numeric' => ['jumlah_batang', 'volume'],
+                'date' => ['tanggal']
+            ],
+            'Laporan Mutasi Kayu Bulat (LMKB)' => [
+                'headers' => ['Jenis Kayu', 'Persediaan Awal', 'Penambahan', 'Penggunaan/Pengurangan', 'Persediaan Akhir', 'Keterangan'],
+                'fields' => ['jenis_kayu', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume', 'keterangan'],
+                'required' => ['jenis_kayu', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume'],
+                'numeric' => ['persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume'],
+                'validate_logic' => true
+            ],
+            'Laporan Penerimaan Kayu Olahan' => [
+                'headers' => ['Nomor Dokumen', 'Tanggal', 'Asal Kayu', 'Jenis Produk', 'Jumlah Keping', 'Volume', 'Keterangan'],
+                'fields' => ['nomor_dokumen', 'tanggal', 'asal_kayu', 'jenis_olahan', 'jumlah_keping', 'volume', 'keterangan'],
+                'required' => ['nomor_dokumen', 'tanggal', 'asal_kayu', 'jenis_olahan', 'jumlah_keping', 'volume'],
+                'numeric' => ['jumlah_keping', 'volume'],
+                'date' => ['tanggal']
+            ],
+            'Laporan Mutasi Kayu Olahan (LMKO)' => [
+                'headers' => ['Jenis Produk', 'Persediaan Awal', 'Penambahan', 'Penggunaan/Pengurangan', 'Persediaan Akhir', 'Keterangan'],
+                'fields' => ['jenis_olahan', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume', 'keterangan'],
+                'required' => ['jenis_olahan', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume'],
+                'numeric' => ['persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume'],
+                'validate_logic' => true
+            ],
+            'Laporan Penjualan Kayu Olahan' => [
+                'headers' => ['Nomor Dokumen', 'Tanggal', 'Tujuan Kirim', 'Jenis Produk', 'Jumlah Keping', 'Volume', 'Keterangan'],
+                'fields' => ['nomor_dokumen', 'tanggal', 'tujuan_kirim', 'jenis_olahan', 'jumlah_keping', 'volume', 'keterangan'],
+                'required' => ['nomor_dokumen', 'tanggal', 'tujuan_kirim', 'jenis_olahan', 'jumlah_keping', 'volume'],
+                'numeric' => ['jumlah_keping', 'volume'],
+                'date' => ['tanggal']
+            ],
+        ];
+
+        if (!isset($fieldMappings[$jenisLaporan])) {
+            throw new \Exception('Jenis laporan tidak dikenali: ' . $jenisLaporan);
+        }
+
+        $mapping = $fieldMappings[$jenisLaporan];
+        $errors = [];
+        $allRows = [];
+        $validCount = 0;
+
+        // Process each row of manual data
+        foreach ($manualData as $rowIndex => $rowData) {
+            $rowNumber = $rowIndex; // Use the row index from manual input
+            $rowErrors = [];
+            $cells = [];
+
+            // Build cells array in the same order as headers
+            foreach ($mapping['fields'] as $fieldName) {
+                $value = $rowData[$fieldName] ?? '';
+                $cells[] = $value;
+            }
+
+            // Validate required fields
+            foreach ($mapping['required'] as $requiredField) {
+                $fieldIndex = array_search($requiredField, $mapping['fields']);
+                $fieldLabel = $mapping['headers'][$fieldIndex];
+                $value = trim((string) ($rowData[$requiredField] ?? ''));
+
+                if ($value === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: {$fieldLabel} tidak boleh kosong";
+                }
+            }
+
+            // Validate numeric fields
+            if (isset($mapping['numeric'])) {
+                foreach ($mapping['numeric'] as $numericField) {
+                    $fieldIndex = array_search($numericField, $mapping['fields']);
+                    $fieldLabel = $mapping['headers'][$fieldIndex];
+                    $value = $rowData[$numericField] ?? '';
+
+                    if (trim((string) $value) !== '') {
+                        if (!is_numeric($value)) {
+                            $rowErrors[] = "Baris {$rowNumber}: {$fieldLabel} harus berupa angka";
+                        } elseif ((float) $value < 0) {
+                            $rowErrors[] = "Baris {$rowNumber}: {$fieldLabel} tidak boleh negatif";
+                        }
+                    }
+                }
+            }
+
+            // Validate date fields
+            if (isset($mapping['date'])) {
+                foreach ($mapping['date'] as $dateField) {
+                    $fieldIndex = array_search($dateField, $mapping['fields']);
+                    $fieldLabel = $mapping['headers'][$fieldIndex];
+                    $value = $rowData[$dateField] ?? '';
+
+                    if (trim((string) $value) !== '') {
+                        $parsedDate = $this->parseManualDate($value);
+                        if (!$parsedDate) {
+                            $rowErrors[] = "Baris {$rowNumber}: {$fieldLabel} format tidak valid (gunakan format: YYYY-MM-DD)";
+                        } else {
+                            // Format for preview (DD/MM/YYYY)
+                            $d = \DateTime::createFromFormat('Y-m-d', $parsedDate);
+                            if ($d !== false) {
+                                $cells[$fieldIndex] = $d->format('d/m/Y');
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Validate logic for mutation reports
+            if (isset($mapping['validate_logic']) && $mapping['validate_logic']) {
+                $persediaanAwal = (float) ($rowData[$mapping['fields'][1]] ?? 0);
+                $penambahan = (float) ($rowData[$mapping['fields'][2]] ?? 0);
+                $penggunaan = (float) ($rowData[$mapping['fields'][3]] ?? 0);
+                $persediaanAkhir = (float) ($rowData[$mapping['fields'][4]] ?? 0);
+
+                $expectedAkhir = $persediaanAwal + $penambahan - $penggunaan;
+                if (abs($expectedAkhir - $persediaanAkhir) > 0.01) {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
+                }
+            }
+
+            if (!empty($rowErrors)) {
+                $errors = array_merge($errors, $rowErrors);
+            } else {
+                $validCount++;
+            }
+
+            $allRows[] = ['cells' => $cells, 'source_row' => $rowNumber];
+        }
+
+        return [
+            'headers' => $mapping['headers'],
+            'rows' => $allRows,
+            'total' => count($allRows),
+            'valid' => $validCount,
+            'errors' => $errors
+        ];
+    }
+
+    /**
+     * Helper: Parse tanggal dari input manual (format HTML date input: YYYY-MM-DD)
+     */
+    private function parseManualDate($value): ?string
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $s = trim((string) $value);
+
+        // HTML date input returns YYYY-MM-DD format
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $s)) {
+            $d = \DateTime::createFromFormat('Y-m-d', $s);
+            if ($d !== false) {
+                return $d->format('Y-m-d');
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Validasi format Laporan Penerimaan Kayu Bulat
      * Header di row 7, Data dimulai row 8, kolom A (No) diabaikan
      * Kolom B-H: Nomor Dokumen | Tanggal | Asal Kayu | Jenis Kayu | Jumlah Batang | Volume | Keterangan
@@ -583,7 +752,7 @@ class LaporanValidationService
         // - Koma (,) hanya sebagai pemisah ribuan
         // - Titik (.) hanya sebagai pemisah desimal
         // - Format valid: 1,234.56 atau 1234.56 atau 1,234 atau 1234
-        
+
         // Jika ada koma DAN titik, validasi posisi:
         // Titik harus di belakang koma (format US: 1,234.56)
         if (strpos($s, ',') !== false && strpos($s, '.') !== false) {
@@ -604,22 +773,22 @@ class LaporanValidationService
             // Pemisah ribuan harus diikuti oleh tepat 3 digit (atau pola ribuan yang benar)
             // Format valid: 1,234 atau 1,234,567 atau 12,345
             // Format invalid: 3,85 atau 1,2 atau 12,3456 (ini format desimal Indonesia)
-            
+
             // Split by comma dan cek pola
             $parts = explode(',', $s);
             $isValidThousandsSeparator = true;
-            
+
             // Semua bagian kecuali yang terakhir harus 1-3 digit (bagian pertama) atau tepat 3 digit
             // Bagian terakhir harus tepat 3 digit untuk thousand separator yang valid
             if (count($parts) >= 2) {
                 $lastPart = array_pop($parts);
-                
+
                 // Bagian terakhir harus tepat 3 digit untuk valid thousand separator
                 if (strlen($lastPart) !== 3) {
                     // Jika bukan 3 digit, kemungkinan ini format desimal Indonesia (3,85)
                     return null; // Reject format Indonesia
                 }
-                
+
                 // Cek bagian-bagian sebelumnya
                 foreach ($parts as $i => $part) {
                     if ($i === 0) {
@@ -639,7 +808,7 @@ class LaporanValidationService
             } else {
                 $isValidThousandsSeparator = false;
             }
-            
+
             if ($isValidThousandsSeparator) {
                 // Valid thousand separator, hapus koma
                 $s = str_replace(',', '', $s);
@@ -650,7 +819,7 @@ class LaporanValidationService
         }
         // Jika HANYA ada Titik (1.5 atau 1.234)
         // Titik dianggap desimal (format valid)
-        
+
         // Bersihkan karakter non-numeric lain (misal spasi, Rp, dll) selain titik dan minus
         $s = preg_replace('/[^0-9\.\-]/', '', $s);
 

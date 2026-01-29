@@ -46,13 +46,27 @@ class LaporanController extends Controller
      */
     public function preview(Request $request)
     {
-        $request->validate([
-            'industri_id' => 'required|exists:industries,id',
-            'bulan' => 'required|integer|between:1,12',
-            'tahun' => 'required|integer|min:2020',
-            'jenis_laporan' => 'required|string',
-            'file_excel' => 'required|file|mimes:xlsx,xls|max:5120',
-        ]);
+        // Detect input mode: manual or excel
+        $isManualMode = $request->has('manual_data') && is_array($request->manual_data) && count($request->manual_data) > 0;
+
+        // Conditional validation based on mode
+        if ($isManualMode) {
+            $request->validate([
+                'industri_id' => 'required|exists:industries,id',
+                'bulan' => 'required|integer|between:1,12',
+                'tahun' => 'required|integer|min:2020',
+                'jenis_laporan' => 'required|string',
+                'manual_data' => 'required|array|min:1',
+            ]);
+        } else {
+            $request->validate([
+                'industri_id' => 'required|exists:industries,id',
+                'bulan' => 'required|integer|between:1,12',
+                'tahun' => 'required|integer|min:2020',
+                'jenis_laporan' => 'required|string',
+                'file_excel' => 'required|file|mimes:xlsx,xls|max:5120',
+            ]);
+        }
 
         // Validasi unique: cek apakah sudah ada laporan untuk industri, bulan, tahun, dan jenis yang sama
         $existingLaporan = Laporan::where('industri_id', $request->industri_id)
@@ -68,24 +82,32 @@ class LaporanController extends Controller
         }
 
         try {
-            // Upload file sementara
-            $file = $request->file('file_excel');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('temp', $fileName, 'local');
-
-            // Baca Excel dan validasi format sesuai jenis laporan menggunakan service
             $jenisLaporan = $request->jenis_laporan;
-            $previewData = $this->validationService->readAndValidateExcel($filePath, $jenisLaporan);
+            $filePath = null;
+
+            if ($isManualMode) {
+                // Process manual data
+                $previewData = $this->validationService->validateManualData($request->manual_data, $jenisLaporan);
+            } else {
+                // Upload file sementara
+                $file = $request->file('file_excel');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('temp', $fileName, 'local');
+
+                // Baca Excel dan validasi format sesuai jenis laporan menggunakan service
+                $previewData = $this->validationService->readAndValidateExcel($filePath, $jenisLaporan);
+            }
 
             // Simpan data ke session untuk proses simpan nanti
             session([
                 'preview_data' => $previewData,
-                'preview_file_path' => $filePath,
+                'preview_file_path' => $filePath, // Will be null for manual mode
                 'preview_metadata' => [
                     'industri_id' => $request->industri_id,
                     'bulan' => $request->bulan,
                     'tahun' => $request->tahun,
                     'jenis_laporan' => $jenisLaporan,
+                    'is_manual' => $isManualMode, // Flag to indicate manual mode
                 ],
                 'redirect_after_save' => url()->previous(), // Simpan URL sebelumnya
                 'is_fresh_upload' => true, // Flag untuk clear localStorage di view
@@ -98,10 +120,9 @@ class LaporanController extends Controller
             Log::error('Laporan preview failed', ['exception' => $e]);
             return back()
                 ->withInput()
-                ->with('error', 'Gagal memproses file. Silakan periksa format template.');
+                ->with('error', 'Gagal memproses data. ' . $e->getMessage());
         }
     }
-
     /**
      * Show preview page by reading preview data from session (GET).
      */

@@ -6,6 +6,8 @@ use App\Models\Tptkb;
 use App\Models\IndustriBase;
 use App\Models\MasterSumber;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -147,12 +149,27 @@ class TptkbController extends Controller implements HasMiddleware
             $tptkb = $query->latest()->paginate(10);
         }
 
-        // Get list kabupaten untuk filter dropdown
-        $kabupatenList = IndustriBase::whereHas('tptkb')
-            ->distinct()
-            ->pluck('kabupaten')
-            ->sort()
-            ->values();
+        // Get list kabupaten untuk filter dropdown dari API
+        // ID Provinsi Jawa Tengah = 33
+        $kabupatenList = Cache::remember('wilayah_jateng_kabupaten', 86400, function () {
+            try {
+                $response = Http::timeout(10)->get('https://www.emsifa.com/api-wilayah-indonesia/api/regencies/33.json');
+                
+                if ($response->successful()) {
+                    $data = $response->json();
+                    // Ambil hanya nama kabupaten/kota
+                    return collect($data)->pluck('name')->sort()->values();
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to fetch wilayah data: ' . $e->getMessage());
+            }
+            
+            // Fallback ke data dari database jika API gagal
+            return IndustriBase::whereHas('tptkb')
+                ->distinct()
+                ->orderBy('kabupaten')
+                ->pluck('kabupaten');
+        });
 
         // Get list sumber bahan baku dari master_sumber (termasuk yang custom)
         $sumberBahanBakuList = MasterSumber::orderBy('nama')->pluck('nama', 'id');
@@ -392,5 +409,36 @@ class TptkbController extends Controller implements HasMiddleware
         $tptkb->industri->delete();
 
         return redirect()->route('tptkb.index')->with('success', 'Data TPT-KB berhasil dihapus!');
+    }
+
+    /**
+     * Import data dari Excel
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240' // Max 10MB
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $filePath = $file->getRealPath();
+
+            // Process import
+            $importer = new \App\Imports\TptkbImport();
+            $result = $importer->import($filePath);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Berhasil import {$result['success']} data dari {$result['total']} baris",
+                'data' => $result
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal import data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

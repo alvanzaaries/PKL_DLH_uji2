@@ -115,7 +115,7 @@
 
         /* Highlight Section */
         .total-banner {
-            background: var(--primary);
+            background: #022d0d;
             color: var(--white);
             padding: 40px;
             border-radius: 16px;

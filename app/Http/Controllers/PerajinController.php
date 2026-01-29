@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Perajin;
 use App\Models\IndustriBase;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -77,11 +79,27 @@ class PerajinController extends Controller implements HasMiddleware
             ->sortDesc()
             ->take(5);
 
-        // Data Kabupaten untuk dropdown filter
-        $kabupatenList = IndustriBase::select('kabupaten')
-            ->distinct()
-            ->orderBy('kabupaten')
-            ->pluck('kabupaten');
+        // Data Kabupaten untuk dropdown filter dari API
+        // ID Provinsi Jawa Tengah = 33
+        $kabupatenList = Cache::remember('wilayah_jateng_kabupaten', 86400, function () {
+            try {
+                $response = Http::timeout(10)->get('https://www.emsifa.com/api-wilayah-indonesia/api/regencies/33.json');
+                
+                if ($response->successful()) {
+                    $data = $response->json();
+                    // Ambil hanya nama kabupaten/kota
+                    return collect($data)->pluck('name')->sort()->values();
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to fetch wilayah data: ' . $e->getMessage());
+            }
+            
+            // Fallback ke data dari database jika API gagal
+            return IndustriBase::select('kabupaten')
+                ->distinct()
+                ->orderBy('kabupaten')
+                ->pluck('kabupaten');
+        });
 
         return view('Industri.perajin.index', compact('perajin', 'kabupatenList', 'yearStats', 'locationStats'));
     }
@@ -172,5 +190,36 @@ class PerajinController extends Controller implements HasMiddleware
         $perajin->industri->delete(); // Cascade delete
         return redirect()->route('perajin.index')
             ->with('success', 'Data perajin berhasil dihapus');
+    }
+
+    /**
+     * Import data dari Excel
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240' // Max 10MB
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $filePath = $file->getRealPath();
+
+            // Process import
+            $importer = new \App\Imports\PerajinImport();
+            $result = $importer->import($filePath);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Berhasil import {$result['success']} data dari {$result['total']} baris",
+                'data' => $result
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal import data: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

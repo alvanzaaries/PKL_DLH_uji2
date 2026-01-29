@@ -96,8 +96,7 @@
                         <option value="" {{ !$tahun ? 'selected' : '' }} disabled>Pilih Tahun</option>
                         @php
                             $currentYear = date('Y');
-                            $configuredStartYear = $earliestYear ?? 2020;
-                            $startYear = $configuredStartYear;
+                            $startYear = config('laporan.start_year', 2020);
                             if ($startYear > $currentYear) {
                                 $startYear = $currentYear;
                             }
@@ -313,13 +312,13 @@
                 toast.className = 'toast toast-' + (variant === 'warning' ? 'warning' : variant);
                 toast.setAttribute('role', 'alert');
                 toast.innerHTML = `
-                                                                                                                            <div class="toast-icon ${variant === 'warning' ? 'warning' : ''}">!</div>
-                                                                                                                            <div class="toast-content">
-                                                                                                                                <div class="toast-title">${title}</div>
-                                                                                                                                <div class="toast-message">${message}</div>
-                                                                                                                            </div>
-                                                                                                                            <button class="toast-close" aria-label="Close">&times;</button>
-                                                                                                                        `;
+                                                                                                                                <div class="toast-icon ${variant === 'warning' ? 'warning' : ''}">!</div>
+                                                                                                                                <div class="toast-content">
+                                                                                                                                    <div class="toast-title">${title}</div>
+                                                                                                                                    <div class="toast-message">${message}</div>
+                                                                                                                                </div>
+                                                                                                                                <button class="toast-close" aria-label="Close">&times;</button>
+                                                                                                                            `;
                 toastContainer.appendChild(toast);
 
                 const closeBtn = toast.querySelector('.toast-close');

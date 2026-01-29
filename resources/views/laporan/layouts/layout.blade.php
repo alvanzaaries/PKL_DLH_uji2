@@ -296,22 +296,28 @@
         </div>
 
         <nav class="sidebar-menu">
+
+            <a href="{{ route('welcome') }}" class="nav-link">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+
             <div class="menu-label">Menu Utama</div>
 
-            @auth   
+            @auth
                 @if(Auth::user()->role === 'admin')
-                
-                <a href="{{ route('laporan.index') }}"
-                    class="nav-link {{ request()->routeIs('laporan.index') || request()->routeIs('laporan.preview') || request()->routeIs('data.industri') || request()->routeIs('laporan.industri') ? 'active' : '' }}">
-                    <i class="fas fa-chart-pie nav-icon"></i> <span>Dashboard</span>
-                </a>
 
-                <a href="{{ route('laporan.monitoring') }}"
-                    class="nav-link {{ request()->routeIs('laporan.monitoring') ? 'active' : '' }}">
-                    <i class="fas fa-desktop nav-icon"></i> <span>Monitoring</span>
-                </a>
+                    <a href="{{ route('laporan.index') }}"
+                        class="nav-link {{ request()->routeIs('laporan.index') || request()->routeIs('laporan.preview') || request()->routeIs('data.industri') || request()->routeIs('laporan.industri') ? 'active' : '' }}">
+                        <i class="fas fa-chart-pie nav-icon"></i> <span>Dashboard</span>
+                    </a>
+
+                    <a href="{{ route('laporan.monitoring') }}"
+                        class="nav-link {{ request()->routeIs('laporan.monitoring') ? 'active' : '' }}">
+                        <i class="fas fa-desktop nav-icon"></i> <span>Monitoring</span>
+                    </a>
                 @endif
-            
+
             @endauth
 
             <a href="{{ route('laporan.rekap') }}"
@@ -336,10 +342,6 @@
 
             <div class="mt-auto mb-2 border-t border-white/10 mx-2"></div>
 
-            <a href="{{ route('welcome') }}" class="nav-link">
-                <i class="fas fa-home nav-icon"></i>
-                <span>Beranda</span>
-            </a>
 
         </nav>
 

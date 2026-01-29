@@ -700,9 +700,14 @@
             </div>
             @auth
             @if(auth()->user()->role === 'admin')
-            <a href="{{ route('tptkb.create') }}" class="btn btn-primary">
-                <span>+</span> Tambah Data Baru
-            </a>
+            <div style="display: flex; gap: 12px;">
+                <button onclick="openImportModal()" class="btn btn-primary" style="background: #0ea5e9;">
+                    <i class="fas fa-file-excel"></i> Import Excel
+                </button>            
+                <a href="{{ route('tptkb.create') }}" class="btn btn-primary">
+                    <span>+</span> Tambah Data Baru
+                </a>
+            </div>
             @endif
             @endauth
         </div>
@@ -860,7 +865,7 @@
                             <td>
                                 @if($item->sumberBahanBaku->count() > 0)
                                     @foreach($item->sumberBahanBaku as $sumber)
-                                        <span class="badge badge-jenis">{{ $sumber->nama }}</span>
+                                        <span class="badge badge-jenis">{{ $sumber->pivot->nama_custom ?? $sumber->nama }}</span>
                                     @endforeach
                                 @else
                                     -
@@ -869,7 +874,7 @@
                             <td>
                                 @if($item->sumberBahanBaku->count() > 0)
                                     @foreach($item->sumberBahanBaku as $sumber)
-                                        <div>{{ $sumber->nama }}: {{ number_format($sumber->pivot->kapasitas, 2, ',', '.') }}</div>
+                                        <div>{{ $sumber->pivot->nama_custom ?? $sumber->nama }}: {{ number_format($sumber->pivot->kapasitas, 2, ',', '.') }}</div>
                                     @endforeach
                                 @else
                                     -
@@ -911,7 +916,9 @@
                 </table>
                 @else
                 <div class="empty-state">
-                    <div style="font-size: 48px;">📂</div>
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                    </svg>
                     <div style="font-size: 18px; margin: 10px 0;">Tidak ada data ditemukan</div>
                     <p style="font-size: 14px;">Silakan ubah filter atau tambah data baru</p>
                 </div>
@@ -1037,9 +1044,10 @@
             if (item.sumber_bahan_baku && item.sumber_bahan_baku.length > 0) {
                 sumberBody.innerHTML = '';
                 item.sumber_bahan_baku.forEach(sumber => {
+                    const namaSumber = sumber.pivot.nama_custom || sumber.nama;
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td style="padding: 10px;">${sumber.nama}</td>
+                        <td style="padding: 10px;">${namaSumber}</td>
                         <td style="padding: 10px; text-align: right;">${parseFloat(sumber.pivot.kapasitas).toLocaleString('id-ID', {minimumFractionDigits: 2})}</td>
                     `;
                     sumberBody.appendChild(row);
@@ -1144,6 +1152,32 @@
                 setTimeout(() => alert.remove(), 500);
             });
         }, 5000);
+
+        // Toggle filter visibility
+        function toggleFilter() {
+            const filterBody = document.getElementById('filterBody');
+            const filterIcon = document.getElementById('filterIcon');
+            
+            if (filterBody.style.display === 'none') {
+                filterBody.style.display = 'block';
+                filterIcon.classList.remove('fa-chevron-down');
+                filterIcon.classList.add('fa-chevron-up');
+            } else {
+                filterBody.style.display = 'none';
+                filterIcon.classList.remove('fa-chevron-up');
+                filterIcon.classList.add('fa-chevron-down');
+            }
+        }
+
+        // Prevent filter body clicks from bubbling to header
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterBody = document.getElementById('filterBody');
+            if (filterBody) {
+                filterBody.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
+        });
     </script>
 
     <!-- Select2 JS -->
@@ -1264,6 +1298,203 @@
                 }
             });
         });
+    </script>
+
+    <!-- Import Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Import Data dari Excel</h2>
+                <span class="close-btn" onclick="closeImportModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="importAlert" style="display: none;"></div>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary);">
+                        <i class="fas fa-file-excel" style="color: #10b981;"></i> Pilih File Excel
+                    </label>
+                    <input type="file" id="importFile" accept=".xlsx,.xls" 
+                           style="width: 100%; padding: 12px; border: 2px dashed var(--border); border-radius: 8px; cursor: pointer;">
+                    <small style="color: #64748b; display: block; margin-top: 8px;">
+                        Format: .xlsx atau .xls (Maksimal 10MB)
+                    </small>
+                </div>
+
+                <div id="importProgress" style="display: none; margin-bottom: 20px;">
+                    <div style="background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div id="progressBar" style="background: linear-gradient(90deg, #10b981, #059669); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                    </div>
+                    <p id="progressText" style="text-align: center; margin-top: 8px; color: #64748b; font-size: 14px;"></p>
+                </div>
+
+                <div id="importResult" style="display: none; margin-top: 20px;">
+                    <h4 style="color: var(--primary); margin-bottom: 12px;">Hasil Import:</h4>
+                    <div id="resultContent"></div>
+                </div>
+
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
+                    <button onclick="closeImportModal()" class="btn" style="background: #64748b; color: white;">
+                        Batal
+                    </button>
+                    <button onclick="processImport()" id="btnImport" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Upload & Import
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openImportModal() {
+            document.getElementById('importModal').style.display = 'block';
+            // Reset form
+            document.getElementById('importFile').value = '';
+            document.getElementById('importAlert').style.display = 'none';
+            document.getElementById('importProgress').style.display = 'none';
+            document.getElementById('importResult').style.display = 'none';
+        }
+
+        function closeImportModal() {
+            document.getElementById('importModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('importModal');
+            if (event.target == modal) {
+                closeImportModal();
+            }
+        }
+
+        function processImport() {
+            const fileInput = document.getElementById('importFile');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                showAlert('Silakan pilih file Excel terlebih dahulu!', 'error');
+                return;
+            }
+
+            // Validate file type
+            const validTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/)) {
+                showAlert('File harus berformat .xlsx atau .xls!', 'error');
+                return;
+            }
+
+            // Validate file size (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showAlert('Ukuran file maksimal 10MB!', 'error');
+                return;
+            }
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            // Show progress
+            document.getElementById('importProgress').style.display = 'block';
+            document.getElementById('progressBar').style.width = '30%';
+            document.getElementById('progressText').textContent = 'Mengupload file...';
+            document.getElementById('btnImport').disabled = true;
+
+            // Send AJAX request
+            fetch('{{ route("tptkb.import") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            })
+            .then(response => {
+                // Check if response is OK
+                if (!response.ok) {
+                    // Try to get error message from JSON
+                    return response.json().then(data => {
+                        throw new Error(data.message || `Server error: ${response.status}`);
+                    }).catch(() => {
+                        // If JSON parsing fails, throw generic error
+                        throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('progressBar').style.width = '100%';
+                document.getElementById('progressText').textContent = 'Selesai!';
+                
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    displayImportResult(data.data);
+                } else {
+                    showAlert(data.message || 'Terjadi kesalahan saat import', 'error');
+                    if (data.data && data.data.errors) {
+                        displayImportErrors(data.data.errors);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Terjadi kesalahan: ' + error.message, 'error');
+                document.getElementById('progressBar').style.width = '0%';
+                document.getElementById('progressText').textContent = '';
+            })
+            .finally(() => {
+                document.getElementById('btnImport').disabled = false;
+            });
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.getElementById('importAlert');
+            alertDiv.className = 'alert alert-' + type;
+            alertDiv.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i> ' + message;
+            alertDiv.style.display = 'flex';
+        }
+
+        function displayImportResult(data) {
+            const resultDiv = document.getElementById('importResult');
+            const contentDiv = document.getElementById('resultContent');
+            
+            let html = `
+                <div style="background: white; padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; color: #3b82f6;">${data.total}</div>
+                            <div style="font-size: 12px; color: #64748b;">Total Baris</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; color: #10b981;">${data.success}</div>
+                            <div style="font-size: 12px; color: #64748b;">Berhasil</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; color: #ef4444;">${data.errors_count}</div>
+                            <div style="font-size: 12px; color: #64748b;">Gagal</div>
+                        </div>
+                    </div>
+            `;
+            
+            if (data.errors && data.errors.length > 0) {
+                html += `
+                    <div style="margin-top: 16px; max-height: 200px; overflow-y: auto;">
+                        <h5 style="color: #ef4444; margin-bottom: 8px; font-size: 14px;">Error Detail:</h5>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #64748b;">
+                `;
+                data.errors.forEach(error => {
+                    html += `<li>Baris ${error.row}: ${error.message}</li>`;
+                });
+                html += `</ul></div>`;
+            }
+            
+            html += `</div>`;
+            contentDiv.innerHTML = html;
+            resultDiv.style.display = 'block';
+        }
+
+        function displayImportErrors(errors) {
+            displayImportResult({ total: 0, success: 0, errors_count: errors.length, errors: errors });
+        }
     </script>
 
     <!-- Leaflet JS -->

@@ -90,7 +90,7 @@
                             <select name="tahun" id="tahun" required class="w-full form-input px-3 py-2 border text-sm">
                                 @php
                                     $currentYear = date('Y');
-                                    $startYear = 2026;
+                                    $startYear = config('laporan.start_year', 2020);
                                 @endphp
                                 @for ($y = $currentYear; $y >= $startYear; $y--)
                                     <option value="{{ $y }}" {{ (old('tahun') ?? $currentYear) == $y ? 'selected' : '' }}>{{ $y }}
@@ -194,290 +194,290 @@
         const excelSection = document.getElementById('excelSection');
         const manualSection = document.getElementById('manualSection');
         const manualTableHead = document.getElementById('manualTableHead');
-            const manualTableBody = document.getElementById('manualTableBody');
-            const btnAddRow = document.getElementById('btnAddRow');
-            const noteText = document.getElementById('noteText');
-            const uploadForm = document.getElementById('uploadForm');
-            const jenisLaporanSelect = document.getElementById('jenis_laporan');
-            const tableNotice = document.getElementById('tableNotice');
-            const tableContainer = document.getElementById('tableContainer');
-            const tableHint = document.getElementById('tableHint');
+        const manualTableBody = document.getElementById('manualTableBody');
+        const btnAddRow = document.getElementById('btnAddRow');
+        const noteText = document.getElementById('noteText');
+        const uploadForm = document.getElementById('uploadForm');
+        const jenisLaporanSelect = document.getElementById('jenis_laporan');
+        const tableNotice = document.getElementById('tableNotice');
+        const tableContainer = document.getElementById('tableContainer');
+        const tableHint = document.getElementById('tableHint');
 
-            let currentMode = 'excel'; // 'excel' or 'manual'
-            let rowCounter = 0;
-            let currentTableConfig = null;
+        let currentMode = 'excel'; // 'excel' or 'manual'
+        let rowCounter = 0;
+        let currentTableConfig = null;
 
-            // Define table configurations for each report type
-            const tableConfigs = {
-                'Laporan Mutasi Kayu Bulat (LMKB)': {
-                    fields: [
-                        { name: 'jenis_kayu', label: 'Jenis Kayu', type: 'text', placeholder: 'Contoh: Meranti' },
-                        { name: 'persediaan_awal_volume', label: 'Persediaan Awal (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                        { name: 'penambahan_volume', label: 'Penambahan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                        { name: 'penggunaan_pengurangan_volume', label: 'Penggunaan/Pengurangan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                        { name: 'persediaan_akhir_volume', label: 'Persediaan Akhir (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                        { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
-                    ]
-                },
-                'Laporan Mutasi Kayu Olahan (LMKO)': {
-                    fields: [
-                        { name: 'jenis_olahan', label: 'Jenis Olahan', type: 'text', placeholder: 'Contoh: Papan' },
-                        { name: 'persediaan_awal_volume', label: 'Persediaan Awal (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                        { name: 'penambahan_volume', label: 'Penambahan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                        { name: 'penggunaan_pengurangan_volume', label: 'Penggunaan/Pengurangan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                        { name: 'persediaan_akhir_volume', label: 'Persediaan Akhir (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                        { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
-                    ]
-                },
-                'Laporan Penerimaan Kayu Bulat': {
-                    fields: [
-                        { name: 'nomor_dokumen', label: 'Nomor Dokumen', type: 'text', placeholder: 'Nomor dokumen' },
-                        { name: 'tanggal', label: 'Tanggal', type: 'date', placeholder: '' },
-                        { name: 'asal_kayu', label: 'Asal Kayu', type: 'text', placeholder: 'Asal kayu' },
-                        { name: 'jenis_kayu', label: 'Jenis Kayu', type: 'text', placeholder: 'Jenis kayu' },
-                        { name: 'jumlah_batang', label: 'Jumlah Batang', type: 'number', placeholder: '0', step: '1' },
-                        { name: 'volume', label: 'Volume (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                        { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
-                    ]
-                },
-                'Laporan Penerimaan Kayu Olahan': {
-                    fields: [
-                        { name: 'nomor_dokumen', label: 'Nomor Dokumen', type: 'text', placeholder: 'Nomor dokumen' },
-                        { name: 'tanggal', label: 'Tanggal', type: 'date', placeholder: '' },
-                        { name: 'asal_kayu', label: 'Asal Kayu', type: 'text', placeholder: 'Asal kayu' },
-                        { name: 'jenis_olahan', label: 'Jenis Olahan', type: 'text', placeholder: 'Jenis olahan' },
-                        { name: 'jumlah_keping', label: 'Jumlah Keping', type: 'number', placeholder: '0', step: '1' },
-                        { name: 'volume', label: 'Volume (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                        { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
-                    ]
-                },
-                'Laporan Penjualan Kayu Olahan': {
-                    fields: [
-                        { name: 'nomor_dokumen', label: 'Nomor Dokumen', type: 'text', placeholder: 'Nomor dokumen' },
-                        { name: 'tanggal', label: 'Tanggal', type: 'date', placeholder: '' },
-                        { name: 'tujuan_kirim', label: 'Tujuan Kirim', type: 'text', placeholder: 'Tujuan pengiriman' },
-                        { name: 'jenis_olahan', label: 'Jenis Olahan', type: 'text', placeholder: 'Jenis olahan' },
-                        { name: 'jumlah_keping', label: 'Jumlah Keping', type: 'number', placeholder: '0', step: '1' },
-                        { name: 'volume', label: 'Volume (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                        { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
-                    ]
-                }
-            };
-
-            // Generate table headers based on config
-            function generateTableHeaders(config) {
-                let headerHTML = '<tr><th class="px-3 py-2 text-left font-bold text-gray-700">No</th>';
-                config.fields.forEach(field => {
-                    headerHTML += `<th class="px-3 py-2 text-left font-bold text-gray-700">${field.label}</th>`;
-                });
-                headerHTML += '<th class="px-3 py-2 text-center font-bold text-gray-700">Aksi</th></tr>';
-                return headerHTML;
+        // Define table configurations for each report type
+        const tableConfigs = {
+            'Laporan Mutasi Kayu Bulat (LMKB)': {
+                fields: [
+                    { name: 'jenis_kayu', label: 'Jenis Kayu', type: 'text', placeholder: 'Contoh: Meranti' },
+                    { name: 'persediaan_awal_volume', label: 'Persediaan Awal (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'penambahan_volume', label: 'Penambahan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'penggunaan_pengurangan_volume', label: 'Penggunaan/Pengurangan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'persediaan_akhir_volume', label: 'Persediaan Akhir (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
+                ]
+            },
+            'Laporan Mutasi Kayu Olahan (LMKO)': {
+                fields: [
+                    { name: 'jenis_olahan', label: 'Jenis Olahan', type: 'text', placeholder: 'Contoh: Papan' },
+                    { name: 'persediaan_awal_volume', label: 'Persediaan Awal (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'penambahan_volume', label: 'Penambahan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'penggunaan_pengurangan_volume', label: 'Penggunaan/Pengurangan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'persediaan_akhir_volume', label: 'Persediaan Akhir (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
+                ]
+            },
+            'Laporan Penerimaan Kayu Bulat': {
+                fields: [
+                    { name: 'nomor_dokumen', label: 'Nomor Dokumen', type: 'text', placeholder: 'Nomor dokumen' },
+                    { name: 'tanggal', label: 'Tanggal', type: 'date', placeholder: '' },
+                    { name: 'asal_kayu', label: 'Asal Kayu', type: 'text', placeholder: 'Asal kayu' },
+                    { name: 'jenis_kayu', label: 'Jenis Kayu', type: 'text', placeholder: 'Jenis kayu' },
+                    { name: 'jumlah_batang', label: 'Jumlah Batang', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'volume', label: 'Volume (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
+                ]
+            },
+            'Laporan Penerimaan Kayu Olahan': {
+                fields: [
+                    { name: 'nomor_dokumen', label: 'Nomor Dokumen', type: 'text', placeholder: 'Nomor dokumen' },
+                    { name: 'tanggal', label: 'Tanggal', type: 'date', placeholder: '' },
+                    { name: 'asal_kayu', label: 'Asal Kayu', type: 'text', placeholder: 'Asal kayu' },
+                    { name: 'jenis_olahan', label: 'Jenis Olahan', type: 'text', placeholder: 'Jenis olahan' },
+                    { name: 'jumlah_keping', label: 'Jumlah Keping', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'volume', label: 'Volume (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
+                ]
+            },
+            'Laporan Penjualan Kayu Olahan': {
+                fields: [
+                    { name: 'nomor_dokumen', label: 'Nomor Dokumen', type: 'text', placeholder: 'Nomor dokumen' },
+                    { name: 'tanggal', label: 'Tanggal', type: 'date', placeholder: '' },
+                    { name: 'tujuan_kirim', label: 'Tujuan Kirim', type: 'text', placeholder: 'Tujuan pengiriman' },
+                    { name: 'jenis_olahan', label: 'Jenis Olahan', type: 'text', placeholder: 'Jenis olahan' },
+                    { name: 'jumlah_keping', label: 'Jumlah Keping', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'volume', label: 'Volume (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
+                ]
             }
+        };
 
-            // Generate table row based on config
-            function generateTableRow(config, rowNum) {
-                let rowHTML = `<tr class="border-b border-gray-100 hover:bg-gray-50">`;
-                rowHTML += `<td class="px-3 py-2 text-gray-700">${rowNum}</td>`;
+        // Generate table headers based on config
+        function generateTableHeaders(config) {
+            let headerHTML = '<tr><th class="px-3 py-2 text-left font-bold text-gray-700">No</th>';
+            config.fields.forEach(field => {
+                headerHTML += `<th class="px-3 py-2 text-left font-bold text-gray-700">${field.label}</th>`;
+            });
+            headerHTML += '<th class="px-3 py-2 text-center font-bold text-gray-700">Aksi</th></tr>';
+            return headerHTML;
+        }
 
-                config.fields.forEach(field => {
-                    const isRequired = field.required !== false ? 'required' : '';
-                    const stepAttr = field.step ? `step="${field.step}"` : '';
-                    const minAttr = field.type === 'number' ? 'min="0"' : '';
+        // Generate table row based on config
+        function generateTableRow(config, rowNum) {
+            let rowHTML = `<tr class="border-b border-gray-100 hover:bg-gray-50">`;
+            rowHTML += `<td class="px-3 py-2 text-gray-700">${rowNum}</td>`;
 
-                    rowHTML += `
-                        <td class="px-3 py-2">
-                            <input type="${field.type}" 
-                                name="manual_data[${rowNum}][${field.name}]" 
-                                class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-[#1A4030] focus:border-[#1A4030]" 
-                                placeholder="${field.placeholder}" 
-                                ${stepAttr} ${minAttr} ${isRequired}>
-                        </td>`;
-                });
+            config.fields.forEach(field => {
+                const isRequired = field.required !== false ? 'required' : '';
+                const stepAttr = field.step ? `step="${field.step}"` : '';
+                const minAttr = field.type === 'number' ? 'min="0"' : '';
 
                 rowHTML += `
-                    <td class="px-3 py-2 text-center">
-                        <button type="button" onclick="removeRow(this)" 
-                            class="text-red-600 hover:text-red-800 transition-colors" 
-                            title="Hapus baris">
-                            <i class="fas fa-trash-alt"></i>
-                        </button>
-                    </td>
-                </tr>`;
+                            <td class="px-3 py-2">
+                                <input type="${field.type}" 
+                                    name="manual_data[${rowNum}][${field.name}]" 
+                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-[#1A4030] focus:border-[#1A4030]" 
+                                    placeholder="${field.placeholder}" 
+                                    ${stepAttr} ${minAttr} ${isRequired}>
+                            </td>`;
+            });
 
-                return rowHTML;
+            rowHTML += `
+                        <td class="px-3 py-2 text-center">
+                            <button type="button" onclick="removeRow(this)" 
+                                class="text-red-600 hover:text-red-800 transition-colors" 
+                                title="Hapus baris">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+
+            return rowHTML;
+        }
+
+        // Initialize table based on selected report type
+        function initializeTable(jenisLaporan) {
+            if (!jenisLaporan || !tableConfigs[jenisLaporan]) {
+                tableNotice.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+                tableHint.style.display = 'none';
+                btnAddRow.disabled = true;
+                btnAddRow.classList.add('opacity-50', 'cursor-not-allowed');
+                currentTableConfig = null;
+                return;
             }
 
-            // Initialize table based on selected report type
-            function initializeTable(jenisLaporan) {
-                if (!jenisLaporan || !tableConfigs[jenisLaporan]) {
-                    tableNotice.classList.remove('hidden');
-                    tableContainer.classList.add('hidden');
-                    tableHint.style.display = 'none';
-                    btnAddRow.disabled = true;
-                    btnAddRow.classList.add('opacity-50', 'cursor-not-allowed');
-                    currentTableConfig = null;
-                    return;
+            currentTableConfig = tableConfigs[jenisLaporan];
+
+            // Show table, hide notice
+            tableNotice.classList.add('hidden');
+            tableContainer.classList.remove('hidden');
+            tableHint.style.display = 'block';
+            btnAddRow.disabled = false;
+            btnAddRow.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            // Generate headers
+            manualTableHead.innerHTML = generateTableHeaders(currentTableConfig);
+
+            // Clear existing rows and reset counter
+            manualTableBody.innerHTML = '';
+            rowCounter = 0;
+
+            // Add initial row
+            addRow();
+        }
+
+        // Listen to jenis laporan changes
+        jenisLaporanSelect.addEventListener('change', (e) => {
+            if (currentMode === 'manual') {
+                initializeTable(e.target.value);
+            }
+        });
+
+        // Mode switching
+        btnExcelMode.addEventListener('click', () => {
+            currentMode = 'excel';
+            excelSection.classList.remove('hidden');
+            manualSection.classList.add('hidden');
+
+            btnExcelMode.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            btnExcelMode.classList.add('bg-[#1A4030]', 'text-white');
+
+            btnManualMode.classList.remove('bg-[#1A4030]', 'text-white');
+            btnManualMode.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+
+            excelFile.required = true;
+            noteText.textContent = 'Pastikan format header Excel sesuai dengan template standar Dinas. Laporan yang sudah diupload tidak dapat diedit secara parsial, harus diupload ulang sepenuhnya.';
+        });
+
+        btnManualMode.addEventListener('click', () => {
+            currentMode = 'manual';
+            excelSection.classList.add('hidden');
+            manualSection.classList.remove('hidden');
+
+            btnManualMode.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+            btnManualMode.classList.add('bg-[#1A4030]', 'text-white');
+
+            btnExcelMode.classList.remove('bg-[#1A4030]', 'text-white');
+            btnExcelMode.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
+
+            excelFile.required = false;
+            excelFile.value = '';
+            fileName.innerHTML = '';
+            noteText.textContent = 'Masukkan data laporan secara manual pada tabel di atas. Pastikan semua kolom terisi dengan benar sebelum melakukan preview.';
+
+            // Initialize table based on current selection
+            initializeTable(jenisLaporanSelect.value);
+        });
+
+        // Add row function
+        function addRow() {
+            if (!currentTableConfig) {
+                alert('Pilih jenis dokumen terlebih dahulu');
+                return;
+            }
+
+            rowCounter++;
+            const rowHTML = generateTableRow(currentTableConfig, rowCounter);
+            manualTableBody.insertAdjacentHTML('beforeend', rowHTML);
+        }
+
+        // Remove row function
+        window.removeRow = function (button) {
+            const row = button.closest('tr');
+            row.remove();
+            updateRowNumbers();
+        };
+
+        // Update row numbers after deletion
+        function updateRowNumbers() {
+            const rows = manualTableBody.querySelectorAll('tr');
+            rows.forEach((row, index) => {
+                row.querySelector('td:first-child').textContent = index + 1;
+                // Update input names to match new row number
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(input => {
+                    const name = input.getAttribute('name');
+                    if (name) {
+                        const newName = name.replace(/\[\d+\]/, `[${index + 1}]`);
+                        input.setAttribute('name', newName);
+                    }
+                });
+            });
+            rowCounter = rows.length;
+        }
+
+        // Add row button click
+        btnAddRow.addEventListener('click', addRow);
+
+        // Excel file handling
+        dropZone.addEventListener('click', () => excelFile.click());
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dropzone-active');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dropzone-active');
+            });
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                excelFile.files = files;
+                updateFileName(files[0]);
+            }
+        });
+
+        excelFile.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                updateFileName(e.target.files[0]);
+            }
+        });
+
+        function updateFileName(file) {
+            fileName.innerHTML = `<i class="fas fa-check mr-1"></i> ${file.name}`;
+        }
+
+        // Form validation before submit
+        uploadForm.addEventListener('submit', (e) => {
+            if (currentMode === 'manual') {
+                const rows = manualTableBody.querySelectorAll('tr');
+                if (rows.length === 0) {
+                    e.preventDefault();
+                    alert('Harap tambahkan minimal satu baris data sebelum melakukan preview.');
+                    return false;
                 }
+            }
+        });
 
-                currentTableConfig = tableConfigs[jenisLaporan];
-
-                // Show table, hide notice
-                tableNotice.classList.add('hidden');
-                tableContainer.classList.remove('hidden');
-                tableHint.style.display = 'block';
-                btnAddRow.disabled = false;
-                btnAddRow.classList.remove('opacity-50', 'cursor-not-allowed');
-
-                // Generate headers
-                manualTableHead.innerHTML = generateTableHeaders(currentTableConfig);
-
-                // Clear existing rows and reset counter
+        // Reset form handler
+        uploadForm.addEventListener('reset', () => {
+            fileName.innerHTML = '';
+            if (currentMode === 'manual') {
                 manualTableBody.innerHTML = '';
                 rowCounter = 0;
-
-                // Add initial row
-                addRow();
-            }
-
-            // Listen to jenis laporan changes
-            jenisLaporanSelect.addEventListener('change', (e) => {
-                if (currentMode === 'manual') {
-                    initializeTable(e.target.value);
-                }
-            });
-
-            // Mode switching
-            btnExcelMode.addEventListener('click', () => {
-                currentMode = 'excel';
-                excelSection.classList.remove('hidden');
-                manualSection.classList.add('hidden');
-
-                btnExcelMode.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-                btnExcelMode.classList.add('bg-[#1A4030]', 'text-white');
-
-                btnManualMode.classList.remove('bg-[#1A4030]', 'text-white');
-                btnManualMode.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-
-                excelFile.required = true;
-                noteText.textContent = 'Pastikan format header Excel sesuai dengan template standar Dinas. Laporan yang sudah diupload tidak dapat diedit secara parsial, harus diupload ulang sepenuhnya.';
-            });
-
-            btnManualMode.addEventListener('click', () => {
-                currentMode = 'manual';
-                excelSection.classList.add('hidden');
-                manualSection.classList.remove('hidden');
-
-                btnManualMode.classList.remove('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-                btnManualMode.classList.add('bg-[#1A4030]', 'text-white');
-
-                btnExcelMode.classList.remove('bg-[#1A4030]', 'text-white');
-                btnExcelMode.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-
-                excelFile.required = false;
-                excelFile.value = '';
-                fileName.innerHTML = '';
-                noteText.textContent = 'Masukkan data laporan secara manual pada tabel di atas. Pastikan semua kolom terisi dengan benar sebelum melakukan preview.';
-
-                // Initialize table based on current selection
                 initializeTable(jenisLaporanSelect.value);
-            });
-
-            // Add row function
-            function addRow() {
-                if (!currentTableConfig) {
-                    alert('Pilih jenis dokumen terlebih dahulu');
-                    return;
-                }
-
-                rowCounter++;
-                const rowHTML = generateTableRow(currentTableConfig, rowCounter);
-                manualTableBody.insertAdjacentHTML('beforeend', rowHTML);
             }
-
-            // Remove row function
-            window.removeRow = function (button) {
-                const row = button.closest('tr');
-                row.remove();
-                updateRowNumbers();
-            };
-
-            // Update row numbers after deletion
-            function updateRowNumbers() {
-                const rows = manualTableBody.querySelectorAll('tr');
-                rows.forEach((row, index) => {
-                    row.querySelector('td:first-child').textContent = index + 1;
-                    // Update input names to match new row number
-                    const inputs = row.querySelectorAll('input');
-                    inputs.forEach(input => {
-                        const name = input.getAttribute('name');
-                        if (name) {
-                            const newName = name.replace(/\[\d+\]/, `[${index + 1}]`);
-                            input.setAttribute('name', newName);
-                        }
-                    });
-                });
-                rowCounter = rows.length;
-            }
-
-            // Add row button click
-            btnAddRow.addEventListener('click', addRow);
-
-            // Excel file handling
-            dropZone.addEventListener('click', () => excelFile.click());
-
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    dropZone.classList.add('dropzone-active');
-                });
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    dropZone.classList.remove('dropzone-active');
-                });
-            });
-
-            dropZone.addEventListener('drop', (e) => {
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    excelFile.files = files;
-                    updateFileName(files[0]);
-                }
-            });
-
-            excelFile.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    updateFileName(e.target.files[0]);
-                }
-            });
-
-            function updateFileName(file) {
-                fileName.innerHTML = `<i class="fas fa-check mr-1"></i> ${file.name}`;
-            }
-
-            // Form validation before submit
-            uploadForm.addEventListener('submit', (e) => {
-                if (currentMode === 'manual') {
-                    const rows = manualTableBody.querySelectorAll('tr');
-                    if (rows.length === 0) {
-                        e.preventDefault();
-                        alert('Harap tambahkan minimal satu baris data sebelum melakukan preview.');
-                        return false;
-                    }
-                }
-            });
-
-            // Reset form handler
-            uploadForm.addEventListener('reset', () => {
-                fileName.innerHTML = '';
-                if (currentMode === 'manual') {
-                    manualTableBody.innerHTML = '';
-                    rowCounter = 0;
-                    initializeTable(jenisLaporanSelect.value);
-                }
-            });
-        </script>
+        });
+    </script>
 
 @endsection

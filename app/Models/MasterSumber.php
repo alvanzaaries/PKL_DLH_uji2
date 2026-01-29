@@ -23,7 +23,7 @@ class MasterSumber extends Model
     public function tptkb()
     {
         return $this->belongsToMany(Tptkb::class, 'tptkb_sumber', 'master_sumber_id', 'tptkb_id')
-                    ->withPivot('kapasitas')
+                    ->withPivot('kapasitas', 'nama_custom')
                     ->withTimestamps();
     }
 }
