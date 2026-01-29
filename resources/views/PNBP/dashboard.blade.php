@@ -1,6 +1,7 @@
 @extends('PNBP.layouts.app')
 
 @section('content')
+    <link rel="stylesheet" href="{{ asset('css/pnbp/landing.css') }}">
     <div class="bg-white overflow-hidden rounded-2xl shadow-sm border border-gray-100">
         <div class="flex flex-col lg:flex-row min-h-[600px]">
             <div class="w-full lg:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-white order-2 lg:order-1">
@@ -39,8 +40,7 @@
             </div>
 
             <!-- Gambar Logo -->
-            <div class="w-full lg:w-1/2 bg-green flex items-center justify-center relative order-1 lg:order-2 p-10">
-                <div class="absolute inset-0 bg-green-50/50 pattern-grid-lg text-green-100 mask-image-gradient-b"></div>
+            <div class="w-full lg:w-1/2 flex items-center justify-center relative order-1 lg:order-2 p-10 pnbp-logo-section" style="background: linear-gradient(135deg, #064E3B 0%, #10B981 100%);">
                 <img src="{{ asset('img/Logo Provinsi Jawa Tengah.png') }}" alt="Logo Jateng"
                     class="relative z-10 h-64 w-64 md:h-80 md:w-80 object-contain drop-shadow-2xl transition-transform hover:scale-105 duration-500">
             </div>
