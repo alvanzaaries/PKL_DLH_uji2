@@ -21,7 +21,7 @@
         </button>
     </div>
 
-    {{-- 2. Manajemen User (Shortcut) --}}
+    {{-- 2. Manajemen User --}}
     <div class="bg-white dark:bg-surface-dark shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
         <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4 flex items-center">
             <span class="material-icons-outlined mr-2">group</span>
@@ -40,7 +40,6 @@
         </div>
     </div>
 
-    {{-- 3. Manajemen KPH (Data Master) --}}
     {{-- 3. Manajemen KPH (Data Master) --}}
     <div class="col-span-1 md:col-span-2 bg-white dark:bg-surface-dark shadow-md rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
         
