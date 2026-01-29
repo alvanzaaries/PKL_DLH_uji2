@@ -403,4 +403,35 @@ class IndustriSekunderController extends Controller implements HasMiddleware
         return redirect()->route('industri-sekunder.index')
             ->with('success', "Perusahaan \"$namaPerusahaan\" berhasil dihapus!");
     }
+
+    /**
+     * Import data dari Excel
+     */
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240' // Max 10MB
+        ]);
+
+        try {
+            $file = $request->file('file');
+            $filePath = $file->getRealPath();
+
+            // Process import
+            $importer = new \App\Imports\IndustriSekunderImport();
+            $result = $importer->import($filePath);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Berhasil import {$result['success']} data dari {$result['total']} baris",
+                'data' => $result
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal import data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

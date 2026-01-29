@@ -44,7 +44,7 @@ class Tptkb extends Model
     public function sumberBahanBaku()
     {
         return $this->belongsToMany(MasterSumber::class, 'tptkb_sumber', 'tptkb_id', 'master_sumber_id')
-                    ->withPivot('kapasitas')
+                    ->withPivot('kapasitas', 'nama_custom')
                     ->withTimestamps();
     }
 

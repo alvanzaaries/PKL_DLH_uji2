@@ -592,4 +592,52 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         \Log::warning('File not found for download: ' . $relativePath);
         return redirect()->back()->with('error', 'File tidak ditemukan di server!');
     }
+
+    /**
+     * Import data dari Excel
+     */
+    public function import(Request $request)
+    {
+        try {
+            $request->validate([
+                'file' => 'required|file|mimes:xlsx,xls|max:10240' // Max 10MB
+            ]);
+
+            $file = $request->file('file');
+            $filePath = $file->getRealPath();
+
+            \Log::info('Starting import from file: ' . $file->getClientOriginalName());
+
+            // Process import
+            $importer = new \App\Imports\IndustriPrimerImport();
+            $result = $importer->import($filePath);
+
+            \Log::info('Import completed', $result);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Berhasil import {$result['success']} data dari {$result['total']} baris",
+                'data' => $result
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation error in import', ['errors' => $e->errors()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi file gagal: ' . implode(', ', $e->errors()['file'] ?? ['Unknown error'])
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Import error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal import data: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

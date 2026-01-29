@@ -26,6 +26,10 @@ class MasterSumberSeeder extends Seeder
                 'keterangan' => 'Kayu berasal dari hutan yang dikelola negara'
             ],
             [
+                'nama' => 'Hutan Alam (Hutan Alam)',
+                'keterangan' => 'Kayu berasal dari hutan alam yang dikelola pemerintah'
+            ],
+            [
                 'nama' => 'Hutan HTI (Hutan Tanaman Industri)',
                 'keterangan' => 'Kayu berasal dari hutan tanaman industri'
             ],
