@@ -11,7 +11,7 @@
     <style>
         :root {
             --primary: #0f172a;
-            --accent: #15803d;
+            --accent: #24a148;
             --bg-body: #f8fafc;
             --text-main: #334155;
             --white: #ffffff;

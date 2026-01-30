@@ -10,21 +10,23 @@
 }
 
 .filter-header {
-    padding: 18px 25px;
-    background: linear-gradient(135deg, #15803d 0%, #166534 100%);
-    border-bottom: 1px solid var(--border, #e2e8f0);
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #24a148 0%, #198038 100%);
+    border-bottom: none;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    cursor: pointer;
     user-select: none;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
-.filter-header:hover {
-    background: linear-gradient(135deg, #166534 0%, #14532d 100%);
-    box-shadow: 0 4px 12px rgba(21, 128, 61, 0.2);
+.filter-header:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(36, 161, 72, 0.2);
 }
+
 
 .filter-header-title {
     display: flex;
@@ -32,18 +34,51 @@
     gap: 12px;
     font-weight: 600;
     color: #ffffff;
-    font-size: 16px;
+    font-size: 15px;
+    position: relative;
+    z-index: 1;
 }
 
 .filter-header-title i {
     font-size: 18px;
-    color: #a7f3d0;
+    color: #defbe6;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Badge untuk active filter count */
+.filter-badge {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    color: #ffffff;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-left: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
 }
 
 .filter-header-icon {
-    transition: transform 0.3s;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     color: #ffffff;
-    font-size: 18px;
+    font-size: 20px;
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 .filter-header-icon.collapsed {
@@ -93,7 +128,7 @@
 }
 
 .filter-search-bar label i {
-    color: var(--accent, #15803d);
+    color: var(--accent, #24a148);
     font-size: 16px;
 }
 
@@ -106,8 +141,8 @@
 }
 
 .filter-search-bar .filter-input:focus {
-    border-color: var(--accent, #15803d);
-    box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.1);
+    border-color: var(--accent, #24a148);
+    box-shadow: 0 0 0 4px rgba(36, 161, 72, 0.1);
     background: #ffffff;
 }
 
@@ -120,16 +155,16 @@
     margin: 24px 0 16px 0;
     padding: 12px 16px;
     background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-    border-left: 4px solid var(--accent, #15803d);
+    border-left: 4px solid var(--accent, #24a148);
     border-radius: 6px;
     display: flex;
     align-items: center;
     gap: 10px;
-    box-shadow: 0 1px 3px rgba(21, 128, 61, 0.1);
+    box-shadow: 0 1px 3px rgba(36, 161, 72, 0.1);
 }
 
 .filter-section-title i {
-    color: var(--accent, #15803d);
+    color: var(--accent, #24a148);
     font-size: 16px;
     width: 20px;
     text-align: center;
@@ -195,8 +230,8 @@ select.filter-input {
 
 .filter-input:focus {
     outline: none;
-    border-color: var(--accent, #15803d);
-    box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.1);
+    border-color: var(--accent, #24a148);
+    box-shadow: 0 0 0 3px rgba(36, 161, 72, 0.1);
     background: #ffffff;
 }
 
@@ -211,7 +246,7 @@ select.filter-input {
 }
 
 .btn-filter {
-    background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+    background: linear-gradient(135deg, #24a148 0%, #198038 100%);
     color: white;
     padding: 12px 24px;
     border-radius: 8px;
@@ -223,13 +258,13 @@ select.filter-input {
     align-items: center;
     gap: 8px;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(21, 128, 61, 0.2);
+    box-shadow: 0 2px 4px rgba(36, 161, 72, 0.2);
 }
 
 .btn-filter:hover {
-    background: linear-gradient(135deg, #166534 0%, #14532d 100%);
+    background: linear-gradient(135deg, #198038 0%, #0e6027 100%);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(21, 128, 61, 0.3);
+    box-shadow: 0 4px 8px rgba(36, 161, 72, 0.3);
 }
 
 .btn-filter i {

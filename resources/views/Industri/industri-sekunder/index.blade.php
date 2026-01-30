@@ -287,9 +287,9 @@
         }
 
         .btn-primary:hover {
-            background: #166534;
+            background: #198038;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(21, 128, 61, 0.3);
+            box-shadow: 0 4px 12px rgba(36, 161, 72, 0.3);
         }
 
         /* Filter Section - Extended from filter-collapse.css */
@@ -333,7 +333,7 @@
         }
 
         thead {
-            background: linear-gradient(135deg, #15803d 0%, #166534 100%);
+            background: linear-gradient(135deg, #24a148 0%, #198038 100%);
         }
 
         th {
@@ -342,7 +342,7 @@
             font-weight: 600;
             color: #ffffff;
             font-size: 14px;
-            border-bottom: 3px solid #14532d;
+            border-bottom: 3px solid #0e6027;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -396,12 +396,12 @@
         }
 
         .btn-edit {
-            background: #10b981;
+            background: #24a148;
             color: white;
         }
 
         .btn-edit:hover {
-            background: #059669;
+            background: #198038;
         }
 
         .btn-delete {
@@ -596,7 +596,7 @@
         }
 
         .modal-header {
-            background: linear-gradient(135deg, var(--accent) 0%, #166534 100%);
+            background: linear-gradient(135deg, var(--accent) 0%, #198038 100%);
             color: white;
             padding: 25px 30px;
             border-radius: 12px 12px 0 0;
@@ -1100,7 +1100,7 @@
                 
                 <div id="modal-map-container" style="display: none; margin-top: 15px;">
                     <div class="detail-section-title">Peta Lokasi</div>
-                    <div id="modal-map" style="height: 250px; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
+                    <div id="modal-map" style="height: 650px; border-radius: 8px; border: 1px solid #e2e8f0;"></div>
                 </div>
             </div>
         </div>
@@ -1192,6 +1192,11 @@
                 .addTo(window.detailMap)
                 .bindPopup(`Lokasi: ${lat.toFixed(6)}, ${lng.toFixed(6)}`)
                 .openPopup();
+            
+            // Fix rendering issue in modal
+            setTimeout(() => {
+                window.detailMap.invalidateSize();
+            }, 100);
         }
 
         // Close modal ketika click di luar modal

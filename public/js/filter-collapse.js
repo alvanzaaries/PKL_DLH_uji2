@@ -48,26 +48,5 @@ function updateActiveFilterCount(filterParams = []) {
 document.addEventListener('DOMContentLoaded', function () {
     updateActiveFilterCount();
 
-    // Add hover functionality to filter card
-    const filterCard = document.querySelector('.filter-card');
-    const filterBody = document.getElementById('filterBody');
-    const filterIcon = document.getElementById('filterIcon');
-
-    if (filterCard && filterBody && filterIcon) {
-        // Expand filter when mouse enters the filter card
-        filterCard.addEventListener('mouseenter', function () {
-            if (!filterBody.classList.contains('show')) {
-                filterBody.classList.add('show');
-                filterIcon.classList.remove('collapsed');
-            }
-        });
-
-        // Collapse filter when mouse leaves the filter card
-        filterCard.addEventListener('mouseleave', function () {
-            if (filterBody.classList.contains('show')) {
-                filterBody.classList.remove('show');
-                filterIcon.classList.add('collapsed');
-            }
-        });
-    }
+    // Hover functionality removed - filter now only opens via onclick
 });
