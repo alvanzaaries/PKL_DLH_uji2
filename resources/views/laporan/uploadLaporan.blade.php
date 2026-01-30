@@ -10,16 +10,6 @@
 
     <div class="max-w-7xl mx-auto">
 
-        @if (session('error'))
-            <div class="bg-red-50 border-l-4 border-red-700 p-4 mb-6 shadow-sm flex items-start">
-                <i class="fas fa-exclamation-circle text-red-700 mt-1 mr-3"></i>
-                <div>
-                    <h3 class="font-bold text-sm text-red-800">Kesalahan</h3>
-                    <p class="text-sm text-red-700">{{ session('error') }}</p>
-                </div>
-            </div>
-        @endif
-
         <div class="bg-white border border-gray-200 shadow-sm rounded-md p-6 mb-6">
             <div class="flex items-center gap-3 mb-2">
                 <a href="{{ route('laporan.index') }}" class="text-gray-400 hover:text-[#1A4030] transition-colors"
@@ -285,24 +275,24 @@
                 const minAttr = field.type === 'number' ? 'min="0"' : '';
 
                 rowHTML += `
-                            <td class="px-3 py-2">
-                                <input type="${field.type}" 
-                                    name="manual_data[${rowNum}][${field.name}]" 
-                                    class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-[#1A4030] focus:border-[#1A4030]" 
-                                    placeholder="${field.placeholder}" 
-                                    ${stepAttr} ${minAttr} ${isRequired}>
-                            </td>`;
+                                <td class="px-3 py-2">
+                                    <input type="${field.type}" 
+                                        name="manual_data[${rowNum}][${field.name}]" 
+                                        class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-[#1A4030] focus:border-[#1A4030]" 
+                                        placeholder="${field.placeholder}" 
+                                        ${stepAttr} ${minAttr} ${isRequired}>
+                                </td>`;
             });
 
             rowHTML += `
-                        <td class="px-3 py-2 text-center">
-                            <button type="button" onclick="removeRow(this)" 
-                                class="text-red-600 hover:text-red-800 transition-colors" 
-                                title="Hapus baris">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </td>
-                    </tr>`;
+                            <td class="px-3 py-2 text-center">
+                                <button type="button" onclick="removeRow(this)" 
+                                    class="text-red-600 hover:text-red-800 transition-colors" 
+                                    title="Hapus baris">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>`;
 
             return rowHTML;
         }

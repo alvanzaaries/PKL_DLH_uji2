@@ -200,6 +200,11 @@ class LaporanValidationService
             $allRows[] = ['cells' => $cells, 'source_row' => $rowNumber];
         }
 
+        // Validasi: pastikan ada minimal 1 baris data (tidak boleh kosong semua)
+        if (count($allRows) === 0) {
+            throw new \Exception('Data tidak boleh kosong. Pastikan ada minimal 1 baris data yang terisi.');
+        }
+
         return [
             'headers' => $mapping['headers'],
             'rows' => $allRows,
@@ -440,6 +445,11 @@ class LaporanValidationService
             $allRows[] = ['cells' => $row, 'source_row' => $rowNumber];
         }
 
+        // Validasi: pastikan ada minimal 1 baris data (tidak boleh kosong semua)
+        if (count($allRows) === 0) {
+            throw new \Exception('File Excel tidak memiliki data. Pastikan ada minimal 1 baris data yang terisi.');
+        }
+
         return [
             'headers' => $expectedHeaders,
             'rows' => $allRows,
@@ -558,6 +568,11 @@ class LaporanValidationService
             $allRows[] = ['cells' => $row, 'source_row' => $rowNumber];
         }
 
+        // Validasi: pastikan ada minimal 1 baris data (tidak boleh kosong semua)
+        if (count($allRows) === 0) {
+            throw new \Exception('File Excel tidak memiliki data. Pastikan ada minimal 1 baris data yang terisi.');
+        }
+
         return [
             'headers' => $expectedHeaders,
             'rows' => $allRows,
@@ -660,6 +675,11 @@ class LaporanValidationService
 
             // Tambahkan semua row, baik valid maupun invalid; sertakan nomor baris sumber Excel agar bisa dipetakan ke nomor sementara
             $allRows[] = ['cells' => $row, 'source_row' => $rowNumber];
+        }
+
+        // Validasi: pastikan ada minimal 1 baris data (tidak boleh kosong semua)
+        if (count($allRows) === 0) {
+            throw new \Exception('File Excel tidak memiliki data. Pastikan ada minimal 1 baris data yang terisi.');
         }
 
         return [
@@ -780,6 +800,11 @@ class LaporanValidationService
             $allRows[] = ['cells' => $row, 'source_row' => $rowNumber];
         }
 
+        // Validasi: pastikan ada minimal 1 baris data (tidak boleh kosong semua)
+        if (count($allRows) === 0) {
+            throw new \Exception('File Excel tidak memiliki data. Pastikan ada minimal 1 baris data yang terisi.');
+        }
+
         return [
             'headers' => $expectedHeaders,
             'rows' => $allRows,
@@ -864,6 +889,11 @@ class LaporanValidationService
 
             // Tambahkan semua row, baik valid maupun invalid; sertakan nomor baris sumber Excel agar bisa dipetakan ke nomor sementara
             $allRows[] = ['cells' => $row, 'source_row' => $rowNumber];
+        }
+
+        // Validasi: pastikan ada minimal 1 baris data (tidak boleh kosong semua)
+        if (count($allRows) === 0) {
+            throw new \Exception('File Excel tidak memiliki data. Pastikan ada minimal 1 baris data yang terisi.');
         }
 
         return [

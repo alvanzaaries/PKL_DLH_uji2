@@ -108,8 +108,8 @@
 
 .filter-input:focus {
     outline: none;
-    border-color: #0F2F24;
-    box-shadow: 0 0 0 1px #0F2F24;
+    border-color: #10B981;
+    box-shadow: 0 0 0 1px #10B981;
 }
 
 /* Buttons */
@@ -130,12 +130,12 @@
 }
 
 .btn-primary {
-    background-color: #0F2F24;
+    background-color: #10B981;
     color: white;
 }
 
 .btn-primary:hover {
-    background-color: #183F32;
+    background-color: #059669;
 }
 
 .btn-secondary {
@@ -251,16 +251,16 @@
 .ledger-table tbody tr.total-row,
 .ledger-table tfoot tr.total-row,
 .table-container .ledger-table tfoot tr.total-row {
-    background-color: #1B5E20 !important;
+    background-color: #10B981 !important;
     color: white !important;
     font-weight: 700;
-    border-top: 2px solid #1B5E20;
+    border-top: 2px solid #10B981;
 }
 
 .ledger-table tbody tr.total-row:hover,
 .ledger-table tfoot tr.total-row:hover,
 .table-container .ledger-table tfoot tr.total-row:hover {
-    background-color: #14532d !important;
+    background-color: #059669 !important;
 }
 
 .ledger-table tbody tr.total-row td,
@@ -399,7 +399,7 @@
 
 .progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #228B22 0%, #10b981 100%);
+    background: linear-gradient(90deg, #10B981 0%, #059669 100%);
     transition: width 0.3s ease;
 }
 
@@ -426,7 +426,7 @@
 }
 
 .donut-card:hover {
-    border-color: #228B22;
+    border-color: #10B981;
     transform: translateY(-2px);
 }
 
@@ -471,7 +471,7 @@
 
 .donut-status {
     font-size: 0.75rem;
-    color: #228B22;
+    color: #10B981;
     background-color: #F0FDF4;
     padding: 2px 8px;
     border-radius: 99px;
@@ -623,7 +623,7 @@
     width: 32px;
     height: 32px;
     background: #F3F4F6;
-    color: #0F2F24;
+    color: #10B981;
     border-radius: 4px;
     font-size: 0.875rem;
 }
