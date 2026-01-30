@@ -15,7 +15,7 @@
                         rekonsiliasi triwulan dengan mudah dan akurat.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4">
-                        @if (auth()->check())
+                        @if (auth()->check() && auth()->user()->role === 'admin')
                             <a href="{{ route('dashboard.index') }}"
                                 class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition duration-150 ease-in-out md:py-4 md:text-lg shadow-lg hover:shadow-green-500/30">
                                 Masuk ke Dashboard
@@ -29,10 +29,24 @@
                             <form id="welcome-logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
                                 @csrf
                             </form>
+                        @elseif (auth()->check() && auth()->user()->role === 'user')
+                            <a href="{{ route('dashboard.index') }}"
+                                class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition duration-150 ease-in-out md:py-4 md:text-lg shadow-lg hover:shadow-green-500/30">
+                                Mulai Upload
+                            </a>
+                            <!-- Aksi logout via form POST untuk keamanan. -->
+                            <a href="{{ route('logout') }}"
+                                onclick="event.preventDefault(); document.getElementById('welcome-logout-form').submit();"
+                                class="inline-flex items-center justify-center px-8 py-3 border border-green-600 text-base font-medium rounded-lg text-green-700 bg-white hover:bg-green-50 transition duration-150 ease-in-out md:py-4 md:text-lg">
+                                Logout
+                            </a>
+                            <form id="welcome-logout-form" method="POST" action="{{ route('logout') }}" class="hidden">
+                                @csrf
+                            </form>
                         @else
                             <a href="{{ route('dashboard.index') }}"
                                 class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 transition duration-150 ease-in-out md:py-4 md:text-lg shadow-lg hover:shadow-green-500/30">
-                                Masuk ke Dashboard
+                                Login
                             </a>
                         @endif
                     </div>

@@ -98,7 +98,7 @@
         </div>
 
         <div class="relative z-10 text-center px-4 max-w-7xl mx-auto mt-12">
-            <h1 class="text-3xl md:text-4xl lg:text-3xl font-extrabold text-white leading-snug drop-shadow-xl mb-8">
+            <h1 class="text-5xl md:text-4xl lg:text-5xl font-extrabold text-white leading-snug drop-shadow-xl mb-8">
                 SISTEM INFORMASI
                 
                 <span class="block md:whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-green-200 to-emerald-100 my-2">
