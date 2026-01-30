@@ -18,25 +18,60 @@
             padding: 20px 30px;
         }
 
-        /* Hero Section - Clean */
+        /* Temporarily hide sidebar */
+        .sidebar {
+            display: none !important;
+        }
+
+        .main-wrapper {
+            margin-left: 0 !important;
+            width: 100% !important;
+        }
+
+        /* Hero Section - Forest Background */
         .hero {
-            padding: 40px 0 30px;
-            background: var(--white);
-            border-bottom: 1px solid #e2e8f0;
+            padding: 80px 0 60px;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.6)), 
+                        url('{{ asset('img/forest_header.png') }}') center center;
+            background-size: cover;
+            background-attachment: fixed; /* Parallax effect */
+            border-bottom: none;
             margin-bottom: 30px;
             text-align: center;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(36, 161, 72, 0.2) 0%, rgba(14, 96, 39, 0.3) 100%);
+            pointer-events: none;
+        }
+
+        .hero .container {
+            position: relative;
+            z-index: 1;
         }
 
         .hero-title {
-            font-size: 28px;
-            color: var(--primary);
-            font-weight: 700;
-            margin-bottom: 8px;
+            font-size: 42px;
+            color: #ffffff;
+            font-weight: 800;
+            margin-bottom: 12px;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            letter-spacing: -0.5px;
         }
 
         .hero-subtitle {
-            color: #64748b;
-            font-size: 16px;
+            color: #defbe6;
+            font-size: 18px;
+            font-weight: 500;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
         }
 
         /* Alert Banner - Minimalist */
@@ -244,22 +279,22 @@
             <a href="{{ route('industri-primer.index') }}" class="stat-card">
                 <div class="stat-label">Industri Primer</div>
                 <span class="stat-number">{{ number_format($statistics['primer_pbphh']) }}</span>
-                <div class="stat-desc">Izin PBPHH Aktif • Klik untuk lihat data</div>
+                <div class="stat-desc">• Klik untuk lihat data</div>
             </a>
             <a href="{{ route('industri-sekunder.index') }}" class="stat-card">
                 <div class="stat-label">Industri Sekunder</div>
                 <span class="stat-number">{{ number_format($statistics['sekunder_pbui']) }}</span>
-                <div class="stat-desc">Izin PBUI Aktif</div>
+                <div class="stat-desc">• Klik untuk lihat data</div>
             </a>
             <a href="{{ route('tptkb.index') }}" class="stat-card">
                 <div class="stat-label">Pengolahan TPT-KB</div>
                 <span class="stat-number">{{ number_format($statistics['tpt_kb']) }}</span>
-                <div class="stat-desc">Terdaftar di Database</div>
+                <div class="stat-desc">• Klik untuk lihat data</div>
             </a>
             <a href="{{ route('perajin.index') }}" class="stat-card">
                 <div class="stat-label">Industri Perajin</div>
                 <span class="stat-number">{{ number_format($statistics['perajin']) }}</span>
-                <div class="stat-desc">Usaha Mikro & Kecil</div>
+                <div class="stat-desc">• Klik untuk lihat data</div>
             </a>
         </div>
 
