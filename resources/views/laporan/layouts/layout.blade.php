@@ -326,10 +326,11 @@
                 <span>Rekapitulasi</span>
             </a>
 
-            <div class="menu-label">Pengelolaan Data</div>
+
 
             @auth
                 @if(Auth::user()->role === 'admin')
+                    <div class="menu-label">Pengelolaan Data</div>
                     <a href="{{ route('laporan.upload.form') }}"
                         class="nav-link {{ request()->routeIs('laporan.upload.form') ? 'active' : '' }}">
                         <i class="fas fa-plus-circle nav-icon"></i>

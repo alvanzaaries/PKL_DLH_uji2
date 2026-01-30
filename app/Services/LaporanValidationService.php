@@ -124,14 +124,17 @@ class LaporanValidationService
                 }
             }
 
-            // Validate numeric fields
+            // Validate numeric fields - must be numeric and non-negative if present
+            // Note: Empty check is already done in required fields validation above
             if (isset($mapping['numeric'])) {
                 foreach ($mapping['numeric'] as $numericField) {
                     $fieldIndex = array_search($numericField, $mapping['fields']);
                     $fieldLabel = $mapping['headers'][$fieldIndex];
-                    $value = $rowData[$numericField] ?? '';
+                    $value = trim((string) ($rowData[$numericField] ?? ''));
 
-                    if (trim((string) $value) !== '') {
+                    // Only validate format if field is not empty
+                    // (empty required fields are already caught above)
+                    if ($value !== '') {
                         if (!is_numeric($value)) {
                             $rowErrors[] = "Baris {$rowNumber}: {$fieldLabel} harus berupa angka";
                         } elseif ((float) $value < 0) {
@@ -164,15 +167,27 @@ class LaporanValidationService
             }
 
             // Validate logic for mutation reports
+            // Only validate if all numeric fields are present and valid
             if (isset($mapping['validate_logic']) && $mapping['validate_logic']) {
-                $persediaanAwal = (float) ($rowData[$mapping['fields'][1]] ?? 0);
-                $penambahan = (float) ($rowData[$mapping['fields'][2]] ?? 0);
-                $penggunaan = (float) ($rowData[$mapping['fields'][3]] ?? 0);
-                $persediaanAkhir = (float) ($rowData[$mapping['fields'][4]] ?? 0);
+                $val1 = trim((string) ($rowData[$mapping['fields'][1]] ?? ''));
+                $val2 = trim((string) ($rowData[$mapping['fields'][2]] ?? ''));
+                $val3 = trim((string) ($rowData[$mapping['fields'][3]] ?? ''));
+                $val4 = trim((string) ($rowData[$mapping['fields'][4]] ?? ''));
 
-                $expectedAkhir = $persediaanAwal + $penambahan - $penggunaan;
-                if (abs($expectedAkhir - $persediaanAkhir) > 0.01) {
-                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
+                // Only run logic validation if all values are present and numeric
+                if (
+                    $val1 !== '' && $val2 !== '' && $val3 !== '' && $val4 !== '' &&
+                    is_numeric($val1) && is_numeric($val2) && is_numeric($val3) && is_numeric($val4)
+                ) {
+                    $persediaanAwal = (float) $val1;
+                    $penambahan = (float) $val2;
+                    $penggunaan = (float) $val3;
+                    $persediaanAkhir = (float) $val4;
+
+                    $expectedAkhir = $persediaanAwal + $penambahan - $penggunaan;
+                    if (abs($expectedAkhir - $persediaanAkhir) > 0.01) {
+                        $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
+                    }
                 }
             }
 
@@ -191,6 +206,115 @@ class LaporanValidationService
             'total' => count($allRows),
             'valid' => $validCount,
             'errors' => $errors
+        ];
+    }
+
+    /**
+     * Validasi data yang sudah diedit oleh user (untuk revalidasi)
+     * Konversi dari array cells ke format yang bisa divalidasi
+     */
+    public function validateEditedData($dataRows, $jenisLaporan, $rowNumberMap = [])
+    {
+        // Convert cells array to associative array format
+        $fieldMappings = [
+            'Laporan Penerimaan Kayu Bulat' => ['nomor_dokumen', 'tanggal', 'asal_kayu', 'jenis_kayu', 'jumlah_batang', 'volume', 'keterangan'],
+            'Laporan Mutasi Kayu Bulat (LMKB)' => ['jenis_kayu', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume', 'keterangan'],
+            'Laporan Penerimaan Kayu Olahan' => ['nomor_dokumen', 'tanggal', 'asal_kayu', 'jenis_olahan', 'jumlah_keping', 'volume', 'keterangan'],
+            'Laporan Mutasi Kayu Olahan (LMKO)' => ['jenis_olahan', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume', 'keterangan'],
+            'Laporan Penjualan Kayu Olahan' => ['nomor_dokumen', 'tanggal', 'tujuan_kirim', 'jenis_olahan', 'jumlah_keping', 'volume', 'keterangan'],
+        ];
+
+        if (!isset($fieldMappings[$jenisLaporan])) {
+            throw new \Exception('Jenis laporan tidak dikenali: ' . $jenisLaporan);
+        }
+
+        $fields = $fieldMappings[$jenisLaporan];
+        $manualData = [];
+
+        // Convert each row from cells array to associative array
+        foreach ($dataRows as $index => $row) {
+            // Handle multiple nested formats:
+            // 1. ['cells' => [...], 'source_row' => X] - from session data
+            // 2. Just [...] - direct array
+
+            // First, extract the cells array
+            if (isset($row['cells'])) {
+                $cells = $row['cells'];
+            } else {
+                $cells = $row;
+            }
+
+            // Ensure cells is an array
+            if (!is_array($cells)) {
+                continue;
+            }
+
+            $rowData = [];
+
+            // Check if cells is already an associative array (from previous validation)
+            // or an indexed array (from form/Excel)
+            $isAssociative = false;
+            if (!empty($cells)) {
+                // Check if first key is a string (associative) or numeric (indexed)
+                $firstKey = array_key_first($cells);
+                $isAssociative = is_string($firstKey);
+            }
+
+            if ($isAssociative) {
+                // Cells is already associative array, just use it directly
+                $rowData = $cells;
+            } else {
+                // Cells is indexed array, convert to associative
+                foreach ($fields as $fieldIndex => $fieldName) {
+                    // Get the value and ensure it's a scalar (string, number, etc)
+                    $value = $cells[$fieldIndex] ?? '';
+
+                    // If value is still an array, skip this malformed row
+                    if (is_array($value)) {
+                        continue 2;
+                    }
+
+                    $rowData[$fieldName] = $value;
+                }
+            }
+
+            $manualData[] = $rowData;
+        }
+
+        // Reuse validateManualData which has complete validation logic
+        $result = $this->validateManualData($manualData, $jenisLaporan);
+
+        // Convert results back from associative array to cells array format
+        // because controller expects cells array format for wrapping
+        $cellsRows = [];
+        foreach ($result['rows'] as $rowData) {
+            // rowData is ['cells' => associative_array, 'source_row' => X]
+            // cells is like: ['jenis_kayu' => 'Meranti', 'persediaan_awal_volume' => 100, ...]
+            $cells = $rowData['cells'] ?? $rowData;
+
+            // If cells is not an array, skip this row
+            if (!is_array($cells)) {
+                continue;
+            }
+
+            // Convert associative array to indexed array based on field order
+            // The field order must match the original column order in Excel/form
+            $cellsArray = [];
+            foreach ($fields as $fieldName) {
+                // Preserve the value from the associative array
+                $cellsArray[] = $cells[$fieldName] ?? '';
+            }
+
+            $cellsRows[] = $cellsArray;
+        }
+
+        // Return in the same format but with cells as indexed arrays
+        return [
+            'headers' => $result['headers'],
+            'rows' => $cellsRows,
+            'total' => $result['total'],
+            'valid' => $result['valid'],
+            'errors' => $result['errors']
         ];
     }
 
@@ -352,11 +476,15 @@ class LaporanValidationService
                 continue;
             }
 
-            if (trim((string) ($row[0] ?? '')) === '') {
+            // Validasi Jenis Kayu (kolom 0) - wajib
+            $jenisKayu = trim((string) ($row[0] ?? ''));
+            if ($jenisKayu === '') {
                 $rowErrors[] = "Baris {$rowNumber}: Jenis Kayu tidak boleh kosong";
             }
 
-            if (trim((string) ($row[1] ?? '')) === '') {
+            // Validasi Persediaan Awal (kolom 1) - wajib dan harus angka
+            $persediaanAwalStr = trim((string) ($row[1] ?? ''));
+            if ($persediaanAwalStr === '') {
                 $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh kosong";
             } else {
                 $persediaanAwal = $this->parseExcelNumber($row[1]);
@@ -367,7 +495,9 @@ class LaporanValidationService
                 }
             }
 
-            if (trim((string) ($row[2] ?? '')) === '') {
+            // Validasi Penambahan (kolom 2) - wajib dan harus angka
+            $penambahanStr = trim((string) ($row[2] ?? ''));
+            if ($penambahanStr === '') {
                 $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh kosong";
             } else {
                 $penambahan = $this->parseExcelNumber($row[2]);
@@ -378,7 +508,9 @@ class LaporanValidationService
                 }
             }
 
-            if (trim((string) ($row[3] ?? '')) === '') {
+            // Validasi Penggunaan/Pengurangan (kolom 3) - wajib dan harus angka
+            $penggunaanStr = trim((string) ($row[3] ?? ''));
+            if ($penggunaanStr === '') {
                 $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh kosong";
             } else {
                 $penggunaan = $this->parseExcelNumber($row[3]);
@@ -389,7 +521,9 @@ class LaporanValidationService
                 }
             }
 
-            if (trim((string) ($row[4] ?? '')) === '') {
+            // Validasi Persediaan Akhir (kolom 4) - wajib dan harus angka
+            $persediaanAkhirStr = trim((string) ($row[4] ?? ''));
+            if ($persediaanAkhirStr === '') {
                 $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh kosong";
             } else {
                 $persediaanAkhir = $this->parseExcelNumber($row[4]);
@@ -401,14 +535,15 @@ class LaporanValidationService
             }
 
             // Validasi logika: Persediaan Akhir = Persediaan Awal + Penambahan - Penggunaan
-            $persediaanAwal = $this->parseExcelNumber($row[1]);
-            $penambahan = $this->parseExcelNumber($row[2]);
-            $penggunaan = $this->parseExcelNumber($row[3]);
-            $persediaanAkhir = $this->parseExcelNumber($row[4]);
+            // Hanya validasi logika jika semua field numeric sudah valid (tidak ada error format)
+            $persediaanAwalParsed = $this->parseExcelNumber($row[1]);
+            $penambahanParsed = $this->parseExcelNumber($row[2]);
+            $penggunaanParsed = $this->parseExcelNumber($row[3]);
+            $persediaanAkhirParsed = $this->parseExcelNumber($row[4]);
 
-            if ($persediaanAwal !== null && $penambahan !== null && $penggunaan !== null && $persediaanAkhir !== null) {
-                $expectedAkhir = $persediaanAwal + $penambahan - $penggunaan;
-                if (abs($expectedAkhir - $persediaanAkhir) > 0.01) {
+            if ($persediaanAwalParsed !== null && $penambahanParsed !== null && $penggunaanParsed !== null && $persediaanAkhirParsed !== null) {
+                $expectedAkhir = $persediaanAwalParsed + $penambahanParsed - $penggunaanParsed;
+                if (abs($expectedAkhir - $persediaanAkhirParsed) > 0.01) {
                     $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
                 }
             }
@@ -563,11 +698,15 @@ class LaporanValidationService
                 continue;
             }
 
-            if (trim((string) ($row[0] ?? '')) === '') {
+            // Validasi Jenis Produk (kolom 0) - wajib
+            $jenisProduk = trim((string) ($row[0] ?? ''));
+            if ($jenisProduk === '') {
                 $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
             }
 
-            if (trim((string) ($row[1] ?? '')) === '') {
+            // Validasi Persediaan Awal (kolom 1) - wajib dan harus angka
+            $persediaanAwalStr = trim((string) ($row[1] ?? ''));
+            if ($persediaanAwalStr === '') {
                 $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh kosong";
             } else {
                 $persediaanAwal = $this->parseExcelNumber($row[1]);
@@ -578,7 +717,9 @@ class LaporanValidationService
                 }
             }
 
-            if (trim((string) ($row[2] ?? '')) === '') {
+            // Validasi Penambahan (kolom 2) - wajib dan harus angka
+            $penambahanStr = trim((string) ($row[2] ?? ''));
+            if ($penambahanStr === '') {
                 $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh kosong";
             } else {
                 $penambahan = $this->parseExcelNumber($row[2]);
@@ -589,7 +730,9 @@ class LaporanValidationService
                 }
             }
 
-            if (trim((string) ($row[3] ?? '')) === '') {
+            // Validasi Penggunaan/Pengurangan (kolom 3) - wajib dan harus angka
+            $penggunaanStr = trim((string) ($row[3] ?? ''));
+            if ($penggunaanStr === '') {
                 $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh kosong";
             } else {
                 $penggunaan = $this->parseExcelNumber($row[3]);
@@ -600,7 +743,9 @@ class LaporanValidationService
                 }
             }
 
-            if (trim((string) ($row[4] ?? '')) === '') {
+            // Validasi Persediaan Akhir (kolom 4) - wajib dan harus angka
+            $persediaanAkhirStr = trim((string) ($row[4] ?? ''));
+            if ($persediaanAkhirStr === '') {
                 $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh kosong";
             } else {
                 $persediaanAkhir = $this->parseExcelNumber($row[4]);
@@ -612,14 +757,15 @@ class LaporanValidationService
             }
 
             // Validasi logika: Persediaan Akhir = Persediaan Awal + Penambahan - Penggunaan
-            $persediaanAwal = $this->parseExcelNumber($row[1]);
-            $penambahan = $this->parseExcelNumber($row[2]);
-            $penggunaan = $this->parseExcelNumber($row[3]);
-            $persediaanAkhir = $this->parseExcelNumber($row[4]);
+            // Hanya validasi logika jika semua field numeric sudah valid (tidak ada error format)
+            $persediaanAwalParsed = $this->parseExcelNumber($row[1]);
+            $penambahanParsed = $this->parseExcelNumber($row[2]);
+            $penggunaanParsed = $this->parseExcelNumber($row[3]);
+            $persediaanAkhirParsed = $this->parseExcelNumber($row[4]);
 
-            if ($persediaanAwal !== null && $penambahan !== null && $penggunaan !== null && $persediaanAkhir !== null) {
-                $expectedAkhir = $persediaanAwal + $penambahan - $penggunaan;
-                if (abs($expectedAkhir - $persediaanAkhir) > 0.01) {
+            if ($persediaanAwalParsed !== null && $penambahanParsed !== null && $penggunaanParsed !== null && $persediaanAkhirParsed !== null) {
+                $expectedAkhir = $persediaanAwalParsed + $penambahanParsed - $penggunaanParsed;
+                if (abs($expectedAkhir - $persediaanAkhirParsed) > 0.01) {
                     $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
                 }
             }
@@ -740,13 +886,17 @@ class LaporanValidationService
             return null;
         }
 
-        // Jika sudah numeric (tanpa format string), langsung return
-        // Excel sering mengirim float 1.5 secara langsung
-        if (is_numeric($value)) {
-            return (float) $value;
+        // Trim whitespace first and check if empty after trimming
+        $s = trim((string) $value);
+        if ($s === '') {
+            return null;
         }
 
-        $s = trim((string) $value);
+        // Jika sudah numeric (tanpa format string), langsung return
+        // Excel sering mengirim float 1.5 secara langsung
+        if (is_numeric($s)) {
+            return (float) $s;
+        }
 
         // Format yang diterima:
         // - Koma (,) hanya sebagai pemisah ribuan

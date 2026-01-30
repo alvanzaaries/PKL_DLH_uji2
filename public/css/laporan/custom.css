@@ -251,18 +251,19 @@
 .ledger-table tbody tr.total-row,
 .ledger-table tfoot tr.total-row,
 .table-container .ledger-table tfoot tr.total-row {
-    background-color: #0F2F24 !important;
+    background-color: #1B5E20 !important;
     color: white !important;
     font-weight: 700;
-    border-top: 2px solid #0F2F24;
+    border-top: 2px solid #1B5E20;
 }
 
 .ledger-table tbody tr.total-row:hover,
 .ledger-table tfoot tr.total-row:hover,
 .table-container .ledger-table tfoot tr.total-row:hover {
-    background-color: #183F32 !important;
+    background-color: #14532d !important;
 }
 
+.ledger-table tbody tr.total-row td,
 .ledger-table tfoot tr.total-row td,
 .table-container .ledger-table tfoot tr.total-row td {
     color: white !important;
