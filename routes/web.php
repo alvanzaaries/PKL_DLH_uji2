@@ -177,7 +177,7 @@ Route::prefix('laporan')->middleware(['auth', 'session.timeout', 'role:admin'])-
 
     // Dashboard
     Route::get('/', [IndustriController::class, 'index'])->name('laporan.index');
-   
+
     // Monitoring
     Route::get('/monitoring', [IndustriController::class, 'monitoring'])->name('laporan.monitoring');
 
@@ -191,5 +191,6 @@ Route::prefix('laporan')->middleware(['auth', 'session.timeout', 'role:admin'])-
     Route::get('/{industri}/upload', [LaporanController::class, 'showByIndustri'])->name('laporan.industri');
     Route::get('/{industri}/detail/{id}', [LaporanController::class, 'detailLaporan'])->name('laporan.detail');
     Route::get('/{industri}/detail/{id}/export', [LaporanController::class, 'exportDetailLaporan'])->name('laporan.detail.export');
+    Route::delete('/{industri}/delete/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
 });
 
