@@ -194,7 +194,7 @@
                                         <td>{{ $item->keterangan }}</td>
                                     </tr>
                                 @endforeach
-                                <tr class="total-row">
+                                <tr class="total-row text-white">
                                     <td colspan="6" class="col-right pr-4">TOTAL:</td>
                                     <td class="col-right">{{ number_format($items->sum('jumlah_batang')) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
@@ -231,7 +231,7 @@
                                         <td>{{ $item->keterangan }}</td>
                                     </tr>
                                 @endforeach
-                                <tr class="total-row">
+                                <tr class="total-row text-white">
                                     <td colspan="6" class="col-right pr-4">TOTAL:</td>
                                     <td class="col-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
@@ -266,7 +266,7 @@
                                         <td>{{ $item->keterangan }}</td>
                                     </tr>
                                 @endforeach
-                                <tr class="total-row">
+                                <tr class="total-row text-white">
                                     <td colspan="3" class="col-right pr-4">TOTAL:</td>
                                     <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
@@ -303,7 +303,7 @@
                                         <td>{{ $item->keterangan }}</td>
                                     </tr>
                                 @endforeach
-                                <tr class="total-row">
+                                <tr class="total-row text-white">
                                     <td colspan="3" class="col-right pr-4">TOTAL:</td>
                                     <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
@@ -342,7 +342,7 @@
                                         <td>{{ $item->keterangan }}</td>
                                     </tr>
                                 @endforeach
-                                <tr class="total-row">
+                                <tr class="total-row text-white">
                                     <td colspan="6" class="col-right pr-4">TOTAL:</td>
                                     <td class="col-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>

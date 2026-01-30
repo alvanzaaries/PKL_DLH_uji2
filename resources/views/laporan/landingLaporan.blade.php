@@ -27,8 +27,7 @@
             padding: 0;
             min-height: 100vh;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
         }
 
         .landing-container {
@@ -234,11 +233,33 @@
 
 <body>
 
-    <header class="header-bar">
-        <a href="/" class="back-link" style="margin-right: 3rem;">
-            <i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Kembali
-        </a>
-    </header>
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed w-full z-50 top-0 left-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="{{ route('pnbp.landing') }}" class="text-2xl font-bold text-green-600">Pelaporan Hasil
+                            Hutan</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ route('laporan.landing') }}"
+                        class="px-3 py-2 rounded-md text-sm font-medium transition text-gray-700 hover:text-green-700 hover:bg-green-50">Beranda</a>
+
+                    @auth
+                        <form method="POST" action="{{ route('logout') }}" class="inline-flex">
+                            @csrf
+                            <button type="submit"
+                                class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition">Logout</button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}"
+                            class="text-gray-600 hover:text-green-600 px-3 py-2 rounded-md text-sm font-medium transition">Login</a>
+                    @endauth
+                </div>
+            </div>
+        </div>
+    </nav>
 
     <div class="landing-container" style="margin-top: 5rem;">
         <div class="landing-flex">
@@ -266,6 +287,20 @@
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="w-full border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 py-6 mt-auto">
+        <div class="mx-auto max-w-6xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex flex-col items-center md:items-start gap-1">
+                <span class="text-sm font-bold text-green-600">Dinas Lingkungan Hidup & Kehutanan</span>
+                <span class="text-xs text-gray-500">© {{ date('Y') }} DLHK Provinsi Jawa Tengah. All rights
+                    reserved.</span>
+            </div>
+            <div class="flex items-center gap-3 text-xs font-medium text-gray-400">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Sistem Berjalan Normal
+            </div>
+        </div>
+    </footer>
 </body>
 
 </html>

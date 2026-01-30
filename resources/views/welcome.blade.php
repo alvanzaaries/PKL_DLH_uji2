@@ -74,10 +74,14 @@
     <nav class="absolute top-0 w-full z-20 px-6 py-4">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
-                    <img src="logo jateng.webp" alt="Logo Jawa Tengah" class="w-full h-full object-contain rounded-full">
+                <div
+                    class="w-10 h-10 flex items-center justify-center hover:scale-105 transition-transform overflow-hidden">
+                    <img src="logo jateng.webp" alt="Logo Jawa Tengah"
+                        class="w-full h-full object-contain rounded-full">
                 </div>
-                <span class="text-white font-bold text-sm sm:text-base tracking-wide hidden sm:block drop-shadow-md">DLHK PROVINSI JAWA TENGAH</span>
+                <span
+                    class="text-white font-bold text-sm sm:text-base tracking-wide hidden sm:block drop-shadow-md">DLHK
+                    PROVINSI JAWA TENGAH</span>
             </div>
         </div>
     </nav>
@@ -98,13 +102,14 @@
         </div>
 
         <div class="relative z-10 text-center px-4 max-w-7xl mx-auto mt-12">
-            <h1 class="text-3xl md:text-4xl lg:text-3xl font-extrabold text-white leading-snug drop-shadow-xl mb-8">
+            <h1 class="text-5xl md:text-4xl lg:text-5xl font-extrabold text-white leading-snug drop-shadow-xl mb-8">
                 SISTEM INFORMASI
-                
-                <span class="block md:whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-green-200 to-emerald-100 my-2">
+
+                <span
+                    class="block md:whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-green-200 to-emerald-100 my-2">
                     PEMANFAATAN &amp; PENGOLAHAN HASIL HUTAN
                 </span>
-                
+
                 JAWA TENGAH
             </h1>
         </div>
@@ -141,7 +146,9 @@
                     <h3
                         class="text-[11px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider mb-2 border-b border-green-100 dark:border-green-800 pb-1">
                         Sistem Pengelolan PNBP Jateng</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4 text-xs leading-snug line-clamp-3">Layanan digital untuk mengelola pelaporan, rekonsiliasi data hasil hutan, dan monitoring PNBP secara real-time.</p>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4 text-xs leading-snug line-clamp-3">Layanan digital
+                        untuk mengelola pelaporan, rekonsiliasi data hasil hutan, dan monitoring PNBP secara real-time.
+                    </p>
 
                     <div class="mt-auto w-full">
                         <a class="inline-flex items-center justify-center w-full bg-green-50 hover:bg-green-100 dark:bg-green-900/30 dark:hover:bg-green-900/50 text-green-700 dark:text-green-300 font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-green-200 dark:border-green-800"
@@ -173,7 +180,8 @@
                     <h3
                         class="text-[11px] font-bold text-[#5EA44D] dark:text-[#72C55E] uppercase tracking-wider mb-2 border-b border-[#72C55E]/30 dark:border-[#72C55E]/30 pb-1">
                         Database Industri Kehutanan </h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4 text-xs leading-snug line-clamp-3">Layanan digital untuk
+                    <p class="text-gray-600 dark:text-gray-400 mb-4 text-xs leading-snug line-clamp-3">Layanan digital
+                        untuk
                         menambahkan, memantau database keaktifan industri kehutanan di Jawa Tengah secara real-time.</p>
 
                     <div class="mt-auto w-full">
@@ -189,29 +197,30 @@
 
             <div
                 class="group relative bg-surface-light dark:bg-surface-dark rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden border border-gray-100 dark:border-gray-700 flex flex-col h-full">
-                <div class="h-1.5 bg-gradient-to-r from-amber-600 to-orange-800"></div>
+                <div class="h-1.5 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
                 <div class="p-4 flex flex-col items-center text-center flex-grow">
                     <div class="w-12 h-12 mb-3 relative group-hover:scale-110 transition-transform duration-300">
-                        <div class="absolute inset-0 bg-orange-100 dark:bg-orange-900/30 rounded-full animate-pulse">
+                        <div class="absolute inset-0 bg-emerald-100 dark:bg-emerald-900/30 rounded-full animate-pulse">
                         </div>
                         <div
-                            class="relative w-full h-full rounded-full border-2 border-white dark:border-gray-700 shadow bg-gradient-to-br from-amber-600 to-orange-700 flex items-center justify-center">
+                            class="relative w-full h-full rounded-full border-2 border-white dark:border-gray-700 shadow bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
                             <span class="material-icons text-white text-2xl">landscape</span>
                         </div>
                     </div>
 
                     <h2
-                        class="text-lg font-extrabold text-gray-900 dark:text-white mb-1 group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors">
+                        class="text-lg font-extrabold text-gray-900 dark:text-white mb-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                         PELAPORAN PUHH</h2>
                     <h3
-                        class="text-[11px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-2 border-b border-amber-100 dark:border-amber-800 pb-1">
+                        class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2 border-b border-emerald-100 dark:border-emerald-800 pb-1">
                         Monitoring Pelaporan Kehutanan</h3>
-                    <p class="text-gray-600 dark:text-gray-400 mb-4 text-xs leading-snug line-clamp-3">Portal pelaporan kehutanan terpadu untuk pengumpulan, pengelolaan,
+                    <p class="text-gray-600 dark:text-gray-400 mb-4 text-xs leading-snug line-clamp-3">Portal pelaporan
+                        kehutanan terpadu untuk pengumpulan, pengelolaan,
                         dan rekapitulasi data.</p>
 
                     <div class="mt-auto w-full">
-                        <a class="inline-flex items-center justify-center w-full bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/30 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-amber-200 dark:border-amber-800"
-                        href="{{ route('laporan.landing') }}" target="_blank">
+                        <a class="inline-flex items-center justify-center w-full bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/30 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200 border border-emerald-200 dark:border-emerald-800"
+                            href="{{ route('laporan.landing') }}" target="_blank">
                             <span>Akses</span>
                             <span
                                 class="material-icons ml-1 text-sm group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
@@ -231,7 +240,8 @@
                 <div class="w-6 h-6 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
                     <span class="material-icons text-primary text-xs">eco</span>
                 </div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">© {{ date('Y') }} Dinas Lingkungan Hidup dan
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">© {{ date('Y') }} Dinas Lingkungan Hidup
+                    dan
                     Kehutanan.</p>
             </div>
         </div>

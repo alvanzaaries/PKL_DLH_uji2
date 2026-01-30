@@ -46,13 +46,27 @@ class LaporanController extends Controller
      */
     public function preview(Request $request)
     {
-        $request->validate([
-            'industri_id' => 'required|exists:industries,id',
-            'bulan' => 'required|integer|between:1,12',
-            'tahun' => 'required|integer|min:2020',
-            'jenis_laporan' => 'required|string',
-            'file_excel' => 'required|file|mimes:xlsx,xls|max:5120',
-        ]);
+        // Detect input mode: manual or excel
+        $isManualMode = $request->has('manual_data') && is_array($request->manual_data) && count($request->manual_data) > 0;
+
+        // Conditional validation based on mode
+        if ($isManualMode) {
+            $request->validate([
+                'industri_id' => 'required|exists:industries,id',
+                'bulan' => 'required|integer|between:1,12',
+                'tahun' => 'required|integer|min:2020',
+                'jenis_laporan' => 'required|string',
+                'manual_data' => 'required|array|min:1',
+            ]);
+        } else {
+            $request->validate([
+                'industri_id' => 'required|exists:industries,id',
+                'bulan' => 'required|integer|between:1,12',
+                'tahun' => 'required|integer|min:2020',
+                'jenis_laporan' => 'required|string',
+                'file_excel' => 'required|file|mimes:xlsx,xls|max:5120',
+            ]);
+        }
 
         // Validasi unique: cek apakah sudah ada laporan untuk industri, bulan, tahun, dan jenis yang sama
         $existingLaporan = Laporan::where('industri_id', $request->industri_id)
@@ -68,24 +82,32 @@ class LaporanController extends Controller
         }
 
         try {
-            // Upload file sementara
-            $file = $request->file('file_excel');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('temp', $fileName, 'local');
-
-            // Baca Excel dan validasi format sesuai jenis laporan menggunakan service
             $jenisLaporan = $request->jenis_laporan;
-            $previewData = $this->validationService->readAndValidateExcel($filePath, $jenisLaporan);
+            $filePath = null;
+
+            if ($isManualMode) {
+                // Process manual data
+                $previewData = $this->validationService->validateManualData($request->manual_data, $jenisLaporan);
+            } else {
+                // Upload file sementara
+                $file = $request->file('file_excel');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $filePath = $file->storeAs('temp', $fileName, 'local');
+
+                // Baca Excel dan validasi format sesuai jenis laporan menggunakan service
+                $previewData = $this->validationService->readAndValidateExcel($filePath, $jenisLaporan);
+            }
 
             // Simpan data ke session untuk proses simpan nanti
             session([
                 'preview_data' => $previewData,
-                'preview_file_path' => $filePath,
+                'preview_file_path' => $filePath, // Will be null for manual mode
                 'preview_metadata' => [
                     'industri_id' => $request->industri_id,
                     'bulan' => $request->bulan,
                     'tahun' => $request->tahun,
                     'jenis_laporan' => $jenisLaporan,
+                    'is_manual' => $isManualMode, // Flag to indicate manual mode
                 ],
                 'redirect_after_save' => url()->previous(), // Simpan URL sebelumnya
                 'is_fresh_upload' => true, // Flag untuk clear localStorage di view
@@ -98,10 +120,9 @@ class LaporanController extends Controller
             Log::error('Laporan preview failed', ['exception' => $e]);
             return back()
                 ->withInput()
-                ->with('error', 'Gagal memproses file. Silakan periksa format template.');
+                ->with('error', 'Gagal memproses data. ' . $e->getMessage());
         }
     }
-
     /**
      * Show preview page by reading preview data from session (GET).
      */
@@ -506,14 +527,6 @@ class LaporanController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Laporan $laporan)
-    {
-        //
-    }
-
-    /**
      * Menampilkan halaman rekap laporan dengan statistik berdasarkan kategori
      */
     public function rekapLaporan(Request $request)
@@ -631,6 +644,44 @@ class LaporanController extends Controller
     }
 
     /**
+     * Hapus laporan beserta data terkait
+     */
+    public function destroy($industri, $id)
+    {
+        $laporan = Laporan::findOrFail($id);
+
+        // Pastikan laporan ini milik industri yang dimaksud
+        if ($laporan->industri_id != $industri) {
+            return redirect()->back()->with('error', 'Data tidak valid');
+        }
+
+        // Hapus semua data detail terkait laporan ini berdasarkan jenis laporan
+        switch ($laporan->jenis_laporan) {
+            case 'Laporan Penerimaan Kayu Bulat':
+                \App\Models\laporan_penerimaan_kayu_bulat::where('laporan_id', $id)->delete();
+                break;
+            case 'Laporan Mutasi Kayu Bulat (LMKB)':
+                \App\Models\laporan_mutasi_kayu_bulat::where('laporan_id', $id)->delete();
+                break;
+            case 'Laporan Penerimaan Kayu Olahan':
+                \App\Models\laporan_penerimaan_kayu_olahan::where('laporan_id', $id)->delete();
+                break;
+            case 'Laporan Mutasi Kayu Olahan (LMKO)':
+                \App\Models\laporan_mutasi_kayu_olahan::where('laporan_id', $id)->delete();
+                break;
+            case 'Laporan Penjualan Kayu Olahan':
+                \App\Models\laporan_penjualan_kayu_olahan::where('laporan_id', $id)->delete();
+                break;
+        }
+
+        // Hapus laporan utama
+        $laporan->delete();
+
+        return redirect()->route('laporan.industri', ['industri' => $industri])
+            ->with('success', 'Laporan berhasil dihapus');
+    }
+
+    /**
      * Validasi data yang sudah diedit oleh user (menggunakan Service)
      */
     private function validateEditedDataUsingService($dataRows, $jenisLaporan, $rowNumberMap = [])
@@ -656,7 +707,7 @@ class LaporanController extends Controller
             // Skip baris kosong
             $isEmpty = true;
             foreach ($row as $cell) {
-                if ($cell !== null && $cell !== '' && trim($cell) !== '') {
+                if ($cell !== null && $cell !== '' && trim((string) $cell) !== '') {
                     $isEmpty = false;
                     break;
                 }
@@ -709,15 +760,17 @@ class LaporanController extends Controller
                     $rowErrors[] = "Baris {$rowNumber}: Jenis Kayu tidak boleh kosong";
                 }
                 // Validasi Jumlah Batang (kolom 4) - wajib dan numeric
-                if (trim((string) ($row[4] ?? '')) === '') {
+                $val4 = trim((string) ($row[4] ?? ''));
+                if ($val4 === '') {
                     $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang tidak boleh kosong";
-                } elseif (!is_numeric($row[4]) || $row[4] < 0) {
+                } elseif (!is_numeric($val4) || (float) $val4 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Jumlah Batang harus berupa angka positif";
                 }
                 // Validasi Volume (kolom 5) - wajib dan numeric
-                if (trim((string) ($row[5] ?? '')) === '') {
+                $val5 = trim((string) ($row[5] ?? ''));
+                if ($val5 === '') {
                     $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
-                } elseif (!is_numeric($row[5]) || $row[5] < 0) {
+                } elseif (!is_numeric($val5) || (float) $val5 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka positif";
                 }
                 break;
@@ -727,21 +780,48 @@ class LaporanController extends Controller
                 if (trim((string) ($row[0] ?? '')) === '') {
                     $rowErrors[] = "Baris {$rowNumber}: Jenis Kayu tidak boleh kosong";
                 }
-                // Validasi Persediaan Awal (kolom 1) - numeric
-                if (isset($row[1]) && trim((string) $row[1]) !== '' && (!is_numeric($row[1]) || $row[1] < 0)) {
+                // Validasi Persediaan Awal (kolom 1) - WAJIB dan numeric
+                $val1 = trim((string) ($row[1] ?? ''));
+                if ($val1 === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh kosong";
+                } elseif (!is_numeric($val1) || (float) $val1 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal harus berupa angka positif";
                 }
-                // Validasi Penambahan (kolom 2) - numeric
-                if (isset($row[2]) && trim((string) $row[2]) !== '' && (!is_numeric($row[2]) || $row[2] < 0)) {
+                // Validasi Penambahan (kolom 2) - WAJIB dan numeric
+                $val2 = trim((string) ($row[2] ?? ''));
+                if ($val2 === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh kosong";
+                } elseif (!is_numeric($val2) || (float) $val2 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka positif";
                 }
-                // Validasi Penggunaan/Pengurangan (kolom 3) - numeric
-                if (isset($row[3]) && trim((string) $row[3]) !== '' && (!is_numeric($row[3]) || $row[3] < 0)) {
+                // Validasi Penggunaan/Pengurangan (kolom 3) - WAJIB dan numeric
+                $val3 = trim((string) ($row[3] ?? ''));
+                if ($val3 === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh kosong";
+                } elseif (!is_numeric($val3) || (float) $val3 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka positif";
                 }
-                // Validasi Persediaan Akhir (kolom 4) - numeric
-                if (isset($row[4]) && trim((string) $row[4]) !== '' && (!is_numeric($row[4]) || $row[4] < 0)) {
+                // Validasi Persediaan Akhir (kolom 4) - WAJIB dan numeric
+                $val4 = trim((string) ($row[4] ?? ''));
+                if ($val4 === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh kosong";
+                } elseif (!is_numeric($val4) || (float) $val4 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka positif";
+                }
+                // VALIDASI LOGIKA MUTASI - Persediaan Akhir = Awal + Penambahan - Penggunaan
+                if (
+                    $val1 !== '' && $val2 !== '' && $val3 !== '' && $val4 !== '' &&
+                    is_numeric($val1) && is_numeric($val2) && is_numeric($val3) && is_numeric($val4)
+                ) {
+                    $persediaanAwal = (float) $val1;
+                    $penambahan = (float) $val2;
+                    $penggunaan = (float) $val3;
+                    $persediaanAkhir = (float) $val4;
+
+                    $expectedAkhir = $persediaanAwal + $penambahan - $penggunaan;
+                    if (abs($expectedAkhir - $persediaanAkhir) > 0.01) {
+                        $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
+                    }
                 }
                 break;
 
@@ -763,15 +843,17 @@ class LaporanController extends Controller
                     $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
                 }
                 // Validasi Jumlah Keping (kolom 4) - wajib dan numeric
-                if (trim((string) ($row[4] ?? '')) === '') {
+                $val4 = trim((string) ($row[4] ?? ''));
+                if ($val4 === '') {
                     $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh kosong";
-                } elseif (!is_numeric($row[4]) || $row[4] < 0) {
+                } elseif (!is_numeric($val4) || (float) $val4 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka positif";
                 }
                 // Validasi Volume (kolom 5) - wajib dan numeric
-                if (trim((string) ($row[5] ?? '')) === '') {
+                $val5 = trim((string) ($row[5] ?? ''));
+                if ($val5 === '') {
                     $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
-                } elseif (!is_numeric($row[5]) || $row[5] < 0) {
+                } elseif (!is_numeric($val5) || (float) $val5 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka positif";
                 }
                 break;
@@ -781,21 +863,48 @@ class LaporanController extends Controller
                 if (trim((string) ($row[0] ?? '')) === '') {
                     $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
                 }
-                // Validasi Persediaan Awal (kolom 1) - numeric
-                if (isset($row[1]) && trim((string) $row[1]) !== '' && (!is_numeric($row[1]) || $row[1] < 0)) {
+                // Validasi Persediaan Awal (kolom 1) - WAJIB dan numeric
+                $val1 = trim((string) ($row[1] ?? ''));
+                if ($val1 === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal tidak boleh kosong";
+                } elseif (!is_numeric($val1) || (float) $val1 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Persediaan Awal harus berupa angka positif";
                 }
-                // Validasi Penambahan (kolom 2) - numeric
-                if (isset($row[2]) && trim((string) $row[2]) !== '' && (!is_numeric($row[2]) || $row[2] < 0)) {
+                // Validasi Penambahan (kolom 2) - WAJIB dan numeric
+                $val2 = trim((string) ($row[2] ?? ''));
+                if ($val2 === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Penambahan tidak boleh kosong";
+                } elseif (!is_numeric($val2) || (float) $val2 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Penambahan harus berupa angka positif";
                 }
-                // Validasi Penggunaan/Pengurangan (kolom 3) - numeric
-                if (isset($row[3]) && trim((string) $row[3]) !== '' && (!is_numeric($row[3]) || $row[3] < 0)) {
+                // Validasi Penggunaan/Pengurangan (kolom 3) - WAJIB dan numeric
+                $val3 = trim((string) ($row[3] ?? ''));
+                if ($val3 === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan tidak boleh kosong";
+                } elseif (!is_numeric($val3) || (float) $val3 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Penggunaan/Pengurangan harus berupa angka positif";
                 }
-                // Validasi Persediaan Akhir (kolom 4) - numeric
-                if (isset($row[4]) && trim((string) $row[4]) !== '' && (!is_numeric($row[4]) || $row[4] < 0)) {
+                // Validasi Persediaan Akhir (kolom 4) - WAJIB dan numeric
+                $val4 = trim((string) ($row[4] ?? ''));
+                if ($val4 === '') {
+                    $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak boleh kosong";
+                } elseif (!is_numeric($val4) || (float) $val4 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir harus berupa angka positif";
+                }
+                // VALIDASI LOGIKA MUTASI - Persediaan Akhir = Awal + Penambahan - Penggunaan
+                if (
+                    $val1 !== '' && $val2 !== '' && $val3 !== '' && $val4 !== '' &&
+                    is_numeric($val1) && is_numeric($val2) && is_numeric($val3) && is_numeric($val4)
+                ) {
+                    $persediaanAwal = (float) $val1;
+                    $penambahan = (float) $val2;
+                    $penggunaan = (float) $val3;
+                    $persediaanAkhir = (float) $val4;
+
+                    $expectedAkhir = $persediaanAwal + $penambahan - $penggunaan;
+                    if (abs($expectedAkhir - $persediaanAkhir) > 0.01) {
+                        $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
+                    }
                 }
                 break;
 
@@ -817,15 +926,17 @@ class LaporanController extends Controller
                     $rowErrors[] = "Baris {$rowNumber}: Jenis Produk tidak boleh kosong";
                 }
                 // Validasi Jumlah Keping (kolom 4) - wajib dan numeric
-                if (trim((string) ($row[4] ?? '')) === '') {
+                $val4 = trim((string) ($row[4] ?? ''));
+                if ($val4 === '') {
                     $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping tidak boleh kosong";
-                } elseif (!is_numeric($row[4]) || $row[4] < 0) {
+                } elseif (!is_numeric($val4) || (float) $val4 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Jumlah Keping harus berupa angka positif";
                 }
                 // Validasi Volume (kolom 5) - wajib dan numeric
-                if (trim((string) ($row[5] ?? '')) === '') {
+                $val5 = trim((string) ($row[5] ?? ''));
+                if ($val5 === '') {
                     $rowErrors[] = "Baris {$rowNumber}: Volume tidak boleh kosong";
-                } elseif (!is_numeric($row[5]) || $row[5] < 0) {
+                } elseif (!is_numeric($val5) || (float) $val5 < 0) {
                     $rowErrors[] = "Baris {$rowNumber}: Volume harus berupa angka positif";
                 }
                 break;
@@ -834,5 +945,3 @@ class LaporanController extends Controller
         return $rowErrors;
     }
 }
-
-

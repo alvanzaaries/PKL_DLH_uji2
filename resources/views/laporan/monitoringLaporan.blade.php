@@ -54,7 +54,7 @@
                     <select name="tahun" id="tahun" class="filter-input" style="min-width: 120px;">
                         @php
                             $currentYear = date('Y');
-                            $startYear = 2020; // Adjusted
+                            $startYear = config('laporan.start_year', 2020);
                         @endphp
                         @for ($year = $currentYear; $year >= $startYear; $year--)
                             <option value="{{ $year }}" {{ request('tahun', $currentYear) == $year ? 'selected' : '' }}>
