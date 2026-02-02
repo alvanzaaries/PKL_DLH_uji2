@@ -1,6 +1,5 @@
 @extends('PNBP.layouts.admin')
 
-\\
 
 @section('title', 'Arsip Rekonsiliasi - Admin')
 @section('header', 'Arsip Rekonsiliasi')
@@ -136,15 +135,15 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{{ $item->created_at->format('d M Y, H:i') }}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
-                                    <a class="text-gray-400 hover:text-primary dark:hover:text-primary transition-colors p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="Detail" href="{{ route('reconciliations.show', $item->id) }}">
-                                        <span class="material-icons-outlined">visibility</span>
+                                    <a class="w-8 h-8 inline-flex items-center justify-center text-gray-400 hover:text-primary dark:hover:text-primary transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-gray-700" title="Detail" href="{{ route('reconciliations.show', $item->id) }}">
+                                        <span class="material-icons-outlined text-[20px] leading-none">visibility</span>
                                     </a>
                                     <!-- Konfirmasi sebelum menghapus data rekonsiliasi. -->
                                     <form action="{{ route('reconciliations.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini? Semua detail data akan ikut terhapus.')">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors p-1 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20" title="Hapus" type="submit">
-                                            <span class="material-icons-outlined">delete_outline</span>
+                                        <button class="w-8 h-8 inline-flex items-center justify-center text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors rounded-full hover:bg-red-50 dark:hover:bg-red-900/20" title="Hapus" type="submit">
+                                            <span class="material-icons-outlined text-[20px] leading-none">delete_outline</span>
                                         </button>
                                     </form>
                                 </div>
