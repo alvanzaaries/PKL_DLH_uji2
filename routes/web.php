@@ -110,6 +110,9 @@ Route::prefix('pnbp')->group(function () {
             ->except(['create', 'store']);
         Route::get('/reconciliations/{reconciliation}/file', [ReconciliationController::class, 'downloadFile'])->name('reconciliations.file');
         Route::get('/reconciliations/{reconciliation}/raw', [ReconciliationController::class, 'rawExcel'])->name('reconciliations.raw');
+        Route::get('/reconciliations/{reconciliation}/raw/sheet/{sheetIndex}', [ReconciliationController::class, 'rawExcelSheet'])
+            ->whereNumber('sheetIndex')
+            ->name('reconciliations.raw.sheet');
         Route::get('/reconciliations/{reconciliation}/export-pdf', [ReconciliationController::class, 'exportPdf'])->name('reconciliations.export-pdf');
         Route::post('/reconciliations/{reconciliation}/summary-overrides', [ReconciliationController::class, 'updateSummaryOverrides'])->name('reconciliations.summary-overrides');
     });
