@@ -440,6 +440,9 @@ class LaporanController extends Controller
 
             DB::commit();
 
+            // Generate Bukti Tanda Terima PDF
+            $this->generateBuktiPdf($laporan);
+
             // Hapus file temporary
             if ($filePath && Storage::exists($filePath)) {
                 Storage::delete($filePath);
@@ -943,5 +946,142 @@ class LaporanController extends Controller
         }
 
         return $rowErrors;
+    }
+
+    /**
+     * Generate Bukti Tanda Terima PDF and save to storage.
+     * Updates the Laporan record with the path.
+     */
+    private function generateBuktiPdf(Laporan $laporan): ?string
+    {
+        try {
+            // Load industri
+            $industri = $laporan->industri;
+            if (!$industri) {
+                Log::warning('Cannot generate PDF: industri not found for laporan id ' . $laporan->id);
+                return null;
+            }
+
+            // Parse periode from tanggal
+            $tanggal = \Carbon\Carbon::parse($laporan->tanggal);
+            $bulanNama = $tanggal->translatedFormat('F');
+            $tahun = $tanggal->year;
+
+            // Prepare data for PDF
+            $data = [
+                'nomorBukti' => 'BTT/' . str_pad($laporan->id, 6, '0', STR_PAD_LEFT) . '/' . date('Y'),
+                'namaIndustri' => $industri->nama,
+                'penanggungJawab' => $industri->penanggungjawab ?? '-',
+                'alamat' => $industri->alamat ?? '-',
+                'jenisLaporan' => $laporan->jenis_laporan,
+                'periodeLaporan' => $bulanNama . ' ' . $tahun,
+                'tanggalDiterima' => $laporan->created_at->translatedFormat('d F Y, H:i') . ' WIB',
+                'tempatTanggal' => 'Kalimantan Timur, ' . $laporan->created_at->translatedFormat('d F Y'),
+            ];
+
+            // Generate PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('laporan.pdf.bukti_tanda_terima', $data);
+
+            // Ensure directory exists
+            $directory = storage_path('app/public/laporan/proofs');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+
+            // Generate filename
+            $filename = 'bukti_' . $laporan->id . '_' . time() . '.pdf';
+            $relativePath = 'laporan/proofs/' . $filename;
+            $fullPath = storage_path('app/public/' . $relativePath);
+
+            // Save PDF
+            $pdf->save($fullPath);
+
+            // Update laporan with path
+            $laporan->update(['path_laporan' => $relativePath]);
+
+            Log::info('Generated PDF for laporan id ' . $laporan->id . ': ' . $relativePath);
+
+            return $relativePath;
+
+        } catch (\Exception $e) {
+            Log::error('Failed to generate PDF for laporan id ' . $laporan->id, [
+                'exception' => $e->getMessage()
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Public page to search for report proofs.
+     * Uses PRG (Post-Redirect-Get) pattern so refresh resets the state.
+     */
+    public function publicSearch(Request $request)
+    {
+        $industries = \App\Models\Industri::orderBy('nama')->get(['id', 'nama']);
+
+        // Default state (GET request) - Check session for flash data
+        $verified = session('verified', false);
+        $selectedIndustri = session('selectedIndustri', null);
+        $laporans = session('laporans', collect());
+        $error = session('error', null);
+
+        // Handle POST submission
+        if ($request->isMethod('post')) {
+            $request->validate([
+                'industri_id' => 'required|exists:industries,id',
+                'penanggung_jawab' => 'required|string',
+            ]);
+
+            $industri = \App\Models\Industri::find($request->industri_id);
+
+            // Case-insensitive authentication check
+            if ($industri && strtolower(trim($industri->penanggungjawab ?? '')) === strtolower(trim($request->penanggung_jawab))) {
+
+                $laporans = Laporan::where('industri_id', $industri->id)
+                    ->whereNotNull('path_laporan')
+                    ->where('path_laporan', '!=', '')
+                    ->orderBy('tanggal', 'desc')
+                    ->get();
+
+                // PRG: Success -> Redirect back to GET with flash data
+                // This ensures that hitting "Refresh" clears the flash data and resets the page
+                return redirect()->route('laporan.bukti')
+                    ->withInput() // Keep input visible on success result
+                    ->with([
+                        'verified' => true,
+                        'selectedIndustri' => $industri,
+                        'laporans' => $laporans
+                    ]);
+
+            } else {
+                // PRG: Failure -> Redirect back with error
+                return redirect()->route('laporan.bukti')
+                    ->withInput()
+                    ->with('error', 'Nama Penanggung Jawab tidak sesuai dengan data industri yang dipilih.');
+            }
+        }
+
+        return view('laporan.public.search', compact('industries', 'laporans', 'verified', 'selectedIndustri', 'error'));
+    }
+
+    /**
+     * Download the Bukti Tanda Terima PDF.
+     * This route is public but the file path is not guessable.
+     */
+    public function publicDownload($id)
+    {
+        $laporan = Laporan::findOrFail($id);
+
+        if (empty($laporan->path_laporan)) {
+            abort(404, 'Bukti tidak tersedia untuk laporan ini.');
+        }
+
+        $fullPath = storage_path('app/public/' . $laporan->path_laporan);
+
+        if (!file_exists($fullPath)) {
+            abort(404, 'File bukti tidak ditemukan.');
+        }
+
+        return response()->download($fullPath);
     }
 }
