@@ -95,6 +95,12 @@ class ReconciliationController extends Controller
 
         $stats = $this->buildReconciliationStats($reconciliation);
 
+        if ($request->ajax()) {
+            return view('PNBP.admin.reconciliations.partials.details-table', [
+                'details' => $details,
+            ]);
+        }
+
         return view('PNBP.admin.reconciliations.show', array_merge(
             ['reconciliation' => $reconciliation, 'details' => $details],
             $stats
