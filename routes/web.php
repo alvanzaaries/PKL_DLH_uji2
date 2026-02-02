@@ -170,9 +170,9 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
 Route::get('/rekap', [LaporanController::class, 'rekapLaporan'])->name('laporan.rekap');
 // Landing Page Laporan - public read access
 Route::get('/laporan/info', [LaporanController::class, 'landing'])->name('laporan.landing');
-// Public bukti laporan - search and download
+// Public bukti laporan - search and view receipt
 Route::match(['get', 'post'], '/laporan/bukti', [LaporanController::class, 'publicSearch'])->name('laporan.bukti');
-Route::get('/laporan/bukti/download/{id}', [LaporanController::class, 'publicDownload'])->name('laporan.bukti.download');
+Route::post('/laporan/bukti/view', [LaporanController::class, 'viewReceipt'])->name('laporan.bukti.view');
 
 
 // Admin operations (upload/rekap/detail) tetap khusus admin

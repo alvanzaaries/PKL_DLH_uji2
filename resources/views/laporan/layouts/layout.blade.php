@@ -329,7 +329,7 @@
             <a href="{{ route('laporan.bukti') }}"
                 class="nav-link {{ request()->routeIs('laporan.bukti') ? 'active' : '' }}">
                 <i class="fas fa-search nav-icon"></i>
-                <span>Cari Bukti</span>
+                <span>Unduh Bukti</span>
             </a>
 
 

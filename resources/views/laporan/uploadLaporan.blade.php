@@ -202,20 +202,28 @@
             'Laporan Mutasi Kayu Bulat (LMKB)': {
                 fields: [
                     { name: 'jenis_kayu', label: 'Jenis Kayu', type: 'text', placeholder: 'Contoh: Meranti' },
-                    { name: 'persediaan_awal_volume', label: 'Persediaan Awal (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'persediaan_awal_btg', label: 'Pers. Awal (Btg)', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'persediaan_awal_volume', label: 'Pers. Awal (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'penambahan_btg', label: 'Penambahan (Btg)', type: 'number', placeholder: '0', step: '1' },
                     { name: 'penambahan_volume', label: 'Penambahan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                    { name: 'penggunaan_pengurangan_volume', label: 'Penggunaan/Pengurangan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                    { name: 'persediaan_akhir_volume', label: 'Persediaan Akhir (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'penggunaan_pengurangan_btg', label: 'Pengurangan (Btg)', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'penggunaan_pengurangan_volume', label: 'Pengurangan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'persediaan_akhir_btg', label: 'Pers. Akhir (Btg)', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'persediaan_akhir_volume', label: 'Pers. Akhir (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
                     { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
                 ]
             },
             'Laporan Mutasi Kayu Olahan (LMKO)': {
                 fields: [
                     { name: 'jenis_olahan', label: 'Jenis Olahan', type: 'text', placeholder: 'Contoh: Papan' },
-                    { name: 'persediaan_awal_volume', label: 'Persediaan Awal (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'persediaan_awal_btg', label: 'Pers. Awal (Btg)', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'persediaan_awal_volume', label: 'Pers. Awal (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'penambahan_btg', label: 'Penambahan (Btg)', type: 'number', placeholder: '0', step: '1' },
                     { name: 'penambahan_volume', label: 'Penambahan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                    { name: 'penggunaan_pengurangan_volume', label: 'Penggunaan/Pengurangan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                    { name: 'persediaan_akhir_volume', label: 'Persediaan Akhir (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'penggunaan_pengurangan_btg', label: 'Pengurangan (Btg)', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'penggunaan_pengurangan_volume', label: 'Pengurangan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
+                    { name: 'persediaan_akhir_btg', label: 'Pers. Akhir (Btg)', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'persediaan_akhir_volume', label: 'Pers. Akhir (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
                     { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
                 ]
             },
@@ -275,24 +283,24 @@
                 const minAttr = field.type === 'number' ? 'min="0"' : '';
 
                 rowHTML += `
-                                <td class="px-3 py-2">
-                                    <input type="${field.type}" 
-                                        name="manual_data[${rowNum}][${field.name}]" 
-                                        class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-[#1A4030] focus:border-[#1A4030]" 
-                                        placeholder="${field.placeholder}" 
-                                        ${stepAttr} ${minAttr} ${isRequired}>
-                                </td>`;
+                                    <td class="px-3 py-2">
+                                        <input type="${field.type}" 
+                                            name="manual_data[${rowNum}][${field.name}]" 
+                                            class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-[#1A4030] focus:border-[#1A4030]" 
+                                            placeholder="${field.placeholder}" 
+                                            ${stepAttr} ${minAttr} ${isRequired}>
+                                    </td>`;
             });
 
             rowHTML += `
-                            <td class="px-3 py-2 text-center">
-                                <button type="button" onclick="removeRow(this)" 
-                                    class="text-red-600 hover:text-red-800 transition-colors" 
-                                    title="Hapus baris">
-                                    <i class="fas fa-trash-alt"></i>
-                                </button>
-                            </td>
-                        </tr>`;
+                                <td class="px-3 py-2 text-center">
+                                    <button type="button" onclick="removeRow(this)" 
+                                        class="text-red-600 hover:text-red-800 transition-colors" 
+                                        title="Hapus baris">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>`;
 
             return rowHTML;
         }
