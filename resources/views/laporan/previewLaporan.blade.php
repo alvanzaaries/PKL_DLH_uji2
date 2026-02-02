@@ -74,16 +74,18 @@
             <div class="error-alert">
                 <div class="error-header">
                     <i class="fas fa-exclamation-triangle"></i>
-                    Ditemukan Error Validasi
+                    Ditemukan Error Validasi ({{ count($topList) }} error)
                 </div>
-                <ul class="error-list">
-                    @foreach($topList as $error)
-                        <li class="error-item">
-                            <span class="error-bullet">●</span>
-                            <span>{{ $error }}</span>
-                        </li>
-                    @endforeach
-                </ul>
+                <div style="max-height: 300px; overflow-y: auto; padding-right: 8px;">
+                    <ul class="error-list">
+                        @foreach($topList as $error)
+                            <li class="error-item">
+                                <span class="error-bullet">●</span>
+                                <span>{{ $error }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
         @endif
 

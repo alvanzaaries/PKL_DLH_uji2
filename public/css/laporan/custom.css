@@ -722,6 +722,26 @@
     margin-top: 4px;
 }
 
+/* Custom scrollbar untuk error list container */
+.error-alert div[style*="overflow-y"]::-webkit-scrollbar {
+    width: 8px;
+}
+
+.error-alert div[style*="overflow-y"]::-webkit-scrollbar-track {
+    background: #FEE2E2;
+    border-radius: 4px;
+}
+
+.error-alert div[style*="overflow-y"]::-webkit-scrollbar-thumb {
+    background: #FCA5A5;
+    border-radius: 4px;
+}
+
+.error-alert div[style*="overflow-y"]::-webkit-scrollbar-thumb:hover {
+    background: #F87171;
+}
+
+
 /* Edit Mode */
 .edit-mode-notice {
     background: #FFFBEB;
