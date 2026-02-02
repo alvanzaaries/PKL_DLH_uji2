@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Bukti Tanda Terima Laporan</title>
+    <title>Tanda Terima Laporan PUHH</title>
     <style>
         * {
             margin: 0;
@@ -14,48 +14,49 @@
         body {
             font-family: 'Times New Roman', Times, serif;
             font-size: 12pt;
-            line-height: 1.5;
-            padding: 20px 40px;
+            line-height: 1.6;
+            padding: 40px 50px;
         }
 
         .header {
             text-align: center;
             border-bottom: 3px double #000;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
         }
 
         .header h1 {
-            font-size: 14pt;
+            font-size: 16pt;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
         }
 
         .header p {
-            font-size: 10pt;
-            margin-top: 5px;
+            font-size: 11pt;
         }
 
         .title {
             text-align: center;
-            margin: 30px 0;
+            margin: 40px 0;
         }
 
         .title h2 {
-            font-size: 14pt;
+            font-size: 16pt;
             font-weight: bold;
-            text-decoration: underline;
             text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
         }
 
-        .title p {
-            font-size: 11pt;
-            margin-top: 5px;
+        .nomor {
+            font-size: 12pt;
+            margin-top: 10px;
         }
 
         .content {
-            margin: 25px 0;
+            margin: 30px 0;
         }
 
         .content table {
@@ -64,12 +65,12 @@
         }
 
         .content table td {
-            padding: 8px 5px;
+            padding: 10px 5px;
             vertical-align: top;
         }
 
         .content table td:first-child {
-            width: 35%;
+            width: 30%;
             font-weight: bold;
         }
 
@@ -78,29 +79,54 @@
             text-align: center;
         }
 
-        .footer {
-            margin-top: 50px;
-            text-align: right;
-            padding-right: 50px;
+        .laporan-list {
+            list-style-type: decimal;
+            margin-left: 20px;
         }
 
-        .footer .date {
-            margin-bottom: 60px;
-        }
-
-        .footer .signature {
-            text-align: center;
-            display: inline-block;
-        }
-
-        .footer .signature .line {
-            border-bottom: 1px solid #000;
-            width: 200px;
+        .laporan-list li {
             margin-bottom: 5px;
         }
 
-        .note {
+        .signature-section {
+            margin-top: 60px;
+            display: table;
+            width: 100%;
+        }
+
+        .signature-left,
+        .signature-right {
+            display: table-cell;
+            width: 50%;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .signature-box {
+            display: inline-block;
+            text-align: center;
+        }
+
+        .signature-box .title-text {
+            font-weight: normal;
+            margin-bottom: 80px;
+        }
+
+        .signature-box .name {
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            min-width: 180px;
+            display: inline-block;
+        }
+
+        .date-place {
+            text-align: right;
             margin-top: 40px;
+            margin-bottom: 10px;
+        }
+
+        .note {
+            margin-top: 50px;
             font-size: 9pt;
             font-style: italic;
             color: #555;
@@ -113,41 +139,36 @@
 <body>
     <div class="header">
         <h1>Dinas Lingkungan Hidup</h1>
-        <p>Sistem Informasi Pelaporan Industri Kehutanan</p>
+        <p>Provinsi Kalimantan Timur</p>
     </div>
 
     <div class="title">
-        <h2>Bukti Tanda Terima Laporan</h2>
-        <p>No. {{ $nomorBukti }}</p>
+        <h2>Tanda Terima Laporan PUHH</h2>
+        <p class="nomor">No: {{ $nomorBukti }}</p>
     </div>
 
     <div class="content">
-        <p style="margin-bottom: 15px;">Dengan ini menyatakan telah menerima laporan dari:</p>
         <table>
             <tr>
-                <td>Nama Industri</td>
+                <td>Nama Perusahaan</td>
                 <td>:</td>
-                <td>{{ $namaIndustri }}</td>
-            </tr>
-            <tr>
-                <td>Penanggung Jawab</td>
-                <td>:</td>
-                <td>{{ $penanggungJawab }}</td>
-            </tr>
-            <tr>
-                <td>Alamat</td>
-                <td>:</td>
-                <td>{{ $alamat }}</td>
-            </tr>
-            <tr>
-                <td>Jenis Laporan</td>
-                <td>:</td>
-                <td>{{ $jenisLaporan }}</td>
+                <td>{{ $namaPerusahaan }}</td>
             </tr>
             <tr>
                 <td>Periode Laporan</td>
                 <td>:</td>
                 <td>{{ $periodeLaporan }}</td>
+            </tr>
+            <tr>
+                <td>Jenis Laporan</td>
+                <td>:</td>
+                <td>
+                    <ol class="laporan-list">
+                        @foreach ($jenisLaporanList as $jenis)
+                            <li>{{ $jenis }}</li>
+                        @endforeach
+                    </ol>
+                </td>
             </tr>
             <tr>
                 <td>Tanggal Diterima</td>
@@ -157,17 +178,27 @@
         </table>
     </div>
 
-    <div class="footer">
-        <div class="date">{{ $tempatTanggal }}</div>
-        <div class="signature">
-            <p>Sistem SIMPEL-HUT</p>
-            <div class="line"></div>
-            <p><em>Dokumen ini digenerate otomatis</em></p>
+    <div class="date-place">
+        {{ $tempatTanggal }}
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-left">
+            <div class="signature-box">
+                <p class="title-text">Yang Menyerahkan,</p>
+                <p class="name">{{ $penanggungJawab }}</p>
+            </div>
+        </div>
+        <div class="signature-right">
+            <div class="signature-box">
+                <p class="title-text">Yang Menerima,</p>
+                <p class="name">Petugas DLH</p>
+            </div>
         </div>
     </div>
 
     <div class="note">
-        *Bukti ini sah dan dapat digunakan sebagai bukti pelaporan. Dokumen digenerate secara otomatis oleh sistem.
+        *Dokumen ini adalah bukti sah penerimaan laporan PUHH dan digenerate secara otomatis oleh sistem SIMPEL-HUT.
     </div>
 </body>
 
