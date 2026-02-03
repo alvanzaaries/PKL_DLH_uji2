@@ -167,7 +167,7 @@
                                     <div class="grid grid-cols-2 gap-4">
                                         <div>
                                             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Periode</p>
-                                            <p class="text-base font-medium text-gray-800 mt-1">{{ $months[$selectedBulan] ?? '-' }} {{ $selectedTahun }}</p>
+                                            <p class="text-base font-medium text-gray-800 mt-1">{{ (is_scalar($selectedBulan) && isset($months[$selectedBulan])) ? $months[$selectedBulan] : '-' }} {{ $selectedTahun }}</p>
                                         </div>
                                         <div>
                                             <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Status</p>
@@ -248,31 +248,73 @@
 @push('styles')
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
-        /* Custom Green Theme for Select2 with Modern Styling */
+        /* Glassmorphism Theme for Select2 */
         .select2-container--default .select2-selection--single {
-            border-color: #D1D5DB;
-            border-radius: 0.75rem; /* rounded-xl */
-            height: 52px; /* Taller input */
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 1rem; /* rounded-2xl look */
+            height: 54px;
             display: flex;
             align-items: center;
-            background-color: #fff;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            transition: all 0.2s;
+            box-shadow: 
+                0 4px 6px -1px rgba(0, 0, 0, 0.05), 
+                0 2px 4px -1px rgba(0, 0, 0, 0.03),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.5); /* Inner light border */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Hover Effect */
         .select2-container--default .select2-selection--single:hover {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            background: rgba(255, 255, 255, 0.4);
+            box-shadow: 
+                0 10px 15px -3px rgba(0, 0, 0, 0.08), 
+                0 4px 6px -2px rgba(0, 0, 0, 0.04),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+            transform: translateY(-1px);
         }
 
+        /* Focus Effect - Glowing Green Ring */
         .select2-container--default .select2-selection--single:focus-within {
             outline: none;
-            border-color: #10B981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 
+                0 0 0 4px rgba(16, 185, 129, 0.1),
+                0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 50px;
-            right: 12px;
+            height: 52px;
+            right: 14px;
+        }
+        
+        /* Rendered Text */
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding-left: 20px;
+            color: #1F2937; /* gray-800 */
+            font-weight: 500;
+            padding-right: 60px; /* Space for clear btn and arrow */
+        }
+
+        /* Clear Button Position */
+        .select2-container--default .select2-selection--single .select2-selection__clear {
+            position: absolute;
+            right: 40px; /* Position to the left of the arrow */
+            top: 50%;
+            transform: translateY(-50%);
+            margin-right: 0;
+            z-index: 10;
+            color: #9CA3AF;
+            font-size: 18px;
+            font-weight: bold;
+            height: auto;
+            line-height: 1;
+        }
+        
+        .select2-container--default .select2-selection--single .select2-selection__clear:hover {
+            color: #EF4444; /* red-500 */
         }
 
         .select2-dropdown {
@@ -280,6 +322,8 @@
             border-radius: 0.75rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             padding: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
         }
 
         .select2-search--dropdown {
@@ -358,6 +402,12 @@
             $('#industri_id').select2({
                 placeholder: '-- Cari dan Pilih Industri --',
                 allowClear: true,
+                width: '100%'
+            });
+
+            // Initialize Select2 for Bulan and Tahun (Glass Style)
+            $('#bulan, #tahun').select2({
+                minimumResultsForSearch: Infinity, // Hide search box
                 width: '100%'
             });
         });

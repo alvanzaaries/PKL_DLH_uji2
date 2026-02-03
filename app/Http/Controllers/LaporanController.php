@@ -1054,8 +1054,8 @@ class LaporanController extends Controller
         // Default state
         $verified = session('verified', false);
         $selectedIndustri = session('selectedIndustri', null);
-        $selectedBulan = session('selectedBulan', null);
-        $selectedTahun = session('selectedTahun', null);
+        $selectedBulan = session('selectedBulan') ? (int) session('selectedBulan') : null;
+        $selectedTahun = session('selectedTahun') ? (int) session('selectedTahun') : null;
         $jenisLaporanList = session('jenisLaporanList', []);
         $error = session('error', null);
 
@@ -1136,11 +1136,11 @@ class LaporanController extends Controller
 
         $industri = \App\Models\Industri::findOrFail($request->industri_id);
 
-        // Get all reports for this industry in the specified month
+        // Get all reports for this industry in the specified month, ordered by latest
         $laporans = Laporan::where('industri_id', $industri->id)
             ->whereMonth('tanggal', $request->bulan)
             ->whereYear('tanggal', $request->tahun)
-            ->orderBy('jenis_laporan')
+            ->orderBy('created_at', 'desc')
             ->get();
 
         if ($laporans->isEmpty()) {
@@ -1150,22 +1150,25 @@ class LaporanController extends Controller
         // Get unique report types
         $jenisLaporanList = $laporans->pluck('jenis_laporan')->unique()->values()->toArray();
 
-        // Use the first laporan ID for the receipt number (8 digits with leading zeros)
-        $firstLaporan = $laporans->first();
-        $nomorBukti = str_pad($firstLaporan->id, 8, '0', STR_PAD_LEFT);
+        // Use the latest laporan ID (8 digits with leading zeros)
+        $latestLaporan = $laporans->first();
+        $nomorBukti = str_pad($latestLaporan->id, 8, '0', STR_PAD_LEFT);
 
         // Get month name
         $bulanNama = \Carbon\Carbon::createFromDate(null, (int) $request->bulan, 1)->translatedFormat('F');
 
+        // Get active Pejabat
+        $pejabat = \App\Models\Pejabat::where('is_active', true)->first();
+
         // Prepare data for view
         $data = [
-            'nomorBukti' => $nomorBukti,
-            'namaPerusahaan' => $industri->nama,
-            'penanggungJawab' => $industri->penanggungjawab ?? '-',
-            'periodeLaporan' => $bulanNama . ' ' . $request->tahun,
+            'industri' => $industri,
+            'receiptId' => $nomorBukti,
+            'bulan_nama' => $bulanNama,
+            'tahun' => $request->tahun,
             'jenisLaporanList' => $jenisLaporanList,
-            'tanggalDiterima' => $firstLaporan->created_at->translatedFormat('d F Y'),
-            'tempatTanggal' => 'Kalimantan Timur, ' . now()->translatedFormat('d F Y'),
+            'tanggalTerakhir' => $latestLaporan->created_at->translatedFormat('d F Y'),
+            'pejabat' => $pejabat,
         ];
 
         return view('laporan.pdf.bukti_tanda_terima', $data);

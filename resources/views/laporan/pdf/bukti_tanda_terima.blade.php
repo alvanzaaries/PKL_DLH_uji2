@@ -1,205 +1,231 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 
 <head>
-    <meta charset="utf-8">
-    <title>Tanda Terima Laporan PUHH</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanda Terima Laporan Penatausahaan Hasil Hutan</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Times New Roman', Times, serif;
-            font-size: 12pt;
-            line-height: 1.6;
-            padding: 40px 50px;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            color: #000;
+        }
+
+        .container {
+            background-color: white;
+            width: 210mm;
+            /* Ukuran A4 */
+            min-height: 297mm;
+            padding: 25mm;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            position: relative;
         }
 
         .header {
             text-align: center;
-            border-bottom: 3px double #000;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 16pt;
             font-weight: bold;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
+            margin-bottom: 40px;
+            font-size: 18px;
+            line-height: 1.5;
         }
 
-        .header p {
-            font-size: 11pt;
+        .form-group {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: center;
         }
 
-        .title {
-            text-align: center;
-            margin: 40px 0;
-        }
-
-        .title h2 {
-            font-size: 16pt;
+        .label {
+            width: 180px;
             font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
         }
 
-        .nomor {
-            font-size: 12pt;
-            margin-top: 10px;
+        .input-line {
+            flex: 1;
+            border: none;
+            border-bottom: 1px dotted black;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 5px;
+            outline: none;
+            background: transparent;
         }
 
-        .content {
-            margin: 30px 0;
-        }
-
-        .content table {
+        .checklist-table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
 
-        .content table td {
-            padding: 10px 5px;
-            vertical-align: top;
+        .checklist-table td,
+        .checklist-table th {
+            border: 1px solid black;
+            padding: 8px;
         }
 
-        .content table td:first-child {
-            width: 30%;
-            font-weight: bold;
-        }
-
-        .content table td:nth-child(2) {
-            width: 5%;
+        .checkbox-cell {
             text-align: center;
-        }
-
-        .laporan-list {
-            list-style-type: decimal;
-            margin-left: 20px;
-        }
-
-        .laporan-list li {
-            margin-bottom: 5px;
+            width: 50px;
+            font-size: 18px;
         }
 
         .signature-section {
             margin-top: 60px;
-            display: table;
-            width: 100%;
-        }
-
-        .signature-left,
-        .signature-right {
-            display: table-cell;
-            width: 50%;
-            text-align: center;
-            vertical-align: top;
-        }
-
-        .signature-box {
-            display: inline-block;
+            float: right;
+            width: 350px;
             text-align: center;
         }
 
-        .signature-box .title-text {
-            font-weight: normal;
-            margin-bottom: 80px;
+        .signature-name {
+            margin-top: 80px;
+            /* Ruang untuk tanda tangan */
+            font-weight: bold;
+            text-decoration: underline;
         }
 
-        .signature-box .name {
-            border-top: 1px solid #000;
-            padding-top: 5px;
-            min-width: 180px;
-            display: inline-block;
+        .signature-rank {
+            margin-top: 5px;
         }
 
-        .date-place {
-            text-align: right;
-            margin-top: 40px;
-            margin-bottom: 10px;
+        .footer-link {
+            position: absolute;
+            bottom: 25mm;
+            left: 25mm;
+            font-size: 12px;
+            color: blue;
+            text-decoration: underline;
         }
 
-        .note {
-            margin-top: 50px;
-            font-size: 9pt;
-            font-style: italic;
-            color: #555;
-            border-top: 1px solid #ccc;
-            padding-top: 10px;
+        /* CSS untuk tampilan saat di-print */
+        @media print {
+            body {
+                background-color: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+
+            .no-print {
+                display: none;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="header">
-        <h1>Dinas Lingkungan Hidup</h1>
-        <p>Provinsi Kalimantan Timur</p>
-    </div>
 
-    <div class="title">
-        <h2>Tanda Terima Laporan PUHH</h2>
-        <p class="nomor">No: {{ $nomorBukti }}</p>
-    </div>
+    <div class="container">
+        <div class="header">
+            <div>TANDA TERIMA</div>
+            <div>LAPORAN PENATAUSAHAAN HASIL HUTAN</div>
+        </div>
 
-    <div class="content">
-        <table>
-            <tr>
-                <td>Nama Perusahaan</td>
-                <td>:</td>
-                <td>{{ $namaPerusahaan }}</td>
-            </tr>
-            <tr>
-                <td>Periode Laporan</td>
-                <td>:</td>
-                <td>{{ $periodeLaporan }}</td>
-            </tr>
-            <tr>
-                <td>Jenis Laporan</td>
-                <td>:</td>
-                <td>
-                    <ol class="laporan-list">
-                        @foreach ($jenisLaporanList as $jenis)
-                            <li>{{ $jenis }}</li>
-                        @endforeach
-                    </ol>
-                </td>
-            </tr>
-            <tr>
-                <td>Tanggal Diterima</td>
-                <td>:</td>
-                <td>{{ $tanggalDiterima }}</td>
-            </tr>
+        <div class="form-group">
+            <label class="label">Nomor</label>
+            <span>:</span>
+            <div class="input-line">{{ $receiptId }}</div>
+        </div>
+        <div class="form-group">
+            <label class="label">Tanggal</label>
+            <span>:</span>
+            <div class="input-line">{{ $tanggalTerakhir }}</div>
+        </div>
+        <div class="form-group">
+            <label class="label">Nama Perusahaan</label>
+            <span>:</span>
+            <div class="input-line">{{ $industri->nama }}</div>
+        </div>
+
+        <div class="form-group">
+            <label class="label">Periode Laporan</label>
+            <span>:</span>
+            <div class="input-line" style="text-transform: capitalize;">{{ $bulan_nama }} / {{ $tahun }}</div>
+        </div>
+
+        <table class="checklist-table">
+            <thead>
+                <tr style="background-color: #eee;">
+                    <th>Jenis Laporan</th>
+                    <th>Cek (√)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Mapping Jenis Laporan Sesuai Template -->
+                <tr>
+                    <td>Laporan Penerimaan Kayu Bulat</td>
+                    <td class="checkbox-cell">
+                        {{ in_array('Laporan Penerimaan Kayu Bulat', $jenisLaporanList) ? '√' : '' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Laporan Mutasi Kayu Bulat (LMKB)</td>
+                    <td class="checkbox-cell">
+                        {{ in_array('Laporan Mutasi Kayu Bulat (LMKB)', $jenisLaporanList) ? '√' : '' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Laporan Penerimaan Kayu Olahan</td>
+                    <td class="checkbox-cell">
+                        {{ in_array('Laporan Penerimaan Kayu Olahan', $jenisLaporanList) ? '√' : '' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Laporan Mutasi Kayu Olahan (LMKO)</td>
+                    <td class="checkbox-cell">
+                        {{ in_array('Laporan Mutasi Kayu Olahan', $jenisLaporanList) ? '√' : '' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td>Laporan Penjualan Kayu Olahan</td>
+                    <td class="checkbox-cell">
+                        {{ in_array('Laporan Penjualan Kayu Olahan', $jenisLaporanList) ? '√' : '' }}
+                    </td>
+                </tr>
+            </tbody>
         </table>
-    </div>
-
-    <div class="date-place">
-        {{ $tempatTanggal }}
-    </div>
-
-    <div class="signature-section">
-        <div class="signature-left">
-            <div class="signature-box">
-                <p class="title-text">Yang Menyerahkan,</p>
-                <p class="name">{{ $penanggungJawab }}</p>
-            </div>
+        <div class="form-group">
+            <label class="label">Waktu verifikasi</label>
+            <span>:</span>
+            <div class="input-line">{{ \Carbon\Carbon::now()->translatedFormat('H:i, d F Y') }}</div>
         </div>
-        <div class="signature-right">
-            <div class="signature-box">
-                <p class="title-text">Yang Menerima,</p>
-                <p class="name">Petugas DLH</p>
+
+        <div class="signature-section">
+            <div style="text-transform: uppercase;">{{ $pejabat->jabatan ?? 'Kepala Dinas Lingkungan Hidup' }}</div>
+
+            <div style="margin-top: 20px; font-size: 12px; color: #888;">
+                [Dokumen ini telah diverifikasi secara elektronik]
             </div>
+
+            <div class="signature-name">{{ $pejabat->nama ?? 'Nama Pejabat' }}</div>
+            <div class="signature-rank">{{ $pejabat->pangkat ?? '-' }}</div>
+            @if(isset($pejabat->nip) && $pejabat->nip != '-')
+                <div class="signature-nip">NIP. {{ $pejabat->nip }}</div>
+            @endif
+        </div>
+
+        <div class="footer-link no-print">
+            <a href="javascript:window.print()">Cetak Halaman Ini</a>
         </div>
     </div>
 
-    <div class="note">
-        *Dokumen ini adalah bukti sah penerimaan laporan PUHH dan digenerate secara otomatis oleh sistem SIMPEL-HUT.
-    </div>
+    <script>
+        window.onload = function () {
+            // window.print();
+        }
+    </script>
 </body>
 
 </html>

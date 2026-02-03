@@ -198,5 +198,9 @@ Route::prefix('laporan')->middleware(['auth', 'session.timeout', 'role:admin'])-
     Route::get('/{industri}/detail/{id}', [LaporanController::class, 'detailLaporan'])->name('laporan.detail');
     Route::get('/{industri}/detail/{id}/export', [LaporanController::class, 'exportDetailLaporan'])->name('laporan.detail.export');
     Route::delete('/{industri}/delete/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
+
+    // Setting Pejabat Penandatangan
+    Route::resource('pejabat', \App\Http\Controllers\PejabatController::class);
+    Route::post('/pejabat/{pejabat}/activate', [\App\Http\Controllers\PejabatController::class, 'activate'])->name('pejabat.activate');
 });
 

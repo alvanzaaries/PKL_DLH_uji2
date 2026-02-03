@@ -274,6 +274,24 @@
                 padding: 1rem;
             }
         }
+
+        .btn-export {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .btn-export:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
     </style>
 
     @stack('styles')
@@ -329,7 +347,7 @@
             <a href="{{ route('laporan.bukti') }}"
                 class="nav-link {{ request()->routeIs('laporan.bukti') ? 'active' : '' }}">
                 <i class="fas fa-search nav-icon"></i>
-                <span>Unduh Bukti</span>
+                <span>Unduh Tanda Terima</span>
             </a>
 
 
@@ -343,16 +361,28 @@
                         <span>Input Laporan</span>
                     </a>
 
-
+                    <a href="{{ route('pejabat.index') }}"
+                        class="nav-link {{ request()->routeIs('pejabat.*') ? 'active' : '' }}">
+                        <i class="fas fa-user-tie nav-icon"></i>
+                        <span>Penandatangan</span>
+                    </a>
                 @endif
             @endauth
 
             <div class="mt-auto mb-2 border-t border-white/10 mx-2"></div>
-
+    
 
         </nav>
 
         <div class="sidebar-footer">
+            <div style="margin-bottom:0.75rem;">
+                <a href="{{ route('template.download') }}" class="btn-export"
+                    style="display:flex; align-items:center; gap:8px; width:100%; justify-content:center;">
+                    <i class="fas fa-file-download"></i>
+                    <span>Download Template</span>
+                </a>
+            </div>
+
             @guest
                 <a href="{{ route('login') }}" class="user-card group">
                     <div class="flex items-center gap-3">
@@ -365,13 +395,6 @@
                         </div>
                     </div>
                 </a>
-                <div style="margin-top:0.75rem;">
-                    <a href="{{ route('template.download') }}" class="btn btn-export"
-                        style="display:flex; align-items:center; gap:8px; width:100%; justify-content:center;">
-                        <i class="fas fa-file-download"></i>
-                        <span>Download Template</span>
-                    </a>
-                </div>
             @else
                 <div class="user-card">
                     <div class="flex items-center gap-3 overflow-hidden">
