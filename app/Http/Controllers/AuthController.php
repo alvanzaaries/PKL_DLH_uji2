@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -34,14 +36,69 @@ class AuthController extends Controller
     }
 
     /**
+     * Verifikasi Google reCAPTCHA v2.
+     */
+    private function verifyRecaptcha(string $token, string $ip): array
+    {
+        $secret = config('services.recaptcha.secret_key');
+        
+        if (empty($secret)) {
+            return ['success' => false, 'error' => 'Secret key tidak dikonfigurasi.'];
+        }
+
+        // Disable SSL verification untuk development (Windows tanpa CA bundle)
+        $response = Http::withoutVerifying()->asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+            'secret' => $secret,
+            'response' => $token,
+            'remoteip' => $ip,
+        ]);
+
+        if ($response->failed()) {
+            Log::error('reCAPTCHA HTTP error', ['status' => $response->status()]);
+            return ['success' => false, 'error' => 'Koneksi ke server captcha gagal.'];
+        }
+
+        $data = $response->json();
+        Log::info('reCAPTCHA response', $data);
+
+        if (!($data['success'] ?? false)) {
+            $errors = $data['error-codes'] ?? [];
+            return ['success' => false, 'error' => 'Verifikasi gagal.', 'codes' => $errors];
+        }
+
+        return ['success' => true];
+    }
+
+    /**
      * Memproses login dan melakukan redirect sesuai peran atau URL tujuan.
      */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        // Validasi input
+        $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
+            'g-recaptcha-response' => ['required', 'string'],
+        ], [
+            'g-recaptcha-response.required' => 'Silakan centang captcha terlebih dahulu.',
         ]);
+
+        // Verifikasi reCAPTCHA
+        $recaptchaResult = $this->verifyRecaptcha(
+            $request->input('g-recaptcha-response'),
+            $request->ip()
+        );
+
+        if (!$recaptchaResult['success']) {
+            $errorMsg = $recaptchaResult['error'];
+            if (!empty($recaptchaResult['codes'])) {
+                $errorMsg .= ' [' . implode(', ', $recaptchaResult['codes']) . ']';
+            }
+            return back()->withErrors(['captcha' => $errorMsg])->onlyInput('email');
+        }
+
+        // Proses login
+        $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();

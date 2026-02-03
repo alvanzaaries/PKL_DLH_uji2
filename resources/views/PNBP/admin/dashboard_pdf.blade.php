@@ -67,7 +67,7 @@
             </tr>
             <tr>
                 <td>HASIL HUTAN BUKAN KAYU (HHBK)</td>
-                <td class="right">{{ number_format($volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] ?? 0, 2, ',', '.') }} Ton/Kg</td>
+                <td class="right">{{ number_format($volumeByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] ?? 0, 2, ',', '.') }} Ton</td>
                 <td class="right">Rp {{ number_format($setorByCat['HASIL HUTAN BUKAN KAYU (HHBK)'] ?? 0, 0, ',', '.') }}</td>           
             </tr>
             <tr>

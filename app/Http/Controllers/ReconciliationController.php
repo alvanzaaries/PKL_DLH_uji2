@@ -95,6 +95,12 @@ class ReconciliationController extends Controller
 
         $stats = $this->buildReconciliationStats($reconciliation);
 
+        if ($request->ajax()) {
+            return view('PNBP.admin.reconciliations.partials.details-table', [
+                'details' => $details,
+            ]);
+        }
+
         return view('PNBP.admin.reconciliations.show', array_merge(
             ['reconciliation' => $reconciliation, 'details' => $details],
             $stats
@@ -652,21 +658,87 @@ class ReconciliationController extends Controller
         file_put_contents($tmpPath, $file->content);
 
         try {
-            $spreadsheet = IOFactory::load($tmpPath);
+            $reader = IOFactory::createReaderForFile($tmpPath);
+            $reader->setReadDataOnly(true);
+            $spreadsheet = $reader->load($tmpPath);
+            $sheetNames = $spreadsheet->getSheetNames();
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Html($spreadsheet);
-            ob_start();
-            $writer->save('php://output');
-            $html = ob_get_clean();
+
+            $firstHtml = '';
+            if (count($sheetNames) > 0) {
+                $writer->setSheetIndex(0);
+                ob_start();
+                $writer->save('php://output');
+                $html = ob_get_clean();
+
+                if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $m)) {
+                    $firstHtml = $m[1];
+                } else {
+                    $firstHtml = $html;
+                }
+            }
+
+            $sheets = [];
+            foreach ($sheetNames as $index => $name) {
+                $sheets[] = [
+                    'name' => $name,
+                    'html' => $index === 0 ? $firstHtml : null,
+                ];
+            }
         } catch (\Exception $e) {
             @unlink($tmpPath);
             return back()->withErrors(['file' => 'Gagal merender file: ' . $e->getMessage()]);
         }
         @unlink($tmpPath);
 
-        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $m)) $body = $m[1];
-        else $body = $html;
+        return view('PNBP.admin.reconciliations.raw', [
+            'reconciliation' => $reconciliation,
+            'sheets' => $sheets,
+        ]);
+    }
 
-        return view('PNBP.admin.reconciliations.raw', ['reconciliation' => $reconciliation, 'rawHtml' => $body]);
+    /**
+     * Memuat HTML untuk satu sheet tertentu (lazy load).
+     */
+    public function rawExcelSheet(Reconciliation $reconciliation, int $sheetIndex)
+    {
+        $file = ReconciliationFile::where('reconciliation_id', $reconciliation->id)->latest()->first();
+        if (!$file) abort(404, 'File tidak ditemukan');
+
+        $tmp = tempnam(sys_get_temp_dir(), 'recon_');
+        $ext = pathinfo($file->original_filename, PATHINFO_EXTENSION);
+        $tmpPath = $tmp . ($ext ? '.' . $ext : '');
+        file_put_contents($tmpPath, $file->content);
+
+        try {
+            $reader = IOFactory::createReaderForFile($tmpPath);
+            $reader->setReadDataOnly(true);
+            $spreadsheet = $reader->load($tmpPath);
+            $sheetNames = $spreadsheet->getSheetNames();
+
+            if ($sheetIndex < 0 || $sheetIndex >= count($sheetNames)) {
+                @unlink($tmpPath);
+                return response()->json(['message' => 'Sheet tidak ditemukan.'], 404);
+            }
+
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Html($spreadsheet);
+            $writer->setSheetIndex($sheetIndex);
+            ob_start();
+            $writer->save('php://output');
+            $html = ob_get_clean();
+        } catch (\Exception $e) {
+            @unlink($tmpPath);
+            return response()->json(['message' => 'Gagal merender sheet: ' . $e->getMessage()], 500);
+        }
+        @unlink($tmpPath);
+
+        if (preg_match('/<body[^>]*>(.*?)<\/body>/is', $html, $m)) {
+            $body = $m[1];
+        } else {
+            $body = $html;
+        }
+
+        return response()->json(['html' => $body]);
     }
 
     /**

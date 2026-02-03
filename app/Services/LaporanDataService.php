@@ -41,19 +41,23 @@ class LaporanDataService
                 break;
 
             case 'Laporan Mutasi Kayu Bulat (LMKB)':
-                // Kolom: Jenis Kayu | Persediaan Awal | Penambahan | Penggunaan | Persediaan Akhir | Keterangan
+                // Kolom baru: Jenis Kayu | Pers.Awal Btg | Pers.Awal Vol | Penambahan Btg | Penambahan Vol | 
+                //             Penggunaan Btg | Penggunaan Vol | Pers.Akhir Btg | Pers.Akhir Vol | Keterangan
                 foreach ($rows as $item) {
                     $row = isset($item['cells']) ? $item['cells'] : $item;
 
-                    // Debug logging untuk melihat data sebelum insert
                     $dataToInsert = [
                         'laporan_id' => $laporan->id,
                         'jenis_kayu' => $row[0] ?? '',
-                        'persediaan_awal_volume' => $this->toFloat($row[1] ?? 0),
-                        'penambahan_volume' => $this->toFloat($row[2] ?? 0),
-                        'penggunaan_pengurangan_volume' => $this->toFloat($row[3] ?? 0),
-                        'persediaan_akhir_volume' => $this->toFloat($row[4] ?? 0),
-                        'keterangan' => $row[5] ?? '',
+                        'persediaan_awal_btg' => (int) $this->toFloat($row[1] ?? 0),
+                        'persediaan_awal_volume' => $this->toFloat($row[2] ?? 0),
+                        'penambahan_btg' => (int) $this->toFloat($row[3] ?? 0),
+                        'penambahan_volume' => $this->toFloat($row[4] ?? 0),
+                        'penggunaan_pengurangan_btg' => (int) $this->toFloat($row[5] ?? 0),
+                        'penggunaan_pengurangan_volume' => $this->toFloat($row[6] ?? 0),
+                        'persediaan_akhir_btg' => (int) $this->toFloat($row[7] ?? 0),
+                        'persediaan_akhir_volume' => $this->toFloat($row[8] ?? 0),
+                        'keterangan' => $row[9] ?? '',
                     ];
 
                     Log::debug('Attempting to insert laporan_mutasi_kayu_bulat', [
@@ -69,7 +73,7 @@ class LaporanDataService
                             'data' => $dataToInsert,
                             'raw_row' => $row,
                         ]);
-                        throw $e; // Re-throw untuk ditangkap di controller
+                        throw $e;
                     }
                 }
                 break;
@@ -93,18 +97,23 @@ class LaporanDataService
                 break;
 
             case 'Laporan Mutasi Kayu Olahan (LMKO)':
-                // Kolom: Jenis Olahan | Persediaan Awal | Penambahan | Penggunaan | Persediaan Akhir | Keterangan
+                // Kolom baru: Jenis Olahan | Pers.Awal Btg | Pers.Awal Vol | Penambahan Btg | Penambahan Vol | 
+                //             Penggunaan Btg | Penggunaan Vol | Pers.Akhir Btg | Pers.Akhir Vol | Keterangan
                 foreach ($rows as $item) {
                     $row = isset($item['cells']) ? $item['cells'] : $item;
 
                     laporan_mutasi_kayu_olahan::create([
                         'laporan_id' => $laporan->id,
                         'jenis_olahan' => $row[0] ?? '',
-                        'persediaan_awal_volume' => $this->toFloat($row[1] ?? 0),
-                        'penambahan_volume' => $this->toFloat($row[2] ?? 0),
-                        'penggunaan_pengurangan_volume' => $this->toFloat($row[3] ?? 0),
-                        'persediaan_akhir_volume' => $this->toFloat($row[4] ?? 0),
-                        'keterangan' => $row[5] ?? '',
+                        'persediaan_awal_btg' => (int) $this->toFloat($row[1] ?? 0),
+                        'persediaan_awal_volume' => $this->toFloat($row[2] ?? 0),
+                        'penambahan_btg' => (int) $this->toFloat($row[3] ?? 0),
+                        'penambahan_volume' => $this->toFloat($row[4] ?? 0),
+                        'penggunaan_pengurangan_btg' => (int) $this->toFloat($row[5] ?? 0),
+                        'penggunaan_pengurangan_volume' => $this->toFloat($row[6] ?? 0),
+                        'persediaan_akhir_btg' => (int) $this->toFloat($row[7] ?? 0),
+                        'persediaan_akhir_volume' => $this->toFloat($row[8] ?? 0),
+                        'keterangan' => $row[9] ?? '',
                     ]);
                 }
                 break;

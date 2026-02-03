@@ -172,4 +172,37 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error("Error parsing chart data or initializing chart:", e);
         }
     }
+
+    // AJAX pagination untuk tabel detail rekonsiliasi.
+    const detailsContainer = document.getElementById('detailsTableContainer');
+    if (detailsContainer) {
+        document.addEventListener('click', function (event) {
+            const link = event.target.closest('#detailsTableContainer a');
+            if (!link) return;
+
+            const href = link.getAttribute('href');
+            if (!href || href.startsWith('#')) return;
+
+            event.preventDefault();
+
+            detailsContainer.classList.add('opacity-60');
+
+            fetch(href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Gagal memuat halaman');
+                    return res.text();
+                })
+                .then(function (html) {
+                    detailsContainer.innerHTML = html;
+                    window.history.replaceState(null, '', href);
+                })
+                .catch(function () {
+                    // fallback jika gagal, lakukan navigasi biasa
+                    window.location.href = href;
+                })
+                .finally(function () {
+                    detailsContainer.classList.remove('opacity-60');
+                });
+        });
+    }
 });

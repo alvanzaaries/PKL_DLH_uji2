@@ -440,6 +440,8 @@ class LaporanController extends Controller
 
             DB::commit();
 
+            // PDF now generated on-demand when user views/downloads the receipt
+
             // Hapus file temporary
             if ($filePath && Storage::exists($filePath)) {
                 Storage::delete($filePath);
@@ -943,5 +945,232 @@ class LaporanController extends Controller
         }
 
         return $rowErrors;
+    }
+
+    /**
+     * Generate Bukti Tanda Terima PDF and save to storage.
+     * Aggregates all report types for the same industry and month.
+     * Updates the Laporan record with the path.
+     */
+    private function generateBuktiPdf(Laporan $laporan): ?string
+    {
+        try {
+            // Load industri
+            $industri = $laporan->industri;
+            if (!$industri) {
+                Log::warning('Cannot generate PDF: industri not found for laporan id ' . $laporan->id);
+                return null;
+            }
+
+            // Parse periode from tanggal
+            $tanggal = \Carbon\Carbon::parse($laporan->tanggal);
+            $bulan = $tanggal->month;
+            $tahun = $tanggal->year;
+            $bulanNama = $tanggal->translatedFormat('F');
+
+            // Get all reports for this industry in the same month
+            $laporansInMonth = Laporan::where('industri_id', $industri->id)
+                ->whereMonth('tanggal', $bulan)
+                ->whereYear('tanggal', $tahun)
+                ->orderBy('jenis_laporan')
+                ->get();
+
+            // Get unique report types
+            $jenisLaporanList = $laporansInMonth->pluck('jenis_laporan')->unique()->values()->toArray();
+
+            // Use the first laporan ID for the receipt number (8 digits with leading zeros)
+            $firstLaporan = $laporansInMonth->first();
+            $nomorBukti = str_pad($firstLaporan->id, 8, '0', STR_PAD_LEFT);
+
+            // Prepare data for PDF
+            $data = [
+                'nomorBukti' => $nomorBukti,
+                'namaPerusahaan' => $industri->nama,
+                'penanggungJawab' => $industri->penanggungjawab ?? '-',
+                'periodeLaporan' => $bulanNama . ' ' . $tahun,
+                'jenisLaporanList' => $jenisLaporanList,
+                'tanggalDiterima' => $laporan->created_at->translatedFormat('d F Y'),
+                'tempatTanggal' => 'Kalimantan Timur, ' . $laporan->created_at->translatedFormat('d F Y'),
+            ];
+
+            // Generate PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('laporan.pdf.bukti_tanda_terima', $data);
+
+            // Ensure directory exists
+            $directory = storage_path('app/public/laporan/proofs');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+
+            // Generate filename based on industry and period
+            $filename = 'bukti_' . $industri->id . '_' . $bulan . '_' . $tahun . '.pdf';
+            $relativePath = 'laporan/proofs/' . $filename;
+            $fullPath = storage_path('app/public/' . $relativePath);
+
+            // Save PDF (will overwrite if already exists for this industry/month)
+            $pdf->save($fullPath);
+
+            // Update all laporans for this industry/month with the same path
+            foreach ($laporansInMonth as $lap) {
+                $lap->update(['path_laporan' => $relativePath]);
+            }
+
+            Log::info('Generated PDF for industri ' . $industri->id . ' periode ' . $bulan . '/' . $tahun . ': ' . $relativePath);
+
+            return $relativePath;
+
+        } catch (\Exception $e) {
+            Log::error('Failed to generate PDF for laporan id ' . $laporan->id, [
+                'exception' => $e->getMessage()
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Public page to search for report proofs.
+     * User selects industry, month, year and enters penanggung jawab to verify.
+     */
+    public function publicSearch(Request $request)
+    {
+        $industries = \App\Models\Industri::orderBy('nama')->get(['id', 'nama']);
+        $months = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        ];
+        $currentYear = date('Y');
+        $years = range($currentYear, $currentYear - 5);
+
+        // Default state
+        $verified = session('verified', false);
+        $selectedIndustri = session('selectedIndustri', null);
+        $selectedBulan = session('selectedBulan') ? (int) session('selectedBulan') : null;
+        $selectedTahun = session('selectedTahun') ? (int) session('selectedTahun') : null;
+        $jenisLaporanList = session('jenisLaporanList', []);
+        $error = session('error', null);
+
+        // Handle POST submission
+        if ($request->isMethod('post')) {
+            $request->validate([
+                'industri_id' => 'required|exists:industries,id',
+                'bulan' => 'required|integer|min:1|max:12',
+                'tahun' => 'required|integer|min:2020|max:2099',
+                'nomor_izin' => 'required|string',
+            ]);
+
+            $industri = \App\Models\Industri::find($request->industri_id);
+
+            // Case-insensitive authentication check with nomor_izin
+            // Clean both strings: remove spaces, slashes, dashes, dots for flexible matching
+            $inputIzin = preg_replace('/[^a-zA-Z0-9]/', '', $request->nomor_izin);
+            $dbIzin = preg_replace('/[^a-zA-Z0-9]/', '', $industri->nomor_izin ?? '');
+
+            if ($industri && strtolower($dbIzin) === strtolower($inputIzin)) {
+
+                // Get all reports for this industry in the specified month
+                $laporans = Laporan::where('industri_id', $industri->id)
+                    ->whereMonth('tanggal', $request->bulan)
+                    ->whereYear('tanggal', $request->tahun)
+                    ->orderBy('jenis_laporan')
+                    ->get();
+
+                if ($laporans->isEmpty()) {
+                    return redirect()->route('laporan.bukti')
+                        ->withInput()
+                        ->with('error', 'Tidak ada laporan untuk periode yang dipilih.');
+                }
+
+                $jenisLaporanList = $laporans->pluck('jenis_laporan')->unique()->values()->toArray();
+
+                return redirect()->route('laporan.bukti')
+                    ->withInput()
+                    ->with([
+                        'verified' => true,
+                        'selectedIndustri' => $industri,
+                        'selectedBulan' => (int) $request->bulan,
+                        'selectedTahun' => (int) $request->tahun,
+                        'jenisLaporanList' => $jenisLaporanList
+                    ]);
+
+            } else {
+                return redirect()->route('laporan.bukti')
+                    ->withInput()
+                    ->with('error', 'Nomor Izin tidak sesuai dengan data industri yang dipilih.');
+            }
+        }
+
+        return view('laporan.public.search', compact(
+            'industries',
+            'months',
+            'years',
+            'verified',
+            'selectedIndustri',
+            'selectedBulan',
+            'selectedTahun',
+            'jenisLaporanList',
+            'error'
+        ));
+    }
+
+    /**
+     * View the Tanda Terima as HTML page (opens in new tab).
+     * User can print it with Ctrl+P.
+     */
+    public function viewReceipt(Request $request)
+    {
+        $request->validate([
+            'industri_id' => 'required|exists:industries,id',
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:2020|max:2099',
+        ]);
+
+        $industri = \App\Models\Industri::findOrFail($request->industri_id);
+
+        // Get all reports for this industry in the specified month, ordered by latest
+        $laporans = Laporan::where('industri_id', $industri->id)
+            ->whereMonth('tanggal', $request->bulan)
+            ->whereYear('tanggal', $request->tahun)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        if ($laporans->isEmpty()) {
+            abort(404, 'Tidak ada laporan untuk periode ini.');
+        }
+
+        // Get unique report types
+        $jenisLaporanList = $laporans->pluck('jenis_laporan')->unique()->values()->toArray();
+
+        // Use the latest laporan ID (8 digits with leading zeros)
+        $latestLaporan = $laporans->first();
+        $nomorBukti = str_pad($latestLaporan->id, 8, '0', STR_PAD_LEFT);
+
+        // Get month name
+        $bulanNama = \Carbon\Carbon::createFromDate(null, (int) $request->bulan, 1)->translatedFormat('F');
+
+        // Get active Pejabat
+        $pejabat = \App\Models\Pejabat::where('is_active', true)->first();
+
+        // Prepare data for view
+        $data = [
+            'industri' => $industri,
+            'receiptId' => $nomorBukti,
+            'bulan_nama' => $bulanNama,
+            'tahun' => $request->tahun,
+            'jenisLaporanList' => $jenisLaporanList,
+            'tanggalTerakhir' => $latestLaporan->created_at->translatedFormat('d F Y'),
+            'pejabat' => $pejabat,
+        ];
+
+        return view('laporan.pdf.bukti_tanda_terima', $data);
     }
 }

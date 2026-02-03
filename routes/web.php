@@ -110,6 +110,9 @@ Route::prefix('pnbp')->group(function () {
             ->except(['create', 'store']);
         Route::get('/reconciliations/{reconciliation}/file', [ReconciliationController::class, 'downloadFile'])->name('reconciliations.file');
         Route::get('/reconciliations/{reconciliation}/raw', [ReconciliationController::class, 'rawExcel'])->name('reconciliations.raw');
+        Route::get('/reconciliations/{reconciliation}/raw/sheet/{sheetIndex}', [ReconciliationController::class, 'rawExcelSheet'])
+            ->whereNumber('sheetIndex')
+            ->name('reconciliations.raw.sheet');
         Route::get('/reconciliations/{reconciliation}/export-pdf', [ReconciliationController::class, 'exportPdf'])->name('reconciliations.export-pdf');
         Route::post('/reconciliations/{reconciliation}/summary-overrides', [ReconciliationController::class, 'updateSummaryOverrides'])->name('reconciliations.summary-overrides');
     });
@@ -167,6 +170,9 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
 Route::get('/rekap', [LaporanController::class, 'rekapLaporan'])->name('laporan.rekap');
 // Landing Page Laporan - public read access
 Route::get('/laporan/info', [LaporanController::class, 'landing'])->name('laporan.landing');
+// Public bukti laporan - search and view receipt
+Route::match(['get', 'post'], '/laporan/bukti', [LaporanController::class, 'publicSearch'])->name('laporan.bukti');
+Route::post('/laporan/bukti/view', [LaporanController::class, 'viewReceipt'])->name('laporan.bukti.view');
 
 
 // Admin operations (upload/rekap/detail) tetap khusus admin
@@ -192,5 +198,9 @@ Route::prefix('laporan')->middleware(['auth', 'session.timeout', 'role:admin'])-
     Route::get('/{industri}/detail/{id}', [LaporanController::class, 'detailLaporan'])->name('laporan.detail');
     Route::get('/{industri}/detail/{id}/export', [LaporanController::class, 'exportDetailLaporan'])->name('laporan.detail.export');
     Route::delete('/{industri}/delete/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
+
+    // Setting Pejabat Penandatangan
+    Route::resource('pejabat', \App\Http\Controllers\PejabatController::class);
+    Route::post('/pejabat/{pejabat}/activate', [\App\Http\Controllers\PejabatController::class, 'activate'])->name('pejabat.activate');
 });
 

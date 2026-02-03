@@ -28,7 +28,7 @@
     @endif
 
     <div style="margin-top:1rem;">
-        <a href="{{ route('laporan.index') }}" class="btn btn-secondary">Kembali ke Monitoring</a>
+        <a href="{{ route('laporan.landing') }}" class="btn btn-secondary">Kembali ke Landing</a>
     </div>
 </div>
 
