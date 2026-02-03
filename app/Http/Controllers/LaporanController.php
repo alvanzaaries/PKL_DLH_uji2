@@ -76,6 +76,9 @@ class LaporanController extends Controller
             ->first();
 
         if ($existingLaporan) {
+            // Clear session to avoid stale data
+            session()->forget(['preview_data', 'preview_file_path', 'preview_metadata']);
+
             return back()
                 ->withInput()
                 ->with('error', 'Laporan jenis "' . $request->jenis_laporan . '" untuk bulan ' . $request->bulan . ' tahun ' . $request->tahun . ' sudah pernah diupload. Setiap jenis laporan hanya bisa diupload sekali per bulan.');
@@ -118,6 +121,10 @@ class LaporanController extends Controller
 
         } catch (\Exception $e) {
             Log::error('Laporan preview failed', ['exception' => $e]);
+
+            // Clear session to avoid stale data
+            session()->forget(['preview_data', 'preview_file_path', 'preview_metadata']);
+
             return back()
                 ->withInput()
                 ->with('error', 'Gagal memproses data. ' . $e->getMessage());
@@ -265,6 +272,7 @@ class LaporanController extends Controller
 
         // Cek apakah ada data preview di session
         if (!session()->has('preview_data')) {
+            // Already no session, just redirect
             return redirect()->route('laporan.upload.form')
                 ->with('error', 'Data preview tidak ditemukan. Silakan upload ulang.');
         }
@@ -352,6 +360,9 @@ class LaporanController extends Controller
             ->first();
 
         if ($existingLaporan) {
+            // Clear session to avoid stale data
+            session()->forget(['preview_data', 'preview_file_path', 'preview_metadata']);
+
             return redirect()->route('laporan.upload.form')
                 ->with('error', 'Laporan jenis "' . $request->jenis_laporan . '" untuk bulan ' . $request->bulan . ' tahun ' . $request->tahun . ' sudah pernah diupload.');
         }
@@ -436,9 +447,19 @@ class LaporanController extends Controller
             }, $dataRows);
 
             // Simpan detail berdasarkan jenis laporan menggunakan service (gunakan edited data jika ada)
+            Log::info('Starting detail data save', [
+                'laporan_id' => $laporan->id,
+                'jenis' => $request->jenis_laporan,
+                'rows_count' => count($cleanedRows)
+            ]);
+
             $this->dataService->saveDetailData($laporan, $request->jenis_laporan, $cleanedRows);
 
+            Log::info('Detail data saved successfully', ['laporan_id' => $laporan->id]);
+
             DB::commit();
+
+            Log::info('Transaction committed successfully', ['laporan_id' => $laporan->id]);
 
             // PDF now generated on-demand when user views/downloads the receipt
 
@@ -452,6 +473,11 @@ class LaporanController extends Controller
 
             // Clear session data
             session()->forget(['preview_data', 'preview_file_path', 'preview_metadata', 'redirect_after_save']);
+
+            Log::info('Redirecting after save', [
+                'laporan_id' => $laporan->id,
+                'redirect_url' => $redirectUrl ?? 'laporan.industri'
+            ]);
 
             // Redirect ke halaman sebelumnya atau default ke industri laporan
             if ($redirectUrl) {
@@ -477,6 +503,9 @@ class LaporanController extends Controller
                 'preview_data_exists' => session()->has('preview_data'),
                 'preview_data_row_count' => isset($previewData['rows']) ? count($previewData['rows']) : 0,
             ]);
+
+            // Clear session to avoid stale data
+            session()->forget(['preview_data', 'preview_file_path', 'preview_metadata']);
 
             // Gunakan redirect URL dari session atau fallback ke laporan.industri
             $redirectUrl = session('redirect_after_save');
@@ -684,56 +713,48 @@ class LaporanController extends Controller
     }
 
     /**
-     * Validasi data yang sudah diedit oleh user (menggunakan Service)
+     * Validate edited data from preview (array of indexed arrays) by converting to associative format
+     * and using the validation service (FIXED for Bug #2)
      */
     private function validateEditedDataUsingService($dataRows, $jenisLaporan, $rowNumberMap = [])
     {
-        // Tentukan expected headers berdasarkan jenis laporan
-        $headersMap = [
-            'Laporan Penerimaan Kayu Bulat' => ['Nomor Dokumen', 'Tanggal', 'Asal Kayu', 'Jenis Kayu', 'Jumlah Batang', 'Volume', 'Keterangan'],
-            'Laporan Mutasi Kayu Bulat (LMKB)' => ['Jenis Kayu', 'Persediaan Awal', 'Penambahan', 'Penggunaan/Pengurangan', 'Persediaan Akhir', 'Keterangan'],
-            'Laporan Penerimaan Kayu Olahan' => ['Nomor Dokumen', 'Tanggal', 'Asal Kayu', 'Jenis Produk', 'Jumlah Keping', 'Volume', 'Keterangan'],
-            'Laporan Mutasi Kayu Olahan (LMKO)' => ['Jenis Produk', 'Persediaan Awal', 'Penambahan', 'Penggunaan/Pengurangan', 'Persediaan Akhir', 'Keterangan'],
-            'Laporan Penjualan Kayu Olahan' => ['Nomor Dokumen', 'Tanggal', 'Tujuan Kirim', 'Jenis Produk', 'Jumlah Keping', 'Volume', 'Keterangan'],
+        // Get field mapping untuk jenis laporan ini
+        $fieldMappings = [
+            'Laporan Penerimaan Kayu Bulat' => [
+                'fields' => ['nomor_dokumen', 'tanggal', 'asal_kayu', 'jenis_kayu', 'jumlah_batang', 'volume', 'keterangan'],
+            ],
+            'Laporan Mutasi Kayu Bulat (LMKB)' => [
+                'fields' => ['jenis_kayu', 'persediaan_awal_btg', 'persediaan_awal_volume', 'penambahan_btg', 'penambahan_volume', 'penggunaan_pengurangan_btg', 'penggunaan_pengurangan_volume', 'persediaan_akhir_btg', 'persediaan_akhir_volume', 'keterangan'],
+            ],
+            'Laporan Penerimaan Kayu Olahan' => [
+                'fields' => ['nomor_dokumen', 'tanggal', 'asal_kayu', 'jenis_olahan', 'jumlah_keping', 'volume', 'keterangan'],
+            ],
+            'Laporan Mutasi Kayu Olahan (LMKO)' => [
+                'fields' => ['jenis_olahan', 'persediaan_awal_btg', 'persediaan_awal_volume', 'penambahan_btg', 'penambahan_volume', 'penggunaan_pengurangan_btg', 'penggunaan_pengurangan_volume', 'persediaan_akhir_btg', 'persediaan_akhir_volume', 'keterangan'],
+            ],
+            'Laporan Penjualan Kayu Olahan' => [
+                'fields' => ['nomor_dokumen', 'tanggal', 'tujuan_kirim', 'jenis_olahan', 'jumlah_keping', 'volume', 'keterangan'],
+            ],
         ];
 
-        $expectedHeaders = $headersMap[$jenisLaporan] ?? [];
-        $errors = [];
-        $validCount = 0;
-
-        // Validasi setiap baris
-        foreach ($dataRows as $index => $row) {
-            // If caller provided a map from index to original source row number, use it for messages
-            $rowNumber = $rowNumberMap[$index] ?? ($index + 1); // Row number untuk error message
-
-            // Skip baris kosong
-            $isEmpty = true;
-            foreach ($row as $cell) {
-                if ($cell !== null && $cell !== '' && trim((string) $cell) !== '') {
-                    $isEmpty = false;
-                    break;
-                }
-            }
-            if ($isEmpty)
-                continue;
-
-            // Validasi row berdasarkan jenis laporan
-            $rowErrors = $this->validateRowByType($row, $jenisLaporan, $rowNumber);
-
-            if (!empty($rowErrors)) {
-                $errors = array_merge($errors, $rowErrors);
-            } else {
-                $validCount++;
-            }
+        if (!isset($fieldMappings[$jenisLaporan])) {
+            throw new \Exception('Jenis laporan tidak dikenali: ' . $jenisLaporan);
         }
 
-        return [
-            'headers' => $expectedHeaders,
-            'rows' => $dataRows,
-            'total' => count($dataRows),
-            'valid' => $validCount,
-            'errors' => $errors
-        ];
+        $mapping = $fieldMappings[$jenisLaporan];
+
+        // Convert indexed arrays to associative arrays
+        $manualData = [];
+        foreach ($dataRows as $rowIndex => $row) {
+            $assocRow = [];
+            foreach ($mapping['fields'] as $fieldIndex => $fieldName) {
+                $assocRow[$fieldName] = $row[$fieldIndex] ?? '';
+            }
+            $manualData[] = $assocRow;
+        }
+
+        // Use existing validation service (which has the Bug #1 fix)
+        return $this->validationService->validateManualData($manualData, $jenisLaporan);
     }
 
     /**
@@ -1010,10 +1031,11 @@ class LaporanController extends Controller
             // Save PDF (will overwrite if already exists for this industry/month)
             $pdf->save($fullPath);
 
-            // Update all laporans for this industry/month with the same path
-            foreach ($laporansInMonth as $lap) {
-                $lap->update(['path_laporan' => $relativePath]);
-            }
+            // Update all laporans for this industry/month with the same path (batch update)
+            Laporan::where('industri_id', $industri->id)
+                ->whereMonth('tanggal', $bulan)
+                ->whereYear('tanggal', $tahun)
+                ->update(['path_laporan' => $relativePath]);
 
             Log::info('Generated PDF for industri ' . $industri->id . ' periode ' . $bulan . '/' . $tahun . ': ' . $relativePath);
 

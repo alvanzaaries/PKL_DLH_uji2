@@ -23,6 +23,43 @@
             </div>
         </div>
 
+        {{-- Alert Messages --}}
+        @if(session('success'))
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-md mb-6 shadow-sm" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
+                    <div>
+                        <p class="font-semibold">Berhasil!</p>
+                        <p class="text-sm">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-md mb-6 shadow-sm" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 text-xl mr-3"></i>
+                    <div>
+                        <p class="font-semibold">Terjadi Kesalahan!</p>
+                        <p class="text-sm">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('warning'))
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 px-6 py-4 rounded-md mb-6 shadow-sm" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mr-3"></i>
+                    <div>
+                        <p class="font-semibold">Peringatan!</p>
+                        <p class="text-sm">{{ session('warning') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="bg-white border border-gray-200 shadow-sm rounded-md mb-8">
             <div class="px-6 py-4 border-bottom border-gray-200 bg-gray-50 rounded-t-md">
                 <div class="flex items-center justify-between">

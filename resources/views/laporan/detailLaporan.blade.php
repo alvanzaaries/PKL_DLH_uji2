@@ -55,10 +55,7 @@
                     </a>
                 @endif
                 
-                {{-- Export Button --}}
-                <a href="{{ route('laporan.detail.export', ['industri' => $industri_id ?? request('industri'), 'id' => $laporan_id ?? request('id')]) }}{{ request()->getQueryString() ? '?' . request()->getQueryString() : '' }}" class="btn btn-primary">
-                    <i class="fas fa-file-excel"></i> Ekspor Excel
-                </a>
+                
             </div>
         </div>
 
@@ -246,11 +243,25 @@
                                     <th class="col-center" style="width: 50px;">No</th>
                                     <th>Perusahaan</th>
                                     <th>Jenis Kayu</th>
-                                    <th class="col-right">Persediaan Awal</th>
-                                    <th class="col-right">Penambahan</th>
-                                    <th class="col-right">Penggunaan</th>
-                                    <th class="col-right">Persediaan Akhir</th>
+                                    <th class="col-right" colspan="2">Persediaan Awal</th>
+                                    <th class="col-right" colspan="2">Penambahan</th>
+                                    <th class="col-right" colspan="2">Penggunaan</th>
+                                    <th class="col-right" colspan="2">Persediaan Akhir</th>
                                     <th>Keterangan</th>
+                                </tr>
+                                <tr style="background: #f9fafb;">
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">Btg</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">m³</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">Btg</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">m³</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">Btg</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">m³</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">Btg</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">m³</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -259,18 +270,26 @@
                                         <td class="col-center text-gray-400">{{ $index + 1 }}</td>
                                         <td class="font-medium text-gray-900">{{ $item->laporan->industri->nama ?? '-' }}</td>
                                         <td>{{ $item->jenis_kayu }}</td>
+                                        <td class="col-right">{{ number_format($item->persediaan_awal_btg) }}</td>
                                         <td class="col-right">{{ number_format($item->persediaan_awal_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->penambahan_btg) }}</td>
                                         <td class="col-right">{{ number_format($item->penambahan_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->penggunaan_pengurangan_btg) }}</td>
                                         <td class="col-right">{{ number_format($item->penggunaan_pengurangan_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->persediaan_akhir_btg) }}</td>
                                         <td class="col-right">{{ number_format($item->persediaan_akhir_volume, 2) }}</td>
                                         <td>{{ $item->keterangan }}</td>
                                     </tr>
                                 @endforeach
                                 <tr class="total-row text-white">
                                     <td colspan="3" class="col-right pr-4">TOTAL:</td>
+                                    <td class="col-right">{{ number_format($items->sum('persediaan_awal_btg')) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('penambahan_btg')) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_btg')) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('persediaan_akhir_btg')) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
                                     <td></td>
                                 </tr>
@@ -283,11 +302,25 @@
                                     <th class="col-center" style="width: 50px;">No</th>
                                     <th>Perusahaan</th>
                                     <th>Jenis Olahan</th>
-                                    <th class="col-right">Persediaan Awal</th>
-                                    <th class="col-right">Penambahan</th>
-                                    <th class="col-right">Penggunaan</th>
-                                    <th class="col-right">Persediaan Akhir</th>
+                                    <th class="col-right" colspan="2">Persediaan Awal</th>
+                                    <th class="col-right" colspan="2">Penambahan</th>
+                                    <th class="col-right" colspan="2">Penggunaan</th>
+                                    <th class="col-right" colspan="2">Persediaan Akhir</th>
                                     <th>Keterangan</th>
+                                </tr>
+                                <tr style="background: #f9fafb;">
+                                    <th></th>
+                                    <th></th>
+                                    <th></th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">Kpg</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">m³</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">Kpg</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">m³</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">Kpg</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">m³</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">Kpg</th>
+                                    <th class="col-right" style="font-size: 0.75rem; font-weight: 500;">m³</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -296,18 +329,26 @@
                                         <td class="col-center text-gray-400">{{ $index + 1 }}</td>
                                         <td class="font-medium text-gray-900">{{ $item->laporan->industri->nama ?? '-' }}</td>
                                         <td>{{ $item->jenis_olahan }}</td>
+                                        <td class="col-right">{{ number_format($item->persediaan_awal_btg) }}</td>
                                         <td class="col-right">{{ number_format($item->persediaan_awal_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->penambahan_btg) }}</td>
                                         <td class="col-right">{{ number_format($item->penambahan_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->penggunaan_pengurangan_btg) }}</td>
                                         <td class="col-right">{{ number_format($item->penggunaan_pengurangan_volume, 2) }}</td>
+                                        <td class="col-right">{{ number_format($item->persediaan_akhir_btg) }}</td>
                                         <td class="col-right">{{ number_format($item->persediaan_akhir_volume, 2) }}</td>
                                         <td>{{ $item->keterangan }}</td>
                                     </tr>
                                 @endforeach
                                 <tr class="total-row text-white">
                                     <td colspan="3" class="col-right pr-4">TOTAL:</td>
+                                    <td class="col-right">{{ number_format($items->sum('persediaan_awal_btg')) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('penambahan_btg')) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_btg')) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($items->sum('persediaan_akhir_btg')) }}</td>
                                     <td class="col-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
                                     <td></td>
                                 </tr>

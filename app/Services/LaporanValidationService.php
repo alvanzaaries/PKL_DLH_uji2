@@ -177,25 +177,27 @@ class LaporanValidationService
 
             // Validate logic for mutation reports
             // Only validate if all numeric fields are present and valid
+            // FIXED: Use field names instead of hardcoded indices to avoid mixing Btg and Vol columns
             if (isset($mapping['validate_logic']) && $mapping['validate_logic']) {
-                $val1 = trim((string) ($rowData[$mapping['fields'][1]] ?? ''));
-                $val2 = trim((string) ($rowData[$mapping['fields'][2]] ?? ''));
-                $val3 = trim((string) ($rowData[$mapping['fields'][3]] ?? ''));
-                $val4 = trim((string) ($rowData[$mapping['fields'][4]] ?? ''));
+                // Use field names to ensure we're always checking Volume columns
+                $persAwalVol = trim((string) ($rowData['persediaan_awal_volume'] ?? ''));
+                $penambahanVol = trim((string) ($rowData['penambahan_volume'] ?? ''));
+                $penggunaanVol = trim((string) ($rowData['penggunaan_pengurangan_volume'] ?? ''));
+                $persAkhirVol = trim((string) ($rowData['persediaan_akhir_volume'] ?? ''));
 
                 // Only run logic validation if all values are present and numeric
                 if (
-                    $val1 !== '' && $val2 !== '' && $val3 !== '' && $val4 !== '' &&
-                    is_numeric($val1) && is_numeric($val2) && is_numeric($val3) && is_numeric($val4)
+                    $persAwalVol !== '' && $penambahanVol !== '' && $penggunaanVol !== '' && $persAkhirVol !== '' &&
+                    is_numeric($persAwalVol) && is_numeric($penambahanVol) && is_numeric($penggunaanVol) && is_numeric($persAkhirVol)
                 ) {
-                    $persediaanAwal = (float) $val1;
-                    $penambahan = (float) $val2;
-                    $penggunaan = (float) $val3;
-                    $persediaanAkhir = (float) $val4;
+                    $persediaanAwal = (float) $persAwalVol;
+                    $penambahan = (float) $penambahanVol;
+                    $penggunaan = (float) $penggunaanVol;
+                    $persediaanAkhir = (float) $persAkhirVol;
 
                     $expectedAkhir = $persediaanAwal + $penambahan - $penggunaan;
                     if (abs($expectedAkhir - $persediaanAkhir) > 0.01) {
-                        $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir tidak sesuai (seharusnya {$expectedAkhir})";
+                        $rowErrors[] = "Baris {$rowNumber}: Persediaan Akhir (Vol) tidak sesuai (seharusnya {$expectedAkhir} m³)";
                     }
                 }
             }
