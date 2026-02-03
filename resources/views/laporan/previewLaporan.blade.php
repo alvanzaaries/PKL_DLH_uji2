@@ -110,6 +110,18 @@
                     'Penambahan' => 'm³',
                     'Penggunaan/Pengurangan' => 'm³',
                     'Persediaan Akhir' => 'm³',
+                    'Persediaan Awal (Btg)' => 'Batang',
+                    'Persediaan Awal (Vol)' => 'm³',
+                    'Penambahan (Btg)' => 'Batang',
+                    'Penambahan (Vol)' => 'm³',
+                    'Penggunaan/Pengurangan (Btg)' => 'Batang',
+                    'Penggunaan/Pengurangan (Vol)' => 'm³',
+                    'Persediaan Akhir (Btg)' => 'Batang',
+                    'Persediaan Akhir (Vol)' => 'm³',
+                    'Persediaan Awal (Kpg)' => 'Keping',
+                    'Penambahan (Kpg)' => 'Keping',
+                    'Penggunaan/Pengurangan (Kpg)' => 'Keping',
+                    'Persediaan Akhir (Kpg)' => 'Keping',
                 ];
             @endphp
             <table class="preview-table" id="previewTable">

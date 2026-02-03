@@ -63,10 +63,10 @@ class LaporanValidationService
                 'date' => ['tanggal']
             ],
             'Laporan Mutasi Kayu Bulat (LMKB)' => [
-                'headers' => ['Jenis Kayu', 'Persediaan Awal', 'Penambahan', 'Penggunaan/Pengurangan', 'Persediaan Akhir', 'Keterangan'],
-                'fields' => ['jenis_kayu', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume', 'keterangan'],
+                'headers' => ['Jenis Kayu', 'Persediaan Awal (Btg)', 'Persediaan Awal (Vol)', 'Penambahan (Btg)', 'Penambahan (Vol)', 'Penggunaan/Pengurangan (Btg)', 'Penggunaan/Pengurangan (Vol)', 'Persediaan Akhir (Btg)', 'Persediaan Akhir (Vol)', 'Keterangan'],
+                'fields' => ['jenis_kayu', 'persediaan_awal_btg', 'persediaan_awal_volume', 'penambahan_btg', 'penambahan_volume', 'penggunaan_pengurangan_btg', 'penggunaan_pengurangan_volume', 'persediaan_akhir_btg', 'persediaan_akhir_volume', 'keterangan'],
                 'required' => ['jenis_kayu', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume'],
-                'numeric' => ['persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume'],
+                'numeric' => ['persediaan_awal_btg', 'persediaan_awal_volume', 'penambahan_btg', 'penambahan_volume', 'penggunaan_pengurangan_btg', 'penggunaan_pengurangan_volume', 'persediaan_akhir_btg', 'persediaan_akhir_volume'],
                 'validate_logic' => true
             ],
             'Laporan Penerimaan Kayu Olahan' => [
@@ -77,10 +77,10 @@ class LaporanValidationService
                 'date' => ['tanggal']
             ],
             'Laporan Mutasi Kayu Olahan (LMKO)' => [
-                'headers' => ['Jenis Produk', 'Persediaan Awal', 'Penambahan', 'Penggunaan/Pengurangan', 'Persediaan Akhir', 'Keterangan'],
-                'fields' => ['jenis_olahan', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume', 'keterangan'],
+                'headers' => ['Jenis Produk', 'Persediaan Awal (Kpg)', 'Persediaan Awal (Vol)', 'Penambahan (Kpg)', 'Penambahan (Vol)', 'Penggunaan/Pengurangan (Kpg)', 'Penggunaan/Pengurangan (Vol)', 'Persediaan Akhir (Kpg)', 'Persediaan Akhir (Vol)', 'Keterangan'],
+                'fields' => ['jenis_olahan', 'persediaan_awal_btg', 'persediaan_awal_volume', 'penambahan_btg', 'penambahan_volume', 'penggunaan_pengurangan_btg', 'penggunaan_pengurangan_volume', 'persediaan_akhir_btg', 'persediaan_akhir_volume', 'keterangan'],
                 'required' => ['jenis_olahan', 'persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume'],
-                'numeric' => ['persediaan_awal_volume', 'penambahan_volume', 'penggunaan_pengurangan_volume', 'persediaan_akhir_volume'],
+                'numeric' => ['persediaan_awal_btg', 'persediaan_awal_volume', 'penambahan_btg', 'penambahan_volume', 'penggunaan_pengurangan_btg', 'penggunaan_pengurangan_volume', 'persediaan_akhir_btg', 'persediaan_akhir_volume'],
                 'validate_logic' => true
             ],
             'Laporan Penjualan Kayu Olahan' => [
