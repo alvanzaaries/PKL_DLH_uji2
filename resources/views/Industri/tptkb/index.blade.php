@@ -845,17 +845,17 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>No</th>
-                            <th>Nama Perusahaan</th>
-                            <th>Tanggal SK</th>
-                            <th>Kabupaten/Kota</th>
-                            <th>Penanggung Jawab</th>
-                            <th>Sumber Bahan Baku</th>
-                            <th>Kapasitas (m³/tahun)</th>
-                            <th>Masa Berlaku</th>
-                            <th>Status Izin</th>
-                            <th>Status</th>
-                            <th>Aksi</th>
+                            <th style="text-align: center;">No</th>
+                            <th style="text-align: center;">Nama Perusahaan</th>
+                            <th style="text-align: center;">Tanggal SK</th>
+                            <th style="text-align: center;">Kabupaten/Kota</th>
+                            <th style="text-align: center;">Penanggung Jawab</th>
+                            <th style="text-align: center;">Sumber Bahan Baku</th>
+                            <th style="text-align: center;">Kapasitas (m³/tahun)</th>
+                            <th style="text-align: center;">Masa Berlaku</th>
+                            <th style="text-align: center;">Status Izin</th>
+                            <th style="text-align: center;">Status</th>
+                            <th style="text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1034,9 +1034,11 @@
 @push('scripts')
     <script src="{{ asset('js/filter-collapse.js') }}"></script>
     <script>
+        const isAdmin = {{ auth()->check() && auth()->user()->role === 'admin' ? 'true' : 'false' }};
+        
         function showDetail(item, isAktif) {
             document.getElementById('modal-nama').textContent = item.industri.nama;
-            document.getElementById('modal-nomor-izin').textContent = item.industri.nomor_izin;
+            document.getElementById('modal-nomor-izin').textContent = isAdmin ? item.industri.nomor_izin : '-';
             document.getElementById('modal-alamat').textContent = item.industri.alamat;
             document.getElementById('modal-kabupaten').textContent = item.industri.kabupaten;
             document.getElementById('modal-penanggungjawab').textContent = item.industri.penanggungjawab;
@@ -1311,42 +1313,91 @@
 
     <!-- Import Modal -->
     <div id="importModal" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h2 class="modal-title">Import Data dari Excel</h2>
-                <span class="close-btn" onclick="closeImportModal()">&times;</span>
+        <div class="modal-content" style="max-width: 650px; border-radius: 16px; overflow: hidden;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #0e6027 0%, #0a4d1f 100%); color: white; padding: 24px; border-bottom: none;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-file-excel" style="font-size: 24px;"></i>
+                    </div>
+                    <div>
+                        <h2 class="modal-title" style="margin: 0; font-size: 20px; font-weight: 700;">Import Data dari Excel</h2>
+                        <p style="margin: 4px 0 0; font-size: 13px; opacity: 0.9;">Upload file Excel untuk menambahkan data secara massal</p>
+                    </div>
+                </div>
+                <span class="close-btn" onclick="closeImportModal()" style="color: white; opacity: 0.9; font-size: 28px;">&times;</span>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 32px;">
                 <div id="importAlert" style="display: none;"></div>
                 
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary);">
-                        <i class="fas fa-file-excel" style="color: #10b981;"></i> Pilih File Excel
-                    </label>
-                    <input type="file" id="importFile" accept=".xlsx,.xls" 
-                           style="width: 100%; padding: 12px; border: 2px dashed var(--border); border-radius: 8px; cursor: pointer;">
-                    <small style="color: #64748b; display: block; margin-top: 8px;">
-                        Format: .xlsx atau .xls (Maksimal 10MB)
-                    </small>
-                </div>
-
-                <div id="importProgress" style="display: none; margin-bottom: 20px;">
-                    <div style="background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden;">
-                        <div id="progressBar" style="background: linear-gradient(90deg, #10b981, #059669); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                <!-- Drag & Drop Area -->
+                <div id="dropZone" style="margin-bottom: 24px; border: 3px dashed #d1d5db; border-radius: 16px; padding: 40px; text-align: center; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); cursor: pointer; transition: all 0.3s ease;" 
+                     onclick="document.getElementById('importFile').click();"
+                     ondragover="event.preventDefault(); this.style.borderColor='#0e6027'; this.style.background='#ecfdf5';"
+                     ondragleave="this.style.borderColor='#d1d5db'; this.style.background='linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)';"
+                     ondrop="handleDrop(event)">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px;">
+                        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #0e6027 0%, #0a4d1f 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(14, 96, 39, 0.3);">
+                            <i class="fas fa-cloud-upload-alt" style="font-size: 36px; color: white;"></i>
+                        </div>
+                        <div>
+                            <p style="font-size: 16px; font-weight: 600; color: #0f172a; margin: 0 0 8px;">
+                                <span id="fileName">Klik atau Drag & Drop file Excel di sini</span>
+                            </p>
+                            <p style="font-size: 14px; color: #64748b; margin: 0;">
+                                Format: <span style="color: #0e6027; font-weight: 600;">.xlsx</span> atau <span style="color: #0e6027; font-weight: 600;">.xls</span> (Maks. 10MB)
+                            </p>
+                        </div>
+                        <input type="file" id="importFile" accept=".xlsx,.xls" style="display: none;" onchange="handleFileSelect(event)">
                     </div>
-                    <p id="progressText" style="text-align: center; margin-top: 8px; color: #64748b; font-size: 14px;"></p>
                 </div>
 
-                <div id="importResult" style="display: none; margin-top: 20px;">
-                    <h4 style="color: var(--primary); margin-bottom: 12px;">Hasil Import:</h4>
-                    <div id="resultContent"></div>
+                <!-- File Info -->
+                <div id="fileInfo" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: #0e6027; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-file-excel" style="color: white; font-size: 18px;"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <p id="selectedFileName" style="margin: 0; font-weight: 600; color: #0f172a; font-size: 14px;"></p>
+                            <p id="selectedFileSize" style="margin: 4px 0 0; font-size: 12px; color: #64748b;"></p>
+                        </div>
+                        <button onclick="clearFile()" style="background: none; border: none; color: #ef4444; cursor: pointer; padding: 8px; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='none'">
+                            <i class="fas fa-times-circle" style="font-size: 20px;"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
-                    <button onclick="closeImportModal()" class="btn" style="background: #64748b; color: white;">
-                        Batal
+                <!-- Progress Bar -->
+                <div id="importProgress" style="display: none; margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 14px; font-weight: 600; color: #0f172a;">Mengupload...</span>
+                        <span id="progressPercent" style="font-size: 14px; font-weight: 700; color: #0e6027;">0%</span>
+                    </div>
+                    <div style="background: #e5e7eb; height: 12px; border-radius: 6px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+                        <div id="progressBar" style="background: linear-gradient(90deg, #0e6027, #0a4d1f); height: 100%; width: 0%; transition: width 0.3s; border-radius: 6px; position: relative; overflow: hidden;">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: shimmer 2s infinite;"></div>
+                        </div>
+                    </div>
+                    <p id="progressText" style="text-align: center; margin-top: 8px; color: #64748b; font-size: 13px;"></p>
+                </div>
+
+                <!-- Import Result -->
+                <div id="importResult" style="display: none; margin-top: 24px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 12px; padding: 20px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <div style="width: 40px; height: 40px; background: #0e6027; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-check" style="color: white; font-size: 18px;"></i>
+                        </div>
+                        <h4 style="color: #0f172a; margin: 0; font-size: 16px; font-weight: 700;">Hasil Import</h4>
+                    </div>
+                    <div id="resultContent" style="color: #166534;"></div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb;">
+                    <button onclick="closeImportModal()" class="btn" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 12px 24px; font-weight: 600; border-radius: 10px; transition: all 0.2s;" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">
+                        <i class="fas fa-times"></i> Batal
                     </button>
-                    <button onclick="processImport()" id="btnImport" class="btn btn-primary">
+                    <button onclick="processImport()" id="btnImport" class="btn btn-primary" style="background: linear-gradient(135deg, #0e6027 0%, #0a4d1f 100%); padding: 12px 32px; font-weight: 600; border-radius: 10px; box-shadow: 0 4px 12px rgba(14, 96, 39, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(14, 96, 39, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(14, 96, 39, 0.3)'">
                         <i class="fas fa-upload"></i> Upload & Import
                     </button>
                 </div>
@@ -1354,11 +1405,67 @@
         </div>
     </div>
 
+    <style>
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+    </style>
+
     <script>
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                displayFileInfo(file);
+            }
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            const dropZone = event.currentTarget;
+            dropZone.style.borderColor = '#d1d5db';
+            dropZone.style.background = 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)';
+            
+            const file = event.dataTransfer.files[0];
+            if (file) {
+                const fileInput = document.getElementById('importFile');
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+                displayFileInfo(file);
+            }
+        }
+
+        function displayFileInfo(file) {
+            const fileName = document.getElementById('selectedFileName');
+            const fileSize = document.getElementById('selectedFileSize');
+            const fileInfo = document.getElementById('fileInfo');
+            const dropZone = document.getElementById('dropZone');
+            
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.style.display = 'block';
+            dropZone.style.display = 'none';
+        }
+
+        function clearFile() {
+            document.getElementById('importFile').value = '';
+            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('dropZone').style.display = 'block';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
         function openImportModal() {
             document.getElementById('importModal').style.display = 'block';
             // Reset form
-            document.getElementById('importFile').value = '';
+            clearFile();
             document.getElementById('importAlert').style.display = 'none';
             document.getElementById('importProgress').style.display = 'none';
             document.getElementById('importResult').style.display = 'none';
@@ -1474,7 +1581,7 @@
                             <div style="font-size: 12px; color: #64748b;">Total Baris</div>
                         </div>
                         <div style="text-align: center;">
-                            <div style="font-size: 24px; font-weight: 700; color: #10b981;">${data.success}</div>
+                            <div style="font-size: 24px; font-weight: 700; color: #0e6027;">${data.success}</div>
                             <div style="font-size: 12px; color: #64748b;">Berhasil</div>
                         </div>
                         <div style="text-align: center;">

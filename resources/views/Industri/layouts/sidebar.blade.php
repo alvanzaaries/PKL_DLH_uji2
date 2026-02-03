@@ -43,6 +43,7 @@
             left: 0;
             top: 0;
             padding: 20px 0;
+            padding-bottom: 180px;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
         }
@@ -255,7 +256,7 @@
                 <span class="menu-text">Perajin</span>
             </a>
 
-            <div style="margin-top: 30px; padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            <div style="margin-top: auto; padding: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1); position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(180deg, rgba(15, 42, 34, 0) 0%, rgba(15, 42, 34, 0.95) 20%, #0f2a22 100%);">
                 @guest
                     <a href="{{ route('login', ['from' => url()->current()]) }}" class="menu-item"
                         style="background: rgba(76, 175, 80, 0.2); border-radius: 8px; justify-content: center;">
