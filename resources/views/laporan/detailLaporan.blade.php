@@ -193,8 +193,8 @@
                                 @endforeach
                                 <tr class="total-row text-white">
                                     <td colspan="6" class="col-right pr-4">TOTAL:</td>
-                                    <td class="col-right">{{ number_format($items->sum('jumlah_batang')) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['jumlah_batang'] ?? 0) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['volume'] ?? 0, 2) }}</td>
                                     <td></td>
                                 </tr>
                             </tbody>
@@ -230,8 +230,8 @@
                                 @endforeach
                                 <tr class="total-row text-white">
                                     <td colspan="6" class="col-right pr-4">TOTAL:</td>
-                                    <td class="col-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['jumlah_keping'] ?? 0) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['volume'] ?? 0, 2) }}</td>
                                     <td></td>
                                 </tr>
                             </tbody>
@@ -283,14 +283,14 @@
                                 @endforeach
                                 <tr class="total-row text-white">
                                     <td colspan="3" class="col-right pr-4">TOTAL:</td>
-                                    <td class="col-right">{{ number_format($items->sum('persediaan_awal_btg')) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('penambahan_btg')) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_btg')) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('persediaan_akhir_btg')) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['persediaan_awal_btg'] ?? 0) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['persediaan_awal_volume'] ?? 0, 2) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['penambahan_btg'] ?? 0) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['penambahan_volume'] ?? 0, 2) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['penggunaan_pengurangan_btg'] ?? 0) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['penggunaan_pengurangan_volume'] ?? 0, 2) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['persediaan_akhir_btg'] ?? 0) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['persediaan_akhir_volume'] ?? 0, 2) }}</td>
                                     <td></td>
                                 </tr>
                             </tbody>
@@ -342,14 +342,14 @@
                                 @endforeach
                                 <tr class="total-row text-white">
                                     <td colspan="3" class="col-right pr-4">TOTAL:</td>
-                                    <td class="col-right">{{ number_format($items->sum('persediaan_awal_btg')) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('persediaan_awal_volume'), 2) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('penambahan_btg')) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('penambahan_volume'), 2) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_btg')) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('penggunaan_pengurangan_volume'), 2) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('persediaan_akhir_btg')) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('persediaan_akhir_volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['persediaan_awal_btg'] ?? 0) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['persediaan_awal_volume'] ?? 0, 2) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['penambahan_btg'] ?? 0) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['penambahan_volume'] ?? 0, 2) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['penggunaan_pengurangan_btg'] ?? 0) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['penggunaan_pengurangan_volume'] ?? 0, 2) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['persediaan_akhir_btg'] ?? 0) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['persediaan_akhir_volume'] ?? 0, 2) }}</td>
                                     <td></td>
                                 </tr>
                             </tbody>
@@ -385,14 +385,19 @@
                                 @endforeach
                                 <tr class="total-row text-white">
                                     <td colspan="6" class="col-right pr-4">TOTAL:</td>
-                                    <td class="col-right">{{ number_format($items->sum('jumlah_keping')) }}</td>
-                                    <td class="col-right">{{ number_format($items->sum('volume'), 2) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['jumlah_keping'] ?? 0) }}</td>
+                                    <td class="col-right">{{ number_format($grandTotal['volume'] ?? 0, 2) }}</td>
                                     <td></td>
                                 </tr>
                             </tbody>
                             @break
                     @endswitch
                 </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="mt-4 px-2">
+                {{ $items->appends(request()->query())->links() }}
             </div>
         @else
             <div class="empty-state">

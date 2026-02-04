@@ -163,11 +163,14 @@
                                 $sourceRow = $rowOffset + $rowIndex + 1;
                             }
 
+
                             // Filter: skip row yang kosong atau tidak lengkap
                             $isRowEmpty = true;
                             $headerCount = count($data['headers'] ?? []);
                             foreach ($cells as $cell) {
-                                if ($cell !== null && $cell !== '' && trim($cell) !== '') {
+                                // Handle both string and array (e.g., from date parsing)
+                                $cellValue = is_array($cell) ? json_encode($cell) : (string) $cell;
+                                if ($cell !== null && $cell !== '' && trim($cellValue) !== '') {
                                     $isRowEmpty = false;
                                     break;
                                 }
@@ -183,7 +186,11 @@
                             <td style="font-weight:700;">{{ $rowOffset + $rowIndex + 1 }}</td>
                             @foreach($cells as $cellIndex => $cell)
                                 @if($cellIndex < $headerCount)
-                                    <td contenteditable="true" data-cell-index="{{ $cellIndex }}">{{ $cell ?? '' }}</td>
+                                    @php
+                                        // Convert array to string if needed (e.g., from date parsing)
+                                        $displayValue = is_array($cell) ? json_encode($cell) : ($cell ?? '');
+                                    @endphp
+                                    <td contenteditable="true" data-cell-index="{{ $cellIndex }}">{{ $displayValue }}</td>
                                 @endif
                             @endforeach
                         </tr>
@@ -249,8 +256,11 @@
             @endphp
 
             <div class="action-footer">
-                <a href="{{ route('laporan.industri', $metadata['industri_id']) }}" class="btn-action btn-secondary"
-                    id="btnKembali">
+                @php
+                    // Gunakan URL dari session jika ada, fallback ke halaman industri
+                    $backUrl = session('redirect_after_save', route('laporan.industri', $metadata['industri_id']));
+                @endphp
+                <a href="{{ $backUrl }}" class="btn-action btn-secondary" id="btnKembali">
                     <i class="fas fa-arrow-left"></i>
                     <span>Kembali</span>
                 </a>
@@ -309,6 +319,8 @@
             });
         }
 
+        var hasUserEdits = false; // Track if user actually edited anything
+
         function attachCellListeners() {
             var table = document.getElementById('previewTable');
             if (!table) return;
@@ -316,8 +328,12 @@
                 cell.addEventListener('keydown', function (e) {
                     if (e.key === 'Enter') { e.preventDefault(); var next = this.nextElementSibling; if (next && next.hasAttribute('contenteditable')) next.focus(); }
                 });
-                cell.addEventListener('paste', function (e) { e.preventDefault(); var text = (e.clipboardData || window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, text); });
+                cell.addEventListener('paste', function (e) {
+                    hasUserEdits = true; // Mark that user pasted data
+                    e.preventDefault(); var text = (e.clipboardData || window.clipboardData).getData('text/plain'); document.execCommand('insertText', false, text);
+                });
                 cell.addEventListener('input', function () {
+                    hasUserEdits = true; // Mark that user made an edit
                     var tr = this.parentElement; var idx = parseInt(tr.getAttribute('data-row-index')); if (isNaN(idx)) return; var cells = tr.querySelectorAll('td[contenteditable]'); masterRows[idx] = masterRows[idx] || []; cells.forEach(function (c, ci) { masterRows[idx][ci] = c.textContent.trim(); }); persistMasterRows();
                 });
             });
@@ -339,7 +355,12 @@
                 });
             }
 
-            document.getElementById('editedDataInput').value = JSON.stringify(masterRows);
+            // ONLY send edited_data if user actually made edits
+            if (hasUserEdits && Object.keys(masterRows).length > 0) {
+                document.getElementById('editedDataInput').value = JSON.stringify(masterRows);
+            } else {
+                document.getElementById('editedDataInput').value = ''; // Don't send if no edits
+            }
             document.getElementById('revalidateOnlyInput').value = initialHasErrors ? '1' : '0';
         });
 

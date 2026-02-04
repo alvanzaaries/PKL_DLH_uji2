@@ -359,6 +359,12 @@ class LaporanDataService
                 }
                 $query->orderBy($sortColumn, $sortDirection);
 
+                // Calculate Grand Total
+                $grandTotal = [
+                    'jumlah_batang' => $query->clone()->sum('jumlah_batang'),
+                    'volume' => $query->clone()->sum('volume'),
+                ];
+
                 $items = ($perPage === 'all') ? $query->get() : $query->paginate($perPage)->withQueryString();
 
                 $filterOptions['jenis_kayu'] = laporan_penerimaan_kayu_bulat::whereIn('laporan_id', $laporanIds)
@@ -386,6 +392,12 @@ class LaporanDataService
                 }
                 $query->orderBy($sortColumn, $sortDirection);
 
+                // Calculate Grand Total
+                $grandTotal = [
+                    'jumlah_keping' => $query->clone()->sum('jumlah_keping'),
+                    'volume' => $query->clone()->sum('volume'),
+                ];
+
                 $items = ($perPage === 'all') ? $query->get() : $query->paginate($perPage)->withQueryString();
 
                 $filterOptions['jenis_olahan'] = laporan_penerimaan_kayu_olahan::whereIn('laporan_id', $laporanIds)
@@ -410,6 +422,18 @@ class LaporanDataService
                 }
                 $query->orderBy($sortColumn, $sortDirection);
 
+                // Calculate Grand Total
+                $grandTotal = [
+                    'persediaan_awal_btg' => $query->clone()->sum('persediaan_awal_btg'),
+                    'persediaan_awal_volume' => $query->clone()->sum('persediaan_awal_volume'),
+                    'penambahan_btg' => $query->clone()->sum('penambahan_btg'),
+                    'penambahan_volume' => $query->clone()->sum('penambahan_volume'),
+                    'penggunaan_pengurangan_btg' => $query->clone()->sum('penggunaan_pengurangan_btg'),
+                    'penggunaan_pengurangan_volume' => $query->clone()->sum('penggunaan_pengurangan_volume'),
+                    'persediaan_akhir_btg' => $query->clone()->sum('persediaan_akhir_btg'),
+                    'persediaan_akhir_volume' => $query->clone()->sum('persediaan_akhir_volume'),
+                ];
+
                 $items = ($perPage === 'all') ? $query->get() : $query->paginate($perPage)->withQueryString();
 
                 $filterOptions['jenis_kayu'] = laporan_mutasi_kayu_bulat::whereIn('laporan_id', $laporanIds)
@@ -431,6 +455,18 @@ class LaporanDataService
                     $sortColumn = 'jenis_olahan';
                 }
                 $query->orderBy($sortColumn, $sortDirection);
+
+                // Calculate Grand Total
+                $grandTotal = [
+                    'persediaan_awal_btg' => $query->clone()->sum('persediaan_awal_btg'),
+                    'persediaan_awal_volume' => $query->clone()->sum('persediaan_awal_volume'),
+                    'penambahan_btg' => $query->clone()->sum('penambahan_btg'),
+                    'penambahan_volume' => $query->clone()->sum('penambahan_volume'),
+                    'penggunaan_pengurangan_btg' => $query->clone()->sum('penggunaan_pengurangan_btg'),
+                    'penggunaan_pengurangan_volume' => $query->clone()->sum('penggunaan_pengurangan_volume'),
+                    'persediaan_akhir_btg' => $query->clone()->sum('persediaan_akhir_btg'),
+                    'persediaan_akhir_volume' => $query->clone()->sum('persediaan_akhir_volume'),
+                ];
 
                 $items = ($perPage === 'all') ? $query->get() : $query->paginate($perPage)->withQueryString();
 
@@ -469,6 +505,14 @@ class LaporanDataService
                 }
                 $query->orderBy($sortColumn, $sortDirection);
 
+                $query->orderBy($sortColumn, $sortDirection);
+
+                // Calculate Grand Total
+                $grandTotal = [
+                    'jumlah_keping' => $query->clone()->sum('jumlah_keping'),
+                    'volume' => $query->clone()->sum('volume'),
+                ];
+
                 $items = ($perPage === 'all') ? $query->get() : $query->paginate($perPage)->withQueryString();
 
                 $filterOptions['tujuan_kirim'] = laporan_penjualan_kayu_olahan::whereIn('laporan_id', $laporanIds)
@@ -480,7 +524,8 @@ class LaporanDataService
 
         return [
             'items' => $items,
-            'filterOptions' => $filterOptions
+            'filterOptions' => $filterOptions,
+            'grandTotal' => $grandTotal ?? [],
         ];
     }
 
@@ -724,10 +769,29 @@ class LaporanDataService
             ->where('jenis_laporan', 'Laporan Penerimaan Kayu Bulat')
             ->pluck('id');
 
+        // Initialize with empty data structure
+        $data = [];
+        $grandTotal = array_fill(1, 12, 0);
+        $grandTotalSum = 0;
+
+        // If grouping by kabupaten (asal industri), initialize all Jawa Tengah kabupaten
+        if ($groupBy === 'kabupaten') {
+            $allKabupaten = $this->getAllJawaTengahKabupaten();
+            foreach ($allKabupaten as $kabupaten) {
+                $key = strtolower(trim($kabupaten));
+                $data[$key] = [
+                    'nama' => strtoupper($kabupaten),
+                    'bulan' => array_fill(1, 12, 0),
+                    'total' => 0
+                ];
+            }
+        }
+
+        // If no data, return early with initialized structure
         if ($laporanIds->isEmpty()) {
             return [
-                'data' => [],
-                'grand_total' => array_fill(1, 12, 0) + ['total' => 0]
+                'data' => $data,
+                'grand_total' => $grandTotal + ['total' => 0]
             ];
         }
 
@@ -760,17 +824,13 @@ class LaporanDataService
 
         $results = $query->get();
 
-        // Process results into structured format
-        $data = [];
-        $grandTotal = array_fill(1, 12, 0);
-        $grandTotalSum = 0;
-
+        // Process results and merge with initialized data
         foreach ($results as $row) {
             $key = $row->group_key;
             $bulan = (int) $row->bulan;
             $volume = (float) $row->total_volume;
 
-            // Initialize group if not exists
+            // Initialize group if not exists (for asal_kayu grouping)
             if (!isset($data[$key])) {
                 $data[$key] = [
                     'nama' => $row->group_name ?? 'N/A',
@@ -817,10 +877,29 @@ class LaporanDataService
             ->where('jenis_laporan', 'Laporan Mutasi Kayu Olahan (LMKO)')
             ->pluck('id');
 
+        // Initialize with empty data structure
+        $data = [];
+        $grandTotal = array_fill(1, 12, 0);
+        $grandTotalSum = 0;
+
+        // If grouping by asal_kayu (kabupaten), initialize all Jawa Tengah kabupaten
+        if ($groupBy === 'asal_kayu') {
+            $allKabupaten = $this->getAllJawaTengahKabupaten();
+            foreach ($allKabupaten as $kabupaten) {
+                $key = strtolower(trim($kabupaten));
+                $data[$key] = [
+                    'nama' => strtoupper($kabupaten),
+                    'bulan' => array_fill(1, 12, 0),
+                    'total' => 0
+                ];
+            }
+        }
+
+        // If no data, return early with initialized structure
         if ($laporanIds->isEmpty()) {
             return [
-                'data' => [],
-                'grand_total' => array_fill(1, 12, 0) + ['total' => 0]
+                'data' => $data,
+                'grand_total' => $grandTotal + ['total' => 0]
             ];
         }
 
@@ -853,17 +932,13 @@ class LaporanDataService
 
         $results = $query->get();
 
-        // Process results into structured format
-        $data = [];
-        $grandTotal = array_fill(1, 12, 0);
-        $grandTotalSum = 0;
-
+        // Process results and merge with initialized data
         foreach ($results as $row) {
             $key = $row->group_key;
             $bulan = (int) $row->bulan;
             $volume = (float) $row->total_volume;
 
-            // Initialize group if not exists
+            // Initialize group if not exists (for jenis_olahan grouping)
             if (!isset($data[$key])) {
                 $data[$key] = [
                     'nama' => $row->group_name ?? 'N/A',
@@ -892,6 +967,88 @@ class LaporanDataService
             'data' => $data,
             'grand_total' => $grandTotal
         ];
+    }
+
+    /**
+     * Get all kabupaten/kota in Jawa Tengah
+     * Fetches from API with caching, falls back to hardcoded list if API fails
+     * Source: https://www.emsifa.com/api-wilayah-indonesia/api/regencies/33.json
+     * 
+     * @return array
+     */
+    private function getAllJawaTengahKabupaten()
+    {
+        $cacheKey = 'jateng_kabupaten_list';
+
+        // Try to get from cache (24 hours)
+        $cached = \Cache::get($cacheKey);
+        if ($cached) {
+            return $cached;
+        }
+
+        // Fetch from API
+        try {
+            $response = \Http::timeout(5)->get('https://www.emsifa.com/api-wilayah-indonesia/api/regencies/33.json');
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $kabupatenList = array_map(function ($item) {
+                    return strtoupper($item['name']);
+                }, $data);
+
+                // Cache for 24 hours
+                \Cache::put($cacheKey, $kabupatenList, now()->addHours(24));
+
+                return $kabupatenList;
+            }
+        } catch (\Exception $e) {
+            // Log error and use fallback
+            \Log::warning('Failed to fetch kabupaten from API: ' . $e->getMessage());
+        }
+
+        // Fallback: hardcoded list (in case API is down)
+        $fallbackList = [
+            'KABUPATEN CILACAP',
+            'KABUPATEN BANYUMAS',
+            'KABUPATEN PURBALINGGA',
+            'KABUPATEN BANJARNEGARA',
+            'KABUPATEN KEBUMEN',
+            'KABUPATEN PURWOREJO',
+            'KABUPATEN WONOSOBO',
+            'KABUPATEN MAGELANG',
+            'KABUPATEN BOYOLALI',
+            'KABUPATEN KLATEN',
+            'KABUPATEN SUKOHARJO',
+            'KABUPATEN WONOGIRI',
+            'KABUPATEN KARANGANYAR',
+            'KABUPATEN SRAGEN',
+            'KABUPATEN GROBOGAN',
+            'KABUPATEN BLORA',
+            'KABUPATEN REMBANG',
+            'KABUPATEN PATI',
+            'KABUPATEN KUDUS',
+            'KABUPATEN JEPARA',
+            'KABUPATEN DEMAK',
+            'KABUPATEN SEMARANG',
+            'KABUPATEN TEMANGGUNG',
+            'KABUPATEN KENDAL',
+            'KABUPATEN BATANG',
+            'KABUPATEN PEKALONGAN',
+            'KABUPATEN PEMALANG',
+            'KABUPATEN TEGAL',
+            'KABUPATEN BREBES',
+            'KOTA MAGELANG',
+            'KOTA SURAKARTA',
+            'KOTA SALATIGA',
+            'KOTA SEMARANG',
+            'KOTA PEKALONGAN',
+            'KOTA TEGAL',
+        ];
+
+        // Cache fallback too (shorter duration - 1 hour)
+        \Cache::put($cacheKey, $fallbackList, now()->addHour());
+
+        return $fallbackList;
     }
 
     /**

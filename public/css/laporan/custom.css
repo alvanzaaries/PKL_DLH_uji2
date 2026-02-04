@@ -76,8 +76,45 @@
 
 /* Variation for detail page */
 .page-container .filter-ribbon {
-    padding: 1rem 0;
+    padding: 1rem 1.5rem; /* Added horizontal padding */
     margin-bottom: 1.5rem;
+    background-color: #F9FAFB;
+    border-radius: 4px;
+}
+
+/* Category Tabs */
+.category-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #E5E7EB;
+    padding-bottom: 0;
+}
+
+.category-tabs .tab-item {
+    padding: 0.75rem 1.25rem;
+    border: none;
+    background: transparent;
+    color: #6B7280;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.category-tabs .tab-item:hover {
+    color: #10B981;
+    background: #F9FAFB;
+}
+
+.category-tabs .tab-item.active {
+    color: #10B981;
+    border-bottom-color: #10B981;
 }
 
 .filter-group {

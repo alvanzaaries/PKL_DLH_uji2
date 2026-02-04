@@ -103,7 +103,7 @@ class LaporanValidationService
 
         // Process each row of manual data
         foreach ($manualData as $rowIndex => $rowData) {
-            $rowNumber = $rowIndex; // Use the row index from manual input
+            $rowNumber = $rowIndex + 1; // Use 1-based row numbering for user-friendly messages
             $rowErrors = [];
             $cells = [];
 

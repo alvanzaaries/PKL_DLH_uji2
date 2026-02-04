@@ -44,7 +44,7 @@
         // GroupBy labels and default
         $groupBy = $groupBy ?? 'kabupaten';
         $groupByLabels = [
-            'asal_kayu' => 'Asal Kayu',
+            'asal_kayu' => $kategori === 'produksi_kayu_olahan' ? 'Asal Industri' : 'Asal Kayu',
             'jenis_kayu' => 'Jenis Kayu',
             'jenis_olahan' => 'Jenis Olahan',
             'tujuan_kirim' => 'Tujuan Kirim',
@@ -87,12 +87,9 @@
             <form id="main-filter-form" method="GET" action="{{ route('laporan.rekap') }}" style="display: contents;">
                 <input type="hidden" name="kategori" value="{{ $kategori }}">
 
-                <!-- Bulan filter removed as per new requirement -->
-
-
                 <div class="filter-group">
-                    <label class="filter-label" style="margin-left: 1rem;" for="tahun">Tahun</label>
-                    <select name="tahun" id="tahun" class="filter-input" style="min-width: 120px; margin-left: 1rem;">
+                    <label class="filter-label" for="tahun">Tahun</label>
+                    <select name="tahun" id="tahun" class="filter-input" style="min-width: 120px;">
                         <option value="" {{ !$tahun ? 'selected' : '' }} disabled>Pilih Tahun</option>
                         @php
                             $currentYear = date('Y');
@@ -136,6 +133,12 @@
                         </a>
                     </div>
                 </div>
+                <div class="filter-actions" style="margin-left: auto;">
+                    <a href="{{ route('laporan.rekap.export', ['tahun' => $tahun, 'kategori' => $kategori, 'groupBy' => $groupBy]) }}" 
+                       class="btn btn-export">
+                        <i class="fas fa-file-excel"></i> Export
+                    </a>
+                </div>
             </div>
         @endif
 
@@ -147,13 +150,19 @@
                     <div style="display: flex; gap: 0.5rem;">
                         <a href="{{ route('laporan.rekap', ['kategori' => $kategori, 'tahun' => $tahun, 'groupBy' => 'asal_kayu']) }}"
                             class="btn {{ $groupBy === 'asal_kayu' ? 'btn-primary' : 'btn-secondary' }}">
-                            <i class="fas fa-map-marker-alt"></i> Asal Kayu
+                            <i class="fas fa-city"></i> Asal Industri
                         </a>
                         <a href="{{ route('laporan.rekap', ['kategori' => $kategori, 'tahun' => $tahun, 'groupBy' => 'jenis_olahan']) }}"
                             class="btn {{ $groupBy === 'jenis_olahan' ? 'btn-primary' : 'btn-secondary' }}">
                             <i class="fas fa-industry"></i> Jenis Olahan
                         </a>
                     </div>
+                </div>
+                <div class="filter-actions" style="margin-left: auto;">
+                    <a href="{{ route('laporan.rekap.export', ['tahun' => $tahun, 'kategori' => $kategori, 'groupBy' => $groupBy]) }}" 
+                       class="btn btn-export">
+                        <i class="fas fa-file-excel"></i> Export
+                    </a>
                 </div>
             </div>
         @endif
@@ -196,8 +205,16 @@
                         </a>
                     </div>
                 </div>
+                <div class="filter-actions" style="margin-left: auto;">
+                    <a href="{{ route('laporan.rekap.export', ['tahun' => $tahun, 'kategori' => $kategori, 'groupBy' => $groupBy, 'eksporLokal' => $eksporLokal]) }}" 
+                       class="btn btn-export">
+                        <i class="fas fa-file-excel"></i> Export
+                    </a>
+                </div>
             </div>
         @endif
+
+
 
         <!-- Content Area -->
         <div class="table-container">
@@ -207,6 +224,22 @@
                 @endphp
 
                 @if ($hasData)
+                    {{-- Universal Search Box for all groupBy options --}}
+                    <div class="filter-ribbon no-print" style="margin-bottom: 1rem;">
+                        <div class="filter-group">
+                            <label class="filter-label" for="dataSearch">
+                                <i class="fas fa-search" style="margin-right: 0.5rem;"></i>Cari {{ $groupByLabel }}
+                            </label>
+                            <input type="text" id="dataSearch" class="filter-input" placeholder="Ketik untuk mencari..."
+                                style="min-width: 300px; margin-left: 1rem;">
+                        </div>
+                        <div class="filter-actions" style="margin-left: auto;">
+                            <button type="button" id="clearSearch" class="btn btn-secondary" style="display: none;">
+                                <i class="fas fa-times"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Data Table -->
                     <div class="table-container">
                         <table class="ledger-table">
@@ -312,13 +345,13 @@
                 toast.className = 'toast toast-' + (variant === 'warning' ? 'warning' : variant);
                 toast.setAttribute('role', 'alert');
                 toast.innerHTML = `
-                                                                                                                                <div class="toast-icon ${variant === 'warning' ? 'warning' : ''}">!</div>
-                                                                                                                                <div class="toast-content">
-                                                                                                                                    <div class="toast-title">${title}</div>
-                                                                                                                                    <div class="toast-message">${message}</div>
-                                                                                                                                </div>
-                                                                                                                                <button class="toast-close" aria-label="Close">&times;</button>
-                                                                                                                            `;
+                                                                                                                                                        <div class="toast-icon ${variant === 'warning' ? 'warning' : ''}">!</div>
+                                                                                                                                                        <div class="toast-content">
+                                                                                                                                                            <div class="toast-title">${title}</div>
+                                                                                                                                                            <div class="toast-message">${message}</div>
+                                                                                                                                                        </div>
+                                                                                                                                                        <button class="toast-close" aria-label="Close">&times;</button>
+                                                                                                                                                    `;
                 toastContainer.appendChild(toast);
 
                 const closeBtn = toast.querySelector('.toast-close');
@@ -340,6 +373,42 @@
                         if (firstMissing) firstMissing.focus();
                     }
                 });
+            }
+
+            // Universal data search functionality
+            const searchInput = document.getElementById('dataSearch');
+            const clearBtn = document.getElementById('clearSearch');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    const searchTerm = this.value.toLowerCase().trim();
+                    const tableRows = document.querySelectorAll('.ledger-table tbody tr');
+
+                    // Show/hide clear button
+                    clearBtn.style.display = searchTerm ? 'inline-block' : 'none';
+
+                    // Filter rows
+                    tableRows.forEach(row => {
+                        const firstCell = row.querySelector('td:first-child');
+                        if (firstCell) {
+                            const cellText = firstCell.textContent.toLowerCase();
+                            if (cellText.includes(searchTerm)) {
+                                row.style.display = '';
+                            } else {
+                                row.style.display = 'none';
+                            }
+                        }
+                    });
+                });
+
+                // Clear search
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', function () {
+                        searchInput.value = '';
+                        searchInput.dispatchEvent(new Event('input'));
+                        searchInput.focus();
+                    });
+                }
             }
         });
     </script>
