@@ -8,6 +8,7 @@ use App\Models\MasterSumber;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use App\Exports\TptkbExport;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -64,7 +65,7 @@ class TptkbController extends Controller implements HasMiddleware
 
         if ($request->filled('kabupaten')) {
             $query->whereHas('industri', function($q) use ($request) {
-                $q->where('kabupaten', $request->kabupaten);
+                $q->whereRaw('LOWER(kabupaten) = LOWER(?)', [$request->kabupaten]);
             });
         }
 
@@ -220,6 +221,88 @@ class TptkbController extends Controller implements HasMiddleware
             'locationStats', 
             'capacityStats'
         ));
+    }
+
+    /**
+     * Export data TPTKB ke Excel dengan filter
+     */
+    public function export(Request $request)
+    {
+        $query = Tptkb::with(['industri', 'sumberBahanBaku']);
+
+        if ($request->filled('nama')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->where('nama', 'like', '%' . $request->nama . '%');
+            });
+        }
+
+        if ($request->filled('kabupaten')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereRaw('LOWER(kabupaten) = LOWER(?)', [$request->kabupaten]);
+            });
+        }
+
+        if ($request->filled('sumber_bahan_baku')) {
+            $query->whereHas('sumberBahanBaku', function($q) use ($request) {
+                $q->where('master_sumber.id', $request->sumber_bahan_baku);
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->where('status', $request->status);
+            });
+        }
+
+        if ($request->filled('tahun')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereYear('tanggal', $request->tahun);
+            });
+        }
+        
+        if ($request->filled('bulan')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereMonth('tanggal', $request->bulan);
+            });
+        }
+
+        $kapasitasFilter = $request->filled('kapasitas') ? $request->kapasitas : null;
+        
+        if ($kapasitasFilter) {
+            $allFiltered = $query->latest()->get();
+            
+            $data = $allFiltered->filter(function($item) use ($kapasitasFilter) {
+                foreach ($item->sumberBahanBaku as $sumber) {
+                    $numericValue = $sumber->pivot->kapasitas_izin ?? 0;
+                    
+                    $matches_range = false;
+                    switch ($kapasitasFilter) {
+                        case '0-1999':
+                            $matches_range = $numericValue >= 0 && $numericValue <= 1999;
+                            break;
+                        case '2000-5999':
+                            $matches_range = $numericValue >= 2000 && $numericValue <= 5999;
+                            break;
+                        case '6000+':
+                            $matches_range = $numericValue >= 6000;
+                            break;
+                    }
+                    
+                    if ($matches_range) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        } else {
+            $data = $query->latest()->get();
+        }
+
+        $filters = $request->only(['nama', 'kabupaten', 'sumber_bahan_baku', 'status', 'tahun', 'bulan', 'kapasitas']);
+        $export = new TptkbExport($data, $filters);
+        $result = $export->export();
+
+        return response()->download($result['file'], $result['filename'])->deleteFileAfterSend(true);
     }
 
     public function create()

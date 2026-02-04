@@ -19,6 +19,8 @@ class IndustriSekunder extends Model
         'industri_id',
         'pemberi_izin',
         'kapasitas_izin',
+        'total_nilai_investasi',
+        'total_pegawai'
     ];
 
     /**

@@ -705,6 +705,9 @@
             @auth
             @if(auth()->user()->role === 'admin')
             <div style="display: flex; gap: 12px;">
+                <button onclick="exportToExcel()" class="btn btn-primary" style="background: #16a34a;">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
                 <button onclick="openImportModal()" class="btn btn-primary" style="background: #0ea5e9;">
                     <i class="fas fa-file-excel"></i> Import Excel
                 </button>            
@@ -1606,10 +1609,34 @@
             html += `</div>`;
             contentDiv.innerHTML = html;
             resultDiv.style.display = 'block';
+            
+            // Update button based on import result
+            const btnImport = document.getElementById('btnImport');
+            if (data.errors_count === 0 && data.success > 0) {
+                // Semua berhasil - ubah jadi tombol "Lihat Data"
+                btnImport.innerHTML = '<i class="fas fa-table"></i> Lihat Data';
+                btnImport.onclick = function() {
+                    window.location.reload();
+                };
+            } else {
+                // Masih ada error - tetap "Upload & Import"
+                btnImport.innerHTML = '<i class="fas fa-upload"></i> Upload & Import';
+                btnImport.onclick = function() {
+                    processImport();
+                };
+            }
         }
 
         function displayImportErrors(errors) {
             displayImportResult({ total: 0, success: 0, errors_count: errors.length, errors: errors });
+        }
+
+        function exportToExcel() {
+            const form = document.querySelector('form[action="{{ route('tptkb.index') }}"]');
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            
+            window.location.href = '{{ route("tptkb.export") }}?' + params.toString();
         }
     </script>
 

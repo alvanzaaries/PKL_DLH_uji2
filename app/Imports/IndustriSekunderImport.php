@@ -41,7 +41,7 @@ class IndustriSekunderImport
             // Validasi header
             $expectedHeaders = [
                 'Nama Perusahaan', 'Alamat', 'Kabupaten/Kota', 'Latitude', 'Longitude',
-                'Penanggung Jawab', 'Kontak', 'Nomor SK/NIB/SS', 'Tanggal SK',
+                'Penanggung Jawab', 'Kontak', 'Nomor SK/NIB/SS', 'Tanggal SK','Total Nilai Investasi','Total Pegawai',
                 'Pemberi Izin', 'Jenis Produksi', 'Kapasitas Izin (m³/tahun)', 'Status'
             ];
 
@@ -135,8 +135,10 @@ class IndustriSekunderImport
             'kontak' => $firstRow[6] ?? null,
             'nomor_izin' => $firstRow[7] ?? null,
             'tanggal' => $firstRow[8] ?? null,
-            'pemberi_izin' => $firstRow[9] ?? null,
-            'status' => $firstRow[12] ?? 'Aktif',
+            'total_nilai_investasi' => is_numeric($firstRow[9] ?? null) ? intval($firstRow[9]) : null,
+            'total_pegawai' => is_numeric($firstRow[10] ?? null) ? intval($firstRow[10]) : null,
+            'pemberi_izin' => $firstRow[11] ?? null,
+            'status' => $firstRow[14] ?? 'Aktif',
         ];
 
         // Validate company data consistency across all rows
@@ -151,7 +153,7 @@ class IndustriSekunderImport
             if (KabupatenHelper::normalize(trim($row[2] ?? '')) !== trim($companyData['kabupaten'])) $inconsistencies[] = 'Kabupaten';
             if (trim($row[5] ?? '') !== trim($companyData['penanggungjawab'])) $inconsistencies[] = 'Penanggung Jawab';
             if (trim($row[6] ?? '') !== trim($companyData['kontak'])) $inconsistencies[] = 'Kontak';
-            if (trim($row[9] ?? '') !== trim($companyData['pemberi_izin'])) $inconsistencies[] = 'Pemberi Izin';
+            if (trim($row[11] ?? '') !== trim($companyData['pemberi_izin'])) $inconsistencies[] = 'Pemberi Izin';
             
             if (!empty($inconsistencies)) {
                 throw new \Exception("Baris $rowNumber: Data tidak konsisten dengan baris lain untuk Nomor Izin yang sama (" . implode(', ', $inconsistencies) . ")");
@@ -205,6 +207,8 @@ class IndustriSekunderImport
                 $industriSekunder = $industri->industriSekunder;
                 $industriSekunder->update([
                     'pemberi_izin' => $companyData['pemberi_izin'],
+                    'total_nilai_investasi' => $companyData['total_nilai_investasi'],
+                    'total_pegawai' => $companyData['total_pegawai'],
                 ]);
                 
                 // Clear existing jenis produksi
@@ -229,6 +233,8 @@ class IndustriSekunderImport
                     'industri_id' => $industri->id,
                     'pemberi_izin' => $companyData['pemberi_izin'],
                     'kapasitas_izin' => 0, // Will be sum of all production types
+                    'total_nilai_investasi' => $companyData['total_nilai_investasi'],
+                    'total_pegawai' => $companyData['total_pegawai'],
                 ]);
             }
 
@@ -238,8 +244,8 @@ class IndustriSekunderImport
                 $row = $companyRow['row'];
                 $rowNumber = $companyRow['rowNumber'];
                 
-                $jenisProduksi = trim($row[10] ?? '');
-                $kapasitasIzin = $row[11] ?? null;
+                $jenisProduksi = trim($row[12] ?? '');
+                $kapasitasIzin = $row[13] ?? null;
                 
                 // Validate production type data
                 if (empty($jenisProduksi)) {

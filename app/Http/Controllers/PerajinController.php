@@ -7,6 +7,7 @@ use App\Models\IndustriBase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use App\Exports\PerajinExport;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -35,7 +36,7 @@ class PerajinController extends Controller implements HasMiddleware
 
         // Filter jenis kerajinan
         if ($request->filled('jenis_kerajinan')) {
-            $query->where('jenis_kerajinan', $request->jenis_kerajinan);
+            $query->whereRaw('LOWER(jenis_kerajinan) = LOWER(?)', [$request->jenis_kerajinan]);
         }
 
         // Filter berdasarkan status
@@ -102,6 +103,52 @@ class PerajinController extends Controller implements HasMiddleware
         });
 
         return view('Industri.perajin.index', compact('perajin', 'kabupatenList', 'yearStats', 'locationStats'));
+    }
+
+    /**
+     * Export data perajin ke Excel dengan filter
+     */
+    public function export(Request $request)
+    {
+        $query = Perajin::with('industri');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('industri', function($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('nomor_izin', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('jenis_kerajinan')) {
+            $query->whereRaw('LOWER(jenis_kerajinan) = LOWER(?)', [$request->jenis_kerajinan]);
+        }
+
+        if ($request->filled('status')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->where('status', $request->status);
+            });
+        }
+
+        if ($request->filled('tahun')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereYear('tanggal', $request->tahun);
+            });
+        }
+        
+        if ($request->filled('bulan')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereMonth('tanggal', $request->bulan);
+            });
+        }
+
+        $data = $query->latest()->get();
+
+        $filters = $request->only(['search', 'jenis_kerajinan', 'status', 'tahun', 'bulan']);
+        $export = new PerajinExport($data, $filters);
+        $result = $export->export();
+
+        return response()->download($result['file'], $result['filename'])->deleteFileAfterSend(true);
     }
 
     public function create()

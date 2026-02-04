@@ -386,6 +386,22 @@
                 </div>
             </div>
 
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Total Nilai Investasi</label>
+                    <input type="number" name="total_nilai_investasi" class="form-input" placeholder="Masukkan total nilai investasi (Rp)" value="{{ old('total_nilai_investasi', $industriPrimer->total_nilai_investasi) }}" min="0">
+                    <div class="file-info">Opsional - Masukkan dalam rupiah</div>
+                    @error('total_nilai_investasi')<div class="error-message">{{ $message }}</div>@enderror
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Total Pegawai</label>
+                    <input type="number" name="total_pegawai" class="form-input" placeholder="Jumlah pegawai" value="{{ old('total_pegawai', $industriPrimer->total_pegawai) }}" min="0">
+                    <div class="file-info">Opsional - Jumlah pegawai/karyawan</div>
+                    @error('total_pegawai')<div class="error-message">{{ $message }}</div>@enderror
+                </div>
+            </div>
+
             <div class="form-group">
                 <label class="form-label">Jenis Produksi & Kapasitas <span class="required">*</span></label>
                 <div class="jenis-produksi-container">
@@ -563,25 +579,27 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        // Load kabupaten
+        // Load kabupaten dari data yang sudah dikirim controller
         const kabupatenSelect = document.getElementById('kabupatenSelect');
         const loadingInfo = kabupatenSelect.nextElementSibling;
         const currentKabupaten = "{{ $industriPrimer->industri->kabupaten }}";
+        const kabupatenList = @json($kabupatenList ?? []);
         
-        fetch('https://www.emsifa.com/api-wilayah-indonesia/api/regencies/33.json')
-            .then(response => response.json())
-            .then(data => {
-                loadingInfo.textContent = 'Pilih kabupaten/kota di Jawa Tengah';
-                data.sort((a, b) => a.name.localeCompare(b.name));
-                data.forEach(kabupaten => {
-                    const option = document.createElement('option');
-                    option.value = kabupaten.name;
-                    option.textContent = kabupaten.name;
-                    if (kabupaten.name === currentKabupaten) {
-                        option.selected = true;
-                    }
-                    kabupatenSelect.appendChild(option);
-                });
+        if (kabupatenList.length > 0) {
+            loadingInfo.textContent = 'Pilih kabupaten/kota di Jawa Tengah';
+            kabupatenList.forEach(kabupaten => {
+                const option = document.createElement('option');
+                option.value = kabupaten;
+                option.textContent = kabupaten;
+                if (kabupaten === currentKabupaten) {
+                    option.selected = true;
+                }
+                kabupatenSelect.appendChild(option);
+            });
+        } else {
+            loadingInfo.textContent = 'Data wilayah tidak tersedia';
+            loadingInfo.style.color = '#dc2626';
+        }
             })
             .catch(() => {
                 loadingInfo.textContent = 'Gagal memuat data wilayah';

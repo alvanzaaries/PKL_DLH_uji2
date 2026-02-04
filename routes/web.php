@@ -132,6 +132,7 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
     Route::get('/primer/create', [IndustriPrimerController::class, 'create'])->name('industri-primer.create');
     Route::post('/primer', [IndustriPrimerController::class, 'store'])->name('industri-primer.store');
     Route::post('/primer/import', [IndustriPrimerController::class, 'import'])->name('industri-primer.import');
+    Route::get('/primer/export', [IndustriPrimerController::class, 'export'])->name('industri-primer.export');
     Route::get('/primer/{id}/edit', [IndustriPrimerController::class, 'edit'])->name('industri-primer.edit');
     Route::put('/primer/{id}', [IndustriPrimerController::class, 'update'])->name('industri-primer.update');
     Route::delete('/primer/{id}', [IndustriPrimerController::class, 'destroy'])->name('industri-primer.destroy');
@@ -142,6 +143,7 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
     Route::get('/sekunder/create', [IndustriSekunderController::class, 'create'])->name('industri-sekunder.create');
     Route::post('/sekunder', [IndustriSekunderController::class, 'store'])->name('industri-sekunder.store');
     Route::post('/sekunder/import', [IndustriSekunderController::class, 'import'])->name('industri-sekunder.import');
+    Route::get('/sekunder/export', [IndustriSekunderController::class, 'export'])->name('industri-sekunder.export');
     Route::get('/sekunder/{id}/edit', [IndustriSekunderController::class, 'edit'])->name('industri-sekunder.edit');
     Route::put('/sekunder/{id}', [IndustriSekunderController::class, 'update'])->name('industri-sekunder.update');
     Route::delete('/sekunder/{id}', [IndustriSekunderController::class, 'destroy'])->name('industri-sekunder.destroy');
@@ -150,6 +152,7 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
     Route::get('/tptkb/create', [TptkbController::class, 'create'])->name('tptkb.create');
     Route::post('/tptkb', [TptkbController::class, 'store'])->name('tptkb.store');
     Route::post('/tptkb/import', [TptkbController::class, 'import'])->name('tptkb.import');
+    Route::get('/tptkb/export', [TptkbController::class, 'export'])->name('tptkb.export');
     Route::get('/tptkb/{id}/edit', [TptkbController::class, 'edit'])->name('tptkb.edit');
     Route::put('/tptkb/{id}', [TptkbController::class, 'update'])->name('tptkb.update');
     Route::delete('/tptkb/{id}', [TptkbController::class, 'destroy'])->name('tptkb.destroy');
@@ -158,6 +161,7 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
     Route::get('/perajin/create', [PerajinController::class, 'create'])->name('perajin.create');
     Route::post('/perajin', [PerajinController::class, 'store'])->name('perajin.store');
     Route::post('/perajin/import', [PerajinController::class, 'import'])->name('perajin.import');
+    Route::get('/perajin/export', [PerajinController::class, 'export'])->name('perajin.export');
     Route::get('/perajin/{perajin}/edit', [PerajinController::class, 'edit'])->name('perajin.edit');
     Route::put('/perajin/{perajin}', [PerajinController::class, 'update'])->name('perajin.update');
     Route::delete('/perajin/{perajin}', [PerajinController::class, 'destroy'])->name('perajin.destroy');

@@ -786,6 +786,9 @@
             @auth
             @if(auth()->user()->role === 'admin')
             <div style="display: flex; gap: 12px;">
+                <button onclick="exportToExcel()" class="btn btn-primary" style="background: #16a34a;">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
                 <button onclick="openImportModal()" class="btn btn-primary" style="background: #0ea5e9;">
                     <i class="fas fa-file-excel"></i> Import Excel
                 </button>
@@ -1066,6 +1069,14 @@
                         <td class="detail-label-col">Kontak</td>
                         <td class="detail-value-col" id="modal-kontak">-</td>
                     </tr>
+                    <tr>
+                        <td class="detail-label-col">Total Nilai Investasi</td>
+                        <td class="detail-value-col" id="modal-investasi">-</td>
+                    </tr>
+                    <tr>
+                        <td class="detail-label-col">Total Pegawai</td>
+                        <td class="detail-value-col" id="modal-pegawai">-</td>
+                    </tr>
                 </table>
 
                 <div class="detail-section-title">Detail Izin & Produksi</div>
@@ -1130,6 +1141,20 @@
             document.getElementById('modal-penanggungjawab').textContent = item.industri.penanggungjawab;
             document.getElementById('modal-kontak').textContent = item.industri.kontak;
             document.getElementById('modal-pemberi-izin').textContent = item.pemberi_izin;
+            
+            // Total Nilai Investasi
+            if (item.total_nilai_investasi) {
+                document.getElementById('modal-investasi').textContent = 'Rp ' + parseInt(item.total_nilai_investasi).toLocaleString('id-ID');
+            } else {
+                document.getElementById('modal-investasi').textContent = '-';
+            }
+            
+            // Total Pegawai
+            if (item.total_pegawai) {
+                document.getElementById('modal-pegawai').textContent = parseInt(item.total_pegawai).toLocaleString('id-ID') + ' orang';
+            } else {
+                document.getElementById('modal-pegawai').textContent = '-';
+            }
             
             // Format jenis produksi dengan kapasitas masing-masing
             if (item.jenis_produksi && item.jenis_produksi.length > 0) {
@@ -1672,10 +1697,34 @@
             html += `</div>`;
             contentDiv.innerHTML = html;
             resultDiv.style.display = 'block';
+            
+            // Update button based on import result
+            const btnImport = document.getElementById('btnImport');
+            if (data.errors_count === 0 && data.success > 0) {
+                // Semua berhasil - ubah jadi tombol "Lihat Data"
+                btnImport.innerHTML = '<i class="fas fa-table"></i> Lihat Data';
+                btnImport.onclick = function() {
+                    window.location.reload();
+                };
+            } else {
+                // Masih ada error - tetap "Upload & Import"
+                btnImport.innerHTML = '<i class="fas fa-upload"></i> Upload & Import';
+                btnImport.onclick = function() {
+                    processImport();
+                };
+            }
         }
 
         function displayImportErrors(errors) {
             displayImportResult({ total: 0, success: 0, errors_count: errors.length, errors: errors });
+        }
+
+        function exportToExcel() {
+            const form = document.querySelector('form[action="{{ route('industri-sekunder.index') }}"]');
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            
+            window.location.href = '{{ route("industri-sekunder.export") }}?' + params.toString();
         }
     </script>
 

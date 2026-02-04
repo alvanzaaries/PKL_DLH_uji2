@@ -20,7 +20,9 @@ class IndustriPrimer extends Model
         'pemberi_izin',
         'kapasitas_izin',
         'pelaporan',
-        'dokumen_izin'
+        'dokumen_izin',
+        'total_nilai_investasi',
+        'total_pegawai'
     ];
 
     /**

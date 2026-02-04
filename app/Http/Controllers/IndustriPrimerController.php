@@ -6,8 +6,7 @@ use App\Models\IndustriPrimer;
 use App\Models\MasterJenisProduksi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;use App\Exports\IndustriPrimerExport;use Illuminate\Support\Facades\Cache;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 
@@ -31,8 +30,10 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             ->kategori('primer')
             ->orderBy('nama')
             ->get();
+        
+        $kabupatenList = \App\Helpers\KabupatenHelper::getValidNames();
             
-        return view('Industri.industri-primer.create', compact('masterJenisProduksi'));
+        return view('Industri.industri-primer.create', compact('masterJenisProduksi', 'kabupatenList'));
     }
 
     /**
@@ -133,7 +134,7 @@ class IndustriPrimerController extends Controller implements HasMiddleware
         // Filter berdasarkan kabupaten (dari tabel industries)
         if ($request->filled('kabupaten')) {
             $query->whereHas('industri', function($q) use ($request) {
-                $q->where('kabupaten', $request->kabupaten);
+                $q->whereRaw('LOWER(kabupaten) = LOWER(?)', [$request->kabupaten]);
             });
         }
 
@@ -161,14 +162,14 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             } else {
                 // Filter by specific custom name
                 $query->whereHas('jenisProduksi', function($q) use ($filterValue) {
-                    $q->where('industri_jenis_produksi.nama_custom', $filterValue);
+                    $q->whereRaw('LOWER(industri_jenis_produksi.nama_custom) = LOWER(?)', [$filterValue]);
                 });
             }
         }
 
         // Filter berdasarkan pemberi izin
         if ($request->filled('pemberi_izin')) {
-            $query->where('pemberi_izin', $request->pemberi_izin);
+            $query->whereRaw('LOWER(pemberi_izin) = LOWER(?)', [$request->pemberi_izin]);
         }
 
         // Filter berdasarkan status
@@ -344,6 +345,116 @@ class IndustriPrimerController extends Controller implements HasMiddleware
     }
 
     /**
+     * Export data industri primer ke Excel dengan filter
+     */
+    public function export(Request $request)
+    {
+        // Gunakan query yang sama dengan index untuk respect filter
+        $query = IndustriPrimer::with(['industri', 'jenisProduksi']);
+
+        // Filter berdasarkan nama (dari tabel industries)
+        if ($request->filled('nama')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->where('nama', 'like', '%' . $request->nama . '%');
+            });
+        }
+
+        // Filter berdasarkan kabupaten (dari tabel industries)
+        if ($request->filled('kabupaten')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereRaw('LOWER(kabupaten) = LOWER(?)', [$request->kabupaten]);
+            });
+        }
+
+        // Filter berdasarkan jenis produksi
+        if ($request->filled('jenis_produksi')) {
+            $filterValue = $request->jenis_produksi;
+            
+            if (is_numeric($filterValue)) {
+                $lainnyaRecord = MasterJenisProduksi::find($filterValue);
+                
+                if ($lainnyaRecord && $lainnyaRecord->nama === 'Lainnya') {
+                    $query->whereHas('jenisProduksi', function($q) {
+                        $q->whereNotNull('industri_jenis_produksi.nama_custom');
+                    });
+                } else {
+                    $query->whereHas('jenisProduksi', function($q) use ($filterValue) {
+                        $q->where('master_jenis_produksi.id', $filterValue);
+                    });
+                }
+            } else {
+                $query->whereHas('jenisProduksi', function($q) use ($filterValue) {
+                    $q->whereRaw('LOWER(industri_jenis_produksi.nama_custom) = LOWER(?)', [$filterValue]);
+                });
+            }
+        }
+
+        // Filter berdasarkan pemberi izin
+        if ($request->filled('pemberi_izin')) {
+            $query->whereRaw('LOWER(pemberi_izin) = LOWER(?)', [$request->pemberi_izin]);
+        }
+
+        // Filter berdasarkan status
+        if ($request->filled('status')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->where('status', $request->status);
+            });
+        }
+
+        // Filter berdasarkan tahun dan bulan
+        if ($request->filled('tahun')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereYear('tanggal', $request->tahun);
+            });
+        }
+        
+        if ($request->filled('bulan')) {
+            $query->whereHas('industri', function($q) use ($request) {
+                $q->whereMonth('tanggal', $request->bulan);
+            });
+        }
+
+        // Filter kapasitas - harus di-handle di collection level
+        $kapasitasFilter = $request->filled('kapasitas') ? $request->kapasitas : null;
+        
+        if ($kapasitasFilter) {
+            $allFiltered = $query->latest()->get();
+            
+            $data = $allFiltered->filter(function($item) use ($kapasitasFilter) {
+                foreach ($item->jenisProduksi as $jp) {
+                    $numericValue = $jp->pivot->kapasitas_izin ?? 0;
+                    
+                    $matches_range = false;
+                    switch ($kapasitasFilter) {
+                        case '0-1999':
+                            $matches_range = $numericValue >= 0 && $numericValue <= 1999;
+                            break;
+                        case '2000-5999':
+                            $matches_range = $numericValue >= 2000 && $numericValue <= 5999;
+                            break;
+                        case '6000+':
+                            $matches_range = $numericValue >= 6000;
+                            break;
+                    }
+                    
+                    if ($matches_range) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+        } else {
+            $data = $query->latest()->get();
+        }
+
+        $filters = $request->only(['nama', 'kabupaten', 'jenis_produksi', 'pemberi_izin', 'status', 'tahun', 'bulan', 'kapasitas']);
+        $export = new IndustriPrimerExport($data, $filters);
+        $result = $export->export();
+
+        return response()->download($result['file'], $result['filename'])->deleteFileAfterSend(true);
+    }
+
+    /**
      * Tampilkan form edit industri primer
      */
     public function edit($id)
@@ -355,7 +466,9 @@ class IndustriPrimerController extends Controller implements HasMiddleware
             ->orderBy('nama')
             ->get();
         
-        return view('Industri.industri-primer.edit', compact('industriPrimer', 'masterJenisProduksi'));
+        $kabupatenList = \App\Helpers\KabupatenHelper::getValidNames();
+        
+        return view('Industri.industri-primer.edit', compact('industriPrimer', 'masterJenisProduksi', 'kabupatenList'));
     }
 
     /**
