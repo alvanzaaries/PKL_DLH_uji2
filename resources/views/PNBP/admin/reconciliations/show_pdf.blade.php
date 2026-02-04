@@ -67,7 +67,7 @@
         <thead>
             <tr>
                 <th>HASIL HUTAN</th>
-                <th class="center" style="width: 10%"></th>
+                <th class="center" style="width: 10%">SATUAN</th>
                 <th class="right" style="width: 20%">TOTAL VOLUME</th>
                 <th class="right" style="width: 25%">TOTAL NILAI LHP (Rp)</th>
             </tr>
