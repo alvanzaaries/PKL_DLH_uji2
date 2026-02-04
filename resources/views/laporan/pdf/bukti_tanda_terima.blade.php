@@ -185,7 +185,7 @@
                 <tr>
                     <td>Laporan Mutasi Kayu Olahan (LMKO)</td>
                     <td class="checkbox-cell">
-                        {{ in_array('Laporan Mutasi Kayu Olahan', $jenisLaporanList) ? '√' : '' }}
+                        {{ in_array('Laporan Mutasi Kayu Olahan (LMKO)', $jenisLaporanList) ? '√' : '' }}
                     </td>
                 </tr>
                 <tr>

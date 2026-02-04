@@ -23,6 +23,43 @@
             </div>
         </div>
 
+        {{-- Alert Messages --}}
+        @if(session('success'))
+            <div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-md mb-6 shadow-sm" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
+                    <div>
+                        <p class="font-semibold">Berhasil!</p>
+                        <p class="text-sm">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-md mb-6 shadow-sm" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-circle text-red-500 text-xl mr-3"></i>
+                    <div>
+                        <p class="font-semibold">Terjadi Kesalahan!</p>
+                        <p class="text-sm">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('warning'))
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 px-6 py-4 rounded-md mb-6 shadow-sm" role="alert">
+                <div class="flex items-center">
+                    <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mr-3"></i>
+                    <div>
+                        <p class="font-semibold">Peringatan!</p>
+                        <p class="text-sm">{{ session('warning') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <div class="bg-white border border-gray-200 shadow-sm rounded-md mb-8">
             <div class="px-6 py-4 border-bottom border-gray-200 bg-gray-50 rounded-t-md">
                 <div class="flex items-center justify-between">
@@ -216,13 +253,13 @@
             'Laporan Mutasi Kayu Olahan (LMKO)': {
                 fields: [
                     { name: 'jenis_olahan', label: 'Jenis Olahan', type: 'text', placeholder: 'Contoh: Papan' },
-                    { name: 'persediaan_awal_btg', label: 'Pers. Awal (Btg)', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'persediaan_awal_btg', label: 'Pers. Awal (Kpg)', type: 'number', placeholder: '0', step: '1' },
                     { name: 'persediaan_awal_volume', label: 'Pers. Awal (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                    { name: 'penambahan_btg', label: 'Penambahan (Btg)', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'penambahan_btg', label: 'Penambahan (Kpg)', type: 'number', placeholder: '0', step: '1' },
                     { name: 'penambahan_volume', label: 'Penambahan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                    { name: 'penggunaan_pengurangan_btg', label: 'Pengurangan (Btg)', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'penggunaan_pengurangan_btg', label: 'Pengurangan (Kpg)', type: 'number', placeholder: '0', step: '1' },
                     { name: 'penggunaan_pengurangan_volume', label: 'Pengurangan (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
-                    { name: 'persediaan_akhir_btg', label: 'Pers. Akhir (Btg)', type: 'number', placeholder: '0', step: '1' },
+                    { name: 'persediaan_akhir_btg', label: 'Pers. Akhir (Kpg)', type: 'number', placeholder: '0', step: '1' },
                     { name: 'persediaan_akhir_volume', label: 'Pers. Akhir (m³)', type: 'number', placeholder: '0.00', step: '0.01' },
                     { name: 'keterangan', label: 'Keterangan', type: 'text', placeholder: 'Opsional', required: false }
                 ]
@@ -283,24 +320,24 @@
                 const minAttr = field.type === 'number' ? 'min="0"' : '';
 
                 rowHTML += `
-                                    <td class="px-3 py-2">
-                                        <input type="${field.type}" 
-                                            name="manual_data[${rowNum}][${field.name}]" 
-                                            class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-[#1A4030] focus:border-[#1A4030]" 
-                                            placeholder="${field.placeholder}" 
-                                            ${stepAttr} ${minAttr} ${isRequired}>
-                                    </td>`;
+                                        <td class="px-3 py-2">
+                                            <input type="${field.type}" 
+                                                name="manual_data[${rowNum}][${field.name}]" 
+                                                class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-[#1A4030] focus:border-[#1A4030]" 
+                                                placeholder="${field.placeholder}" 
+                                                ${stepAttr} ${minAttr} ${isRequired}>
+                                        </td>`;
             });
 
             rowHTML += `
-                                <td class="px-3 py-2 text-center">
-                                    <button type="button" onclick="removeRow(this)" 
-                                        class="text-red-600 hover:text-red-800 transition-colors" 
-                                        title="Hapus baris">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </td>
-                            </tr>`;
+                                    <td class="px-3 py-2 text-center">
+                                        <button type="button" onclick="removeRow(this)" 
+                                            class="text-red-600 hover:text-red-800 transition-colors" 
+                                            title="Hapus baris">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </td>
+                                </tr>`;
 
             return rowHTML;
         }

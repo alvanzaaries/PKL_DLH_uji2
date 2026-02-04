@@ -21,7 +21,7 @@ class UserManagementController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        return view('PNBP.admin.users_management.index', compact('users'));
+        return view('admin.users_management.index', compact('users'));
     }
 
     /**
@@ -29,7 +29,7 @@ class UserManagementController extends Controller
      */
     public function create(Request $request)
     {
-        return view('PNBP.admin.users_management.create');
+        return view('admin.users_management.create');
     }
 
     /**
@@ -41,13 +41,14 @@ class UserManagementController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'role' => ['required', 'string', 'in:user,admin'],
         ]);
 
-        // Pengguna baru selalu berperan sebagai user (role tidak diubah dari UI).
+        // Admin bisa menentukan role saat membuat user baru.
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
-            'role' => 'user',
+            'role' => $data['role'],
             'password' => Hash::make($data['password']),
         ]);
 
@@ -61,7 +62,7 @@ class UserManagementController extends Controller
      */
     public function edit(Request $request, User $user)
     {
-        return view('PNBP.admin.users_management.edit', compact('user'));
+        return view('admin.users_management.edit', compact('user'));
     }
 
     /**
@@ -73,11 +74,13 @@ class UserManagementController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'password' => ['nullable', 'string', 'min:6', 'confirmed'],
+            'role' => ['required', 'string', 'in:user,admin'],
         ]);
 
-        // Role tidak bisa diubah via UI; pertahankan role saat ini.
+        // Admin bisa mengubah role user (termasuk menjadikan admin).
         $user->name = $data['name'];
         $user->email = $data['email'];
+        $user->role = $data['role'];
 
         if (!empty($data['password'])) {
             $user->password = Hash::make($data['password']);
