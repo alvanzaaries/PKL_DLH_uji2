@@ -91,14 +91,6 @@ Route::prefix('pnbp')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
         Route::get('/dashboard/export-pdf', [DashboardController::class, 'exportPdf'])->name('dashboard.export');
 
-        // User Management
-        Route::get('/admin/users', [UserManagementController::class, 'index'])->name('admin.users.index');
-        Route::get('/admin/users/create', [UserManagementController::class, 'create'])->name('admin.users.create');
-        Route::post('/admin/users', [UserManagementController::class, 'store'])->name('admin.users.store');
-        Route::get('/admin/users/{user}/edit', [UserManagementController::class, 'edit'])->name('admin.users.edit');
-        Route::put('/admin/users/{user}', [UserManagementController::class, 'update'])->name('admin.users.update');
-        Route::post('/admin/users/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('admin.users.reset-password');
-
         // Settings (Pengaturan)
         Route::get('/settings', [SettingsPNBPController::class, 'index'])->name('admin.settings.index');
         Route::post('/settings/kph', [SettingsPNBPController::class, 'storeKph'])->name('admin.settings.kph.store');
@@ -123,6 +115,18 @@ Route::get('/dashboard', fn() => redirect()->route('dashboard.index'));
 Route::get('/user/upload', fn() => redirect()->route('user.upload'));
 Route::get('/user/history', fn() => redirect()->route('user.history'));
 Route::get('/user/dashboard', fn() => redirect()->route('user.dashboard'));
+
+// ===================================================================
+// ADMIN PANEL - User Management (Independent from PNBP)
+// ===================================================================
+Route::prefix('admin')->middleware(['auth', 'session.timeout', 'role:admin'])->group(function () {
+    Route::get('/users', [UserManagementController::class, 'index'])->name('admin.users.index');
+    Route::get('/users/create', [UserManagementController::class, 'create'])->name('admin.users.create');
+    Route::post('/users', [UserManagementController::class, 'store'])->name('admin.users.store');
+    Route::get('/users/{user}/edit', [UserManagementController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('admin.users.update');
+    Route::post('/users/{user}/reset-password', [UserManagementController::class, 'resetPassword'])->name('admin.users.reset-password');
+});
 
 // ===================================================================
 // INDUSTRI (SIDI-HUT) - Admin CRUD
