@@ -176,6 +176,7 @@ Route::prefix('industri')->middleware(['auth', 'session.timeout', 'role:admin'])
 // ===================================================================
 // Rekap - public read access
 Route::get('/rekap', [LaporanController::class, 'rekapLaporan'])->name('laporan.rekap');
+Route::get('/rekap/export', [LaporanController::class, 'exportRekapTahunan'])->name('laporan.rekap.export');
 // Landing Page Laporan - public read access
 Route::get('/laporan/info', [LaporanController::class, 'landing'])->name('laporan.landing');
 // Public bukti laporan - search and view receipt

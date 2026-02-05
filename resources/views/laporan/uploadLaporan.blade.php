@@ -23,42 +23,7 @@
             </div>
         </div>
 
-        {{-- Alert Messages --}}
-        @if(session('success'))
-            <div class="bg-green-50 border-l-4 border-green-500 text-green-800 px-6 py-4 rounded-md mb-6 shadow-sm" role="alert">
-                <div class="flex items-center">
-                    <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
-                    <div>
-                        <p class="font-semibold">Berhasil!</p>
-                        <p class="text-sm">{{ session('success') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="bg-red-50 border-l-4 border-red-500 text-red-800 px-6 py-4 rounded-md mb-6 shadow-sm" role="alert">
-                <div class="flex items-center">
-                    <i class="fas fa-exclamation-circle text-red-500 text-xl mr-3"></i>
-                    <div>
-                        <p class="font-semibold">Terjadi Kesalahan!</p>
-                        <p class="text-sm">{{ session('error') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        @if(session('warning'))
-            <div class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 px-6 py-4 rounded-md mb-6 shadow-sm" role="alert">
-                <div class="flex items-center">
-                    <i class="fas fa-exclamation-triangle text-yellow-500 text-xl mr-3"></i>
-                    <div>
-                        <p class="font-semibold">Peringatan!</p>
-                        <p class="text-sm">{{ session('warning') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
+        {{-- Alerts are now handled by the layout --}}
 
         <div class="bg-white border border-gray-200 shadow-sm rounded-md mb-8">
             <div class="px-6 py-4 border-bottom border-gray-200 bg-gray-50 rounded-t-md">
@@ -171,7 +136,7 @@
                         </div>
 
                         <div id="tableContainer" class="border border-gray-200 rounded-md overflow-x-auto hidden">
-                            <table class="w-full text-xs" id="manualTable">
+                            <table class="text-xs" id="manualTable" style="min-width: 100%; width: max-content;">
                                 <thead class="bg-gray-50 border-b border-gray-200" id="manualTableHead">
                                     <!-- Headers will be generated dynamically -->
                                 </thead>
@@ -267,7 +232,7 @@
             'Laporan Penerimaan Kayu Bulat': {
                 fields: [
                     { name: 'nomor_dokumen', label: 'Nomor Dokumen', type: 'text', placeholder: 'Nomor dokumen' },
-                    { name: 'tanggal', label: 'Tanggal', type: 'date', placeholder: '' },
+                    { name: 'tanggal', label: 'Tanggal (dd/mm/yyyy)', type: 'text', placeholder: 'Contoh: 15/01/2024' },
                     { name: 'asal_kayu', label: 'Asal Kayu', type: 'text', placeholder: 'Asal kayu' },
                     { name: 'jenis_kayu', label: 'Jenis Kayu', type: 'text', placeholder: 'Jenis kayu' },
                     { name: 'jumlah_batang', label: 'Jumlah Batang', type: 'number', placeholder: '0', step: '1' },
@@ -278,7 +243,7 @@
             'Laporan Penerimaan Kayu Olahan': {
                 fields: [
                     { name: 'nomor_dokumen', label: 'Nomor Dokumen', type: 'text', placeholder: 'Nomor dokumen' },
-                    { name: 'tanggal', label: 'Tanggal', type: 'date', placeholder: '' },
+                    { name: 'tanggal', label: 'Tanggal (dd/mm/yyyy)', type: 'text', placeholder: 'Contoh: 15/01/2024' },
                     { name: 'asal_kayu', label: 'Asal Kayu', type: 'text', placeholder: 'Asal kayu' },
                     { name: 'jenis_olahan', label: 'Jenis Olahan', type: 'text', placeholder: 'Jenis olahan' },
                     { name: 'jumlah_keping', label: 'Jumlah Keping', type: 'number', placeholder: '0', step: '1' },
@@ -289,7 +254,7 @@
             'Laporan Penjualan Kayu Olahan': {
                 fields: [
                     { name: 'nomor_dokumen', label: 'Nomor Dokumen', type: 'text', placeholder: 'Nomor dokumen' },
-                    { name: 'tanggal', label: 'Tanggal', type: 'date', placeholder: '' },
+                    { name: 'tanggal', label: 'Tanggal (dd/mm/yyyy)', type: 'text', placeholder: 'Contoh: 15/01/2024' },
                     { name: 'tujuan_kirim', label: 'Tujuan Kirim', type: 'text', placeholder: 'Tujuan pengiriman' },
                     { name: 'jenis_olahan', label: 'Jenis Olahan', type: 'text', placeholder: 'Jenis olahan' },
                     { name: 'jumlah_keping', label: 'Jumlah Keping', type: 'number', placeholder: '0', step: '1' },
@@ -301,11 +266,17 @@
 
         // Generate table headers based on config
         function generateTableHeaders(config) {
-            let headerHTML = '<tr><th class="px-3 py-2 text-left font-bold text-gray-700">No</th>';
+            let headerHTML = '<tr><th class="px-3 py-2 text-left font-bold text-gray-700" style="min-width: 50px;">No</th>';
             config.fields.forEach(field => {
-                headerHTML += `<th class="px-3 py-2 text-left font-bold text-gray-700">${field.label}</th>`;
+                // Set minimum width based on field type
+                let minWidth = '120px'; // default
+                if (field.type === 'number') minWidth = '100px';
+                if (field.name === 'keterangan') minWidth = '150px';
+                if (field.name === 'jenis_kayu' || field.name === 'jenis_olahan') minWidth = '140px';
+
+                headerHTML += `<th class="px-3 py-2 text-left font-bold text-gray-700" style="min-width: ${minWidth};">${field.label}</th>`;
             });
-            headerHTML += '<th class="px-3 py-2 text-center font-bold text-gray-700">Aksi</th></tr>';
+            headerHTML += '<th class="px-3 py-2 text-center font-bold text-gray-700" style="min-width: 70px;">Aksi</th></tr>';
             return headerHTML;
         }
 
@@ -319,25 +290,28 @@
                 const stepAttr = field.step ? `step="${field.step}"` : '';
                 const minAttr = field.type === 'number' ? 'min="0"' : '';
 
+                // Set input width based on field
+                let inputClass = 'w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-1 focus:ring-[#1A4030] focus:border-[#1A4030]';
+
                 rowHTML += `
-                                        <td class="px-3 py-2">
-                                            <input type="${field.type}" 
-                                                name="manual_data[${rowNum}][${field.name}]" 
-                                                class="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:ring-1 focus:ring-[#1A4030] focus:border-[#1A4030]" 
-                                                placeholder="${field.placeholder}" 
-                                                ${stepAttr} ${minAttr} ${isRequired}>
-                                        </td>`;
+                                                    <td class="px-3 py-2">
+                                                        <input type="${field.type}" 
+                                                            name="manual_data[${rowNum}][${field.name}]" 
+                                                            class="${inputClass}" 
+                                                            placeholder="${field.placeholder}" 
+                                                            ${stepAttr} ${minAttr} ${isRequired}>
+                                                    </td>`;
             });
 
             rowHTML += `
-                                    <td class="px-3 py-2 text-center">
-                                        <button type="button" onclick="removeRow(this)" 
-                                            class="text-red-600 hover:text-red-800 transition-colors" 
-                                            title="Hapus baris">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </td>
-                                </tr>`;
+                                                <td class="px-3 py-2 text-center">
+                                                    <button type="button" onclick="removeRow(this)" 
+                                                        class="text-red-600 hover:text-red-800 transition-colors" 
+                                                        title="Hapus baris">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>`;
 
             return rowHTML;
         }

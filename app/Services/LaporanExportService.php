@@ -54,6 +54,110 @@ class LaporanExportService
     }
 
     /**
+     * Export rekap tahunan dengan breakdown per bulan
+     * Data: rows = groups (kabupaten/jenis), columns = 12 months
+     */
+    public function exportRekapTahunan($rekapData, $tahun, $kategori, $groupByLabel)
+    {
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Title
+        $sheet->setCellValue('A1', 'REKAP TAHUNAN ' . strtoupper($kategori));
+        $sheet->mergeCells('A1:O1');
+        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Year
+        $sheet->setCellValue('A2', 'Tahun: ' . $tahun);
+        $sheet->mergeCells('A2:O2');
+        $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(11);
+        $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+        // Headers (Row 4)
+        $headers = ['No', $groupByLabel, 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des', 'Total'];
+        $colIndex = 1;
+        foreach ($headers as $header) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIndex);
+            $sheet->setCellValue($colLetter . '4', $header);
+            $colIndex++;
+        }
+
+        // Style headers
+        $sheet->getStyle('A4:O4')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '10B981']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+        ]);
+
+        // Column widths
+        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('B')->setWidth(30);
+        for ($i = 3; $i <= 15; $i++) {
+            $sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i))->setWidth(12);
+        }
+
+        // Data
+        $row = 5;
+        $no = 1;
+        $data = $rekapData['data'] ?? [];
+
+        foreach ($data as $item) {
+            $sheet->setCellValue('A' . $row, $no);
+            $sheet->setCellValue('B' . $row, $item['nama']);
+
+            // Months (columns C-N = months 1-12)
+            for ($bulan = 1; $bulan <= 12; $bulan++) {
+                $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($bulan + 2);
+                $value = $item['bulan'][$bulan] ?? 0;
+                $sheet->setCellValue($colLetter . $row, number_format($value, 2, '.', ''));
+            }
+
+            // Total (column O)
+            $sheet->setCellValue('O' . $row, number_format($item['total'], 2, '.', ''));
+
+            // Style data row
+            $sheet->getStyle('A' . $row . ':O' . $row)->applyFromArray([
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+            ]);
+
+            // Right-align numbers
+            $sheet->getStyle('C' . $row . ':O' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+            $row++;
+            $no++;
+        }
+
+        // Grand Total Row
+        $grandTotal = $rekapData['grand_total'] ?? [];
+        $sheet->setCellValue('A' . $row, 'TOTAL');
+        $sheet->mergeCells('A' . $row . ':B' . $row);
+        $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+
+        for ($bulan = 1; $bulan <= 12; $bulan++) {
+            $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($bulan + 2);
+            $value = $grandTotal[$bulan] ?? 0;
+            $sheet->setCellValue($colLetter . $row, number_format($value, 2, '.', ''));
+        }
+        $sheet->setCellValue('O' . $row, number_format($grandTotal['total'] ?? 0, 2, '.', ''));
+
+        $sheet->getStyle('A' . $row . ':O' . $row)->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '10B981']],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT]
+        ]);
+
+        // Filename
+        $kategoriStr = str_replace(' ', '_', $kategori);
+        $groupByStr = str_replace(' ', '_', $groupByLabel);
+        $filename = "Rekap_Tahunan_{$kategoriStr}_{$groupByStr}_{$tahun}.xlsx";
+
+        $this->downloadExcel($spreadsheet, $filename);
+    }
+
+    /**
      * Export detail laporan ke Excel
      */
     public function exportDetail($items, $bulan, $tahun, $jenis, $companyName, $filters = [])

@@ -366,11 +366,17 @@
                         <i class="fas fa-user-tie nav-icon"></i>
                         <span>Penandatangan</span>
                     </a>
+
+                    <a href="{{ route('admin.users.index') }}"
+                        class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                        <i class="fas fa-users-cog nav-icon"></i>
+                        <span>Manajemen User</span>
+                    </a>
                 @endif
             @endauth
 
             <div class="mt-auto mb-2 border-t border-white/10 mx-2"></div>
-    
+
 
         </nav>
 
@@ -447,6 +453,30 @@
                     <div>
                         <h3 class="title">Berhasil </h3>
                         <p class="text">{{ session('success') }}</p>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mb-6 border-l-4 border-red-600 bg-red-50 p-4 shadow-sm rounded-sm">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-red-600 mt-0.5 mr-3"></i>
+                        <div>
+                            <h3 class="text-red-800 font-bold text-sm mb-1">Gagal</h3>
+                            <p class="text-red-700 text-sm">{{ session('error') }}</p>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
+            @if (session('warning'))
+                <div class="mb-6 border-l-4 border-yellow-600 bg-yellow-50 p-4 shadow-sm rounded-sm">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-circle text-yellow-600 mt-0.5 mr-3"></i>
+                        <div>
+                            <h3 class="text-yellow-800 font-bold text-sm mb-1">Perhatian</h3>
+                            <p class="text-yellow-700 text-sm">{{ session('warning') }}</p>
+                        </div>
                     </div>
                 </div>
             @endif

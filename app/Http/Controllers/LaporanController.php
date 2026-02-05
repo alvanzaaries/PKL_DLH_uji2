@@ -79,9 +79,25 @@ class LaporanController extends Controller
             // Clear session to avoid stale data
             session()->forget(['preview_data', 'preview_file_path', 'preview_metadata']);
 
+            // Get nama bulan untuk pesan yang lebih user-friendly
+            $namaBulan = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember'
+            ][$request->bulan];
+
             return back()
                 ->withInput()
-                ->with('error', 'Laporan jenis "' . $request->jenis_laporan . '" untuk bulan ' . $request->bulan . ' tahun ' . $request->tahun . ' sudah pernah diupload. Setiap jenis laporan hanya bisa diupload sekali per bulan.');
+                ->with('error', 'Upload gagal! Laporan "' . $request->jenis_laporan . '" untuk periode ' . $namaBulan . ' ' . $request->tahun . ' sudah ada. Setiap jenis laporan hanya dapat diupload sekali per bulan.');
         }
 
         try {
@@ -363,8 +379,24 @@ class LaporanController extends Controller
             // Clear session to avoid stale data
             session()->forget(['preview_data', 'preview_file_path', 'preview_metadata']);
 
+            // Get nama bulan untuk pesan yang lebih user-friendly
+            $namaBulan = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember'
+            ][$request->bulan];
+
             return redirect()->route('laporan.upload.form')
-                ->with('error', 'Laporan jenis "' . $request->jenis_laporan . '" untuk bulan ' . $request->bulan . ' tahun ' . $request->tahun . ' sudah pernah diupload.');
+                ->with('error', 'Upload gagal! Laporan "' . $request->jenis_laporan . '" untuk periode ' . $namaBulan . ' ' . $request->tahun . ' sudah ada. Setiap jenis laporan hanya dapat diupload sekali per bulan.');
         }
 
         try {
@@ -373,6 +405,7 @@ class LaporanController extends Controller
             // Ambil data dari session
             $previewData = session('preview_data');
             $filePath = session('preview_file_path');
+
 
             // Cek apakah ada edited data dari form (data yang sudah diedit user)
             $dataRows = $previewData['rows'];
@@ -391,16 +424,33 @@ class LaporanController extends Controller
                         }
                     }
                     $needsRevalidation = true;
+                    \Log::info('Edited data detected, revalidation needed', [
+                        'jenis_laporan' => $request->jenis_laporan,
+                        'row_count' => count($dataRows),
+                        'first_row' => $dataRows[0] ?? null,
+                    ]);
                 }
             }
 
             // Jika ada data yang diedit, validasi ulang
             if ($needsRevalidation) {
+                \Log::info('Starting revalidation with edited data');
+
                 // Buat temporary file dengan data yang sudah diedit untuk validasi
                 // Kita akan validasi manual menggunakan validation service
                 $validationResult = $this->validateEditedDataUsingService($dataRows, $request->jenis_laporan, $rowNumberMap ?? []);
 
+                \Log::info('Revalidation completed', [
+                    'error_count' => count($validationResult['errors'] ?? []),
+                    'has_errors' => !empty($validationResult['errors']),
+                    'sample_errors' => array_slice($validationResult['errors'] ?? [], 0, 3),
+                ]);
+
                 if (!empty($validationResult['errors'])) {
+                    \Log::warning('Revalidation found errors, redirecting back to preview', [
+                        'total_errors' => count($validationResult['errors']),
+                    ]);
+
                     // Masih ada error, simpan preview yang sudah divalidasi ulang ke session (wrap rows)
                     $sessionRows = $previewData['rows'] ?? [];
                     $wrapped = [];
@@ -435,6 +485,7 @@ class LaporanController extends Controller
             // Simpan laporan master
             $laporan = Laporan::create([
                 'industri_id' => $request->industri_id,
+                'user_id' => auth()->id(),
                 'jenis_laporan' => $request->jenis_laporan,
                 'tanggal' => $tanggal,
                 'path_laporan' => '', // String kosong untuk memenuhi constraint NOT NULL
@@ -562,10 +613,10 @@ class LaporanController extends Controller
      */
     public function rekapLaporan(Request $request)
     {
-        // Ambil parameter dari request
-        $tahun = $request->input('tahun');
+        // Ambil parameter dari request, default tahun ke tahun sekarang
+        $tahun = $request->input('tahun', date('Y')); // Default ke tahun sekarang
         $kategori = $request->input('kategori', 'produksi_kayu_bulat'); // Default ke produksi_kayu_bulat
-        $groupBy = $request->input('groupBy', 'asal_kayu'); // Default ke asal_kayu
+        $groupBy = $request->input('groupBy'); // Will be set based on kategori below
         $eksporLokal = $request->input('eksporLokal', 'semua'); // Default ke semua
 
         // Validasi kategori
@@ -577,13 +628,14 @@ class LaporanController extends Controller
         // Validasi groupBy berdasarkan kategori
         if ($kategori === 'produksi_kayu_bulat') {
             $validGroupBy = ['kabupaten', 'asal_kayu'];
-            $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'kabupaten';
+            // Default ke 'kabupaten' (Asal Industri)
+            $groupBy = $groupBy && in_array($groupBy, $validGroupBy) ? $groupBy : 'kabupaten';
         } elseif ($kategori === 'produksi_kayu_olahan') {
             $validGroupBy = ['asal_kayu', 'jenis_olahan'];
-            $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'asal_kayu';
+            $groupBy = $groupBy && in_array($groupBy, $validGroupBy) ? $groupBy : 'asal_kayu';
         } elseif ($kategori === 'penjualan') {
             $validGroupBy = ['tujuan_kirim', 'jenis_olahan'];
-            $groupBy = in_array($groupBy, $validGroupBy) ? $groupBy : 'tujuan_kirim';
+            $groupBy = $groupBy && in_array($groupBy, $validGroupBy) ? $groupBy : 'tujuan_kirim';
         } else {
             $groupBy = 'asal_kayu'; // Default untuk kategori lain
         }
@@ -597,15 +649,65 @@ class LaporanController extends Controller
         // Ambil tahun paling awal dari database untuk dropdown filter
         $earliestYear = Laporan::selectRaw('MIN(YEAR(tanggal)) as min_year')->value('min_year') ?? 2020;
 
-        // Inisialisasi data rekap
-        $rekapData = [];
-
-        // Jika tahun dipilih, ambil data dari service
-        if ($tahun) {
-            $rekapData = $this->dataService->getRekapTahunan($tahun, $kategori, $groupBy, $eksporLokal);
-        }
+        // Ambil data rekap untuk tahun yang dipilih (atau tahun sekarang by default)
+        $rekapData = $this->dataService->getRekapTahunan($tahun, $kategori, $groupBy, $eksporLokal);
 
         return view('laporan.rekapLaporan', compact('tahun', 'kategori', 'earliestYear', 'rekapData', 'groupBy', 'eksporLokal'));
+    }
+
+    /**
+     * Export rekap tahunan ke Excel
+     */
+    public function exportRekapTahunan(Request $request)
+    {
+        $tahun = $request->input('tahun', date('Y'));
+        $kategori = $request->input('kategori', 'produksi_kayu_bulat');
+        $groupBy = $request->input('groupBy');
+        $eksporLokal = $request->input('eksporLokal', 'semua');
+
+        // Same validation logic as rekapLaporan
+        $validKategori = ['produksi_kayu_bulat', 'produksi_kayu_olahan', 'penjualan'];
+        if (!in_array($kategori, $validKategori)) {
+            $kategori = 'produksi_kayu_bulat';
+        }
+
+        if ($kategori === 'produksi_kayu_bulat') {
+            $validGroupBy = ['kabupaten', 'asal_kayu'];
+            $groupBy = $groupBy && in_array($groupBy, $validGroupBy) ? $groupBy : 'kabupaten';
+        } elseif ($kategori === 'produksi_kayu_olahan') {
+            $validGroupBy = ['asal_kayu', 'jenis_olahan'];
+            $groupBy = $groupBy && in_array($groupBy, $validGroupBy) ? $groupBy : 'asal_kayu';
+        } elseif ($kategori === 'penjualan') {
+            $validGroupBy = ['tujuan_kirim', 'jenis_olahan'];
+            $groupBy = $groupBy && in_array($groupBy, $validGroupBy) ? $groupBy : 'tujuan_kirim';
+        }
+
+        // Get data
+        $rekapData = $this->dataService->getRekapTahunan($tahun, $kategori, $groupBy, $eksporLokal);
+
+        // Get groupBy label
+        $groupByLabels = [
+            'kabupaten' => 'Asal Industri',
+            'asal_kayu' => 'Asal Kayu',
+            'jenis_kayu' => 'Jenis Kayu',
+            'jenis_olahan' => 'Jenis Olahan',
+            'tujuan_kirim' => 'Tujuan Pengiriman'
+        ];
+
+        if ($kategori === 'produksi_kayu_olahan' && $groupBy === 'asal_kayu') {
+            $groupByLabel = 'Asal Industri';
+        } else {
+            $groupByLabel = $groupByLabels[$groupBy] ?? ucwords(str_replace('_', ' ', $groupBy));
+        }
+
+        $kategoriLabel = [
+            'produksi_kayu_bulat' => 'Pemenuhan Kayu Bulat',
+            'produksi_kayu_olahan' => 'Produksi Kayu Olahan',
+            'penjualan' => 'Penjualan Kayu Olahan'
+        ][$kategori] ?? $kategori;
+
+        // Export using service
+        return $this->exportService->exportRekapTahunan($rekapData, $tahun, $kategoriLabel, $groupByLabel);
     }
 
     /**
@@ -670,6 +772,7 @@ class LaporanController extends Controller
             'jenisLabel' => $jenisOptions[$jenis],
             'items' => $detailData['items'],
             'filterOptions' => $detailData['filterOptions'],
+            'grandTotal' => $detailData['grandTotal'] ?? [],
             'perPage' => $perPage,
         ]);
     }
