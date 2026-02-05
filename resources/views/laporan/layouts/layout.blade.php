@@ -366,6 +366,12 @@
                         <i class="fas fa-user-tie nav-icon"></i>
                         <span>Penandatangan</span>
                     </a>
+
+                    <a href="{{ route('admin.users.index') }}"
+                        class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                        <i class="fas fa-users-cog nav-icon"></i>
+                        <span>Manajemen User</span>
+                    </a>
                 @endif
             @endauth
 
