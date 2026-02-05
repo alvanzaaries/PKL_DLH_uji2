@@ -231,8 +231,15 @@
             background-color: #f8fafc;
         }
 
-        .data-table tr:hover {
+        .data-table tbody tr {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .data-table tbody tr:hover {
             background-color: #f1f5f9;
+            transform: scale(1.002);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
         
         .badge {
@@ -334,12 +341,21 @@
                     </thead>
                     <tbody>
                         @forelse($dataIndustri as $index => $item)
-                        <tr>
+                        @php
+                            $rawType = $item->type;
+                            $routeName = match($rawType) {
+                                'primer', 'PBPHH' => 'industri-primer.index',
+                                'sekunder', 'PBUI' => 'industri-sekunder.index',
+                                'tpt_kb' => 'tptkb.index',
+                                'perajin', 'end_user' => 'perajin.index',
+                                default => 'industri-primer.index'
+                            };
+                        @endphp
+                        <tr onclick="window.location.href='{{ route($routeName) }}'" style="cursor: pointer;">
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $item->nama }}</td>
                             <td>
                                 @php
-                                    $rawType = $item->type;
                                     $label = match($rawType) {
                                         'primer', 'PBPHH' => 'Industri Primer',
                                         'sekunder', 'PBUI' => 'Industri Sekunder',
