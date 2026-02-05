@@ -306,28 +306,28 @@
         .statistics-section {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
         .stat-card {
             background: var(--white);
-            padding: 25px;
+            padding: 15px;
             border-radius: 12px;
             border: 1px solid var(--border);
             text-align: center;
         }
 
         .stat-card h3 {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
             color: var(--primary);
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
 
         .chart-container {
             position: relative;
-            height: 250px;
+            height: 220px;
             margin: 0 auto;
         }
 
@@ -600,14 +600,14 @@
             </div>
             @auth
             @if(auth()->user()->role === 'admin')
-            <div style="display: flex; gap: 12px;">
-                <button onclick="exportToExcel()" class="btn btn-primary" style="background: #16a34a;">
-                    <i class="fas fa-file-excel"></i> Export Excel
+            <div style="display: flex; gap: 8px;">
+                <button onclick="exportToExcel()" class="btn btn-primary" style="background: #16a34a; padding: 8px 16px; font-size: 13px;">
+                    <i class="fas fa-file-excel" style="font-size: 12px;"></i> Export Excel
                 </button>
-                <button onclick="openImportModal()" class="btn btn-primary" style="background: #0ea5e9;">
-                    <i class="fas fa-file-excel"></i> Import Excel
+                <button onclick="openImportModal()" class="btn btn-primary" style="background: #0ea5e9; padding: 8px 16px; font-size: 13px;">
+                    <i class="fas fa-file-excel" style="font-size: 12px;"></i> Import Excel
                 </button>
-                <a href="{{ route('industri-primer.create') }}" class="btn btn-primary">
+                <a href="{{ route('industri-primer.create') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">
                     <span>+</span> Tambah Data Baru
                 </a>
             </div>
@@ -1175,7 +1175,26 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: { 
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                padding: 6,
+                                font: { size: 10 },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.slice(0, 5).map((label, i) => ({
+                                            text: label,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        }));
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -1210,7 +1229,26 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: { 
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                padding: 6,
+                                font: { size: 10 },
+                                generateLabels: function(chart) {
+                                    const data = chart.data;
+                                    if (data.labels.length && data.datasets.length) {
+                                        return data.labels.slice(0, 6).map((label, i) => ({
+                                            text: label,
+                                            fillStyle: data.datasets[0].backgroundColor[i],
+                                            hidden: false,
+                                            index: i
+                                        }));
+                                    }
+                                    return [];
+                                }
+                            }
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -1241,7 +1279,14 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: { 
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                padding: 6,
+                                font: { size: 10 }
+                            }
+                        },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -1274,7 +1319,7 @@
                 </div>
                 <span class="close-btn" onclick="closeImportModal()" style="color: white; opacity: 0.9; font-size: 28px;">&times;</span>
             </div>
-            <div class="modal-body" style="padding: 32px;">
+            <div class="modal-body" style="padding: 32px; max-height: 70vh; overflow-y: auto;">
                 <div id="importAlert" style="display: none;"></div>
                 
                 <!-- Drag & Drop Area -->
@@ -1337,7 +1382,7 @@
                         </div>
                         <h4 style="color: #0f172a; margin: 0; font-size: 16px; font-weight: 700;">Hasil Import</h4>
                     </div>
-                    <div id="resultContent" style="color: #166534;"></div>
+                    <div id="resultContent" style="color: #166534; max-height: 300px; overflow-y: auto; padding-right: 8px; scrollbar-width: thin; scrollbar-color: #16a34a #e5e7eb;"></div>
                 </div>
 
                 <!-- Action Buttons -->
