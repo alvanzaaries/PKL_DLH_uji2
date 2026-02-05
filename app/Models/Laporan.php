@@ -14,6 +14,7 @@ class Laporan extends Model
 
     protected $fillable = [
         'industri_id',
+        'user_id',
         'jenis_laporan',
         'tanggal',
         'path_laporan',
@@ -34,6 +35,14 @@ class Laporan extends Model
     public static function getJenisLaporan()
     {
         return self::JENIS_LAPORAN;
+    }
+
+    /**
+     * Relasi ke User (uploader)
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     /**

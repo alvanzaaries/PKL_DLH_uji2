@@ -28,6 +28,17 @@
         if(!$companyName && isset($items) && $items->count()) {
             $companyName = $items->first()->laporan->industri->nama ?? null;
         }
+        
+        // Ambil user yang upload laporan (dari item pertama)
+        $uploaderName = null;
+        $uploadedAt = null;
+        if(isset($items) && $items->count()) {
+            $laporanData = $items->first()->laporan;
+            if($laporanData) {
+                $uploaderName = $laporanData->user->name ?? null;
+                $uploadedAt = $laporanData->created_at;
+            }
+        }
     @endphp
 
     <div class="page-container px-6 py-8">
@@ -41,6 +52,15 @@
                     @endif
                     {{ $judulHeader }} • Periode: {{ $periodeLabel }} • Total data: {{ $items->count() }}
                 </p>
+                @if($uploaderName)
+                <p style="font-size: 0.85rem; color: #6b7280; margin-top: 4px;">
+                    <i class="fas fa-user-upload" style="margin-right: 4px;"></i>
+                    Diupload oleh: <strong>{{ $uploaderName }}</strong>
+                    @if($uploadedAt)
+                        • {{ $uploadedAt->translatedFormat('d F Y, H:i') }}
+                    @endif
+                </p>
+                @endif
             </div>
 
             <div style="display: flex; gap: 8px;">

@@ -485,6 +485,7 @@ class LaporanController extends Controller
             // Simpan laporan master
             $laporan = Laporan::create([
                 'industri_id' => $request->industri_id,
+                'user_id' => auth()->id(),
                 'jenis_laporan' => $request->jenis_laporan,
                 'tanggal' => $tanggal,
                 'path_laporan' => '', // String kosong untuk memenuhi constraint NOT NULL
