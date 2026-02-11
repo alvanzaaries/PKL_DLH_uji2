@@ -1013,7 +1013,7 @@
                                     @auth
                                     @if(auth()->user()->role === 'admin')
                                     <a href="{{ route('industri-sekunder.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
-                                    <form action="{{ route('industri-sekunder.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirmDelete('{{ $item->industri->nama }}')">
+                                    <form action="{{ route('industri-sekunder.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="confirmDelete('{{ $item->industri->nama }}'); return false;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-action btn-delete">Hapus</button>
@@ -1252,7 +1252,13 @@
 
         // Konfirmasi delete
         function confirmDelete(namaPerusahaan) {
-            return confirm(`Apakah Anda yakin ingin menghapus perusahaan "${namaPerusahaan}"?\n\nData yang dihapus tidak dapat dikembalikan!`);
+            event.preventDefault();
+            const form = event.target;
+            
+            if (confirm(`Apakah Anda yakin ingin menghapus perusahaan "${namaPerusahaan}"?\n\nData yang dihapus tidak dapat dikembalikan!`)) {
+                form.submit();
+            }
+            return false;
         }
 
         // Toggle filter visibility

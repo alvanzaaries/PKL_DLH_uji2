@@ -617,6 +617,7 @@
     });
 
     function confirmDeleteDokumen() {
+        event.preventDefault();
         if (confirm('Apakah Anda yakin ingin menghapus dokumen ini?')) {
             document.getElementById('hapusDokumenFlag').value = '1';
             const currentFileDiv = document.querySelector('.current-file');
@@ -624,6 +625,7 @@
                 currentFileDiv.innerHTML = '<div style="color: #dc2626; font-style: italic;">Dokumen akan dihapus saat Anda klik Update Data</div>';
             }
         }
+        return false;
     }
 
     // Event listener untuk menampilkan preview file baru yang dipilih

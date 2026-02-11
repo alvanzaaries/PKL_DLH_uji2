@@ -908,7 +908,7 @@
                                     @auth
                                     @if(auth()->user()->role === 'admin')
                                     <a href="{{ route('tptkb.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
-                                    <form action="{{ route('tptkb.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                    <form action="{{ route('tptkb.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="event.preventDefault(); if(confirm('Apakah Anda yakin ingin menghapus data ini?')) { this.submit(); } return false;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn-action btn-delete">Hapus</button>

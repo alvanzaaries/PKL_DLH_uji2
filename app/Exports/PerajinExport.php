@@ -27,7 +27,7 @@ class PerajinExport
         // Title dengan informasi filter
         $filterText = $this->buildFilterText();
         $sheet->setCellValue('A1', 'Data Perajin' . ($filterText ? ' berdasarkan ' . $filterText : ''));
-        $sheet->mergeCells('A1:G3');
+        $sheet->mergeCells('A1:G2');
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => '000000']],
             'alignment' => [
@@ -36,6 +36,17 @@ class PerajinExport
             ]
         ]);
         $sheet->getRowDimension(1)->setRowHeight(25);
+
+        // Tanggal dan jam ekspor
+        $sheet->setCellValue('A3', 'Tanggal Ekspor: ' . date('d/m/Y H:i:s'));
+        $sheet->mergeCells('A3:G3');
+        $sheet->getStyle('A3')->applyFromArray([
+            'font' => ['size' => 11, 'color' => ['rgb' => '666666']],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER
+            ]
+        ]);
 
         // Set header kolom di row 4
         $headers = [

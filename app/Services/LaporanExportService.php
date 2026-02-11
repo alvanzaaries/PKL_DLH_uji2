@@ -74,6 +74,13 @@ class LaporanExportService
         $sheet->getStyle('A2')->getFont()->setBold(true)->setSize(11);
         $sheet->getStyle('A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
+        // Tanggal ekspor
+        $sheet->setCellValue('A3', 'Tanggal Ekspor: ' . date('d/m/Y H:i:s'));
+        $sheet->mergeCells('A3:O3');
+        $sheet->getStyle('A3')->getFont()->setSize(10);
+        $sheet->getStyle('A3')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A3')->getFont()->getColor()->setRGB('666666');
+
         // Headers (Row 4)
         $headers = ['No', $groupByLabel, 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des', 'Total'];
         $colIndex = 1;
@@ -210,8 +217,16 @@ class LaporanExportService
         $sheet->getStyle('A' . $dateRow)->getFont()->setBold(true)->setSize(11);
         $sheet->getStyle('A' . $dateRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
+        // Tanggal ekspor
+        $exportRow = $dateRow + 1;
+        $sheet->setCellValue('A' . $exportRow, 'Tanggal Ekspor: ' . date('d/m/Y H:i:s'));
+        $sheet->mergeCells('A' . $exportRow . ':I' . $exportRow);
+        $sheet->getStyle('A' . $exportRow)->getFont()->setSize(10);
+        $sheet->getStyle('A' . $exportRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A' . $exportRow)->getFont()->getColor()->setRGB('666666');
+
         // Warning text
-        $warnRow = $dateRow + 2;
+        $warnRow = $exportRow + 1;
         $sheet->setCellValue('A' . $warnRow, '* Jangan Ubah Struktur Kolom');
         $sheet->getStyle('A' . $warnRow)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_RED));
     }
