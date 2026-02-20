@@ -32,15 +32,23 @@ class PerajinImport
 
             // Skip first 4 rows (baris 1-4), header di baris 5 (index 4)
             $header = $rows[4] ?? null;
-            
+
             if (!$header) {
                 throw new \Exception('File Excel tidak memiliki header di baris 5');
             }
 
             // Validasi header
             $expectedHeaders = [
-                'Nama Perajin', 'Alamat', 'Kabupaten/Kota', 'Latitude', 'Longitude',
-                'Penanggung Jawab', 'Kontak', 'Nomor SK', 'Tanggal SK', 'Status'
+                'Nama Perajin',
+                'Alamat',
+                'Kabupaten/Kota',
+                'Latitude',
+                'Longitude',
+                'Penanggung Jawab',
+                'Kontak',
+                'Nomor SK',
+                'Tanggal SK',
+                'Status'
             ];
 
             if ($header !== $expectedHeaders) {
@@ -123,7 +131,7 @@ class PerajinImport
         // Parse tanggal
         $tanggal = $this->parseDate($data['tanggal']);
         if (!$tanggal) {
-            throw new \Exception('Format tanggal tidak valid. Gunakan format YYYY-MM-DD atau DD/MM/YYYY');
+            throw new \Exception('Format tanggal tidak valid. Gunakan format DD/MM/YYYY atau DD/MM/YYYY');
         }
 
         DB::beginTransaction();
@@ -181,7 +189,7 @@ class PerajinImport
             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                 return Carbon::createFromFormat('Y-m-d', $date)->format('Y-m-d');
             }
-            
+
             if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $date)) {
                 return Carbon::createFromFormat('d/m/Y', $date)->format('Y-m-d');
             }

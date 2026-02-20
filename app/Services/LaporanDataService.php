@@ -664,7 +664,7 @@ class LaporanDataService
 
         $s = trim((string) $value);
 
-        // Jika format ISO year first (YYYY-MM-DD or YYYY/MM/DD)
+        // Jika format ISO year first (DD/MM/YYYY or YYYY/MM/DD)
         if (preg_match('/^\d{4}[\-\/]\d{1,2}[\-\/]\d{1,2}$/', $s)) {
             $d = \DateTime::createFromFormat('Y-m-d', str_replace('/', '-', $s));
             if ($d !== false)

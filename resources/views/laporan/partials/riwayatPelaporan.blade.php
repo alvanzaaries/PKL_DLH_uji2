@@ -20,6 +20,9 @@
                         </th>
                         <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Tgl Upload
                         </th>
+                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Diupload
+                            Oleh
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
@@ -40,6 +43,9 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $laporan->created_at->format('d/m/Y H:i') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                                {{ $laporan->user->name ?? '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <div class="flex items-center gap-2">
@@ -117,15 +123,15 @@
                 Tindakan ini tidak dapat dibatalkan. Semua data terkait laporan ini akan dihapus permanen.
             </p>
             <div class="flex gap-3 justify-center">
-                <button type="button" onclick="closeDeleteModal()" 
-                        class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+                <button type="button" onclick="closeDeleteModal()"
+                    class="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
                     Batal
                 </button>
                 <form id="deleteForm" method="POST" class="inline">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" 
-                            class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">
+                    <button type="submit"
+                        class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors">
                         <i class="fas fa-trash-alt mr-1"></i> Hapus
                     </button>
                 </form>
@@ -139,22 +145,22 @@
         const modal = document.getElementById('deleteModal');
         const deleteInfo = document.getElementById('deleteInfo');
         const deleteForm = document.getElementById('deleteForm');
-        
+
         deleteInfo.textContent = jenisLaporan + ' - ' + periode;
         deleteForm.action = '/laporan/' + industriId + '/delete/' + laporanId;
-        
+
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
-    
+
     function closeDeleteModal() {
         const modal = document.getElementById('deleteModal');
         modal.classList.add('hidden');
         modal.classList.remove('flex');
     }
-    
+
     // Close modal when clicking outside
-    document.getElementById('deleteModal').addEventListener('click', function(e) {
+    document.getElementById('deleteModal').addEventListener('click', function (e) {
         if (e.target === this) {
             closeDeleteModal();
         }
