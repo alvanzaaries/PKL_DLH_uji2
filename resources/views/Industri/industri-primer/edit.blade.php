@@ -600,11 +600,6 @@
             loadingInfo.textContent = 'Data wilayah tidak tersedia';
             loadingInfo.style.color = '#dc2626';
         }
-            })
-            .catch(() => {
-                loadingInfo.textContent = 'Gagal memuat data wilayah';
-                loadingInfo.style.color = '#dc2626';
-            });
 
         // Load existing jenis produksi
         if (existingJenisProduksi && existingJenisProduksi.length > 0) {
