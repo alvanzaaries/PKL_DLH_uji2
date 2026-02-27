@@ -30,6 +30,32 @@
             width: calc(100% - 260px);
         }
 
+        :root {
+            --primary: #0f172a;
+            --accent: #15803d;
+            --bg-body: #f8fafc;
+            --text-main: #334155;
+            --white: #ffffff;
+            --border: #e2e8f0;
+            --success: #16a34a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Arial', 'Helvetica Neue', Helvetica, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
         .container {
             max-width: 1400px;
             width: 100%;
@@ -37,35 +63,86 @@
             padding: 20px;
         }
 
-                /* Header Section */
+        /* =============================================
+           PAGE HEADER - CLEAN OFFICE STYLE
+        ============================================= */
         .page-header {
-            background: var(--white);
-            padding: 30px;
+            background: #ffffff;
+            padding: 0;
             border-radius: 12px;
-            border: 1px solid var(--border);
-            margin-bottom: 30px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid #0a5c2e;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .page-header-main {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 22px 28px;
+        }
+
+        .page-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .page-header-icon {
+            width: 48px;
+            height: 48px;
+            background: #f0fdf4;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #bbf7d0;
+            flex-shrink: 0;
+        }
+
+        .page-header-icon i {
+            font-size: 22px;
+            color: #0a5c2e;
         }
 
         .page-title {
-            font-size: 28px;
-            color: var(--primary);
+            font-size: 20px;
+            color: #0f172a;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 3px;
+            letter-spacing: -0.3px;
         }
 
         .page-subtitle {
             color: #64748b;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
+        .page-subtitle i {
+            font-size: 10px;
+            color: #0a5c2e;
+        }
+
+        .page-header-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* =============================================
+           BUTTONS
+        ============================================= */
         .btn {
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 8px;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.2s;
             border: none;
@@ -73,200 +150,279 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
 
         .btn-primary {
-            background: var(--accent);
+            background: #0a5c2e;
             color: white;
+            border: 1px solid #0a5c2e;
         }
 
         .btn-primary:hover {
-            background: #198038;
+            background: #074d26;
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(36, 161, 72, 0.3);
+            box-shadow: 0 4px 12px rgba(10, 92, 46, 0.25);
+            color: white;
         }
 
-        /* Filter Section - Extended from filter-collapse.css */
-        
+        /* =============================================
+           FILTER SECTION
+        ============================================= */
+
         /* Table */
         .table-card {
-            background: var(--white);
-            border-radius: 12px;
-            border: 1px solid var(--border);
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
             overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         .table-header {
-            padding: 20px 25px;
-            border-bottom: 1px solid var(--border);
+            padding: 18px 24px;
+            border-bottom: 1px solid #f1f5f9;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: #fafbfc;
         }
 
+        /* =============================================
+           TABLE COMPONENTS
+        ============================================= */
         .table-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 700;
-            color: var(--primary);
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-title i {
+            color: #0a5c2e;
+            font-size: 15px;
         }
 
         .result-count {
-            font-size: 14px;
+            font-size: 13px;
             color: #64748b;
+            background: #f1f5f9;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .result-count strong {
+            color: #0a5c2e;
+            font-weight: 700;
         }
 
         .table-container {
             overflow-x: auto;
-            border-radius: 12px;
-            border: 1px solid #e0e0e0;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 13.5px;
         }
 
         thead {
-            background: linear-gradient(135deg, #24a148 0%, #198038 100%);
+            background: #0a5c2e;
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         th {
-            padding: 16px;
+            padding: 13px 14px;
             text-align: left;
             font-weight: 600;
-            color: #ffffff;
-            font-size: 14px;
-            border-bottom: 3px solid #0e6027;
+            color: rgba(255,255,255,0.95);
+            font-size: 11.5px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            white-space: nowrap;
+            border-bottom: none;
         }
 
+        th:first-child { padding-left: 20px; }
+        td:first-child { padding-left: 20px; }
+
         td {
-            padding: 16px;
-            border-bottom: 1px solid #e5e7eb;
-            font-size: 14px;
+            padding: 13px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 13.5px;
             color: #374151;
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            background: #ffffff;
+            transition: background 0.15s ease;
         }
 
         tbody tr:nth-child(even) {
-            background: #f9fafb;
-        }
-
-        tbody tr:nth-child(odd) {
-            background: #ffffff;
+            background: #fafbfc;
         }
 
         tbody tr:hover {
-            background: #dbeafe;
-            transform: scale(1.001);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            transition: all 0.2s ease;
+            background: #f0fdf4 !important;
+        }
+
+        /* Company name cell */
+        .company-name {
+            font-weight: 600;
+            color: #0a5c2e;
+            font-size: 14px;
+        }
+
+        .company-sub {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 2px;
         }
 
         .action-buttons {
             display: flex;
-            gap: 8px;
+            gap: 6px;
+            align-items: center;
         }
 
         .btn-action {
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
             border: none;
             cursor: pointer;
             text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s;
+            white-space: nowrap;
         }
 
         .btn-view {
-            background: #3b82f6;
-            color: white;
+            background: #eff6ff;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
         }
 
         .btn-view:hover {
-            background: #2563eb;
+            background: #dbeafe;
+            color: #1d4ed8;
         }
 
         .btn-edit {
-            background: #24a148;
-            color: white;
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
         }
 
         .btn-edit:hover {
-            background: #198038;
+            background: #dcfce7;
+            color: #166534;
         }
 
         .btn-delete {
-            background: #ef4444;
-            color: white;
+            background: #fff1f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
         }
 
         .btn-delete:hover {
-            background: #dc2626;
+            background: #fee2e2;
+            color: #b91c1c;
         }
 
+        /* Badges */
         .badge-jenis {
             display: inline-block;
-            background: linear-gradient(135deg, #24a148 0%, #198038 100%);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            margin: 2px;
-            box-shadow: 0 1px 3px rgba(36, 161, 72, 0.3);
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+            margin: 2px 2px;
+            white-space: nowrap;
         }
 
         .badge-lainnya {
             display: inline-block;
-            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            margin: 2px;
-            box-shadow: 0 1px 3px rgba(249, 115, 22, 0.3);
+            background: #fff7ed;
+            color: #c2410c;
+            border: 1px solid #fed7aa;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 11.5px;
+            font-weight: 600;
+            margin: 2px 2px;
+            white-space: nowrap;
         }
 
         .badge-status-aktif {
-            display: inline-block;
-            background: transparent;
-            color: green;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #f0fdf4;
+            color: #15803d;
+            border: 1px solid #86efac;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-status-aktif::before {
+            content: '';
+            display: block;
+            width: 7px;
+            height: 7px;
+            background: #22c55e;
+            border-radius: 50%;
         }
 
         .badge-status-nonaktif {
-            display: inline-block;
-            background: transparent;
-            color: red;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #fff1f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-status-nonaktif::before {
+            content: '';
+            display: block;
+            width: 7px;
+            height: 7px;
+            background: #ef4444;
+            border-radius: 50%;
         }
 
         .btn-document {
-            background: #dc2626;
-            color: white;
+            background: #fff1f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
 
         .btn-document:hover {
-            background: #b91c1c;
+            background: #fee2e2;
             transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
-        }
-
-        .btn-document i {
-            font-size: 14px;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
         }
 
         /* Select2 Custom Styling */
@@ -302,75 +458,118 @@
             background-color: var(--accent);
         }
 
-        /* Statistics Section */
+        /* =============================================
+           STATISTICS SECTION
+        ============================================= */
         .statistics-section {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            gap: 16px;
             margin-bottom: 20px;
         }
 
         .stat-card {
-            background: var(--white);
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            text-align: center;
+            background: #ffffff;
+            padding: 18px 20px;
+            border-radius: 14px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
         .stat-card h3 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card h3 i {
+            color: #0a5c2e;
             font-size: 14px;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 12px;
         }
 
         .chart-container {
             position: relative;
-            height: 220px;
+            height: 210px;
             margin: 0 auto;
         }
 
-        /* Pagination */
+        /* =============================================
+           PAGINATION
+        ============================================= */
         .pagination {
-            margin-top: 30px;
+            margin-top: 0;
+            padding: 16px 20px;
             display: flex;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
+            border-top: 1px solid #f1f5f9;
         }
 
         .pagination a,
         .pagination span {
-            padding: 8px 14px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
+            padding: 7px 13px;
+            border-radius: 7px;
+            border: 1px solid #e2e8f0;
             text-decoration: none;
-            color: var(--text-main);
-            font-size: 14px;
+            color: #475569;
+            font-size: 13px;
             font-weight: 500;
+            transition: all 0.15s;
         }
 
         .pagination a:hover {
-            background: var(--accent);
+            background: #0a5c2e;
             color: white;
-            border-color: var(--accent);
+            border-color: #0a5c2e;
         }
 
         .pagination .active {
-            background: var(--accent);
+            background: #0a5c2e;
             color: white;
-            border-color: var(--accent);
+            border-color: #0a5c2e;
         }
 
+        /* =============================================
+           EMPTY STATE
+        ============================================= */
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
-            color: #999;
+            padding: 70px 20px;
+            color: #94a3b8;
+        }
+
+        .empty-state-icon {
+            width: 72px;
+            height: 72px;
+            background: #f1f5f9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .empty-state-icon i {
+            font-size: 30px;
+            color: #94a3b8;
         }
 
         .empty-state h3 {
-            font-size: 24px;
-            margin-bottom: 10px;
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            color: #94a3b8;
         }
 
         /* Modal Styles */
@@ -594,25 +793,35 @@
 
         <!-- Page Header -->
         <div class="page-header">
-            <div>
-                <h1 class="page-title">Data Industri Primer (PBUI)</h1>
-                <p class="page-subtitle">Daftar perusahaan industri primer pengolahan hasil hutan</p>
+            <div class="page-header-main">
+                <div class="page-header-left">
+                    <div class="page-header-icon">
+                        <i class="fas fa-industry"></i>
+                    </div>
+                    <div>
+                        <h1 class="page-title">Data Industri Primer (PBUI)</h1>
+                        <p class="page-subtitle">
+                            <i class="fas fa-circle" style="font-size: 6px; color: #86efac;"></i>
+                            Dinas Lingkungan Hidup &bull; Perusahaan Pengolahan Hasil Hutan
+                        </p>
+                    </div>
+                </div>
+                <div class="page-header-actions">
+                    @auth
+                    @if(auth()->user()->role === 'admin')
+                    <button onclick="exportToExcel()" class="btn btn-primary">
+                        <i class="fas fa-file-excel"></i> Export Excel
+                    </button>
+                    <button onclick="openImportModal()" class="btn btn-primary">
+                        <i class="fas fa-upload"></i> Import Excel
+                    </button>
+                    <a href="{{ route('industri-primer.create') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Tambah Data
+                    </a>
+                    @endif
+                    @endauth
+                </div>
             </div>
-            @auth
-            @if(auth()->user()->role === 'admin')
-            <div style="display: flex; gap: 8px;">
-                <button onclick="exportToExcel()" class="btn btn-primary" style="background: #16a34a; padding: 8px 16px; font-size: 13px;">
-                    <i class="fas fa-file-excel" style="font-size: 12px;"></i> Export Excel
-                </button>
-                <button onclick="openImportModal()" class="btn btn-primary" style="background: #0ea5e9; padding: 8px 16px; font-size: 13px;">
-                    <i class="fas fa-file-excel" style="font-size: 12px;"></i> Import Excel
-                </button>
-                <a href="{{ route('industri-primer.create') }}" class="btn btn-primary" style="padding: 8px 16px; font-size: 13px;">
-                    <span>+</span> Tambah Data Baru
-                </a>
-            </div>
-            @endif
-            @endauth
         </div>
 
         <!-- Filter Section -->
@@ -732,19 +941,19 @@
         <!-- Statistics Section -->
         <div class="statistics-section">
             <div class="stat-card">
-                <h3><i class="fas fa-chart-line" style="color: var(--accent); margin-right: 8px;"></i>Sebaran Per Tahun</h3>
+                <h3><i class="fas fa-chart-bar"></i> Sebaran Per Tahun</h3>
                 <div class="chart-container">
                     <canvas id="chartTahun"></canvas>
                 </div>
             </div>
             <div class="stat-card">
-                <h3><i class="fas fa-map-marked-alt" style="color: var(--accent); margin-right: 8px;"></i>Sebaran Kabupaten/Kota</h3>
+                <h3><i class="fas fa-map-marked-alt"></i> Sebaran Kabupaten/Kota</h3>
                 <div class="chart-container">
                     <canvas id="chartKabupaten"></canvas>
                 </div>
             </div>
             <div class="stat-card">
-                <h3><i class="fas fa-chart-pie" style="color: var(--accent); margin-right: 8px;"></i>Sebaran Kapasitas Izin</h3>
+                <h3><i class="fas fa-layer-group"></i> Sebaran Kapasitas Izin</h3>
                 <div class="chart-container">
                     <canvas id="chartKapasitas"></canvas>
                 </div>
@@ -754,7 +963,7 @@
         <!-- Table Card -->
         <div class="table-card">
             <div class="table-header">
-                <h2 class="table-title">Daftar Perusahaan</h2>
+                <h2 class="table-title"><i class="fas fa-table"></i> Daftar Perusahaan Industri Primer</h2>
                 <div class="result-count">
                     Total: <strong>{{ $industriPrimer->total() }}</strong> perusahaan
                 </div>
@@ -765,23 +974,25 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="text-align: center;">No</th>
-                            <th style="text-align: center;">Nama Perusahaan</th>
-                            <th style="text-align: center;">Tanggal SK</th>
-                            <th style="text-align: center;">Kabupaten/Kota</th>
-                            <th style="text-align: center;">Penanggung Jawab</th>
-                            <th style="text-align: center;">Jenis Produksi</th>
-                            <th style="text-align: center;">Kapasitas Izin</th>
-                            <th style="text-align: center;">Nomor SK</th>
-                            <th style="text-align: center;">Status</th>
+                            <th style="width: 44px; text-align: center;">No</th>
+                            <th>Nama Perusahaan</th>
+                            <th style="width: 110px;">Tanggal SK</th>
+                            <th style="width: 160px;">Kabupaten/Kota</th>
+                            <th>Penanggung Jawab</th>
+                            <th>Jenis Produksi</th>
+                            <th>Kapasitas Izin</th>
+                            <th style="width: 130px;">Nomor SK</th>
+                            <th style="width: 110px; text-align: center;">Status</th>
                             <th style="text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($industriPrimer as $index => $item)
                         <tr>
-                            <td>{{ $industriPrimer->firstItem() + $index }}</td>
-                            <td><strong>{{ $item->industri->nama }}</strong></td>
+                            <td style="text-align: center; color: #94a3b8; font-size: 12px; font-weight: 600;">{{ $industriPrimer->firstItem() + $index }}</td>
+                            <td>
+                                <div class="company-name">{{ $item->industri->nama }}</div>
+                            </td>
                             <td>{{ $item->industri->tanggal ? \Carbon\Carbon::parse($item->industri->tanggal)->format('d/m/Y') : '-' }}</td>
                             <td>{{ $item->industri->kabupaten }}</td>
                             <td>{{ $item->industri->penanggungjawab }}</td>
@@ -822,14 +1033,14 @@
                             </td>
                             <td>
                                 <div class="action-buttons">
-                                    <button class="btn-action btn-view" onclick='showDetail(@json($item))'>Lihat</button>
+                                    <button class="btn-action btn-view" onclick='showDetail(@json($item))'><i class="fas fa-eye"></i> Lihat</button>
                                     @auth
                                     @if(auth()->user()->role === 'admin')
-                                    <a href="{{ route('industri-primer.edit', $item->id) }}" class="btn-action btn-edit">Edit</a>
+                                    <a href="{{ route('industri-primer.edit', $item->id) }}" class="btn-action btn-edit"><i class="fas fa-edit"></i> Edit</a>
                                     <form action="{{ route('industri-primer.destroy', $item->id) }}" method="POST" style="display: inline;" onsubmit="confirmDelete('{{ $item->industri->nama }}'); return false;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn-action btn-delete">Hapus</button>
+                                        <button type="submit" class="btn-action btn-delete"><i class="fas fa-trash"></i> Hapus</button>
                                     </form>
                                     @endif
                                     @endauth
@@ -841,11 +1052,11 @@
                 </table>
                 @else
                 <div class="empty-state">
-                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#6c757d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                    <div class="empty-state-text">Tidak ada data ditemukan</div>
-                    <p style="font-size: 14px;">Silakan ubah filter atau tambah data baru</p>
+                    <div class="empty-state-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3>Tidak ada data ditemukan</h3>
+                    <p>Silakan ubah filter pencarian atau tambah data baru</p>
                 </div>
                 @endif
             </div>
