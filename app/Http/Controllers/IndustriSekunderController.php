@@ -157,24 +157,8 @@ class IndustriSekunderController extends Controller implements HasMiddleware
             $filteredData = (clone $query)->get();
         }
 
-        // Ambil daftar kabupaten Jawa Tengah dari API wilayah.id dengan cache
-        $kabupatenList = Cache::remember('wilayah_jateng_kabupaten', 86400, function () {
-            try {
-                $response = Http::timeout(10)->get('https://www.emsifa.com/api-wilayah-indonesia/api/regencies/33.json');
-                
-                if ($response->successful()) {
-                    $data = $response->json();
-                    return collect($data)->pluck('name')->sort()->values();
-                }
-            } catch (\Exception $e) {
-                \Log::error('Failed to fetch wilayah data: ' . $e->getMessage());
-            }
-            
-            return \App\Models\IndustriBase::select('kabupaten')
-                ->distinct()
-                ->orderBy('kabupaten')
-                ->pluck('kabupaten');
-        });
+        // Ambil daftar kabupaten/kota Jawa Tengah dari helper
+        $kabupatenList = \App\Helpers\KabupatenHelper::getValidNames();
 
         // Ambil daftar jenis produksi dari master
         $jenisProduksiList = MasterJenisProduksi::aktif()

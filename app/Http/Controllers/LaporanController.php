@@ -243,6 +243,7 @@ class LaporanController extends Controller
         $industri = \App\Models\Industri::findOrFail($industriId);
 
         $laporans = Laporan::where('industri_id', $industriId)
+            ->with('user')
             ->orderBy('tanggal', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
@@ -320,7 +321,21 @@ class LaporanController extends Controller
                 }
             }
 
+            // DEBUG: Log data before revalidation
+            \Log::info('Revalidation dataRows structure', [
+                'count' => count($dataRows),
+                'has_edited_data' => $request->has('edited_data') && !empty($request->edited_data),
+                'first_row_keys' => count($dataRows) > 0 ? (is_array($dataRows[0]) ? array_keys($dataRows[0]) : 'not_array') : 'empty',
+                'first_row_sample' => count($dataRows) > 0 ? (is_array($dataRows[0]) ? array_slice($dataRows[0], 0, 3, true) : $dataRows[0]) : null,
+            ]);
+
             $validationResult = $this->validateEditedDataUsingService($dataRows, $request->jenis_laporan, $rowNumberMap);
+
+            // DEBUG: Log validation result
+            \Log::info('Revalidation result', [
+                'rows_count' => count($validationResult['rows'] ?? []),
+                'first_result_row' => count($validationResult['rows'] ?? []) > 0 ? array_slice($validationResult['rows'][0], 0, 3, true) : null,
+            ]);
 
             // Wrap rows with source_row metadata so preview shows original Excel row numbers
             $sessionRows = $previewData['rows'] ?? [];
@@ -847,17 +862,46 @@ class LaporanController extends Controller
         $mapping = $fieldMappings[$jenisLaporan];
 
         // Convert indexed arrays to associative arrays
+        // Handle both plain indexed arrays and wrapped arrays from Excel (['cells' => [...], 'source_row' => X])
         $manualData = [];
         foreach ($dataRows as $rowIndex => $row) {
+            // Unwrap if row has 'cells' key (Excel format from session)
+            if (is_array($row) && array_key_exists('cells', $row)) {
+                $cells = $row['cells'];
+            } else {
+                $cells = $row;
+            }
+
+            // Skip if cells is not an array
+            if (!is_array($cells)) {
+                continue;
+            }
+
             $assocRow = [];
             foreach ($mapping['fields'] as $fieldIndex => $fieldName) {
-                $assocRow[$fieldName] = $row[$fieldIndex] ?? '';
+                $assocRow[$fieldName] = $cells[$fieldIndex] ?? '';
             }
             $manualData[] = $assocRow;
         }
 
         // Use existing validation service (which has the Bug #1 fix)
-        return $this->validationService->validateManualData($manualData, $jenisLaporan);
+        $result = $this->validationService->validateManualData($manualData, $jenisLaporan);
+
+        // IMPORTANT: validateManualData returns rows wrapped with ['cells' => ..., 'source_row' => ...]
+        // But the controller expects flat array of cells for its own wrapping logic.
+        // Extract just the cells from each wrapped row.
+        $flatRows = [];
+        foreach ($result['rows'] as $wrappedRow) {
+            if (is_array($wrappedRow) && array_key_exists('cells', $wrappedRow)) {
+                $flatRows[] = $wrappedRow['cells'];
+            } else {
+                // Already a flat row, use as-is
+                $flatRows[] = $wrappedRow;
+            }
+        }
+        $result['rows'] = $flatRows;
+
+        return $result;
     }
 
 

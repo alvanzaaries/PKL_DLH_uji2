@@ -150,27 +150,8 @@ class TptkbController extends Controller implements HasMiddleware
             $tptkb = $query->latest()->paginate(10);
         }
 
-        // Get list kabupaten untuk filter dropdown dari API
-        // ID Provinsi Jawa Tengah = 33
-        $kabupatenList = Cache::remember('wilayah_jateng_kabupaten', 86400, function () {
-            try {
-                $response = Http::timeout(10)->get('https://www.emsifa.com/api-wilayah-indonesia/api/regencies/33.json');
-                
-                if ($response->successful()) {
-                    $data = $response->json();
-                    // Ambil hanya nama kabupaten/kota
-                    return collect($data)->pluck('name')->sort()->values();
-                }
-            } catch (\Exception $e) {
-                \Log::error('Failed to fetch wilayah data: ' . $e->getMessage());
-            }
-            
-            // Fallback ke data dari database jika API gagal
-            return IndustriBase::whereHas('tptkb')
-                ->distinct()
-                ->orderBy('kabupaten')
-                ->pluck('kabupaten');
-        });
+        // Ambil daftar kabupaten/kota Jawa Tengah dari helper
+        $kabupatenList = \App\Helpers\KabupatenHelper::getValidNames();
 
         // Get list sumber bahan baku dari master_sumber (termasuk yang custom)
         $sumberBahanBakuList = MasterSumber::orderBy('nama')->pluck('nama', 'id');

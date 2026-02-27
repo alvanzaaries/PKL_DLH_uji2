@@ -31,34 +31,46 @@ class IndustriPrimerImport
 
         try {
             \Log::info('Import: Loading file', ['path' => $filePath]);
-            
+
             if (!file_exists($filePath)) {
                 throw new \Exception('File tidak ditemukan: ' . $filePath);
             }
-            
+
             $spreadsheet = IOFactory::load($filePath);
             \Log::info('Import: File loaded successfully');
-            
+
             $worksheet = $spreadsheet->getActiveSheet();
             \Log::info('Import: Got active worksheet');
-            
+
             $rows = $worksheet->toArray();
             \Log::info('Import: Converted to array', ['row_count' => count($rows)]);
 
             // Skip first 4 rows (baris 1-4), header di baris 5 (index 4)
             $header = $rows[4] ?? null;
-            
+
             if (!$header) {
                 throw new \Exception('File Excel tidak memiliki header di baris 5');
             }
-            
+
             \Log::info('Import: Header extracted from row 5', ['header' => $header]);
 
             // Validasi header
             $expectedHeaders = [
-                'Nama Perusahaan', 'Alamat', 'Kabupaten/Kota', 'Latitude', 'Longitude',
-                'Penanggung Jawab', 'Kontak', 'Nomor SK/NIB/SS', 'Tanggal SK','Total Nilai Investasi','Total Pegawai',
-                'Pemberi Izin', 'Jenis Produksi', 'Kapasitas Izin (m³/tahun)', 'Status'
+                'Nama Perusahaan',
+                'Alamat',
+                'Kabupaten/Kota',
+                'Latitude',
+                'Longitude',
+                'Penanggung Jawab',
+                'Kontak',
+                'Nomor SK/NIB/SS',
+                'Tanggal SK',
+                'Total Nilai Investasi',
+                'Total Pegawai',
+                'Pemberi Izin',
+                'Jenis Produksi',
+                'Kapasitas Izin (m³/tahun)',
+                'Status'
             ];
 
             if ($header !== $expectedHeaders) {
@@ -105,7 +117,7 @@ class IndustriPrimerImport
                     ];
                     continue;
                 }
-                
+
                 if (!isset($groupedByCompany[$nomorIzin])) {
                     $groupedByCompany[$nomorIzin] = [];
                 }
@@ -152,7 +164,7 @@ class IndustriPrimerImport
     {
         // Use first row for company data
         $firstRow = $companyRows[0]['row'];
-        
+
         // Extract company data from first row
         $companyData = [
             'nama' => trim($firstRow[0] ?? ''),
@@ -175,16 +187,22 @@ class IndustriPrimerImport
         foreach ($companyRows as $companyRow) {
             $row = $companyRow['row'];
             $rowNumber = $companyRow['rowNumber'];
-            
+
             // Check if company data is consistent
             $inconsistencies = [];
-            if (trim($row[0] ?? '') !== $companyData['nama']) $inconsistencies[] = 'Nama Perusahaan';
-            if (trim($row[1] ?? '') !== $companyData['alamat']) $inconsistencies[] = 'Alamat';
-            if (KabupatenHelper::normalize(trim($row[2] ?? '')) !== $companyData['kabupaten']) $inconsistencies[] = 'Kabupaten';
-            if (trim($row[5] ?? '') !== $companyData['penanggungjawab']) $inconsistencies[] = 'Penanggung Jawab';
-            if (trim($row[6] ?? '') !== $companyData['kontak']) $inconsistencies[] = 'Kontak';
-            if (trim($row[11] ?? '') !== $companyData['pemberi_izin']) $inconsistencies[] = 'Pemberi Izin';
-            
+            if (trim($row[0] ?? '') !== $companyData['nama'])
+                $inconsistencies[] = 'Nama Perusahaan';
+            if (trim($row[1] ?? '') !== $companyData['alamat'])
+                $inconsistencies[] = 'Alamat';
+            if (KabupatenHelper::normalize(trim($row[2] ?? '')) !== $companyData['kabupaten'])
+                $inconsistencies[] = 'Kabupaten';
+            if (trim($row[5] ?? '') !== $companyData['penanggungjawab'])
+                $inconsistencies[] = 'Penanggung Jawab';
+            if (trim($row[6] ?? '') !== $companyData['kontak'])
+                $inconsistencies[] = 'Kontak';
+            if (trim($row[11] ?? '') !== $companyData['pemberi_izin'])
+                $inconsistencies[] = 'Pemberi Izin';
+
             if (!empty($inconsistencies)) {
                 throw new \Exception("Baris $rowNumber: Data tidak konsisten dengan baris lain untuk Nomor Izin yang sama (" . implode(', ', $inconsistencies) . ")");
             }
@@ -212,14 +230,14 @@ class IndustriPrimerImport
         // Parse tanggal
         $tanggal = $this->parseDate($companyData['tanggal']);
         if (!$tanggal) {
-            throw new \Exception('Format tanggal tidak valid. Gunakan format YYYY-MM-DD atau DD/MM/YYYY');
+            throw new \Exception('Format tanggal tidak valid. Gunakan format DD/MM/YYYY atau DD/MM/YYYY');
         }
 
         DB::beginTransaction();
         try {
             // Check if company exists (upsert by nomor_izin)
             $industri = IndustriBase::where('nomor_izin', $companyData['nomor_izin'])->first();
-            
+
             if ($industri) {
                 // Update existing
                 $industri->update([
@@ -270,19 +288,19 @@ class IndustriPrimerImport
             foreach ($companyRows as $companyRow) {
                 $row = $companyRow['row'];
                 $rowNumber = $companyRow['rowNumber'];
-                
+
                 $jenisProduksi = trim($row[12] ?? '');
                 $kapasitasIzin = $row[13] ?? null;
-                
+
                 // Validate production type data
                 if (empty($jenisProduksi)) {
                     throw new \Exception("Baris $rowNumber: Jenis Produksi tidak boleh kosong");
                 }
-                
+
                 if (empty($kapasitasIzin) || !is_numeric($kapasitasIzin)) {
                     throw new \Exception("Baris $rowNumber: Kapasitas Izin harus berupa angka");
                 }
-                
+
                 // Normalize and find master jenis produksi (case-insensitive)
                 $masterJenisProduksi = MasterJenisProduksi::where('kategori', 'primer')
                     ->whereRaw('LOWER(TRIM(nama)) = ?', [strtolower(trim($jenisProduksi))])
@@ -293,11 +311,11 @@ class IndustriPrimerImport
                     $lainnya = MasterJenisProduksi::where('nama', 'Lainnya')
                         ->whereIn('kategori', ['primer', 'both'])
                         ->first();
-                    
+
                     if (!$lainnya) {
                         throw new \Exception("Baris $rowNumber: Master data 'Lainnya' tidak ditemukan. Pastikan seeder sudah dijalankan.");
                     }
-                    
+
                     // Attach with custom name
                     $industriPrimer->jenisProduksi()->attach($lainnya->id, [
                         'kapasitas_izin' => $kapasitasIzin,
@@ -310,10 +328,10 @@ class IndustriPrimerImport
                     ]);
                 }
 
-                
+
                 $totalKapasitas += $kapasitasIzin;
             }
-            
+
             // Update total kapasitas
             $industriPrimer->update(['kapasitas_izin' => $totalKapasitas]);
 
@@ -350,11 +368,11 @@ class IndustriPrimerImport
 
         // Parse string date
         try {
-            // Try YYYY-MM-DD
+            // Try DD/MM/YYYY
             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                 return Carbon::createFromFormat('Y-m-d', $date)->format('Y-m-d');
             }
-            
+
             // Try DD/MM/YYYY
             if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $date)) {
                 return Carbon::createFromFormat('d/m/Y', $date)->format('Y-m-d');

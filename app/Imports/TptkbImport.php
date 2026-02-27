@@ -33,16 +33,27 @@ class TptkbImport
 
             // Skip first 4 rows (baris 1-4), header di baris 5 (index 4)
             $header = $rows[4] ?? null;
-            
+
             if (!$header) {
                 throw new \Exception('File Excel tidak memiliki header di baris 5');
             }
 
             // Validasi header
             $expectedHeaders = [
-                'Nama Perusahaan', 'Alamat', 'Kabupaten/Kota', 'Latitude', 'Longitude',
-                'Penanggung Jawab', 'Kontak', 'Nomor SK', 'Tanggal SK',
-                'Pemberi Izin', 'Sumber Bahan Baku', 'Kapasitas (m³/tahun)', 'Masa Berlaku', 'Status'
+                'Nama Perusahaan',
+                'Alamat',
+                'Kabupaten/Kota',
+                'Latitude',
+                'Longitude',
+                'Penanggung Jawab',
+                'Kontak',
+                'Nomor SK',
+                'Tanggal SK',
+                'Pemberi Izin',
+                'Sumber Bahan Baku',
+                'Kapasitas (m³/tahun)',
+                'Masa Berlaku',
+                'Status'
             ];
 
             if ($header !== $expectedHeaders) {
@@ -82,7 +93,7 @@ class TptkbImport
                     ];
                     continue;
                 }
-                
+
                 if (!isset($groupedByCompany[$nomorIzin])) {
                     $groupedByCompany[$nomorIzin] = [];
                 }
@@ -123,7 +134,7 @@ class TptkbImport
         // Use first row for company data
         $firstRow = $companyRows[0]['row'];
         $firstRowNumber = $companyRows[0]['rowNumber'];
-        
+
         // Parse company data from first row
         $companyData = [
             'nama' => $firstRow[0] ?? null,
@@ -144,16 +155,22 @@ class TptkbImport
         foreach ($companyRows as $companyRow) {
             $row = $companyRow['row'];
             $rowNumber = $companyRow['rowNumber'];
-            
+
             // Check if company data is consistent
             $inconsistencies = [];
-            if (trim($row[0] ?? '') !== trim($companyData['nama'])) $inconsistencies[] = 'Nama Perusahaan';
-            if (trim($row[1] ?? '') !== trim($companyData['alamat'])) $inconsistencies[] = 'Alamat';
-            if (KabupatenHelper::normalize(trim($row[2] ?? '')) !== trim($companyData['kabupaten'])) $inconsistencies[] = 'Kabupaten';
-            if (trim($row[5] ?? '') !== trim($companyData['penanggungjawab'])) $inconsistencies[] = 'Penanggung Jawab';
-            if (trim($row[6] ?? '') !== trim($companyData['kontak'])) $inconsistencies[] = 'Kontak';
-            if (trim($row[9] ?? '') !== trim($companyData['pemberi_izin'])) $inconsistencies[] = 'Pemberi Izin';
-            
+            if (trim($row[0] ?? '') !== trim($companyData['nama']))
+                $inconsistencies[] = 'Nama Perusahaan';
+            if (trim($row[1] ?? '') !== trim($companyData['alamat']))
+                $inconsistencies[] = 'Alamat';
+            if (KabupatenHelper::normalize(trim($row[2] ?? '')) !== trim($companyData['kabupaten']))
+                $inconsistencies[] = 'Kabupaten';
+            if (trim($row[5] ?? '') !== trim($companyData['penanggungjawab']))
+                $inconsistencies[] = 'Penanggung Jawab';
+            if (trim($row[6] ?? '') !== trim($companyData['kontak']))
+                $inconsistencies[] = 'Kontak';
+            if (trim($row[9] ?? '') !== trim($companyData['pemberi_izin']))
+                $inconsistencies[] = 'Pemberi Izin';
+
             if (!empty($inconsistencies)) {
                 throw new \Exception("Baris $rowNumber: Data tidak konsisten dengan baris lain untuk Nomor Izin yang sama (" . implode(', ', $inconsistencies) . ")");
             }
@@ -182,19 +199,19 @@ class TptkbImport
         // Parse tanggal
         $tanggal = $this->parseDate($companyData['tanggal']);
         if (!$tanggal) {
-            throw new \Exception('Format tanggal tidak valid. Gunakan format YYYY-MM-DD atau DD/MM/YYYY');
+            throw new \Exception('Format tanggal tidak valid. Gunakan format DD/MM/YYYY atau DD/MM/YYYY');
         }
 
         $masaBerlaku = $this->parseDate($companyData['masa_berlaku']);
         if (!$masaBerlaku) {
-            throw new \Exception('Format masa berlaku tidak valid. Gunakan format YYYY-MM-DD atau DD/MM/YYYY');
+            throw new \Exception('Format masa berlaku tidak valid. Gunakan format DD/MM/YYYY atau DD/MM/YYYY');
         }
 
         DB::beginTransaction();
         try {
             // Check if company already exists
             $industri = IndustriBase::where('nomor_izin', $companyData['nomor_izin'])->first();
-            
+
             if ($industri) {
                 // Update existing company
                 $industri->update([
@@ -208,13 +225,13 @@ class TptkbImport
                     'tanggal' => $tanggal,
                     'status' => $companyData['status'],
                 ]);
-                
+
                 $tptkb = $industri->tptkb;
                 $tptkb->update([
                     'pemberi_izin' => $companyData['pemberi_izin'],
                     'masa_berlaku' => $masaBerlaku,
                 ]);
-                
+
                 // Clear existing sumber bahan baku
                 $tptkb->sumberBahanBaku()->detach();
             } else {
@@ -248,19 +265,19 @@ class TptkbImport
             foreach ($companyRows as $companyRow) {
                 $row = $companyRow['row'];
                 $rowNumber = $companyRow['rowNumber'];
-                
+
                 $sumberBahanBaku = trim($row[10] ?? '');
                 $kapasitas = $row[11] ?? null;
-                
+
                 // Validate sumber data
                 if (empty($sumberBahanBaku)) {
                     throw new \Exception("Baris $rowNumber: Sumber Bahan Baku tidak boleh kosong");
                 }
-                
+
                 if (empty($kapasitas) || !is_numeric($kapasitas)) {
                     throw new \Exception("Baris $rowNumber: Kapasitas harus berupa angka");
                 }
-                
+
                 // Normalize and find master sumber (case-insensitive)
                 $masterSumber = MasterSumber::whereRaw('LOWER(TRIM(nama)) = ?', [strtolower(trim($sumberBahanBaku))])
                     ->first();
@@ -268,29 +285,29 @@ class TptkbImport
                 if (!$masterSumber) {
                     // Not found in seed - use "Lainnya" with custom name
                     $lainnya = MasterSumber::where('nama', 'Lainnya')->first();
-                    
+
                     if (!$lainnya) {
                         throw new \Exception("Baris $rowNumber: Master data 'Lainnya' tidak ditemukan. Pastikan seeder sudah dijalankan.");
                     }
-                    
+
                     // Attach with custom name
                     $tptkb->sumberBahanBaku()->attach($lainnya->id, [
                         'kapasitas' => $kapasitas,
                         'nama_custom' => $sumberBahanBaku
                     ]);
-                    
+
                     $sumberNames[] = $sumberBahanBaku; // Use custom name
                 } else {
                     // Found in seed - use it
                     $tptkb->sumberBahanBaku()->attach($masterSumber->id, [
                         'kapasitas' => $kapasitas
                     ]);
-                    
+
                     $sumberNames[] = $masterSumber->nama; // Use master name
                 }
 
             }
-            
+
             // Update total kapasitas and sumber names
             $tptkb->update([
                 'kapasitas_izin' => $totalKapasitas,
@@ -330,7 +347,7 @@ class TptkbImport
             if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                 return Carbon::createFromFormat('Y-m-d', $date)->format('Y-m-d');
             }
-            
+
             if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $date)) {
                 return Carbon::createFromFormat('d/m/Y', $date)->format('Y-m-d');
             }

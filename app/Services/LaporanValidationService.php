@@ -163,7 +163,7 @@ class LaporanValidationService
                     if (trim((string) $value) !== '') {
                         $parsedDate = $this->parseManualDate($value);
                         if (!$parsedDate) {
-                            $rowErrors[] = "Baris {$rowNumber}: {$fieldLabel} format tidak valid (gunakan format: YYYY-MM-DD)";
+                            $rowErrors[] = "Baris {$rowNumber}: {$fieldLabel} format tidak valid (gunakan format: DD/MM/YYYY)";
                         } else {
                             // Format for preview (DD/MM/YYYY)
                             $d = \DateTime::createFromFormat('Y-m-d', $parsedDate);
@@ -300,12 +300,13 @@ class LaporanValidationService
         // Reuse validateManualData which has complete validation logic
         $result = $this->validateManualData($manualData, $jenisLaporan);
 
-        // Convert results back from associative array to cells array format
+        // Convert results back to cells array format
         // because controller expects cells array format for wrapping
+        // NOTE: validateManualData returns cells as INDEXED arrays, not associative!
         $cellsRows = [];
         foreach ($result['rows'] as $rowData) {
-            // rowData is ['cells' => associative_array, 'source_row' => X]
-            // cells is like: ['jenis_kayu' => 'Meranti', 'persediaan_awal_volume' => 100, ...]
+            // rowData is ['cells' => indexed_array, 'source_row' => X]
+            // cells is like: ['Meranti', 100, 50, ...] - indexed, not associative
             $cells = $rowData['cells'] ?? $rowData;
 
             // If cells is not an array, skip this row
@@ -313,15 +314,9 @@ class LaporanValidationService
                 continue;
             }
 
-            // Convert associative array to indexed array based on field order
-            // The field order must match the original column order in Excel/form
-            $cellsArray = [];
-            foreach ($fields as $fieldName) {
-                // Preserve the value from the associative array
-                $cellsArray[] = $cells[$fieldName] ?? '';
-            }
-
-            $cellsRows[] = $cellsArray;
+            // cells is already an indexed array in the correct order (matching headers/fields)
+            // Just use it directly - no need to re-convert
+            $cellsRows[] = array_values($cells);
         }
 
         // Return in the same format but with cells as indexed arrays
@@ -335,7 +330,7 @@ class LaporanValidationService
     }
 
     /**
-     * Helper: Parse tanggal dari input manual (format HTML date input: YYYY-MM-DD)
+     * Helper: Parse tanggal dari input manual (format HTML date input: DD/MM/YYYY)
      */
     private function parseManualDate($value): ?string
     {
@@ -345,7 +340,7 @@ class LaporanValidationService
 
         $s = trim((string) $value);
 
-        // HTML date input returns YYYY-MM-DD format
+        // HTML date input returns DD/MM/YYYY format
         if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $s)) {
             $d = \DateTime::createFromFormat('Y-m-d', $s);
             if ($d !== false) {
@@ -402,7 +397,7 @@ class LaporanValidationService
             } else {
                 $tanggal = $this->parseExcelDate($row[1]);
                 if (!$tanggal) {
-                    $rowErrors[] = "Baris {$rowNumber}: Format tanggal tidak valid (gunakan format: DD/MM/YYYY atau YYYY-MM-DD)";
+                    $rowErrors[] = "Baris {$rowNumber}: Format tanggal tidak valid (gunakan format: DD/MM/YYYY atau DD/MM/YYYY)";
                 } else {
                     // Untuk preview, tampilkan tanggal dalam format yang mudah dibaca (DD/MM/YYYY)
                     $d = \DateTime::createFromFormat('Y-m-d', $tanggal);
@@ -1040,7 +1035,7 @@ class LaporanValidationService
         // Try to robustly parse common ambiguous formats (DD/MM/YYYY vs MM/DD/YYYY)
         $s = trim((string) $value);
 
-        // If ISO-like year first (YYYY-MM-DD or YYYY/MM/DD)
+        // If ISO-like year first (DD/MM/YYYY or YYYY/MM/DD)
         if (preg_match('/^\d{4}[\-\/]\d{1,2}[\-\/]\d{1,2}$/', $s)) {
             $d = \DateTime::createFromFormat('Y-m-d', str_replace('/', '-', $s));
             if ($d !== false)
