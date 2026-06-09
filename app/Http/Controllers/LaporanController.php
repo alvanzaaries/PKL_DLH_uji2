@@ -55,7 +55,7 @@ class LaporanController extends Controller
                 'industri_id' => 'required|exists:industries,id',
                 'bulan' => 'required|integer|between:1,12',
                 'tahun' => 'required|integer|min:2020',
-                'jenis_laporan' => 'required|string',
+                'jenis_laporan_id' => 'required|exists:master_jenis_laporan,id',
                 'manual_data' => 'required|array|min:1',
             ]);
         } else {
@@ -63,14 +63,16 @@ class LaporanController extends Controller
                 'industri_id' => 'required|exists:industries,id',
                 'bulan' => 'required|integer|between:1,12',
                 'tahun' => 'required|integer|min:2020',
-                'jenis_laporan' => 'required|string',
+                'jenis_laporan_id' => 'required|exists:master_jenis_laporan,id',
                 'file_excel' => 'required|file|mimes:xlsx,xls|max:5120',
             ]);
         }
 
+        $jenisLaporanModel = \App\Models\JenisLaporan::findOrFail($request->jenis_laporan_id);
+
         // Validasi unique: cek apakah sudah ada laporan untuk industri, bulan, tahun, dan jenis yang sama
         $existingLaporan = Laporan::where('industri_id', $request->industri_id)
-            ->where('jenis_laporan', $request->jenis_laporan)
+            ->where('jenis_laporan_id', $request->jenis_laporan_id)
             ->whereYear('tanggal', $request->tahun)
             ->whereMonth('tanggal', $request->bulan)
             ->first();
@@ -97,11 +99,11 @@ class LaporanController extends Controller
 
             return back()
                 ->withInput()
-                ->with('error', 'Upload gagal! Laporan "' . $request->jenis_laporan . '" untuk periode ' . $namaBulan . ' ' . $request->tahun . ' sudah ada. Setiap jenis laporan hanya dapat diupload sekali per bulan.');
+                ->with('error', 'Upload gagal! Laporan "' . $jenisLaporanModel->nama . '" untuk periode ' . $namaBulan . ' ' . $request->tahun . ' sudah ada. Setiap jenis laporan hanya dapat diupload sekali per bulan.');
         }
 
         try {
-            $jenisLaporan = $request->jenis_laporan;
+            $jenisLaporan = $jenisLaporanModel->nama;
             $filePath = null;
 
             if ($isManualMode) {
@@ -125,6 +127,7 @@ class LaporanController extends Controller
                     'industri_id' => $request->industri_id,
                     'bulan' => $request->bulan,
                     'tahun' => $request->tahun,
+                    'jenis_laporan_id' => $jenisLaporanModel->id,
                     'jenis_laporan' => $jenisLaporan,
                     'is_manual' => $isManualMode, // Flag to indicate manual mode
                 ],
@@ -243,14 +246,17 @@ class LaporanController extends Controller
         $industri = \App\Models\Industri::findOrFail($industriId);
 
         $laporans = Laporan::where('industri_id', $industriId)
-            ->with('user')
+            ->with(['user', 'jenisLaporan'])
             ->orderBy('tanggal', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
+        $jenisLaporans = \App\Models\JenisLaporan::orderBy('nama')->get();
+
         return view('laporan/laporanByIndustri', [
             'industri' => $industri,
-            'laporans' => $laporans
+            'laporans' => $laporans,
+            'jenisLaporans' => $jenisLaporans
         ]);
     }
 
@@ -260,9 +266,11 @@ class LaporanController extends Controller
     public function showUploadForm()
     {
         $industries = \App\Models\Industri::orderBy('nama')->get();
+        $jenisLaporans = \App\Models\JenisLaporan::orderBy('nama')->get();
 
         return view('laporan/uploadLaporan', [
-            'industries' => $industries
+            'industries' => $industries,
+            'jenisLaporans' => $jenisLaporans
         ]);
     }
 
@@ -283,9 +291,12 @@ class LaporanController extends Controller
             'industri_id' => 'required|exists:industries,id',
             'bulan' => 'required|integer|between:1,12',
             'tahun' => 'required|integer|min:2020',
-            'jenis_laporan' => 'required|string',
+            'jenis_laporan_id' => 'required|exists:master_jenis_laporan,id',
             'confirmed_preview' => 'required',
         ]);
+
+        $jenisLaporan = \App\Models\JenisLaporan::findOrFail($request->jenis_laporan_id);
+        $request->merge(['jenis_laporan' => $jenisLaporan->nama]);
 
         // Cek apakah ada data preview di session
         if (!session()->has('preview_data')) {
@@ -329,7 +340,7 @@ class LaporanController extends Controller
                 'first_row_sample' => count($dataRows) > 0 ? (is_array($dataRows[0]) ? array_slice($dataRows[0], 0, 3, true) : $dataRows[0]) : null,
             ]);
 
-            $validationResult = $this->validateEditedDataUsingService($dataRows, $request->jenis_laporan, $rowNumberMap);
+            $validationResult = $this->validateEditedDataUsingService($dataRows, $jenisLaporan->nama, $rowNumberMap);
 
             // DEBUG: Log validation result
             \Log::info('Revalidation result', [
@@ -355,7 +366,8 @@ class LaporanController extends Controller
                     'industri_id' => $request->industri_id,
                     'bulan' => $request->bulan,
                     'tahun' => $request->tahun,
-                    'jenis_laporan' => $request->jenis_laporan,
+                    'jenis_laporan_id' => $request->jenis_laporan_id,
+                    'jenis_laporan' => $jenisLaporan->nama,
                 ],
                 'redirect_after_save' => session('redirect_after_save')
             ]);
@@ -385,7 +397,7 @@ class LaporanController extends Controller
 
         // Validasi unique lagi sebelum menyimpan (double check)
         $existingLaporan = Laporan::where('industri_id', $request->industri_id)
-            ->where('jenis_laporan', $request->jenis_laporan)
+            ->where('jenis_laporan_id', $request->jenis_laporan_id)
             ->whereYear('tanggal', $request->tahun)
             ->whereMonth('tanggal', $request->bulan)
             ->first();
@@ -411,7 +423,7 @@ class LaporanController extends Controller
             ][$request->bulan];
 
             return redirect()->route('laporan.upload.form')
-                ->with('error', 'Upload gagal! Laporan "' . $request->jenis_laporan . '" untuk periode ' . $namaBulan . ' ' . $request->tahun . ' sudah ada. Setiap jenis laporan hanya dapat diupload sekali per bulan.');
+                ->with('error', 'Upload gagal! Laporan "' . $jenisLaporan->nama . '" untuk periode ' . $namaBulan . ' ' . $request->tahun . ' sudah ada. Setiap jenis laporan hanya dapat diupload sekali per bulan.');
         }
 
         try {
@@ -440,7 +452,7 @@ class LaporanController extends Controller
                     }
                     $needsRevalidation = true;
                     \Log::info('Edited data detected, revalidation needed', [
-                        'jenis_laporan' => $request->jenis_laporan,
+                        'jenis_laporan' => $jenisLaporan->nama,
                         'row_count' => count($dataRows),
                         'first_row' => $dataRows[0] ?? null,
                     ]);
@@ -453,7 +465,7 @@ class LaporanController extends Controller
 
                 // Buat temporary file dengan data yang sudah diedit untuk validasi
                 // Kita akan validasi manual menggunakan validation service
-                $validationResult = $this->validateEditedDataUsingService($dataRows, $request->jenis_laporan, $rowNumberMap ?? []);
+                $validationResult = $this->validateEditedDataUsingService($dataRows, $jenisLaporan->nama, $rowNumberMap ?? []);
 
                 \Log::info('Revalidation completed', [
                     'error_count' => count($validationResult['errors'] ?? []),
@@ -483,7 +495,8 @@ class LaporanController extends Controller
                             'industri_id' => $request->industri_id,
                             'bulan' => $request->bulan,
                             'tahun' => $request->tahun,
-                            'jenis_laporan' => $request->jenis_laporan,
+                            'jenis_laporan_id' => $request->jenis_laporan_id,
+                            'jenis_laporan' => $jenisLaporan->nama,
                         ],
                         'redirect_after_save' => session('redirect_after_save')
                     ]);
@@ -501,7 +514,7 @@ class LaporanController extends Controller
             $laporan = Laporan::create([
                 'industri_id' => $request->industri_id,
                 'user_id' => auth()->id(),
-                'jenis_laporan' => $request->jenis_laporan,
+                'jenis_laporan_id' => $request->jenis_laporan_id,
                 'tanggal' => $tanggal,
                 'path_laporan' => '', // String kosong untuk memenuhi constraint NOT NULL
             ]);
@@ -515,11 +528,11 @@ class LaporanController extends Controller
             // Simpan detail berdasarkan jenis laporan menggunakan service (gunakan edited data jika ada)
             Log::info('Starting detail data save', [
                 'laporan_id' => $laporan->id,
-                'jenis' => $request->jenis_laporan,
+                'jenis' => $jenisLaporan->nama,
                 'rows_count' => count($cleanedRows)
             ]);
 
-            $this->dataService->saveDetailData($laporan, $request->jenis_laporan, $cleanedRows);
+            $this->dataService->saveDetailData($laporan, $jenisLaporan->nama, $cleanedRows);
 
             Log::info('Detail data saved successfully', ['laporan_id' => $laporan->id]);
 
@@ -562,7 +575,7 @@ class LaporanController extends Controller
                 'exception_message' => $e->getMessage(),
                 'exception_trace' => $e->getTraceAsString(),
                 'industri_id' => $request->industri_id ?? null,
-                'jenis_laporan' => $request->jenis_laporan ?? null,
+                'jenis_laporan_id' => $request->jenis_laporan_id ?? null,
                 'bulan' => $request->bulan ?? null,
                 'tahun' => $request->tahun ?? null,
                 'has_edited_data' => $request->has('edited_data'),
@@ -725,14 +738,10 @@ class LaporanController extends Controller
         return $this->exportService->exportRekapTahunan($rekapData, $tahun, $kategoriLabel, $groupByLabel);
     }
 
-    /**
-     * Menampilkan halaman detail data laporan berdasarkan master laporan id dan industri
-     * Route: /laporan/{industri}/detail/{id}
-     */
     public function detailLaporan(Request $request, $industri, $id)
     {
-        // Temukan master laporan
-        $laporan = Laporan::findOrFail($id);
+        // Temukan master laporan beserta jenisLaporan
+        $laporan = Laporan::with('jenisLaporan')->findOrFail($id);
 
         // Pastikan laporan ini milik industri yang diberikan di URL
         if ((int) $laporan->industri_id !== (int) $industri) {
@@ -744,20 +753,8 @@ class LaporanController extends Controller
         $tahun = (int) \Carbon\Carbon::parse($laporan->tanggal)->year;
         $perPage = $request->input('per_page', 25); // Default 25 items per page
 
-        $jenisOptions = [
-            'penerimaan_kayu_bulat' => 'Laporan Penerimaan Kayu Bulat',
-            'penerimaan_kayu_olahan' => 'Laporan Penerimaan Kayu Olahan',
-            'mutasi_kayu_bulat' => 'Laporan Mutasi Kayu Bulat (LMKB)',
-            'mutasi_kayu_olahan' => 'Laporan Mutasi Kayu Olahan (LMKO)',
-            'penjualan_kayu_olahan' => 'Laporan Penjualan Kayu Olahan',
-        ];
-
-        // Cari slug jenis berdasarkan label yang tersimpan di master laporan
-        $jenis = array_search($laporan->jenis_laporan, $jenisOptions);
-        if ($jenis === false) {
-            return redirect()->route('laporan.rekap', ['bulan' => $bulan, 'tahun' => $tahun])
-                ->with('error', 'Jenis laporan tidak valid.');
-        }
+        $jenis = $laporan->jenisLaporan->slug;
+        $jenisLabel = $laporan->jenisLaporan->nama;
 
         // Build filters array dari query (jika ada)
         $filters = [];
@@ -784,7 +781,7 @@ class LaporanController extends Controller
             'bulan' => $bulan,
             'tahun' => $tahun,
             'jenis' => $jenis,
-            'jenisLabel' => $jenisOptions[$jenis],
+            'jenisLabel' => $jenisLabel,
             'items' => $detailData['items'],
             'filterOptions' => $detailData['filterOptions'],
             'grandTotal' => $detailData['grandTotal'] ?? [],
@@ -797,28 +794,28 @@ class LaporanController extends Controller
      */
     public function destroy($industri, $id)
     {
-        $laporan = Laporan::findOrFail($id);
+        $laporan = Laporan::with('jenisLaporan')->findOrFail($id);
 
         // Pastikan laporan ini milik industri yang dimaksud
         if ($laporan->industri_id != $industri) {
             return redirect()->back()->with('error', 'Data tidak valid');
         }
 
-        // Hapus semua data detail terkait laporan ini berdasarkan jenis laporan
-        switch ($laporan->jenis_laporan) {
-            case 'Laporan Penerimaan Kayu Bulat':
+        // Hapus semua data detail terkait laporan ini berdasarkan jenis laporan slug
+        switch ($laporan->jenisLaporan->slug) {
+            case 'penerimaan_kayu_bulat':
                 \App\Models\laporan_penerimaan_kayu_bulat::where('laporan_id', $id)->delete();
                 break;
-            case 'Laporan Mutasi Kayu Bulat (LMKB)':
+            case 'mutasi_kayu_bulat':
                 \App\Models\laporan_mutasi_kayu_bulat::where('laporan_id', $id)->delete();
                 break;
-            case 'Laporan Penerimaan Kayu Olahan':
+            case 'penerimaan_kayu_olahan':
                 \App\Models\laporan_penerimaan_kayu_olahan::where('laporan_id', $id)->delete();
                 break;
-            case 'Laporan Mutasi Kayu Olahan (LMKO)':
+            case 'mutasi_kayu_olahan':
                 \App\Models\laporan_mutasi_kayu_olahan::where('laporan_id', $id)->delete();
                 break;
-            case 'Laporan Penjualan Kayu Olahan':
+            case 'penjualan_kayu_olahan':
                 \App\Models\laporan_penjualan_kayu_olahan::where('laporan_id', $id)->delete();
                 break;
         }
@@ -928,14 +925,18 @@ class LaporanController extends Controller
             $bulanNama = $tanggal->translatedFormat('F');
 
             // Get all reports for this industry in the same month
-            $laporansInMonth = Laporan::where('industri_id', $industri->id)
+            $laporansInMonth = Laporan::with('jenisLaporan')
+                ->where('industri_id', $industri->id)
                 ->whereMonth('tanggal', $bulan)
                 ->whereYear('tanggal', $tahun)
-                ->orderBy('jenis_laporan')
                 ->get();
 
-            // Get unique report types
-            $jenisLaporanList = $laporansInMonth->pluck('jenis_laporan')->unique()->values()->toArray();
+            // Get unique report types sorted by name
+            $jenisLaporanList = $laporansInMonth->map(fn($l) => $l->jenisLaporan->nama)
+                ->unique()
+                ->sort()
+                ->values()
+                ->toArray();
 
             // Use the first laporan ID for the receipt number (8 digits with leading zeros)
             $firstLaporan = $laporansInMonth->first();
@@ -1038,10 +1039,10 @@ class LaporanController extends Controller
             if ($industri && strtolower($dbIzin) === strtolower($inputIzin)) {
 
                 // Get all reports for this industry in the specified month
-                $laporans = Laporan::where('industri_id', $industri->id)
+                $laporans = Laporan::with('jenisLaporan')
+                    ->where('industri_id', $industri->id)
                     ->whereMonth('tanggal', $request->bulan)
                     ->whereYear('tanggal', $request->tahun)
-                    ->orderBy('jenis_laporan')
                     ->get();
 
                 if ($laporans->isEmpty()) {
@@ -1050,7 +1051,11 @@ class LaporanController extends Controller
                         ->with('error', 'Tidak ada laporan untuk periode yang dipilih.');
                 }
 
-                $jenisLaporanList = $laporans->pluck('jenis_laporan')->unique()->values()->toArray();
+                $jenisLaporanList = $laporans->map(fn($l) => $l->jenisLaporan->nama)
+                    ->unique()
+                    ->sort()
+                    ->values()
+                    ->toArray();
 
                 return redirect()->route('laporan.bukti')
                     ->withInput()
@@ -1097,7 +1102,8 @@ class LaporanController extends Controller
         $industri = \App\Models\Industri::findOrFail($request->industri_id);
 
         // Get all reports for this industry in the specified month, ordered by latest
-        $laporans = Laporan::where('industri_id', $industri->id)
+        $laporans = Laporan::with('jenisLaporan')
+            ->where('industri_id', $industri->id)
             ->whereMonth('tanggal', $request->bulan)
             ->whereYear('tanggal', $request->tahun)
             ->orderBy('created_at', 'desc')
@@ -1108,7 +1114,11 @@ class LaporanController extends Controller
         }
 
         // Get unique report types
-        $jenisLaporanList = $laporans->pluck('jenis_laporan')->unique()->values()->toArray();
+        $jenisLaporanList = $laporans->map(fn($l) => $l->jenisLaporan->nama)
+            ->unique()
+            ->sort()
+            ->values()
+            ->toArray();
 
         // Use the latest laporan ID (8 digits with leading zeros)
         $latestLaporan = $laporans->first();

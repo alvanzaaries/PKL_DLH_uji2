@@ -36,7 +36,7 @@
                                 {{ $laporan->industri->nama ?? '-' }}
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-900 font-medium">
-                                {{ $laporan->jenis_laporan }}
+                                {{ $laporan->jenisLaporan->nama ?? '-' }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                 {{ \Carbon\Carbon::parse($laporan->tanggal)->translatedFormat('F Y') }}
@@ -50,25 +50,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
                                 <div class="flex items-center gap-2">
                                     @php
-                                        // Map human-readable jenis_laporan to route 'jenis' slugs used by detail view
-                                        $jenisSlug = null;
-                                        switch ($laporan->jenis_laporan) {
-                                            case 'Laporan Penerimaan Kayu Bulat':
-                                                $jenisSlug = 'penerimaan_kayu_bulat';
-                                                break;
-                                            case 'Laporan Mutasi Kayu Bulat (LMKB)':
-                                                $jenisSlug = 'mutasi_kayu_bulat';
-                                                break;
-                                            case 'Laporan Penerimaan Kayu Olahan':
-                                                $jenisSlug = 'penerimaan_kayu_olahan';
-                                                break;
-                                            case 'Laporan Mutasi Kayu Olahan (LMKO)':
-                                                $jenisSlug = 'mutasi_kayu_olahan';
-                                                break;
-                                            case 'Laporan Penjualan Kayu Olahan':
-                                                $jenisSlug = 'penjualan_kayu_olahan';
-                                                break;
-                                        }
+                                        $jenisSlug = $laporan->jenisLaporan->slug ?? null;
                                         $bulan = \Carbon\Carbon::parse($laporan->tanggal)->month;
                                         $tahun = \Carbon\Carbon::parse($laporan->tanggal)->year;
                                     @endphp
@@ -81,7 +63,7 @@
                                     @endif
 
                                     <button type="button"
-                                        onclick="confirmDelete('{{ $laporan->id }}', '{{ $laporan->industri_id }}', '{{ $laporan->jenis_laporan }}', '{{ \Carbon\Carbon::parse($laporan->tanggal)->translatedFormat('F Y') }}')"
+                                        onclick="confirmDelete('{{ $laporan->id }}', '{{ $laporan->industri_id }}', '{{ $laporan->jenisLaporan->nama ?? '' }}', '{{ \Carbon\Carbon::parse($laporan->tanggal)->translatedFormat('F Y') }}')"
                                         class="text-red-600 hover:text-red-800 font-medium" title="Hapus Laporan">
                                         <i class="fas fa-trash-alt"></i>
                                     </button>

@@ -111,11 +111,13 @@
 
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Jenis Dokumen</label>
-                            <select name="jenis_laporan" id="jenis_laporan" required
+                            <select name="jenis_laporan_id" id="jenis_laporan" required
                                 class="w-full form-input px-3 py-2 border text-sm">
                                 <option value="">-- Pilih Jenis --</option>
-                                @foreach (\App\Models\Laporan::JENIS_LAPORAN as $jenis)
-                                    <option value="{{ $jenis }}">{{ $jenis }}</option>
+                                @foreach ($jenisLaporans as $jenis)
+                                    <option value="{{ $jenis->id }}" data-nama="{{ $jenis->nama }}" {{ old('jenis_laporan_id') == $jenis->id ? 'selected' : '' }}>
+                                        {{ $jenis->nama }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -365,7 +367,9 @@
             // Listen to jenis laporan changes
             jenisLaporanSelect.addEventListener('change', (e) => {
                 if (currentMode === 'manual') {
-                    initializeTable(e.target.value);
+                    const selectedOption = e.target.options[e.target.selectedIndex];
+                    const namaJenis = selectedOption ? selectedOption.getAttribute('data-nama') : '';
+                    initializeTable(namaJenis);
                 }
             });
 
@@ -402,7 +406,9 @@
                 noteText.textContent = 'Masukkan data laporan secara manual pada tabel di atas. Pastikan semua kolom terisi dengan benar sebelum melakukan preview.';
 
                 // Initialize table based on current selection
-                initializeTable(jenisLaporanSelect.value);
+                const selectedOption = jenisLaporanSelect.options[jenisLaporanSelect.selectedIndex];
+                const namaJenis = selectedOption ? selectedOption.getAttribute('data-nama') : '';
+                initializeTable(namaJenis);
             });
 
             // Add row function
@@ -498,7 +504,9 @@
                 if (currentMode === 'manual') {
                     manualTableBody.innerHTML = '';
                     rowCounter = 0;
-                    initializeTable(jenisLaporanSelect.value);
+                    const selectedOption = jenisLaporanSelect.options[jenisLaporanSelect.selectedIndex];
+                    const namaJenis = selectedOption ? selectedOption.getAttribute('data-nama') : '';
+                    initializeTable(namaJenis);
                 }
             });
         </script>

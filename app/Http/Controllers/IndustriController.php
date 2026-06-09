@@ -48,7 +48,9 @@ class IndustriController extends Controller
                     ->whereYear('tanggal', $tahun)
                     ->whereMonth('tanggal', $bulan);
                 if ($jenisLaporan) {
-                    $laporanQuery->where('jenis_laporan', $jenisLaporan);
+                    $laporanQuery->whereHas('jenisLaporan', function ($q) use ($jenisLaporan) {
+                        $q->where('nama', $jenisLaporan);
+                    });
                 }
                 $adaLaporan = $laporanQuery->exists();
                 if ($adaLaporan) {
@@ -97,9 +99,10 @@ class IndustriController extends Controller
 
         // Hitung jumlah laporan masuk per jenis (untuk kartu navigasi)
         $laporanCountsQuery = Laporan::query()
-            ->select('jenis_laporan', DB::raw('COUNT(*) as total'))
-            ->whereYear('tanggal', $tahun)
-            ->groupBy('jenis_laporan');
+            ->join('master_jenis_laporan', 'laporan.jenis_laporan_id', '=', 'master_jenis_laporan.id')
+            ->select('master_jenis_laporan.nama as jenis_laporan', DB::raw('COUNT(*) as total'))
+            ->whereYear('laporan.tanggal', $tahun)
+            ->groupBy('master_jenis_laporan.nama');
 
         if ($kabupatenKota) {
             $laporanCountsQuery->whereHas('industri', function ($q) use ($kabupatenKota) {
@@ -138,6 +141,7 @@ class IndustriController extends Controller
         $kabupatenKota = request('kabupaten'); // Filter kabupaten/kota
         $jenisLaporan = request('jenis_laporan'); // Filter jenis laporan
         $statusIndustri = request('status_industri', 'aktif'); // Default: hanya industri aktif
+        $jenisIndustri = request('jenis_industri'); // Filter jenis industri
 
         $bulanSekarang = (int) date('n'); // Bulan saat ini (1-12)
         $tahunSekarang = (int) date('Y'); // Tahun saat ini
@@ -150,12 +154,18 @@ class IndustriController extends Controller
 
         // Filter berdasarkan status industri (default: hanya aktif)
         if ($statusIndustri !== 'semua') {
-            $query->where('status', $statusIndustri);
+            $dbStatus = ($statusIndustri === 'aktif') ? 'Aktif' : 'Tidak Aktif';
+            $query->where('status', $dbStatus);
         }
 
         if ($kabupatenKota) {
             $query->where('kabupaten', $kabupatenKota);
         }
+
+        if ($jenisIndustri) {
+            $query->where('type', $jenisIndustri);
+        }
+
         $companies = $query->get()->map(function ($industri) use ($tahun, $bulanSekarang, $tahunSekarang, $jenisLaporan) {
             $laporanPerBulan = [];
             for ($bulan = 1; $bulan <= 12; $bulan++) {
@@ -163,7 +173,9 @@ class IndustriController extends Controller
                     ->whereYear('tanggal', $tahun)
                     ->whereMonth('tanggal', $bulan);
                 if ($jenisLaporan) {
-                    $laporanQuery->where('jenis_laporan', $jenisLaporan);
+                    $laporanQuery->whereHas('jenisLaporan', function ($q) use ($jenisLaporan) {
+                        $q->where('nama', $jenisLaporan);
+                    });
                 }
                 $adaLaporan = $laporanQuery->exists();
                 if ($adaLaporan) {
@@ -180,6 +192,7 @@ class IndustriController extends Controller
                 'nama' => $industri->nama,
                 'kabupaten' => $industri->kabupaten,
                 'type' => $industri->type ?? $industri->getJenisIndustri(),
+                'status' => $industri->status,
                 'laporan' => $laporanPerBulan
             ];
         });

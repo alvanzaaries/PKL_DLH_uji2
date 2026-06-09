@@ -69,7 +69,12 @@
         @endif
 
         <!-- Error Messages (top-level) -->
-        @php $topList = $displayErrors ?? ($data['errors'] ?? []); @endphp
+        @php
+            $topList = $displayErrors ?? ($data['errors'] ?? []);
+            if ($errors->any()) {
+                $topList = array_merge($topList, $errors->all());
+            }
+        @endphp
         @if(!empty($topList))
             <div class="error-alert">
                 <div class="error-header">
@@ -234,6 +239,7 @@
 
             <!-- Hidden inputs untuk metadata -->
             <input type="hidden" name="industri_id" value="{{ $metadata['industri_id'] }}">
+            <input type="hidden" name="jenis_laporan_id" value="{{ $metadata['jenis_laporan_id'] }}">
             <input type="hidden" name="bulan" value="{{ $metadata['bulan'] }}">
             <input type="hidden" name="tahun" value="{{ $metadata['tahun'] }}">
             <input type="hidden" name="jenis_laporan" value="{{ $metadata['jenis_laporan'] }}">
