@@ -368,6 +368,24 @@ class ReconciliationController extends Controller
 
         $file = $request->file('file');
 
+        // --- Validasi header sheet agar sesuai format yang diharapkan ---
+        try {
+            $sheetCheck = IOFactory::load($file->getPathname())->getSheet(0);
+            $colE = trim((string) $sheetCheck->getCell('E1')->getValue());
+            $colG = trim((string) $sheetCheck->getCell('G1')->getValue());
+        } catch (\Exception $e) {
+            return redirect()->route('user.upload')->withErrors(['file' => 'Gagal membaca file Excel. Pastikan file bukan korup dan berekstensi .xlsx/.xls.']);
+        }
+
+        // Pastikan kolom E dan G sesuai sample (E = Jenis HH, G = Satuan)
+        if (strtoupper($colE) !== 'JENIS HH' && strtoupper($colE) !== 'JENIS HH*' && stripos($colE, 'JENIS') === false) {
+            return redirect()->route('user.upload')->withErrors(['file' => 'Format kolom tidak sesuai. Pastikan Kolom E berisi "Jenis HH" sesuai format contoh.']);
+        }
+
+        if (strtoupper($colG) !== 'SATUAN' && stripos($colG, 'SATUAN') === false) {
+            return redirect()->route('user.upload')->withErrors(['file' => 'Format kolom tidak sesuai. Pastikan Kolom G berisi "Satuan" sesuai format contoh.']);
+        }
+
         $recon = Reconciliation::create([
             'year' => $request->year,
             'quarter' => $request->quarter,
