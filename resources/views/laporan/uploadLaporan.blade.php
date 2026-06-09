@@ -93,12 +93,12 @@
 
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Jenis Dokumen</label>
-                            <select name="jenis_laporan" id="jenis_laporan" required
+                            <select name="jenis_laporan_id" id="jenis_laporan" required
                                 class="w-full form-input px-3 py-2 border text-sm">
                                 <option value="">-- Pilih Jenis --</option>
-                                @foreach (\App\Models\Laporan::JENIS_LAPORAN as $jenis)
-                                    <option value="{{ $jenis }}" {{ old('jenis_laporan') == $jenis ? 'selected' : '' }}>
-                                        {{ $jenis }}
+                                @foreach ($jenisLaporans as $jenis)
+                                    <option value="{{ $jenis->id }}" data-nama="{{ $jenis->nama }}" {{ old('jenis_laporan_id') == $jenis->id ? 'selected' : '' }}>
+                                        {{ $jenis->nama }}
                                     </option>
                                 @endforeach
                             </select>
@@ -351,7 +351,9 @@
         // Listen to jenis laporan changes
         jenisLaporanSelect.addEventListener('change', (e) => {
             if (currentMode === 'manual') {
-                initializeTable(e.target.value);
+                const selectedOption = e.target.options[e.target.selectedIndex];
+                const namaJenis = selectedOption ? selectedOption.getAttribute('data-nama') : '';
+                initializeTable(namaJenis);
             }
         });
 
@@ -388,7 +390,9 @@
             noteText.textContent = 'Masukkan data laporan secara manual pada tabel di atas. Pastikan semua kolom terisi dengan benar sebelum melakukan preview.';
 
             // Initialize table based on current selection
-            initializeTable(jenisLaporanSelect.value);
+            const selectedOption = jenisLaporanSelect.options[jenisLaporanSelect.selectedIndex];
+            const namaJenis = selectedOption ? selectedOption.getAttribute('data-nama') : '';
+            initializeTable(namaJenis);
         });
 
         // Add row function
@@ -448,23 +452,39 @@
             });
         });
 
+        function validateAndSetFile(file) {
+            if (!file) return false;
+            
+            const allowedExtensions = /(\.xlsx|\.xls)$/i;
+            if (!allowedExtensions.exec(file.name)) {
+                alert('Format file tidak didukung! Harap unggah file dengan format Excel (.xlsx atau .xls).');
+                excelFile.value = '';
+                fileName.innerHTML = `<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i> Format file harus .xlsx atau .xls</span>`;
+                return false;
+            }
+            
+            fileName.innerHTML = `<i class="fas fa-check mr-1"></i> ${file.name}`;
+            return true;
+        }
+
         dropZone.addEventListener('drop', (e) => {
             const files = e.dataTransfer.files;
             if (files.length > 0) {
-                excelFile.files = files;
-                updateFileName(files[0]);
+                if (validateAndSetFile(files[0])) {
+                    excelFile.files = files;
+                } else {
+                    excelFile.value = '';
+                }
             }
         });
 
         excelFile.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
-                updateFileName(e.target.files[0]);
+                if (!validateAndSetFile(e.target.files[0])) {
+                    excelFile.value = '';
+                }
             }
         });
-
-        function updateFileName(file) {
-            fileName.innerHTML = `<i class="fas fa-check mr-1"></i> ${file.name}`;
-        }
 
         // Form validation before submit
         uploadForm.addEventListener('submit', (e) => {
@@ -473,6 +493,21 @@
                 if (rows.length === 0) {
                     e.preventDefault();
                     alert('Harap tambahkan minimal satu baris data sebelum melakukan preview.');
+                    return false;
+                }
+            } else if (currentMode === 'excel') {
+                if (!excelFile.files || excelFile.files.length === 0) {
+                    e.preventDefault();
+                    alert('Harap pilih file Excel terlebih dahulu.');
+                    return false;
+                }
+                const file = excelFile.files[0];
+                const allowedExtensions = /(\.xlsx|\.xls)$/i;
+                if (!allowedExtensions.exec(file.name)) {
+                    e.preventDefault();
+                    alert('Format file tidak didukung! Harap unggah file dengan format Excel (.xlsx atau .xls).');
+                    excelFile.value = '';
+                    fileName.innerHTML = `<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i> Format file harus .xlsx atau .xls</span>`;
                     return false;
                 }
             }
@@ -484,9 +519,114 @@
             if (currentMode === 'manual') {
                 manualTableBody.innerHTML = '';
                 rowCounter = 0;
-                initializeTable(jenisLaporanSelect.value);
+                const selectedOption = jenisLaporanSelect.options[jenisLaporanSelect.selectedIndex];
+                const namaJenis = selectedOption ? selectedOption.getAttribute('data-nama') : '';
+                initializeTable(namaJenis);
             }
+            // Reset Select2
+            $('#industri_id').val('').trigger('change');
         });
     </script>
-
 @endsection
+
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        /* Modern Select2 Styling matching Tailwind */
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #D1D5DB; /* border-gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            height: 38px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .select2-container--default .select2-selection--single:hover {
+            border-color: #9CA3AF;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+            right: 8px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            padding-left: 12px;
+            padding-right: 50px; /* Space for clear btn and arrow */
+            color: #1F2937; /* gray-800 */
+            font-size: 0.875rem; /* text-sm */
+        }
+        .select2-container--default .select2-selection--single .select2-selection__placeholder {
+            color: #9CA3AF;
+        }
+        .select2-container--default .select2-selection--single:focus-within,
+        .select2-container--default.select2-container--open .select2-selection--single {
+            outline: none;
+            border-color: #1A4030;
+            box-shadow: 0 0 0 1px #1A4030;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__clear {
+            position: absolute;
+            right: 32px; /* Position to the left of the arrow */
+            top: 50%;
+            transform: translateY(-50%);
+            margin-right: 0;
+            z-index: 10;
+            color: #9CA3AF;
+            font-size: 18px;
+            font-weight: bold;
+            height: auto;
+            line-height: 1;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__clear:hover {
+            color: #EF4444;
+        }
+        .select2-dropdown {
+            border-color: #D1D5DB;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 9999;
+        }
+        .select2-search--dropdown {
+            padding: 6px 8px;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border-radius: 0.375rem;
+            border-color: #D1D5DB;
+            padding: 6px 10px;
+            outline: none;
+            font-size: 0.875rem;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+            border-color: #1A4030;
+            box-shadow: 0 0 0 1px #1A4030;
+        }
+        .select2-results__option {
+            font-size: 0.875rem;
+            padding: 8px 12px;
+            border-radius: 0.25rem;
+            margin: 2px 4px;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #1A4030;
+            color: #FFFFFF;
+        }
+        .select2-container--default .select2-results__option[aria-selected=true] {
+            background-color: #E2E8F0;
+            color: #1F2937;
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#industri_id').select2({
+                placeholder: '-- Pilih Perusahaan --',
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
+@endpush

@@ -310,23 +310,14 @@ class LaporanDataService
      */
     public function getDetailLaporan($bulan, $tahun, $jenis, $filters = [], $perPage = 25, $sortBy = null, $sortDirection = 'asc')
     {
-        // Map jenis slug to jenis_laporan label
-        $jenisLaporanMap = [
-            'penerimaan_kayu_bulat' => 'Laporan Penerimaan Kayu Bulat',
-            'penerimaan_kayu_olahan' => 'Laporan Penerimaan Kayu Olahan',
-            'mutasi_kayu_bulat' => 'Laporan Mutasi Kayu Bulat (LMKB)',
-            'mutasi_kayu_olahan' => 'Laporan Mutasi Kayu Olahan (LMKO)',
-            'penjualan_kayu_olahan' => 'Laporan Penjualan Kayu Olahan',
-        ];
-
-        $jenisLaporanLabel = $jenisLaporanMap[$jenis] ?? null;
-
         $laporanQuery = Laporan::whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun);
 
-        // Filter by jenis_laporan to get only the specific report type
-        if ($jenisLaporanLabel) {
-            $laporanQuery->where('jenis_laporan', $jenisLaporanLabel);
+        // Filter by jenis relation slug
+        if ($jenis) {
+            $laporanQuery->whereHas('jenisLaporan', function ($q) use ($jenis) {
+                $q->where('slug', $jenis);
+            });
         }
 
         // Jika ada filter industri_id, batasi laporan hanya untuk industri tersebut
@@ -534,23 +525,14 @@ class LaporanDataService
      */
     public function getDetailLaporanForExport($bulan, $tahun, $jenis, $filters = [])
     {
-        // Map jenis slug to jenis_laporan label
-        $jenisLaporanMap = [
-            'penerimaan_kayu_bulat' => 'Laporan Penerimaan Kayu Bulat',
-            'penerimaan_kayu_olahan' => 'Laporan Penerimaan Kayu Olahan',
-            'mutasi_kayu_bulat' => 'Laporan Mutasi Kayu Bulat (LMKB)',
-            'mutasi_kayu_olahan' => 'Laporan Mutasi Kayu Olahan (LMKO)',
-            'penjualan_kayu_olahan' => 'Laporan Penjualan Kayu Olahan',
-        ];
-
-        $jenisLaporanLabel = $jenisLaporanMap[$jenis] ?? null;
-
         $laporanQuery = Laporan::whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun);
 
-        // Filter by jenis_laporan to get only the specific report type
-        if ($jenisLaporanLabel) {
-            $laporanQuery->where('jenis_laporan', $jenisLaporanLabel);
+        // Filter by jenis relation slug
+        if ($jenis) {
+            $laporanQuery->whereHas('jenisLaporan', function ($q) use ($jenis) {
+                $q->where('slug', $jenis);
+            });
         }
 
         // Jika ada filter industri_id, batasi laporan hanya untuk industri tersebut
@@ -766,7 +748,9 @@ class LaporanDataService
     {
         // Query laporan untuk tahun yang dipilih
         $laporanIds = Laporan::whereYear('tanggal', $tahun)
-            ->where('jenis_laporan', 'Laporan Penerimaan Kayu Bulat')
+            ->whereHas('jenisLaporan', function ($q) {
+                $q->where('slug', 'penerimaan_kayu_bulat');
+            })
             ->pluck('id');
 
         // Initialize with empty data structure
@@ -874,7 +858,9 @@ class LaporanDataService
     {
         // Query laporan untuk tahun yang dipilih
         $laporanIds = Laporan::whereYear('tanggal', $tahun)
-            ->where('jenis_laporan', 'Laporan Mutasi Kayu Olahan (LMKO)')
+            ->whereHas('jenisLaporan', function ($q) {
+                $q->where('slug', 'mutasi_kayu_olahan');
+            })
             ->pluck('id');
 
         // Initialize with empty data structure
@@ -1066,7 +1052,9 @@ class LaporanDataService
     {
         // Query laporan untuk tahun yang dipilih
         $laporanIds = Laporan::whereYear('tanggal', $tahun)
-            ->where('jenis_laporan', 'Laporan Penjualan Kayu Olahan')
+            ->whereHas('jenisLaporan', function ($q) {
+                $q->where('slug', 'penjualan_kayu_olahan');
+            })
             ->pluck('id');
 
         if ($laporanIds->isEmpty()) {
@@ -1167,12 +1155,16 @@ class LaporanDataService
     {
         // Query untuk penerimaan kayu bulat
         $laporanBulatIds = Laporan::whereYear('tanggal', $tahun)
-            ->where('jenis_laporan', 'Laporan Penerimaan Kayu Bulat')
+            ->whereHas('jenisLaporan', function ($q) {
+                $q->where('slug', 'penerimaan_kayu_bulat');
+            })
             ->pluck('id');
 
         // Query untuk penerimaan kayu olahan
         $laporanOlahanIds = Laporan::whereYear('tanggal', $tahun)
-            ->where('jenis_laporan', 'Laporan Penerimaan Kayu Olahan')
+            ->whereHas('jenisLaporan', function ($q) {
+                $q->where('slug', 'penerimaan_kayu_olahan');
+            })
             ->pluck('id');
 
         // Jika tidak ada data sama sekali

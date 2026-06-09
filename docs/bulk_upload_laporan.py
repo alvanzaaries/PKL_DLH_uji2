@@ -203,7 +203,7 @@ if __name__ == "__main__":
             'industri_id': 1,
             'bulan': 1,
             'tahun': 2024,
-            'jenis_laporan': 'Laporan Penerimaan Kayu Olahan'
+            'jenis_laporan': 'Laporan Penerimaan Kayu Olahan'k
         }
     ]
     

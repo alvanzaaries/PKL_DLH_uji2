@@ -1,4 +1,5 @@
 *.log
+.gitignore
 .DS_Store
 .env
 .env.backup
@@ -26,3 +27,9 @@ Thumbs.db
 .agent
 PNBP.md
 PANDUAN_PNBP.md
+AKSES_FILE_MANAGER.
+ARCHITECTURE_ANALYSIS.md
+ARCHITECTURE_DIAGRAMS.md
+EXECUTIVE_SUMMARY.md
+DATABASE_DOCUMENTATION.md
+server_requirements.md

@@ -30,9 +30,19 @@
             <form method="GET" action="{{ route('laporan.monitoring') }}" style="display: contents;">
 
                 <div class="filter-group">
-                    <label class="filter-label" for="search">Cari Perusahaan</label>
-                    <input type="text" id="searchCompany" placeholder="Ketik nama perusahaan..." class="filter-input"
+                    <label class="filter-label" for="searchCompany">Cari Perusahaan</label>
+                    <input type="text" id="searchCompany" placeholder="Ketik nama / no izin..." class="filter-input"
                         style="min-width: 250px;">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label" for="jenis_industri">Jenis Industri</label>
+                    <select name="jenis_industri" id="jenis_industri" class="filter-input">
+                        <option value="">Semua Jenis</option>
+                        <option value="primer" {{ request('jenis_industri') == 'primer' ? 'selected' : '' }}>Industri Primer</option>
+                        <option value="sekunder" {{ request('jenis_industri') == 'sekunder' ? 'selected' : '' }}>Industri Sekunder</option>
+                        <option value="tpt_kb" {{ request('jenis_industri') == 'tpt_kb' ? 'selected' : '' }}>TPT-KB</option>
+                    </select>
                 </div>
 
                 <div class="filter-group">
@@ -51,7 +61,7 @@
 
                 <div class="filter-group">
                     <label class="filter-label" for="tahun">Periode Tahun</label>
-                    <select name="tahun" id="tahun" class="filter-input" style="min-width: 120px;">
+                    <select name="tahun" id="tahun" class="filter-input" style="min-width: 100px;">
                         @php
                             $currentYear = date('Y');
                             $startYear = config('laporan.start_year', 2020);
@@ -79,12 +89,11 @@
                 </div>
 
                 <div class="filter-group">
-                    <label class="filter-label" for="status_industri">Status Industri</label>
+                    <label class="filter-label" for="status_industri">Status Keaktifan</label>
                     <select name="status_industri" id="status_industri" class="filter-input">
-                        <option value="aktif" {{ request('status_industri', 'aktif') == 'aktif' ? 'selected' : '' }}>Hanya
-                            Aktif</option>
-                        <option value="semua" {{ request('status_industri') == 'semua' ? 'selected' : '' }}>Semua Industri
-                        </option>
+                        <option value="aktif" {{ request('status_industri', 'aktif') == 'aktif' ? 'selected' : '' }}>Hanya Aktif</option>
+                        <option value="tidak_aktif" {{ request('status_industri') == 'tidak_aktif' ? 'selected' : '' }}>Tidak Aktif</option>
+                        <option value="semua" {{ request('status_industri') == 'semua' ? 'selected' : '' }}>Semua Industri</option>
                     </select>
                 </div>
 
@@ -115,7 +124,7 @@
                     </thead>
                     <tbody>
                         @foreach ($companies as $company)
-                            <tr>
+                            <tr data-name="{{ strtolower($company->nama) }}" data-permit="{{ strtolower($company->nomor_izin ?? '') }}">
                                 <td class="col-center" style="color: #9CA3AF;">{{ $loop->iteration }}</td>
                                 <td>
                                     <div style="display: flex; flex-direction: column;">
@@ -147,6 +156,19 @@
                                             }
                                         @endphp
                                         <span class="meta-info">{{ $typeLabel }}</span>
+                                        <div style="margin-top: 4px;">
+                                            @if (strtolower($company->status ?? '') === 'aktif')
+                                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; background-color: #DEF7EC; color: #03543F; border: 1px solid #BCF0DA;">
+                                                    <span style="width: 5px; height: 5px; border-radius: 50%; background-color: #31C48D;"></span>
+                                                    Aktif
+                                                </span>
+                                            @else
+                                                <span style="display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; background-color: #FDE8E8; color: #9B1C1C; border: 1px solid #FBD5D5;">
+                                                    <span style="width: 5px; height: 5px; border-radius: 50%; background-color: #F05252;"></span>
+                                                    Tidak Aktif
+                                                </span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </td>
                                 <td class="meta-info">{{ $company->kabupaten }}</td>
@@ -212,19 +234,17 @@
                     let visibleCount = 0;
 
                     rows.forEach((row, index) => {
-                        const companyName = row.querySelector('.company-name');
-                        if (companyName) {
-                            const name = companyName.textContent.toLowerCase();
+                        const name = row.getAttribute('data-name') || '';
+                        const permit = row.getAttribute('data-permit') || '';
 
-                            if (searchTerm === '' || name.includes(searchTerm)) {
-                                row.style.display = '';
-                                visibleCount++;
-                                // Update nomor urut
-                                const firstCol = row.querySelector('td:first-child');
-                                if (firstCol) firstCol.textContent = visibleCount;
-                            } else {
-                                row.style.display = 'none';
-                            }
+                        if (searchTerm === '' || name.includes(searchTerm) || permit.includes(searchTerm)) {
+                            row.style.display = '';
+                            visibleCount++;
+                            // Update nomor urut
+                            const firstCol = row.querySelector('td:first-child');
+                            if (firstCol) firstCol.textContent = visibleCount;
+                        } else {
+                            row.style.display = 'none';
                         }
                     });
 
@@ -238,7 +258,7 @@
                             let h3 = emptyState.querySelector('h3');
                             let p = emptyState.querySelector('p');
                             if (h3) h3.textContent = 'Perusahaan Tidak Ditemukan';
-                            if (p) p.textContent = `Tidak ada perusahaan dengan nama "${searchTerm}"`;
+                            if (p) p.textContent = `Tidak ada perusahaan dengan nama atau no izin "${searchTerm}"`;
                         }
                     } else {
                         if (tableBody.parentElement) {

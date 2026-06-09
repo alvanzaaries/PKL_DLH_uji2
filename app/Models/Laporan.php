@@ -15,26 +15,25 @@ class Laporan extends Model
     protected $fillable = [
         'industri_id',
         'user_id',
-        'jenis_laporan',
+        'jenis_laporan_id',
         'tanggal',
         'path_laporan',
     ];
 
-    // Definisi jenis laporan yang tersedia (single source of truth)
-    public const JENIS_LAPORAN = [
-        "Laporan Mutasi Kayu Bulat (LMKB)",
-        "Laporan Mutasi Kayu Olahan (LMKO)",
-        "Laporan Penerimaan Kayu Bulat",
-        "Laporan Penerimaan Kayu Olahan",
-        "Laporan Penjualan Kayu Olahan",
-    ];
+    /**
+     * Relasi ke JenisLaporan
+     */
+    public function jenisLaporan()
+    {
+        return $this->belongsTo(JenisLaporan::class, 'jenis_laporan_id');
+    }
 
     /**
      * Mendapatkan semua jenis laporan yang tersedia
      */
     public static function getJenisLaporan()
     {
-        return self::JENIS_LAPORAN;
+        return JenisLaporan::pluck('nama')->toArray();
     }
 
     /**

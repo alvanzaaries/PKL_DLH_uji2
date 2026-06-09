@@ -78,7 +78,7 @@
 
                 {{-- Area Dropzone Upload --}}
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">File Excel (.xlsx, .xls, .csv)</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">File Excel (.xlsx, .xls)</label>
 
                     <div id="drop-zone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:bg-gray-50 transition relative cursor-pointer">
                         <div id="empty-state" class="space-y-1 text-center">
@@ -88,9 +88,9 @@
                             <div class="flex text-sm text-gray-600 justify-center">
                                 <span class="font-medium text-green-600">Klik untuk pilih file</span>
                                 <p class="pl-1">atau drag and drop</p>
-                                <input id="file-upload" name="file" type="file" class="sr-only" accept=".xlsx,.xls,.csv" required>
+                                <input id="file-upload" name="file" type="file" class="sr-only" accept=".xlsx,.xls" required>
                             </div>
-                            <p class="text-xs text-gray-500">Excel hingga 2MB</p>
+                            <p class="text-xs text-gray-500">Hanya file Excel (.xlsx atau .xls) hingga 2MB</p>
                         </div>
 
                         <div id="file-info" class="hidden text-center w-full">

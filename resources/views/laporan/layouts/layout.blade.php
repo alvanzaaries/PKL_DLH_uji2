@@ -469,6 +469,22 @@
                 </div>
             @endif
 
+            @if ($errors->any())
+                <div class="mb-6 border-l-4 border-red-600 bg-red-50 p-4 shadow-sm rounded-sm">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-red-600 mt-0.5 mr-3"></i>
+                        <div>
+                            <h3 class="text-red-800 font-bold text-sm mb-1">Gagal Validasi</h3>
+                            <ul class="list-disc list-inside text-red-700 text-sm">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            @endif
+
             @if (session('warning'))
                 <div class="mb-6 border-l-4 border-yellow-600 bg-yellow-50 p-4 shadow-sm rounded-sm">
                     <div class="flex items-start">

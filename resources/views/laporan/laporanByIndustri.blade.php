@@ -111,11 +111,13 @@
 
                         <div>
                             <label class="block text-xs font-bold text-gray-700 uppercase mb-2">Jenis Dokumen</label>
-                            <select name="jenis_laporan" id="jenis_laporan" required
+                            <select name="jenis_laporan_id" id="jenis_laporan" required
                                 class="w-full form-input px-3 py-2 border text-sm">
                                 <option value="">-- Pilih Jenis --</option>
-                                @foreach (\App\Models\Laporan::JENIS_LAPORAN as $jenis)
-                                    <option value="{{ $jenis }}">{{ $jenis }}</option>
+                                @foreach ($jenisLaporans as $jenis)
+                                    <option value="{{ $jenis->id }}" data-nama="{{ $jenis->nama }}" {{ old('jenis_laporan_id') == $jenis->id ? 'selected' : '' }}>
+                                        {{ $jenis->nama }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
@@ -365,7 +367,9 @@
             // Listen to jenis laporan changes
             jenisLaporanSelect.addEventListener('change', (e) => {
                 if (currentMode === 'manual') {
-                    initializeTable(e.target.value);
+                    const selectedOption = e.target.options[e.target.selectedIndex];
+                    const namaJenis = selectedOption ? selectedOption.getAttribute('data-nama') : '';
+                    initializeTable(namaJenis);
                 }
             });
 
@@ -402,7 +406,9 @@
                 noteText.textContent = 'Masukkan data laporan secara manual pada tabel di atas. Pastikan semua kolom terisi dengan benar sebelum melakukan preview.';
 
                 // Initialize table based on current selection
-                initializeTable(jenisLaporanSelect.value);
+                const selectedOption = jenisLaporanSelect.options[jenisLaporanSelect.selectedIndex];
+                const namaJenis = selectedOption ? selectedOption.getAttribute('data-nama') : '';
+                initializeTable(namaJenis);
             });
 
             // Add row function
@@ -462,23 +468,39 @@
                 });
             });
 
+            function validateAndSetFile(file) {
+                if (!file) return false;
+                
+                const allowedExtensions = /(\.xlsx|\.xls)$/i;
+                if (!allowedExtensions.exec(file.name)) {
+                    alert('Format file tidak didukung! Harap unggah file dengan format Excel (.xlsx atau .xls).');
+                    excelFile.value = '';
+                    fileName.innerHTML = `<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i> Format file harus .xlsx atau .xls</span>`;
+                    return false;
+                }
+                
+                fileName.innerHTML = `<i class="fas fa-check mr-1"></i> ${file.name}`;
+                return true;
+            }
+
             dropZone.addEventListener('drop', (e) => {
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
-                    excelFile.files = files;
-                    updateFileName(files[0]);
+                    if (validateAndSetFile(files[0])) {
+                        excelFile.files = files;
+                    } else {
+                        excelFile.value = '';
+                    }
                 }
             });
 
             excelFile.addEventListener('change', (e) => {
                 if (e.target.files.length > 0) {
-                    updateFileName(e.target.files[0]);
+                    if (!validateAndSetFile(e.target.files[0])) {
+                        excelFile.value = '';
+                    }
                 }
             });
-
-            function updateFileName(file) {
-                fileName.innerHTML = `<i class="fas fa-check mr-1"></i> ${file.name}`;
-            }
 
             // Form validation before submit
             uploadForm.addEventListener('submit', (e) => {
@@ -487,6 +509,21 @@
                     if (rows.length === 0) {
                         e.preventDefault();
                         alert('Harap tambahkan minimal satu baris data sebelum melakukan preview.');
+                        return false;
+                    }
+                } else if (currentMode === 'excel') {
+                    if (!excelFile.files || excelFile.files.length === 0) {
+                        e.preventDefault();
+                        alert('Harap pilih file Excel terlebih dahulu.');
+                        return false;
+                    }
+                    const file = excelFile.files[0];
+                    const allowedExtensions = /(\.xlsx|\.xls)$/i;
+                    if (!allowedExtensions.exec(file.name)) {
+                        e.preventDefault();
+                        alert('Format file tidak didukung! Harap unggah file dengan format Excel (.xlsx atau .xls).');
+                        excelFile.value = '';
+                        fileName.innerHTML = `<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i> Format file harus .xlsx atau .xls</span>`;
                         return false;
                     }
                 }
@@ -498,7 +535,9 @@
                 if (currentMode === 'manual') {
                     manualTableBody.innerHTML = '';
                     rowCounter = 0;
-                    initializeTable(jenisLaporanSelect.value);
+                    const selectedOption = jenisLaporanSelect.options[jenisLaporanSelect.selectedIndex];
+                    const namaJenis = selectedOption ? selectedOption.getAttribute('data-nama') : '';
+                    initializeTable(namaJenis);
                 }
             });
         </script>

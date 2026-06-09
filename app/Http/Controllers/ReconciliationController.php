@@ -360,7 +360,10 @@ class ReconciliationController extends Controller
             'year' => 'required|integer|min:2000|max:2099',
             'quarter' => 'required|integer|min:1|max:4',
             'kph' => 'required|string|max:255',
-            'file' => 'required|file|mimes:xlsx,xls,csv',
+            'file' => 'required|file|mimes:xlsx,xls|max:2048',
+        ], [
+            'file.mimes' => 'Format file harus Excel (.xlsx atau .xls). Format lain tidak diizinkan.',
+            'file.max' => 'Ukuran file tidak boleh lebih dari 2MB.',
         ]);
 
         $file = $request->file('file');
