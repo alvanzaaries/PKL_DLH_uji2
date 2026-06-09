@@ -25,6 +25,12 @@ class LaporanValidationService
         // set $formatData = false untuk mencegah PhpSpreadsheet mengembalikan string ter-format (mis. "2,789.71")
         $sheet = $worksheet->toArray(null, true, false, false);
 
+        // Free PhpSpreadsheet memory
+        $spreadsheet->disconnectWorksheets();
+        unset($worksheet);
+        unset($spreadsheet);
+        gc_collect_cycles();
+
         // Validasi format berdasarkan jenis laporan
         switch ($jenisLaporan) {
             case 'Laporan Penerimaan Kayu Bulat':
