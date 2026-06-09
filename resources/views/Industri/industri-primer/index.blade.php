@@ -1377,7 +1377,7 @@
             // Chart Tahun
             const ctxTahun = document.getElementById('chartTahun').getContext('2d');
             new Chart(ctxTahun, {
-                type: 'doughnut',
+                type: 'bar',
                 data: {
                     labels: {!! json_encode($yearStats->keys()) !!},
                     datasets: [{
@@ -1430,7 +1430,7 @@
             // Chart Kabupaten
             const ctxKabupaten = document.getElementById('chartKabupaten').getContext('2d');
             new Chart(ctxKabupaten, {
-                type: 'doughnut',
+                type: 'bar',
                 data: {
                     labels: {!! json_encode($locationStats->keys()) !!},
                     datasets: [{
@@ -1484,7 +1484,7 @@
             // Chart Kapasitas
             const ctxKapasitas = document.getElementById('chartKapasitas').getContext('2d');
             new Chart(ctxKapasitas, {
-                type: 'doughnut',
+                type: 'bar',
                 data: {
                     labels: {!! json_encode($capacityStats->keys()) !!},
                     datasets: [{

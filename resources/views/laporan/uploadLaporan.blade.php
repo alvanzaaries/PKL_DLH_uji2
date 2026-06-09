@@ -452,23 +452,39 @@
             });
         });
 
+        function validateAndSetFile(file) {
+            if (!file) return false;
+            
+            const allowedExtensions = /(\.xlsx|\.xls)$/i;
+            if (!allowedExtensions.exec(file.name)) {
+                alert('Format file tidak didukung! Harap unggah file dengan format Excel (.xlsx atau .xls).');
+                excelFile.value = '';
+                fileName.innerHTML = `<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i> Format file harus .xlsx atau .xls</span>`;
+                return false;
+            }
+            
+            fileName.innerHTML = `<i class="fas fa-check mr-1"></i> ${file.name}`;
+            return true;
+        }
+
         dropZone.addEventListener('drop', (e) => {
             const files = e.dataTransfer.files;
             if (files.length > 0) {
-                excelFile.files = files;
-                updateFileName(files[0]);
+                if (validateAndSetFile(files[0])) {
+                    excelFile.files = files;
+                } else {
+                    excelFile.value = '';
+                }
             }
         });
 
         excelFile.addEventListener('change', (e) => {
             if (e.target.files.length > 0) {
-                updateFileName(e.target.files[0]);
+                if (!validateAndSetFile(e.target.files[0])) {
+                    excelFile.value = '';
+                }
             }
         });
-
-        function updateFileName(file) {
-            fileName.innerHTML = `<i class="fas fa-check mr-1"></i> ${file.name}`;
-        }
 
         // Form validation before submit
         uploadForm.addEventListener('submit', (e) => {
@@ -477,6 +493,21 @@
                 if (rows.length === 0) {
                     e.preventDefault();
                     alert('Harap tambahkan minimal satu baris data sebelum melakukan preview.');
+                    return false;
+                }
+            } else if (currentMode === 'excel') {
+                if (!excelFile.files || excelFile.files.length === 0) {
+                    e.preventDefault();
+                    alert('Harap pilih file Excel terlebih dahulu.');
+                    return false;
+                }
+                const file = excelFile.files[0];
+                const allowedExtensions = /(\.xlsx|\.xls)$/i;
+                if (!allowedExtensions.exec(file.name)) {
+                    e.preventDefault();
+                    alert('Format file tidak didukung! Harap unggah file dengan format Excel (.xlsx atau .xls).');
+                    excelFile.value = '';
+                    fileName.innerHTML = `<span class="text-red-600"><i class="fas fa-times-circle mr-1"></i> Format file harus .xlsx atau .xls</span>`;
                     return false;
                 }
             }
@@ -520,6 +551,7 @@
         }
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             padding-left: 12px;
+            padding-right: 50px; /* Space for clear btn and arrow */
             color: #1F2937; /* gray-800 */
             font-size: 0.875rem; /* text-sm */
         }
@@ -533,9 +565,17 @@
             box-shadow: 0 0 0 1px #1A4030;
         }
         .select2-container--default .select2-selection--single .select2-selection__clear {
-            margin-right: 24px;
+            position: absolute;
+            right: 32px; /* Position to the left of the arrow */
+            top: 50%;
+            transform: translateY(-50%);
+            margin-right: 0;
+            z-index: 10;
             color: #9CA3AF;
-            font-size: 16px;
+            font-size: 18px;
+            font-weight: bold;
+            height: auto;
+            line-height: 1;
         }
         .select2-container--default .select2-selection--single .select2-selection__clear:hover {
             color: #EF4444;
