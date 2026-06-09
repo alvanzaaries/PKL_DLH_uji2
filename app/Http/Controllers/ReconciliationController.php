@@ -379,11 +379,11 @@ class ReconciliationController extends Controller
 
         // Pastikan kolom E dan G sesuai sample (E = Jenis HH, G = Satuan)
         if (strtoupper($colE) !== 'JENIS HH' && strtoupper($colE) !== 'JENIS HH*' && stripos($colE, 'JENIS') === false) {
-            return redirect()->route('user.upload')->withErrors(['file' => 'Format kolom tidak sesuai. Pastikan Kolom E berisi "Jenis HH" sesuai format contoh.']);
+            return redirect()->route('user.upload')->withErrors(['file' => 'Format kolom tidak sesuai. Pastikan sesuai format contoh.']);
         }
 
         if (strtoupper($colG) !== 'SATUAN' && stripos($colG, 'SATUAN') === false) {
-            return redirect()->route('user.upload')->withErrors(['file' => 'Format kolom tidak sesuai. Pastikan Kolom G berisi "Satuan" sesuai format contoh.']);
+            return redirect()->route('user.upload')->withErrors(['file' => 'Format kolom tidak sesuai. Pastikan sesuai format contoh.']);
         }
 
         $recon = Reconciliation::create([
