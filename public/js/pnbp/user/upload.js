@@ -9,10 +9,51 @@ document.addEventListener('DOMContentLoaded', function () {
     const filesizeDisplay = document.getElementById('selected-filesize');
     const removeBtn = document.getElementById('remove-file');
 
+    // Fungsi untuk validasi tipe file Excel
+    function isValidExcelFile(file) {
+        const excelMimes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+        const excelExtensions = ['.xlsx', '.xls'];
+        
+        // Cek berdasarkan MIME type
+        if (excelMimes.includes(file.type)) {
+            return true;
+        }
+        
+        // Cek berdasarkan extension sebagai fallback
+        const extension = '.' + file.name.split('.').pop().toLowerCase();
+        return excelExtensions.includes(extension);
+    }
+
+    // Fungsi untuk menampilkan error
+    function showFileError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'bg-red-50 border-l-4 border-red-500 text-red-700 p-4 mb-6';
+        errorDiv.role = 'alert';
+        errorDiv.innerHTML = `<p class="font-bold">Terjadi Kesalahan</p><p class="text-sm mt-1">${message}</p>`;
+        
+        const form = document.getElementById('uploadForm');
+        const existingError = form.querySelector('[role="alert"]');
+        if (existingError) {
+            existingError.remove();
+        }
+        form.insertBefore(errorDiv, form.firstChild);
+        
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
+    }
+
     if (dropZone && fileInput) {
         // Memperbarui tampilan berdasarkan file yang dipilih.
         function updateUI(file) {
             if (file) {
+                // Validasi tipe file
+                if (!isValidExcelFile(file)) {
+                    showFileError('Format file tidak valid. Hanya file Excel (.xlsx atau .xls) yang diizinkan.');
+                    resetUI();
+                    return;
+                }
+                
                 emptyState.classList.add('hidden');
                 fileInfo.classList.remove('hidden');
                 filenameDisplay.textContent = file.name;
